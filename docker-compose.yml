@@ -1,0 +1,29 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+    db:
+        image: mysql
+        command: --default-authentication-plugin=mysql_native_password
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: example
+            MYSQL_DATABASE: zerowallet
+        volumes:
+            - ./database:/docker-entrypoint-initdb.d
+    webserver:
+        image: php:7.4-apache
+        restart: always
+        volumes:
+            - ./backend:/var/www/html
+        ports:
+            - "8080:80"
+    client:
+        image: node:12.14.0-alpine
+        tty: true
+        volumes:
+            - ./client:/client
+        ports:
+            - "3000:3000"
+        working_dir: "/client"
+        command: "npm start"
