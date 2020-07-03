@@ -11,6 +11,9 @@ services:
             MYSQL_DATABASE: zerowallet
         volumes:
             - ./database:/docker-entrypoint-initdb.d
+            - db_data:/var/lib/mysql
+        ports:
+            - "3306:3306"
     webserver:
         image: php:7.4-apache
         restart: always
@@ -26,4 +29,9 @@ services:
         ports:
             - "3000:3000"
         working_dir: "/client"
-        command: "npm start"
+
+        command: npm start
+
+volumes:
+    db_data:
+        driver: local
