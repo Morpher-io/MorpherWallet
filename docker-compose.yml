@@ -14,13 +14,24 @@ services:
             - db_data:/var/lib/mysql
         ports:
             - "3306:3306"
-    webserver:
-        image: php:7.4-apache
+    backend:
+        build:
+            context: ./backend
+            dockerfile: Dockerfile
+        image: tomw1808/php
         restart: always
         volumes:
             - ./backend:/var/www/html
+            - ./backend/php.ini-development:/usr/local/etc/php/php.ini
         ports:
             - "8080:80"
+        environment: 
+            DB_HOSTNAME: 'db'
+            DB_USERNAME: 'root'
+            DB_PASSWORD: 'example'
+            DB_DATABASE: 'zerowallet'
+            FACEBOOK_APP_ID: '299132904630133'
+            FACEBOOK_APP_SECRET: 'db3693734c6dd7c5581d5e1f012e3e84'
     client:
         image: node:12.14.0-alpine
         tty: true

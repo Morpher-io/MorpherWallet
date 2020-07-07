@@ -21,16 +21,16 @@ CREATE TABLE IF NOT EXISTS `Recovery` (
   `recovery_id` int NOT NULL AUTO_INCREMENT,
   `recoverytype_idfk` int NOT NULL DEFAULT '1',
   `user_idfk` int NOT NULL,
-  `recovery_encryptedSeed` varchar(255) NOT NULL,
+  `recovery_encryptedSeed` text NOT NULL,
   `recovery_key` varchar(255) NOT NULL,
-  `recovery_extraInformation` varchar(255) DEFAULT NULL,
+  `recovery_extraInformation` text,
   `recovery_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`recovery_id`),
   KEY `fk_Recovery_RecoveryType_idx` (`recoverytype_idfk`),
   KEY `fk_Recovery_User1_idx` (`user_idfk`),
-  CONSTRAINT `fk_Recovery_RecoveryType` FOREIGN KEY (`recoverytype_idfk`) REFERENCES `RecoveryType` (`recoverytype_id`),
-  CONSTRAINT `fk_Recovery_User1` FOREIGN KEY (`user_idfk`) REFERENCES `User` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+  CONSTRAINT `fk_Recovery_RecoveryType` FOREIGN KEY (`recoverytype_idfk`) REFERENCES `RecoveryType` (`recoverytype_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_Recovery_User1` FOREIGN KEY (`user_idfk`) REFERENCES `User` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Dumping data for table zerowallet.Recovery: ~0 rows (approximately)
 /*!40000 ALTER TABLE `Recovery` DISABLE KEYS */;
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `RecoveryType` (
   PRIMARY KEY (`recoverytype_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
--- Dumping data for table zerowallet.RecoveryType: ~0 rows (approximately)
+-- Dumping data for table zerowallet.RecoveryType: ~4 rows (approximately)
 /*!40000 ALTER TABLE `RecoveryType` DISABLE KEYS */;
 INSERT IGNORE INTO `RecoveryType` (`recoverytype_id`, `Name`) VALUES
 	(1, 'Email/Password'),
@@ -65,21 +65,6 @@ CREATE TABLE IF NOT EXISTS `User` (
 -- Dumping data for table zerowallet.User: ~0 rows (approximately)
 /*!40000 ALTER TABLE `User` DISABLE KEYS */;
 /*!40000 ALTER TABLE `User` ENABLE KEYS */;
-
--- Dumping structure for table zerowallet.UserHistory
-CREATE TABLE IF NOT EXISTS `UserHistory` (
-  `userhistory_id` int NOT NULL AUTO_INCREMENT,
-  `user_idfk` int NOT NULL,
-  `userhistory_email` varchar(255) NOT NULL,
-  `userhistory_created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`userhistory_id`),
-  KEY `fk_UserHistory_User1_idx` (`user_idfk`),
-  CONSTRAINT `fk_UserHistory_User1` FOREIGN KEY (`user_idfk`) REFERENCES `User` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- Dumping data for table zerowallet.UserHistory: ~0 rows (approximately)
-/*!40000 ALTER TABLE `UserHistory` DISABLE KEYS */;
-/*!40000 ALTER TABLE `UserHistory` ENABLE KEYS */;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;

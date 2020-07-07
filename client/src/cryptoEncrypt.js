@@ -37,9 +37,20 @@ const cryptoEncrypt = (password, seedPhrase) => new Promise(async (resolve, reje
     );
 
     console.log(ciphertext);
-    let buffer = new Uint8Array(ciphertext, 0, 5);
-    console.log(buffer);
-    resolve({ciphertext: ciphertext, iv: iv, salt: salt});
+    const ctArray = Array.from(new Uint8Array(ciphertext));                              // ciphertext as byte array
+    const ctStr = ctArray.map(byte => String.fromCharCode(byte)).join('');             // ciphertext as string
+    const ctBase64 = btoa(ctStr);                                                      // encode ciphertext as base64
+
+    const ivArray = Array.from(new Uint8Array(iv));
+    const ivStr = ivArray.map(byte => String.fromCharCode(byte)).join('');
+    const ivBase64 = btoa(ivStr);  
+
+    const saltArray = Array.from(new Uint8Array(salt));
+    const saltStr = saltArray.map(byte => String.fromCharCode(byte)).join('');
+    const saltBase64 = btoa(saltStr);  
+
+    //const ivHex = Array.from(iv).map(b => ('00' + b.toString(16)).slice(-2)).join(''); // iv as hex string
+    resolve({ciphertext: ctBase64, iv: ivBase64, salt: saltBase64});
     //send to server
   
 

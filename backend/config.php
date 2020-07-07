@@ -1,6 +1,7 @@
 <?php
 
 require_once 'vendor/autoload.php';
+require_once 'lib/Morpher/DbConnector.php';
 
 if (!session_id())
 {
@@ -10,8 +11,8 @@ if (!session_id())
 // Call Facebook API
 
 $facebook = new \Facebook\Facebook([
-  'app_id'      => '299132904630133',
-  'app_secret'     => 'db3693734c6dd7c5581d5e1f012e3e84',
+  'app_id'      => getenv("FACEBOOK_APP_ID"),
+  'app_secret'     => getenv("FACEBOOK_APP_SECRET"),
   'default_graph_version'  => 'v7.0'
 ]);
 
