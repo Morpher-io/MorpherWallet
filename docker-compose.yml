@@ -22,6 +22,7 @@ services:
         restart: always
         volumes:
             - ./backend:/var/www/html
+            - /var/www/html/vendor
             - ./backend/php.ini-development:/usr/local/etc/php/php.ini
         ports:
             - "8080:80"
@@ -32,16 +33,16 @@ services:
             DB_DATABASE: 'zerowallet'
             FACEBOOK_APP_ID: '299132904630133'
             FACEBOOK_APP_SECRET: 'db3693734c6dd7c5581d5e1f012e3e84'
-    client:
-        image: node:12.14.0-alpine
-        tty: true
-        volumes:
-            - ./client:/client
-        ports:
-            - "3000:3000"
-        working_dir: "/client"
+    # client:
+    #     image: node:12.14.0-alpine
+    #     tty: true
+    #     volumes:
+    #         - ./client:/client
+    #     ports:
+    #         - "3000:3000"
+    #     working_dir: "/client"
 
-        command: npm start
+    #     command: npm start
 
 volumes:
     db_data:
