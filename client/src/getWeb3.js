@@ -3,7 +3,8 @@ import Web3 from "web3";
 import Web3ProviderEngine from "web3-provider-engine";
 import HookedWalletSubprovider from "web3-provider-engine/subproviders/hooked-wallet";
 import SubscriptionsSubprovider from "web3-provider-engine/subproviders/subscriptions";
-import RpcSubprovider from "web3-provider-engine/subproviders/rpc";
+//import RpcSubprovider from "web3-provider-engine/subproviders/rpc";
+import WebsockerSubprovider from 'web3-provider-engine/subproviders/websocket';
 
 const getWeb3 = (tryMetaMask, keystore) =>
   new Promise((resolve, reject) => {
@@ -36,21 +37,24 @@ const getWeb3 = (tryMetaMask, keystore) =>
       engine.addProvider(new SubscriptionsSubprovider());
       // data source
       engine.addProvider(
-        new RpcSubprovider({
-          rpcUrl: "http://127.0.0.1:7545",
+        //new RpcSubprovider({
+        //  rpcUrl: "http://127.0.0.1:7545",
+        //})
+        new WebsockerSubprovider({
+          rpcUrl: 'ws://127.0.0.1:7545'
         })
       );
 
       // log new blocks
-      engine.on("block", function (block) {
-        console.log("================================");
-        console.log(
-          "BLOCK CHANGED:",
-          "#" + block.number.toString("hex"),
-          "0x" + block.hash.toString("hex")
-        );
-        console.log("================================");
-      });
+      // engine.on("block", function (block) {
+      //   console.log("================================");
+      //   console.log(
+      //     "BLOCK CHANGED:",
+      //     "#" + block.number.toString("hex"),
+      //     "0x" + block.hash.toString("hex")
+      //   );
+      //   console.log("================================");
+      // });
 
       // network connectivity error
       engine.on("error", function (err) {

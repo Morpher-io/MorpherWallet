@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import getWeb3 from "./getWeb3";
 import getKeystore from "./getKeystore";
-import cryptoEncrypt from "./cryptoEncrypt";
-import cryptoDecrypt from "./cryptoDecrypt";
 import config from "./config.json";
 import FacebookLogin from "react-facebook-login";
-
 import "./App.css";
+
+const { cryptoEncrypt, cryptoDecrypt, sha256 } = require("./cryptoFunctions");
+//import cryptoDecrypt from "./cryptoDecrypt";
 
 class App extends Component {
   state = {
@@ -18,13 +18,13 @@ class App extends Component {
     web3: null,
     accounts: null,
     hasWallet: false,
-    hasWalletRecovery: false
+    hasWalletRecovery: false,
   };
 
   async componentDidMount() {
     let encryptedKeystore = localStorage.getItem("encryptedSeed") || "";
     if (encryptedKeystore !== "") {
-      this.setState({hasWallet: true});
+      this.setState({ hasWallet: true });
       //const web3 = await getWeb3(false);
     }
   }
@@ -48,22 +48,72 @@ class App extends Component {
   unlockWallet = async (e) => {
     e.preventDefault();
     let encryptedKeystore = localStorage.getItem("encryptedSeed") || "";
+    let email = localStorage.getItem("email") || "";
     if (encryptedKeystore === "") {
-      this.setState({hasWallet: false});
+      this.setState({ hasWallet: false });
     }
 
     encryptedKeystore = JSON.parse(encryptedKeystore);
-    let seed = await cryptoDecrypt(this.state.walletPassword, encryptedKeystore.ciphertext, encryptedKeystore.iv, encryptedKeystore.salt);
+    let seed = await cryptoDecrypt(
+      this.state.walletPassword,
+      encryptedKeystore.ciphertext,
+      encryptedKeystore.iv,
+      encryptedKeystore.salt
+    );
     let keystore = await getKeystore(this.state.walletPassword, seed);
     let web3 = await getWeb3(false, keystore);
     let accounts = await web3.eth.getAccounts();
-    this.setState({hasWallet: true, unlockedWallet: true, web3, accounts});
-  }
+    this.setState({
+      hasWallet: true,
+      unlockedWallet: true,
+      web3,
+      accounts,
+      walletEmail: email,
+    });
+  };
 
   createWallet = async (e) => {
     //console.log(e);
     e.preventDefault();
-    let keystore = await getKeystore(this.state.walletPassword, false);
+
+    /**
+     * First try to fetch the wallet from the server, in case the browser-cache was cleared
+     */
+    let key = await sha256(this.state.walletPassword + this.state.walletEmail);
+    let options = {
+      method: "POST",
+      body: JSON.stringify({ key: key }),
+      mode: "cors",
+      cache: "default",
+    };
+    let seed = false;
+    let response = await fetch(
+      config.BACKEND_ENDPOINT + "/index.php?endpoint=restoreEmailPassword",
+      options
+    );
+    let responseBody = await response.json();
+
+    /**
+     * Login /Create Wallet is in one function
+     * @todo: Separate Login and Create Wallet into separate functions so that upon failed "login" a recovery can be suggested
+     */
+    if (responseBody !== false) {
+      /**
+       * Wallet was found on server, attempting to decrypt with the password
+       */
+      let encryptedSeedObject = JSON.parse(responseBody);
+      seed = await cryptoDecrypt(
+        this.state.walletPassword,
+        encryptedSeedObject.ciphertext,
+        encryptedSeedObject.iv,
+        encryptedSeedObject.salt
+      );
+    }
+
+    /**
+     * If no wallet was found, then create a new one (seed = false) otherwise use the decrypted seed from above
+     */
+    let keystore = await getKeystore(this.state.walletPassword, seed);
     let web3 = await getWeb3(false, keystore);
     let accounts = await web3.eth.getAccounts();
     let pwDerivedKey = await new Promise((resolve, reject) => {
@@ -74,58 +124,144 @@ class App extends Component {
         resolve(key);
       });
     });
-    let seed = keystore.getSeed(pwDerivedKey);
-    console.log(seed);
+
+    seed = keystore.getSeed(pwDerivedKey);
     let encryptedSeed = await cryptoEncrypt(this.state.walletPassword, seed);
-    console.log(JSON.stringify(encryptedSeed));
     window.localStorage.setItem("encryptedSeed", JSON.stringify(encryptedSeed));
-    const options = {
+    window.localStorage.setItem("email", this.state.walletEmail);
+
+    options = {
       method: "POST",
-      body: JSON.stringify({ seed: encryptedSeed, email: this.state.walletEmail }),
+      body: JSON.stringify({
+        key: key,
+        seed: encryptedSeed,
+        email: this.state.walletEmail,
+      }),
       mode: "cors",
       cache: "default",
     };
-    fetch('http://localhost:8080/storetokens_email_pw.php', options).then(result => {
+    fetch(
+      config.BACKEND_ENDPOINT + "/index.php?endpoint=saveEmailPassword",
+      options
+    ).then((result) => {
       console.log(result);
-      result.json().then(response => {
+      result.json().then((response) => {
         console.log(response);
-        this.setState({hasWallet: true, unlockedWallet: true, web3, accounts});
+        this.setState({
+          hasWallet: true,
+          unlockedWallet: true,
+          web3,
+          accounts,
+        });
       });
-      
     });
-    //console.log(seed);
-    //console.log(encryptedSeed);
-    //let decryptedSeed = await cryptoDecrypt(
-    //  this.state.walletPassword,
-    //  encryptedSeed.ciphertext,
-    //  encryptedSeed.iv,
-    //  encryptedSeed.salt
-    //);
-    //console.log(decryptedSeed);
   };
 
   logout = () => {
-    this.setState({ isAuthenticated: false, token: "", user: null });
+    localStorage.clear();
+    this.setState({ isAuthenticated: false, token: "", user: null, web3: null, hasWallet:false });
+    window.location.reload();
+
   };
 
-  facebookResponse = (response) => {
+  facebookResponseAddRecovery = async (response) => {
+    let encryptedKeystore = localStorage.getItem("encryptedSeed") || "";
+
+    if (encryptedKeystore === "") {
+      throw "Keystore not found, aborting";
+    }
+
+    encryptedKeystore = JSON.parse(encryptedKeystore);
+    let seed = await cryptoDecrypt(
+      this.state.walletPassword,
+      encryptedKeystore.ciphertext,
+      encryptedKeystore.iv,
+      encryptedKeystore.salt
+    );
+    let encryptedSeed = await cryptoEncrypt(response.userID, seed);
+    let key = await sha256(config.FACEBOOK_APP_ID + response.userID);
+    const options = {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: response.accessToken,
+        seed: encryptedSeed,
+        key: key,
+        email: this.state.walletEmail,
+      }),
+      mode: "cors",
+      cache: "default",
+    };
+    fetch(
+      config.BACKEND_ENDPOINT + "/index.php?endpoint=saveFacebook",
+      options
+    ).then((r) => {
+      r.json().then((response) => {
+        console.log(response);
+        this.setState({ hasWalletRecovery: true });
+      });
+    });
+  };
+
+  facebookRecovery = async (response) => {
     console.log(response);
-    // const options = {
-    //     method: 'POST',
-    //     body: JSON.stringify({access_token: response.accessToken}),
-    //     mode: 'cors',
-    //     cache: 'default'
-    // };
-    // fetch('http://localhost:8080/storetokens.php', options).then(r => {
-    //     //const token = r.headers.get('x-auth-token');
-    //     r.json().then(user => {
-    //       console.log(user);
-    //         //if (token) {
-    //             this.setState({isAuthenticated: true, user});
-    //             this.startWeb3Init(user.id, config.FACEBOOK_APP_ID);
-    //         //}
-    //     });
-    // })
+    let key = await sha256(config.FACEBOOK_APP_ID + response.userID);
+    const options = {
+      method: "POST",
+      body: JSON.stringify({ accessToken: response.accessToken, key: key }),
+      mode: "cors",
+      cache: "default",
+    };
+    fetch(
+      config.BACKEND_ENDPOINT + "/index.php?endpoint=restoreFacebook",
+      options
+    ).then((r) => {
+      r.json().then(async (responseBody) => {
+        if (responseBody !== false) {
+          //initiate recovery
+          let encryptedSeed = JSON.parse(responseBody);
+          let seed = await cryptoDecrypt(
+            response.userID,
+            encryptedSeed.ciphertext,
+            encryptedSeed.iv,
+            encryptedSeed.salt
+          );
+          let keystore = await getKeystore(this.state.walletPassword, seed);
+          let web3 = await getWeb3(false, keystore);
+          let accounts = await web3.eth.getAccounts();
+
+          //we cannot store the wallet in localstore, because the password needs to come from facebook again anyways, unless we add the following todo:
+          /**
+           * @todo: add in a step to reset the password, if necessary
+           */
+          // let pwDerivedKey = await new Promise((resolve, reject) => {
+          //   keystore.keyFromPassword(this.state.walletPassword, (err, key) => {
+          //     if (err) {
+          //       reject(err);
+          //     }
+          //     resolve(key);
+          //   });
+          // });
+
+          // seed = keystore.getSeed(pwDerivedKey);
+          // let encryptedSeed = await cryptoEncrypt(this.state.walletPassword, seed);
+          // window.localStorage.setItem(
+          //   "encryptedSeed",
+          //   JSON.stringify(encryptedSeed)
+          // );
+          window.localStorage.setItem("email", response.email);
+          this.setState({
+            hasWalletRecovery: true,
+            hasWallet: true,
+            unlockedWallet: true,
+            walletEmail: response.email,
+            web3,
+            accounts,
+          });
+        } else {
+          alert("Your account wasn't found with Facebook recovery, create one with username and password first");
+        }
+      });
+    });
   };
 
   onFailure = (error) => {
@@ -170,14 +306,14 @@ class App extends Component {
             value={this.state.walletPassword}
             onChange={this.handleInputChange}
           />
-          <input type="submit" value="Create new Wallet" />
+          <input type="submit" value="Login / Create new Wallet" />
         </form>
         <br />
         <FacebookLogin
           appId={config.FACEBOOK_APP_ID}
           autoLoad={false}
-          fields="name,email,picture"
-          callback={this.facebookRecover}
+          fields="name,email"
+          callback={this.facebookRecovery}
         />
       </div>
     ) : !this.state.unlockedWallet ? (
@@ -193,8 +329,15 @@ class App extends Component {
           />
           <input type="submit" value="Unlock Wallet" />
         </form>
+        <br />
+        <FacebookLogin
+          appId={config.FACEBOOK_APP_ID}
+          autoLoad={false}
+          fields="name,email"
+          callback={this.facebookRecovery}
+        />
       </div>
-    ) : 
+    ) : (
       <div>
         <p>Authenticated</p>
         <h1>Hi {this.state.walletEmail}</h1>
@@ -221,23 +364,23 @@ class App extends Component {
             Log out
           </button>
         </div>
-        { !this.state.hasWalletRecovery ? (
-        <div>
-
-        <h1>Add Password Recovery</h1>
-        <br />
-        <FacebookLogin
-          appId={config.FACEBOOK_APP_ID}
-          autoLoad={false}
-          fields="name,email,picture"
-          callback={this.facebookResponse}
-          textButton="Add Facebook Recovery"
-        />
-        </div>
-        ) : (<div></div>)}
+        {!this.state.hasWalletRecovery ? (
+          <div>
+            <h2>Add Password Recovery</h2>
+            <br />
+            <FacebookLogin
+              appId={config.FACEBOOK_APP_ID}
+              autoLoad={false}
+              fields="name,email"
+              callback={this.facebookResponseAddRecovery}
+              textButton="Add Facebook Recovery"
+            />
+          </div>
+        ) : (
+          <div></div>
+        )}
       </div>
-    ;
-
+    );
     return <div className="App">{content}</div>;
   }
 }
