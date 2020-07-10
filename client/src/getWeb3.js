@@ -20,6 +20,7 @@ const getWeb3 = (tryMetaMask, keystore) =>
           getAccounts: function (cb) {
             
             //some more code here
+            //extra line of code
             //setTimeout(() => cb(null, keystore.getAddresses()), 5000);
             cb(null, keystore.getAddresses());
             
