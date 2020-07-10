@@ -19,6 +19,7 @@ const getWeb3 = (tryMetaMask, keystore) =>
         new HookedWalletSubprovider({
           getAccounts: function (cb) {
             
+            //some more code here
             //setTimeout(() => cb(null, keystore.getAddresses()), 5000);
             cb(null, keystore.getAddresses());
             
