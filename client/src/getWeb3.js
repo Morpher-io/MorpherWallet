@@ -18,7 +18,12 @@ const getWeb3 = (tryMetaMask, keystore) =>
       engine.addProvider(
         new HookedWalletSubprovider({
           getAccounts: function (cb) {
+            
+            //some more code here
+            //setTimeout(() => cb(null, keystore.getAddresses()), 5000);
             cb(null, keystore.getAddresses());
+            //added some other code
+            
           },
           //signTransaction: (tx, ecb) =>  {
           //  var send = window.confirm("Do you want to send off this transaction?");
@@ -29,6 +34,7 @@ const getWeb3 = (tryMetaMask, keystore) =>
           //approveTransaction: function(cb){ window.confirm("Do you want to send off this transaction?"); return true; },
           signTransaction: function (tx, cb) {
             if (window.confirm("Do you want to send off this transaction?")) {
+              //setTimeout(() => keystore.signTransaction(tx,cb), 5000);
               keystore.signTransaction(tx, cb);
             }
           },
