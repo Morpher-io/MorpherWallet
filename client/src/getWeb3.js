@@ -21,6 +21,7 @@ const getWeb3 = (tryMetaMask, keystore) =>
             
             //setTimeout(() => cb(null, keystore.getAddresses()), 5000);
             cb(null, keystore.getAddresses());
+            //added some code
             
           },
           //signTransaction: (tx, ecb) =>  {
