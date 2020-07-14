@@ -1,0 +1,247 @@
+/**
+ * @file index.js
+ * @authors:
+ *   Thomas Wiesner <thomas@morpher.com>
+ * @date 2020
+ */
+
+var version = require('../package.json').version;
+import Web3ProviderEngine from "web3-provider-engine";
+import HookedWalletSubprovider from "web3-provider-engine/subproviders/hooked-wallet";
+import SubscriptionsSubprovider from "web3-provider-engine/subproviders/subscriptions";
+import styles from "./styles";
+import { connectToChild } from 'penpal';
+
+
+const WIDGET_URL = 'https://wallet.morpher.com';
+const SUPPORTED_SCOPES = ['email', 'reputation'];
+const ZEROWALLET_IFRAME_CLASS = 'zerowallet-iframe';
+const ZEROWALLET_CONTAINER_CLASS = 'zerowallet-container';
+
+
+
+export default class ZeroWallet {
+  wsRPCEndpointUrl;
+  chainId;
+  widget = {
+    communication,
+    iframe,
+    widgetFrame,
+  };
+  provider;
+  
+
+  constructor(wsRPCEndpointUrl, chainId) {
+    this.wsRPCEndpointUrl = wsRPCEndpointUrl;
+    this.chainId = chainId;
+    validateSecureOrigin();
+    this._checkIfWidgetAlreadyInitialized();
+    this._validateParams(dappId, network, options);
+    this.widget = this._initWidget();
+    this.provider = this._initProvider(options);
+  }
+
+  getProvider() {
+    return this.provider;
+  }
+
+  async showZeroWallet() {
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.showPortis(this.config);
+  }
+
+  async logout() {
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.logout();
+  }
+
+  onLogin(callback) {
+    this._onLoginCallback = callback;
+  }
+
+  onLogout(callback) {
+    this._onLogoutCallback = callback;
+  }
+
+  onActiveWalletChanged(callback) {
+    this._onActiveWalletChangedCallback = callback;
+  }
+
+  onError(callback) {
+    this._onErrorCallback = callback;
+  }
+
+  async isLoggedIn() {
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.isLoggedIn();
+  }
+
+  
+
+  async _initWidget() {
+    await onWindowLoad();
+    const style = document.createElement('style');
+    style.innerHTML = styles;
+
+    const container = document.createElement('div');
+    container.className = PORTIS_CONTAINER_CLASS;
+
+    const widgetFrame = document.createElement('div');
+    widgetFrame.id = ZEROWALLET_CONTAINER_CLASS+`-${Date.now()}`;
+    widgetFrame.className = ZEROWALLET_IFRAME_CLASS;
+
+    container.appendChild(widgetFrame);
+    document.body.appendChild(container);
+    document.head.appendChild(style);
+
+    const connection = connectToChild({
+      url: this._widgetUrl,
+      appendTo: document.getElementById(widgetFrame.id),
+      methods: {
+        setHeight: this._setHeight.bind(this),
+        getWindowSize: this._getWindowSize.bind(this),
+        onLogin: this._onLogin.bind(this),
+        onLogout: this._onLogout.bind(this),
+        onActiveWalletChanged: this._onActiveWalletChanged.bind(this),
+        onError: this._onError.bind(this),
+      },
+    });
+
+    connection.iframe.style.position = 'absolute';
+    connection.iframe.style.height = '100%';
+    connection.iframe.style.width = '100%';
+    connection.iframe.style.border = '0 transparent';
+
+    const communication = await connection.promise;
+    communication.retrieveSession(this.config);
+
+    return { communication, iframe: connection.iframe, widgetFrame };
+  }
+
+  _initProvider() {
+    const engine = new Web3ProviderEngine();
+    
+
+    //engine.addProvider(new CacheSubprovider());
+    //engine.addProvider(new SubscriptionsSubprovider());
+    //engine.addProvider(new FilterSubprovider());
+    //engine.addProvider(new NonceSubprovider());
+    engine.addProvider(
+      //new RpcSubprovider({
+      //  rpcUrl: "http://127.0.0.1:7545",
+      //})
+      new WebsockerSubprovider({
+        rpcUrl: this.wsRPCEndpointUrl
+      })
+    );
+   
+    engine.addProvider(
+      new HookedWalletSubprovider({
+        getAccounts: async cb => {
+          const widgetCommunication = (await this.widget).communication;
+          const { error, result } = await widgetCommunication.getAccounts();
+          if (!error && result) {
+            this._selectedAddress = result[0];
+          }
+          cb(error, result);
+        },
+        signTransaction: async (txParams, cb) => {
+          const widgetCommunication = (await this.widget).communication;
+          const { error, result } = await widgetCommunication.signTransaction(txParams);
+          cb(error, result);
+        },
+        /*
+        signMessage: async (msgParams, cb) => {
+          const widgetCommunication = (await this.widget).communication;
+          const params = Object.assign({}, msgParams, { messageStandard: 'signMessage' });
+          const { error, result } = await widgetCommunication.signMessage(params, this.config);
+          cb(error, result);
+        },
+        signPersonalMessage: async (msgParams, cb) => {
+          const widgetCommunication = (await this.widget).communication;
+          const params = Object.assign({}, msgParams, { messageStandard: 'signPersonalMessage' });
+          const { error, result } = await widgetCommunication.signMessage(params, this.config);
+          cb(error, result);
+        },
+        signTypedMessage: async (msgParams, cb) => {
+          const widgetCommunication = (await this.widget).communication;
+          const params = Object.assign({}, msgParams, { messageStandard: 'signTypedMessage' });
+          const { error, result } = await widgetCommunication.signMessage(params, this.config);
+          cb(error, result);
+        },
+        signTypedMessageV3: async (msgParams, cb) => {
+          const widgetCommunication = (await this.widget).communication;
+          const params = Object.assign({}, msgParams, { messageStandard: 'signTypedMessageV3' });
+          const { error, result } = await widgetCommunication.signMessage(params, this.config);
+          cb(error, result);
+        },
+        estimateGas: async (txParams, cb) => {
+          const gas = await getTxGas(query, txParams);
+          cb(null, gas);
+        },
+        getGasPrice: async cb => {
+          cb(null, '');
+        },
+        */
+      }),
+    );
+
+   
+
+    engine.isZeroWallet = true;
+
+    engine.on('error', error => {
+      if (error && error.message && error.message.includes('PollingBlockTracker')) {
+        console.warn('If you see this warning constantly, there might be an error with your RPC node.');
+      } else {
+        console.error(error);
+      }
+    });
+
+    engine.start();
+    return engine;
+  }
+
+  async _setHeight(height) {
+    const widgetFrame = (await this.widget).widgetFrame;
+    widgetFrame.style.height = `${height}px`;
+  }
+
+  _getWindowSize() {
+    const body = document.getElementsByTagName('body')[0];
+    const width = window.innerWidth || document.documentElement.clientWidth || body.clientWidth;
+    const height = window.innerHeight || document.documentElement.clientHeight || body.clientHeight;
+    return { width, height };
+  }
+
+  _onLogin(walletAddress, email) {
+    if (this._onLoginCallback) {
+      this._onLoginCallback(walletAddress, email);
+    }
+  }
+
+  _onLogout() {
+    this._selectedAddress = '';
+    if (this._onLogoutCallback) {
+      this._onLogoutCallback();
+    }
+  }
+
+  _onActiveWalletChanged(walletAddress) {
+    if (this._onActiveWalletChangedCallback) {
+      this._onActiveWalletChangedCallback(walletAddress);
+    }
+  }
+
+  _onError(error) {
+    if (this._onErrorCallback) {
+      this._onErrorCallback(error);
+    }
+  }
+
+  clearSubprovider(subproviderType) {
+    const subprovider = this.provider._providers.find(subprovider => subprovider instanceof subproviderType);
+    this.provider.removeProvider(subprovider);
+    this.provider.addProvider(new subproviderType());
+  }
+}
