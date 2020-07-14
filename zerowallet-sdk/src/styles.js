@@ -1,4 +1,4 @@
-export const styles = `
+module.exports.styles = `
 .zerowallet-container {
   position: fixed;
   width: 0px;

@@ -5,40 +5,44 @@
  * @date 2020
  */
 
-var version = require('../package.json').version;
+
 import Web3ProviderEngine from "web3-provider-engine";
 import HookedWalletSubprovider from "web3-provider-engine/subproviders/hooked-wallet";
-import SubscriptionsSubprovider from "web3-provider-engine/subproviders/subscriptions";
+import WebsockerSubprovider from 'web3-provider-engine/subproviders/websocket';
 import styles from "./styles";
+import onWindowLoad from "./onWindowLoad";
 import { connectToChild } from 'penpal';
 
 
-const WIDGET_URL = 'https://wallet.morpher.com';
-const SUPPORTED_SCOPES = ['email', 'reputation'];
+const WIDGET_URL = 'http://localhost:3001';
 const ZEROWALLET_IFRAME_CLASS = 'zerowallet-iframe';
 const ZEROWALLET_CONTAINER_CLASS = 'zerowallet-container';
 
-
+const tempCachingIFrame = document.createElement('iframe');
+tempCachingIFrame.className = ZEROWALLET_IFRAME_CLASS;
+tempCachingIFrame.style.width = '0';
+tempCachingIFrame.style.height = '0';
+tempCachingIFrame.style.border = 'none';
+tempCachingIFrame.style.position = 'absolute';
+tempCachingIFrame.style.top = '-999px';
+tempCachingIFrame.style.left = '-999px';
+tempCachingIFrame.src = WIDGET_URL;
+onWindowLoad().then(() => {
+  if (document.getElementsByClassName(ZEROWALLET_IFRAME_CLASS).length) {
+    console.warn(
+      'Portis script was already loaded. This might cause unexpected behavior. If loading with a <script> tag, please make sure that you only load it once.',
+    );
+  }
+  document.body.appendChild(tempCachingIFrame);
+});
 
 export default class ZeroWallet {
-  wsRPCEndpointUrl;
-  chainId;
-  widget = {
-    communication,
-    iframe,
-    widgetFrame,
-  };
-  provider;
   
-
   constructor(wsRPCEndpointUrl, chainId) {
     this.wsRPCEndpointUrl = wsRPCEndpointUrl;
     this.chainId = chainId;
-    validateSecureOrigin();
-    this._checkIfWidgetAlreadyInitialized();
-    this._validateParams(dappId, network, options);
     this.widget = this._initWidget();
-    this.provider = this._initProvider(options);
+    this.provider = this._initProvider();
   }
 
   getProvider() {
@@ -47,7 +51,7 @@ export default class ZeroWallet {
 
   async showZeroWallet() {
     const widgetCommunication = (await this.widget).communication;
-    return widgetCommunication.showPortis(this.config);
+    return widgetCommunication.showZeroWallet();
   }
 
   async logout() {
@@ -76,15 +80,13 @@ export default class ZeroWallet {
     return widgetCommunication.isLoggedIn();
   }
 
-  
-
   async _initWidget() {
     await onWindowLoad();
     const style = document.createElement('style');
     style.innerHTML = styles;
 
     const container = document.createElement('div');
-    container.className = PORTIS_CONTAINER_CLASS;
+    container.className = ZEROWALLET_CONTAINER_CLASS;
 
     const widgetFrame = document.createElement('div');
     widgetFrame.id = ZEROWALLET_CONTAINER_CLASS+`-${Date.now()}`;
@@ -95,8 +97,7 @@ export default class ZeroWallet {
     document.head.appendChild(style);
 
     const connection = connectToChild({
-      url: this._widgetUrl,
-      appendTo: document.getElementById(widgetFrame.id),
+      iframe: tempCachingIFrame,
       methods: {
         setHeight: this._setHeight.bind(this),
         getWindowSize: this._getWindowSize.bind(this),
@@ -107,13 +108,17 @@ export default class ZeroWallet {
       },
     });
 
-    connection.iframe.style.position = 'absolute';
-    connection.iframe.style.height = '100%';
-    connection.iframe.style.width = '100%';
-    connection.iframe.style.border = '0 transparent';
+
+    tempCachingIFrame.style.position = 'absolute';
+    tempCachingIFrame.style.height = '100%';
+    tempCachingIFrame.style.width = '100%';
+    tempCachingIFrame.style.left=0;
+    tempCachingIFrame.style.top=0;
+    tempCachingIFrame.style.background = "white";
+    tempCachingIFrame.style.border = '0 transparent';
 
     const communication = await connection.promise;
-    communication.retrieveSession(this.config);
+    communication.retrieveSession();
 
     return { communication, iframe: connection.iframe, widgetFrame };
   }
