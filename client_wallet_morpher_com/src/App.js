@@ -1,25 +1,31 @@
 import React, { Component } from "react";
-import getWeb3 from "./getWeb3";
-import getKeystore from "./getKeystore";
+import getKeystore from "./morpher/keystore";
 import config from "./config.json";
 import FacebookLogin from "react-facebook-login";
+import { connectToParent } from "penpal";
+import {getEncryptedSeed,
+  saveWalletEmailPassword,
+  restoreKeystoreFromMail,} from "./morpher/backupRestore";
 import "./App.css";
 
 const { cryptoEncrypt, cryptoDecrypt, sha256 } = require("./cryptoFunctions");
 //import cryptoDecrypt from "./cryptoDecrypt";
 
 class App extends Component {
+  connection;
+
   state = {
     walletEmail: "",
     walletPassword: "",
     isAuthenticated: false,
     user: null,
     token: "",
-    web3: null,
-    accounts: null,
+    isLoggedIn: false,
+    accounts: [],
     hasWallet: false,
     hasWalletRecovery: false,
     loginFailure: false,
+    keystore: null,
   };
 
   async componentDidMount() {
@@ -29,25 +35,24 @@ class App extends Component {
       let loginType = localStorage.getItem("loginType") || "";
       this.setState({ loginType });
       this.setState({ hasWallet: true, walletEmail: email });
-      //const web3 = await getWeb3(false);
     }
-  }
 
-  startWeb3Init = async (user_id, app_id) => {
-    try {
-      const web3 = await getWeb3(false, user_id + "" + app_id);
-      console.log(web3);
-      const accounts = await web3.eth.getAccounts();
-      console.log(accounts);
-      this.setState({ web3, accounts });
-    } catch (error) {
-      // Catch any errors for any of the above operations.
-      alert(
-        `Failed to load web3, accounts, or contract. Check console for details.`
-      );
-      console.error(error);
-    }
-  };
+    this.connection = connectToParent({
+      //parentOrigin: "http://localhost:3000",
+      // Methods child is exposing to parent
+      methods: {
+        getAccounts() {
+          return this.state.accounts;
+        },
+        signTransaction(txObj) {
+          return this.web3.signTransaction(txObj);
+        },
+        isLoggedIn() {
+          return this.state.isLoggedIn;
+        },
+      },
+    });
+  }
 
   unlockWallet = async (e) => {
     e.preventDefault();
@@ -67,13 +72,11 @@ class App extends Component {
       );
 
       let keystore = await getKeystore(this.state.walletPassword, seed);
-      let web3 = await getWeb3(false, keystore);
-      let accounts = await web3.eth.getAccounts();
+
       this.setState({
         hasWallet: true,
         unlockedWallet: true,
-        web3,
-        accounts,
+        keystore,
         walletEmail: email,
       });
     } catch (e) {
@@ -89,103 +92,28 @@ class App extends Component {
     /**
      * First try to fetch the wallet from the server, in case the browser-cache was cleared
      */
-    let key = await sha256(this.state.walletEmail);
-    let options = {
-      method: "POST",
-      body: JSON.stringify({ key: key }),
-      mode: "cors",
-      cache: "default",
-    };
-    let seed = false;
-    let response = await fetch(
-      config.BACKEND_ENDPOINT + "/index.php?endpoint=restoreEmailPassword",
-      options
-    );
-    let responseBody = await response.json();
-
-    /**
-     * Login /Create Wallet is in one function
-     * @todo: Separate Login and Create Wallet into separate functions so that upon failed "login" a recovery can be suggested
-     */
-    if (responseBody !== false) {
-      /**
-       * Wallet was found on server, attempting to decrypt with the password
-       */
-      let encryptedSeedObject = JSON.parse(responseBody);
-      try {
-      seed = await cryptoDecrypt(
-        this.state.walletPassword,
-        encryptedSeedObject.ciphertext,
-        encryptedSeedObject.iv,
-        encryptedSeedObject.salt
+    let keystore = null;
+    let created = false;
+    try {
+      keystore = restoreKeystoreFromMail(
+        this.state.walletEmail,
+        this.state.walletPassword
       );
-      } catch (e) {
-        console.error(e);
-        this.setState({loginFailure: true});
-        return;
-      }
+    } catch (e) {
+      /**
+       * If no wallet was found, then create a new one (seed = false) otherwise use the decrypted seed from above
+       */
+      keystore = await getKeystore(this.state.walletPassword, seed);
+      created = true;
     }
+    let encryptedSeed = getEncryptedSeed(keystore, this.state.walletPassword);
 
-    /**
-     * If no wallet was found, then create a new one (seed = false) otherwise use the decrypted seed from above
-     */
-    let keystore = await getKeystore(this.state.walletPassword, seed);
-    let web3 = await getWeb3(false, keystore);
-    let accounts = await web3.eth.getAccounts();
-    this.saveWalletEmailPassword(
-      keystore,
-      this.state.walletPassword,
-      this.state.walletPassword,
-      key,
-      this.state.walletEmail
-    );
-    this.setState({
-      hasWallet: true,
-      unlockedWallet: true,
-      web3,
-      accounts,
-    });
-  };
-
-  saveWalletEmailPassword = async (
-    keystore,
-    passwordDecrypt,
-    passwordEncrypt,
-    key,
-    userEmail
-  ) => {
-    console.log(userEmail);
-    let pwDerivedKey = await new Promise((resolve, reject) => {
-      keystore.keyFromPassword(passwordDecrypt, (err, key) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(key);
-      });
-    });
-
-    let seed = keystore.getSeed(pwDerivedKey);
-    let encryptedSeed = await cryptoEncrypt(passwordEncrypt, seed);
     window.localStorage.setItem("encryptedSeed", JSON.stringify(encryptedSeed));
-    window.localStorage.setItem("email", userEmail);
-
-    let options = {
-      method: "POST",
-      body: JSON.stringify({
-        key: key,
-        seed: encryptedSeed,
-        email: userEmail,
-      }),
-      mode: "cors",
-      cache: "default",
-    };
-    let result = await fetch(
-      config.BACKEND_ENDPOINT + "/index.php?endpoint=saveEmailPassword",
-      options
-    );
-    console.log(result);
-    let response = await result.json();
-    console.log(response);
+    window.localStorage.setItem("email", this.state.walletEmail);
+    if (created) {
+      saveWalletEmailPassword(this.state.walletEmail, encryptedSeed);
+    }
+    this.setState({keystore, isLoggedIn:true, hasWallet: true})
   };
 
   logout = () => {

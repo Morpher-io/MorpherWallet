@@ -43,6 +43,7 @@ export default class ZeroWallet {
     this.chainId = chainId;
     this.widget = this._initWidget();
     this.provider = this._initProvider();
+    window.zerowallet = this;
   }
 
   getProvider() {
@@ -110,9 +111,9 @@ export default class ZeroWallet {
 
 
     tempCachingIFrame.style.position = 'absolute';
-    tempCachingIFrame.style.height = '100%';
-    tempCachingIFrame.style.width = '100%';
-    tempCachingIFrame.style.left=0;
+    tempCachingIFrame.style.height = '600px';
+    tempCachingIFrame.style.width = '300px';
+    tempCachingIFrame.style.right=0;
     tempCachingIFrame.style.top=0;
     tempCachingIFrame.style.background = "white";
     tempCachingIFrame.style.border = '0 transparent';
