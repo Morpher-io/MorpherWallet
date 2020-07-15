@@ -3,12 +3,18 @@ import getKeystore from "./morpher/keystore";
 import config from "./config.json";
 import FacebookLogin from "react-facebook-login";
 import { connectToParent } from "penpal";
-import {getEncryptedSeed,
-  saveWalletEmailPassword,
-  restoreKeystoreFromMail,} from "./morpher/backupRestore";
-import "./App.css";
 
-const { cryptoEncrypt, cryptoDecrypt, sha256 } = require("./cryptoFunctions");
+import "./App.css";
+const {
+  getEncryptedSeed,
+  saveWalletEmailPassword,
+  restoreKeystoreFromMail,
+} = require("./morpher/backupRestore");
+const {
+  cryptoEncrypt,
+  cryptoDecrypt,
+  sha256,
+} = require("./morpher/cryptoFunctions");
 //import cryptoDecrypt from "./cryptoDecrypt";
 
 class App extends Component {
@@ -38,14 +44,21 @@ class App extends Component {
     }
 
     this.connection = connectToParent({
-      //parentOrigin: "http://localhost:3000",
+      parentOrigin: "http://localhost:3000",
       // Methods child is exposing to parent
       methods: {
         getAccounts() {
-          return this.state.accounts;
+          return this.keystore.getAccounts();
         },
         signTransaction(txObj) {
-          return this.web3.signTransaction(txObj);
+          return new Promise((resolve, reject) => {
+            //see if we are logged in?!
+            try {
+              this.keystore.signTransaction(txObj, resolve);
+            } catch (e) {
+              reject(e);
+            }
+          });
         },
         isLoggedIn() {
           return this.state.isLoggedIn;
@@ -103,7 +116,7 @@ class App extends Component {
       /**
        * If no wallet was found, then create a new one (seed = false) otherwise use the decrypted seed from above
        */
-      keystore = await getKeystore(this.state.walletPassword, seed);
+      keystore = await getKeystore(this.state.walletPassword);
       created = true;
     }
     let encryptedSeed = getEncryptedSeed(keystore, this.state.walletPassword);
@@ -113,7 +126,7 @@ class App extends Component {
     if (created) {
       saveWalletEmailPassword(this.state.walletEmail, encryptedSeed);
     }
-    this.setState({keystore, isLoggedIn:true, hasWallet: true})
+    this.setState({ keystore, isLoggedIn: true, hasWallet: true });
   };
 
   logout = () => {
@@ -189,8 +202,6 @@ class App extends Component {
           );
           let keystore = await getKeystore(newPasswordForLocalStorage, seed);
           let key_recreated = await sha256(this.state.walletPassword);
-          let web3 = await getWeb3(false, keystore);
-          let accounts = await web3.eth.getAccounts();
           this.saveWalletEmailPassword(
             keystore,
             newPasswordForLocalStorage,
@@ -205,8 +216,6 @@ class App extends Component {
             hasWallet: true,
             unlockedWallet: true,
             walletEmail: this.state.walletEmail,
-            web3,
-            accounts,
           });
         } else {
           alert(

@@ -77,6 +77,7 @@ export default class ZeroWallet {
   }
 
   async isLoggedIn() {
+    console.log("hello");
     const widgetCommunication = (await this.widget).communication;
     return widgetCommunication.isLoggedIn();
   }
@@ -114,12 +115,13 @@ export default class ZeroWallet {
     tempCachingIFrame.style.height = '600px';
     tempCachingIFrame.style.width = '300px';
     tempCachingIFrame.style.right=0;
+    tempCachingIFrame.style.left=0;
     tempCachingIFrame.style.top=0;
     tempCachingIFrame.style.background = "white";
     tempCachingIFrame.style.border = '0 transparent';
 
     const communication = await connection.promise;
-    communication.retrieveSession();
+    //communication.retrieveSession();
 
     return { communication, iframe: connection.iframe, widgetFrame };
   }

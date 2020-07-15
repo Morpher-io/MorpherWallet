@@ -23,8 +23,8 @@ class App extends Component {
 
   async componentDidMount() {
     this.zeroWallet = new ZeroWallet("ws://127.0.0.1:7545");
-    let isAuthenticated = await this.zeroWallet.isLoggedIn();
-    this.setState({isAuthenticated});
+    //let isAuthenticated = await this.zeroWallet.isLoggedIn();
+    //this.setState({isAuthenticated});
   }
 
   startWeb3Init = async (user_id, app_id) => {

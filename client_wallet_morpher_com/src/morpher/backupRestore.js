@@ -1,5 +1,7 @@
-import { sha256 } from "./cryptoFunctions";
-import getKeystore from "./keystore";
+const getKeystore = require("./keystore");
+const config = require("./../config.json");
+const { cryptoEncrypt, cryptoDecrypt, sha256 } = require("./cryptoFunctions");
+
 
 const getEncryptedSeed = async (keystore, password) => {
     let pwDerivedKey = await new Promise((resolve, reject) => {
