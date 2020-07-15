@@ -230,16 +230,6 @@ class App extends Component {
     alert(error);
   };
 
-  sendEther = async (amount, to) => {
-    const { web3, accounts } = this.state;
-    let result = await web3.eth.sendTransaction({
-      from: accounts[0],
-      to,
-      value: amount * 1000000000000000000,
-    });
-    console.log(result);
-  };
-
   handleInputChange = (event) => {
     const target = event.target;
     const value = target.value;
