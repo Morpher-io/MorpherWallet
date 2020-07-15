@@ -30,7 +30,7 @@ It should be running on localhost:3000
 *You Need To Run The Wallet First!*
 
 ## Wallet
-This is the actual keystore which should be running under wallet.morpher.com
+This is the actual keystore which should be running under wallet.morpher.com (or localhost:3001 in development)
 
 The SDK tries to open this in an iFrame.
 
