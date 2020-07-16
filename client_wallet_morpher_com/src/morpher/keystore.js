@@ -1,6 +1,7 @@
 import Lightwallet from 'eth-lightwallet';
 
-const getKeystore = (password, _secretSeed = false) => new Promise((resolve, reject) => {
+function getKeystore (password, _secretSeed = false) {
+  return new Promise((resolve, reject) => {
   let secretSeed = _secretSeed === false ? Lightwallet.keystore.generateRandomSeed() : _secretSeed;
   const vaultOpts = {
     seedPhrase: secretSeed, //'motion candy violin crazy north hazard uphold corn spray message vibrant palace',
@@ -27,4 +28,6 @@ const getKeystore = (password, _secretSeed = false) => new Promise((resolve, rej
    });
  } catch(err) {reject(err) };
 });
+}
+
 export default getKeystore;

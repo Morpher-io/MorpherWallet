@@ -3,19 +3,20 @@ import getKeystore from "./morpher/keystore";
 import config from "./config.json";
 import FacebookLogin from "react-facebook-login";
 import { connectToParent } from "penpal";
+import isIframe from "./morpher/isIframe";
 
 import "./App.css";
+
 const {
   getEncryptedSeed,
   saveWalletEmailPassword,
   restoreKeystoreFromMail,
+  getKeystoreFromEncryptedSeed,
+  backupFacebookSeed,
+  changePasswordEncryptedSeed,
+  recoverFacebookSeed,
+  getEncryptedSeedFromMail,
 } = require("./morpher/backupRestore");
-const {
-  cryptoEncrypt,
-  cryptoDecrypt,
-  sha256,
-} = require("./morpher/cryptoFunctions");
-//import cryptoDecrypt from "./cryptoDecrypt";
 
 class App extends Component {
   connection;
@@ -43,49 +44,50 @@ class App extends Component {
       this.setState({ hasWallet: true, walletEmail: email });
     }
 
-    this.connection = connectToParent({
-      parentOrigin: "http://localhost:3000",
-      // Methods child is exposing to parent
-      methods: {
-        getAccounts() {
-          return this.keystore.getAccounts();
+    if (isIframe()) {
+      this.connection = connectToParent({
+        parentOrigin: "http://localhost:3000",
+        // Methods child is exposing to parent
+        methods: {
+          getAccounts() {
+            return this.keystore.getAccounts();
+          },
+          signTransaction(txObj) {
+            return new Promise((resolve, reject) => {
+              //see if we are logged in?!
+              try {
+                this.keystore.signTransaction(txObj, resolve);
+              } catch (e) {
+                reject(e);
+              }
+            });
+          },
+          isLoggedIn() {
+            return this.state.isLoggedIn;
+          },
+          logout() {
+            //maybe confirm?!
+            //call onLogout callback to parent
+          },
         },
-        signTransaction(txObj) {
-          return new Promise((resolve, reject) => {
-            //see if we are logged in?!
-            try {
-              this.keystore.signTransaction(txObj, resolve);
-            } catch (e) {
-              reject(e);
-            }
-          });
-        },
-        isLoggedIn() {
-          return this.state.isLoggedIn;
-        },
-      },
-    });
+      });
+    }
   }
 
   unlockWallet = async (e) => {
     e.preventDefault();
-    let encryptedKeystore = localStorage.getItem("encryptedSeed") || "";
+    let encryptedSeed = localStorage.getItem("encryptedSeed") || "";
     let email = localStorage.getItem("email") || "";
-    if (encryptedKeystore === "") {
+    if (encryptedSeed === "") {
       this.setState({ hasWallet: false });
     }
 
-    encryptedKeystore = JSON.parse(encryptedKeystore);
+    encryptedSeed = JSON.parse(encryptedSeed);
     try {
-      let seed = await cryptoDecrypt(
-        this.state.walletPassword,
-        encryptedKeystore.ciphertext,
-        encryptedKeystore.iv,
-        encryptedKeystore.salt
+      let keystore = getKeystoreFromEncryptedSeed(
+        encryptedSeed,
+        this.state.walletPassword
       );
-
-      let keystore = await getKeystore(this.state.walletPassword, seed);
-
       this.setState({
         hasWallet: true,
         unlockedWallet: true,
@@ -108,25 +110,28 @@ class App extends Component {
     let keystore = null;
     let created = false;
     try {
-      keystore = restoreKeystoreFromMail(
-        this.state.walletEmail,
-        this.state.walletPassword
-      );
+      console.log("trying to find keystore from mail");
+      let encryptedSeed = await getEncryptedSeedFromMail(this.state.walletEmail);
+      keystore = await getKeystoreFromEncryptedSeed(encryptedSeed, this.state.walletPassword);
     } catch (e) {
+      console.log("keystore not found in mail, creating a new one");
       /**
        * If no wallet was found, then create a new one (seed = false) otherwise use the decrypted seed from above
        */
       keystore = await getKeystore(this.state.walletPassword);
       created = true;
     }
-    let encryptedSeed = getEncryptedSeed(keystore, this.state.walletPassword);
+    let encryptedSeed = await getEncryptedSeed(keystore, this.state.walletPassword);
 
     window.localStorage.setItem("encryptedSeed", JSON.stringify(encryptedSeed));
     window.localStorage.setItem("email", this.state.walletEmail);
     if (created) {
       saveWalletEmailPassword(this.state.walletEmail, encryptedSeed);
     }
-    this.setState({ keystore, isLoggedIn: true, hasWallet: true });
+    if(isIframe()) {
+      (await this.connection.promise).onLogin(this.state.walletEmail);
+    }
+    this.setState({ keystore, isLoggedIn: true, hasWallet: true, unlockedWallet: true });
   };
 
   logout = () => {
@@ -136,94 +141,61 @@ class App extends Component {
   };
 
   facebookResponseAddRecovery = async (response) => {
-    let encryptedKeystore = localStorage.getItem("encryptedSeed") || "";
+    let encryptedSeedFromPassword = localStorage.getItem("encryptedSeed") || "";
 
-    if (encryptedKeystore === "") {
-      throw "Keystore not found, aborting";
+    if (encryptedSeedFromPassword === "") {
+      throw new Error("Keystore not found, aborting");
     }
 
-    encryptedKeystore = JSON.parse(encryptedKeystore);
-    let seed = await cryptoDecrypt(
+    let encryptedSeedFromFacebookUserID = await changePasswordEncryptedSeed(
+      encryptedSeedFromPassword,
       this.state.walletPassword,
-      encryptedKeystore.ciphertext,
-      encryptedKeystore.iv,
-      encryptedKeystore.salt
+      response.userID
     );
-    let encryptedSeed = await cryptoEncrypt(response.userID, seed);
-    let key = await sha256(config.FACEBOOK_APP_ID + response.userID);
-    const options = {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: response.accessToken,
-        seed: encryptedSeed,
-        key: key,
-        email: this.state.walletEmail,
-      }),
-      mode: "cors",
-      cache: "default",
-    };
-    fetch(
-      config.BACKEND_ENDPOINT + "/index.php?endpoint=saveFacebook",
-      options
-    ).then((r) => {
-      r.json().then((response) => {
-        console.log(response);
-        this.setState({ hasWalletRecovery: true });
-      });
-    });
+    try {
+      await backupFacebookSeed(
+        this.state.walletEmail,
+        response.userID,
+        encryptedSeedFromFacebookUserID
+      );
+      this.setState({ hasWalletRecovery: true });
+    } catch {
+      this.setState({ hasWalletRecovery: false });
+    }
   };
 
   facebookRecovery = async (response) => {
-    console.log(response);
-    let key = await sha256(config.FACEBOOK_APP_ID + response.userID);
-    const options = {
-      method: "POST",
-      body: JSON.stringify({ accessToken: response.accessToken, key: key }),
-      mode: "cors",
-      cache: "default",
-    };
-    fetch(
-      config.BACKEND_ENDPOINT + "/index.php?endpoint=restoreFacebook",
-      options
-    ).then((r) => {
-      r.json().then(async (responseBody) => {
-        if (responseBody !== false) {
-          //initiate recovery
-          let encryptedSeed = JSON.parse(responseBody);
-          let seed = await cryptoDecrypt(
-            response.userID,
-            encryptedSeed.ciphertext,
-            encryptedSeed.iv,
-            encryptedSeed.salt
-          );
-          var newPasswordForLocalStorage = prompt(
-            "Enter a new password for you local vault",
-            "Super Strong Pass0wrd!"
-          );
-          let keystore = await getKeystore(newPasswordForLocalStorage, seed);
-          let key_recreated = await sha256(this.state.walletPassword);
-          this.saveWalletEmailPassword(
-            keystore,
-            newPasswordForLocalStorage,
-            newPasswordForLocalStorage,
-            key_recreated,
-            this.state.walletEmail
-          );
-
-          window.localStorage.setItem("email", this.state.walletEmail);
-          this.setState({
-            hasWalletRecovery: true,
-            hasWallet: true,
-            unlockedWallet: true,
-            walletEmail: this.state.walletEmail,
-          });
-        } else {
-          alert(
-            "Your account wasn't found with Facebook recovery, create one with username and password first"
-          );
-        }
+    try {
+      let encryptedSeedFacebook = await recoverFacebookSeed(
+        response.accessToken
+      );
+      var newPasswordForLocalStorage = prompt(
+        "Enter a new password for you local vault",
+        "Super Strong Pass0wrd!"
+      );
+      let encryptedSeedPassword = await changePasswordEncryptedSeed(
+        encryptedSeedFacebook,
+        response.userID,
+        newPasswordForLocalStorage
+      );
+      let keystore = getKeystoreFromEncryptedSeed(
+        encryptedSeedPassword,
+        newPasswordForLocalStorage
+      );
+      saveWalletEmailPassword(this.state.walletEmail, encryptedSeedPassword);
+      window.localStorage.setItem("encryptedSeed", encryptedSeedPassword);
+      window.localStorage.setItem("email", this.state.walletEmail);
+      this.setState({
+        hasWalletRecovery: true,
+        hasWallet: true,
+        unlockedWallet: true,
+        keystore,
       });
-    });
+    } catch (e) {
+      alert(
+        "Your account wasn't found with Facebook recovery, create one with username and password first"
+      );
+    }
   };
 
   onFailure = (error) => {
@@ -307,24 +279,11 @@ class App extends Component {
       <div>
         <p>Authenticated</p>
         <h1>Hi {this.state.walletEmail}</h1>
-        {!this.state.web3 ? (
-          <div>Loading Web3, accounts, and contract...</div>
-        ) : (
-          <div>
-            <h2>Good to Go!</h2>
-            <p>Your Account: {this.state.accounts[0]}</p>
-            <button
-              onClick={() =>
-                this.sendEther(
-                  0.1,
-                  "0x5AD2d0Ebe451B9bC2550e600f2D2Acd31113053E"
-                )
-              }
-            >
-              SEND TRANSACTION
-            </button>
-          </div>
-        )}
+
+        <div>
+          <h2>Good to Go!</h2>
+          <p>Your Account: {this.state.accounts[0]}</p>
+        </div>
         <div>
           <button onClick={this.logout} className="button">
             Log out
