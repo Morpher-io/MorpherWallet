@@ -1,4 +1,4 @@
-const getKeystore = require("./keystore");
+const { getKeystore }  = require("./keystore");
 const config = require("./../config.json");
 const { cryptoEncrypt, cryptoDecrypt, sha256 } = require("./cryptoFunctions");
 
@@ -25,7 +25,6 @@ const getKeystoreFromEncryptedSeed = async (encryptedSeed, password) =>
         encryptedSeed.iv,
         encryptedSeed.salt
       );
-      console.log(getKeystore);
       let keystore = await getKeystore(password, seed);
       resolve(keystore);
     } catch (e) {

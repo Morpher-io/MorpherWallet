@@ -1,6 +1,6 @@
 import Lightwallet from 'eth-lightwallet';
 
-function getKeystore (password, _secretSeed = false) {
+export function getKeystore (password, _secretSeed = false) {
   return new Promise((resolve, reject) => {
   let secretSeed = _secretSeed === false ? Lightwallet.keystore.generateRandomSeed() : _secretSeed;
   const vaultOpts = {
@@ -23,11 +23,9 @@ function getKeystore (password, _secretSeed = false) {
               callback(null, password);
           };
            resolve(ks);
-           
+
        });
    });
  } catch(err) {reject(err) };
 });
 }
-
-export default getKeystore;

@@ -5,12 +5,16 @@ import React, { Component } from "react";
 import getWeb3 from "./getWeb3";
 import ZeroWallet from 'zerowallet-sdk';
 import "./App.css";
+//import { connectToChild } from 'penpal';
 
 class App extends Component {
-  
+
+  //connection;
+
   state = {
     walletEmail: "",
     walletPassword: "",
+    walletAddress: "",
     isAuthenticated: false,
     user: null,
     token: "",
@@ -23,16 +27,25 @@ class App extends Component {
 
   async componentDidMount() {
     this.zeroWallet = new ZeroWallet("ws://127.0.0.1:7545");
-    //let isAuthenticated = await this.zeroWallet.isLoggedIn();
-    //this.setState({isAuthenticated});
+    //let web3 = await this.zeroWallet.getProvider();
+
+    let res = await this.zeroWallet.isLoggedIn()
+    if(res.isLoggedIn == true) {
+      this.setState({walletEmail: res.walletEmail})
+      this.setState({isAuthenticated: true})
+    }
+
+    this.zeroWallet.onLogin((walletAddress, walletEmail)=>{
+      this.setState({walletEmail: walletEmail})
+      this.setState({walletAddress: walletAddress})
+      this.setState({isAuthenticated: true})
+    })
   }
 
   startWeb3Init = async (user_id, app_id) => {
     try {
       const web3 = await getWeb3(false, user_id + "" + app_id);
-      console.log(web3);
       const accounts = await web3.eth.getAccounts();
-      console.log(accounts);
       this.setState({ web3, accounts });
     } catch (error) {
       // Catch any errors for any of the above operations.
@@ -43,7 +56,9 @@ class App extends Component {
     }
   };
 
-  
+  sendEth = async() => {
+    console.log(this.zeroWallet)
+  }
 
   logout = () => {
     localStorage.clear();
@@ -51,7 +66,7 @@ class App extends Component {
     window.location.reload();
   };
 
-  
+
 
   onFailure = (error) => {
     alert(error);
@@ -67,10 +82,10 @@ class App extends Component {
     console.log(result);
   };
 
-  
+
 
   render() {
-    let content = this.state.isAuthenticated ? (<div>Authenticated</div>) : (<div>Not logged in!</div>);
+    let content = this.state.isAuthenticated ? (<div><h2>Hi {this.state.walletEmail}</h2> <div><button onClick={this.sendEth}>Send eth</button></div></div>) : (<div>Not logged in!</div>);
     return <div className="App"><h1>Welcome to the trade engine!</h1><br />{content}</div>;
   }
 }

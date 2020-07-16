@@ -1,11 +1,11 @@
 import React, { Component } from "react";
-import getKeystore from "./morpher/keystore";
-import config from "./config.json";
 import FacebookLogin from "react-facebook-login";
 import { connectToParent } from "penpal";
 import isIframe from "./morpher/isIframe";
-
+import config from "./config.json";
 import "./App.css";
+
+import { getKeystore }  from "./morpher/keystore";
 
 const {
   getEncryptedSeed,
@@ -25,6 +25,7 @@ class App extends Component {
     walletEmail: "",
     walletPassword: "",
     isAuthenticated: false,
+    unlockedWallet: false,
     user: null,
     token: "",
     isLoggedIn: false,
@@ -44,26 +45,29 @@ class App extends Component {
       this.setState({ hasWallet: true, walletEmail: email });
     }
 
+    var self = this
     if (isIframe()) {
       this.connection = connectToParent({
         parentOrigin: "http://localhost:3000",
         // Methods child is exposing to parent
         methods: {
           getAccounts() {
-            return this.keystore.getAccounts();
+            return self.keystore.getAccounts();
           },
           signTransaction(txObj) {
             return new Promise((resolve, reject) => {
               //see if we are logged in?!
               try {
-                this.keystore.signTransaction(txObj, resolve);
+                self.keystore.signTransaction(txObj, resolve);
               } catch (e) {
                 reject(e);
               }
             });
           },
           isLoggedIn() {
-            return this.state.isLoggedIn;
+            //return "ok"
+            if(self.state.isLoggedIn) return {isLoggedIn: true, unlockedWallet: self.state.unlockedWallet, walletEmail: self.state.walletEmail, accounts: self.state.accounts};
+            else return { isLoggedIn: false }
           },
           logout() {
             //maybe confirm?!
@@ -88,6 +92,12 @@ class App extends Component {
         encryptedSeed,
         this.state.walletPassword
       );
+
+      if (isIframe()) {
+        //let parent = await this.connection.promise;
+        //await parent.onLogin(this.state.accounts[0], this.state.walletEmail)
+        (await this.connection.promise).onLogin(this.state.accounts[0], this.state.walletEmail);
+      }
       this.setState({
         hasWallet: true,
         unlockedWallet: true,
@@ -101,40 +111,49 @@ class App extends Component {
   };
 
   createWallet = async (e) => {
-    //console.log(e);
-    e.preventDefault();
-
-    /**
-     * First try to fetch the wallet from the server, in case the browser-cache was cleared
-     */
-    let keystore = null;
-    let created = false;
     try {
-      console.log("trying to find keystore from mail");
-      let encryptedSeed = await getEncryptedSeedFromMail(this.state.walletEmail);
-      keystore = await getKeystoreFromEncryptedSeed(encryptedSeed, this.state.walletPassword);
-    } catch (e) {
-      console.log("keystore not found in mail, creating a new one");
-      /**
-       * If no wallet was found, then create a new one (seed = false) otherwise use the decrypted seed from above
-       */
-      keystore = await getKeystore(this.state.walletPassword);
-      created = true;
-    }
-    let encryptedSeed = await getEncryptedSeed(keystore, this.state.walletPassword);
+      //console.log(e);
+      e.preventDefault();
 
-    window.localStorage.setItem("encryptedSeed", JSON.stringify(encryptedSeed));
-    window.localStorage.setItem("email", this.state.walletEmail);
-    if (created) {
-      saveWalletEmailPassword(this.state.walletEmail, encryptedSeed);
+      /**
+       * First try to fetch the wallet from the server, in case the browser-cache was cleared
+       */
+      let keystore = null;
+      let created = false;
+      try {
+        console.log("trying to find keystore from mail");
+        let encryptedSeed = await getEncryptedSeedFromMail(this.state.walletEmail);
+        keystore = await getKeystoreFromEncryptedSeed(encryptedSeed, this.state.walletPassword);
+      } catch (e) {
+        console.log("keystore not found in mail, creating a new one");
+        /**
+         * If no wallet was found, then create a new one (seed = false) otherwise use the decrypted seed from above
+         */
+        keystore = await getKeystore(this.state.walletPassword);
+        created = true;
+      }
+      let encryptedSeed = await getEncryptedSeed(keystore, this.state.walletPassword);
+
+      window.localStorage.setItem("encryptedSeed", JSON.stringify(encryptedSeed));
+      window.localStorage.setItem("email", this.state.walletEmail);
+      if (created) {
+        saveWalletEmailPassword(this.state.walletEmail, encryptedSeed);
+      }
+      if (isIframe()) {
+        //let parent = await this.connection.promise;
+        //await parent.onLogin(this.state.accounts[0], this.state.walletEmail)
+        (await this.connection.promise).onLogin(this.state.accounts[0], this.state.walletEmail);
+      }
+      this.setState({keystore, isLoggedIn: true, hasWallet: true, unlockedWallet: true});
+    }catch (e) {
+      console.log(e)
     }
-    if(isIframe()) {
-      (await this.connection.promise).onLogin(this.state.walletEmail);
-    }
-    this.setState({ keystore, isLoggedIn: true, hasWallet: true, unlockedWallet: true });
   };
 
-  logout = () => {
+  logout = async () => {
+    if (isIframe()) {
+      (await this.connection.promise).onLogout();
+    }
     localStorage.clear();
     //this.setState({ isAuthenticated: false, token: "", user: null, web3: null, hasWallet:false });
     window.location.reload();
@@ -277,11 +296,9 @@ class App extends Component {
       </div>
     ) : (
       <div>
-        <p>Authenticated</p>
-        <h1>Hi {this.state.walletEmail}</h1>
+        <h3>You are successfully logged in!</h3>
 
         <div>
-          <h2>Good to Go!</h2>
           <p>Your Account: {this.state.accounts[0]}</p>
         </div>
         <div>
