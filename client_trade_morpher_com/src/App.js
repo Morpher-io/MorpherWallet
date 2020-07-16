@@ -40,6 +40,13 @@ class App extends Component {
       this.setState({walletAddress: walletAddress})
       this.setState({isAuthenticated: true})
     })
+
+    this.zeroWallet.onLogout(()=>{
+      this.setState({walletEmail: ""})
+      this.setState({walletAddress: ""})
+      this.setState({isAuthenticated: false})
+    })
+
   }
 
   startWeb3Init = async (user_id, app_id) => {
