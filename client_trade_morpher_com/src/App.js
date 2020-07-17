@@ -31,13 +31,16 @@ class App extends Component {
     let res = await this.zeroWallet.isLoggedIn();
     if (res.isLoggedIn === true) {
       this.setState({ walletEmail: res.walletEmail });
-      this.setState({ isAuthenticated: true });
+      let web3 = await getWeb3();
+      this.setState({ isAuthenticated: true, web3 });
     }
 
-    this.zeroWallet.onLogin((walletAddress, walletEmail) => {
+    this.zeroWallet.onLogin(async (walletAddress, walletEmail) => {
       this.setState({ walletEmail: walletEmail });
       this.setState({ walletAddress: walletAddress });
-      this.setState({ isAuthenticated: true });
+      let web3 = await getWeb3();
+      console.log(web3);
+      this.setState({ isAuthenticated: true, web3 });
     });
 
     this.zeroWallet.onLogout(() => {

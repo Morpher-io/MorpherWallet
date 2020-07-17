@@ -35,6 +35,7 @@ onWindowLoad().then(() => {
   }
   document.body.appendChild(tempCachingIFrame);
 });
+let iframeLoadedFired = false;
 
 export default class ZeroWallet {
   
@@ -77,9 +78,21 @@ export default class ZeroWallet {
   }
 
   async isLoggedIn() {
-    console.log("hello");
+    await this.iframeLoaded();
     const widgetCommunication = (await this.widget).communication;
     return widgetCommunication.isLoggedIn();
+  }
+
+  async iframeLoaded() {
+    return new Promise((resolve) => {
+      if(iframeLoadedFired) {
+        resolve();
+      }
+      tempCachingIFrame.onload = () => {
+        iframeLoadedFired = true;
+        resolve();
+      }
+    });
   }
 
   async _initWidget() {

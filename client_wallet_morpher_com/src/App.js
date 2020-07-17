@@ -37,16 +37,15 @@ class App extends Component {
   };
 
   async componentDidMount() {
-    let encryptedKeystore = localStorage.getItem("encryptedSeed") || "";
+    let encryptedSeed = localStorage.getItem("encryptedSeed") || "";
     let email = localStorage.getItem("email") || "";
     let password = window.sessionStorage.getItem("password") || "";
-    if (encryptedKeystore !== "" && email !== "") {
+    if (encryptedSeed !== "" && email !== "") {
       let loginType = localStorage.getItem("loginType") || "";
       this.setState({ loginType });
       this.setState({ hasWallet: true, walletEmail: email });
       if (password !== "") {
-        this.setState({ walletPassword: password });
-        this.unlockWallet();
+        this.unlockWallet(JSON.parse(encryptedSeed), password);
       }
     }
 
@@ -71,7 +70,7 @@ class App extends Component {
           },
           isLoggedIn() {
             //return "ok"
-            if (self.state.isLoggedIn)
+            if (self.state.unlockedWallet)
               return {
                 isLoggedIn: true,
                 unlockedWallet: self.state.unlockedWallet,
@@ -101,14 +100,7 @@ class App extends Component {
     encryptedSeed = JSON.parse(encryptedSeed);
     await this.unlockWallet(encryptedSeed, password);
 
-    if (isIframe()) {
-      //let parent = await this.connection.promise;
-      //await parent.onLogin(this.state.accounts[0], this.state.walletEmail)
-      (await this.connection.promise).onLogin(
-        this.state.accounts[0],
-        this.state.walletEmail
-      );
-    }
+   
   };
 
   unlockWallet = async (encryptedSeed, password) => {
@@ -125,6 +117,15 @@ class App extends Component {
         keystore,
         accounts,
       });
+
+      if (isIframe()) {
+        //let parent = await this.connection.promise;
+        //await parent.onLogin(this.state.accounts[0], this.state.walletEmail)
+        (await this.connection.promise).onLogin(
+          this.state.accounts[0],
+          this.state.walletEmail
+        );
+      }
     } catch (e) {
       console.error(e);
       this.setState({
