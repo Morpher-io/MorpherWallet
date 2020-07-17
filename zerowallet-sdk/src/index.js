@@ -149,14 +149,6 @@ export default class ZeroWallet {
     //engine.addProvider(new SubscriptionsSubprovider());
     //engine.addProvider(new FilterSubprovider());
     //engine.addProvider(new NonceSubprovider());
-    engine.addProvider(
-    //  new RpcSubprovider({
-    //    rpcUrl: "http://127.0.0.1:7545",
-    //  })
-      new WebsockerSubprovider({
-        rpcUrl: this.wsRPCEndpointUrl
-      })
-    );
 
 
    
@@ -164,11 +156,9 @@ export default class ZeroWallet {
       new HookedWalletSubprovider({
         getAccounts: async cb => {
           const widgetCommunication = (await this.widget).communication;
-          const { error, result } = await widgetCommunication.getAccounts();
-          if (!error && result) {
-            this._selectedAddress = result[0];
-          }
-          cb(error, result);
+          const result = await widgetCommunication.getAccounts();
+          console.log(result);
+          cb(null, result);
         },
         signTransaction: async (txParams, cb) => {
           const widgetCommunication = (await this.widget).communication;
@@ -210,6 +200,16 @@ export default class ZeroWallet {
         */
       }),
     );
+
+    
+    engine.addProvider(
+      //  new RpcSubprovider({
+      //    rpcUrl: "http://127.0.0.1:7545",
+      //  })
+        new WebsockerSubprovider({
+          rpcUrl: this.wsRPCEndpointUrl
+        })
+      );
 
    
 

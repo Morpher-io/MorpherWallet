@@ -55,14 +55,18 @@ class App extends Component {
         parentOrigin: "http://localhost:3000",
         // Methods child is exposing to parent
         methods: {
-          getAccounts() {
-            return self.keystore.getAccounts();
+          async getAccounts() {
+            if(self.state.keystore != null) {
+              return await self.state.keystore.getAddresses();
+            } else {
+              return [];
+            }
           },
           signTransaction(txObj) {
             return new Promise((resolve, reject) => {
               //see if we are logged in?!
               try {
-                self.keystore.signTransaction(txObj, resolve);
+                self.state.keystore.signTransaction(txObj, resolve);
               } catch (e) {
                 reject(e);
               }
