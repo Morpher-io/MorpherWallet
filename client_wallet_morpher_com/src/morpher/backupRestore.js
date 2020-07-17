@@ -59,7 +59,6 @@ const getEncryptedSeedFromMail = async (email) =>
       mode: "cors",
       cache: "default",
     };
-    let seed = false;
     let response = await fetch(
       config.BACKEND_ENDPOINT + "/index.php?endpoint=restoreEmailPassword",
       options

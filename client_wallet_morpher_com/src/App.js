@@ -5,12 +5,12 @@ import isIframe from "./morpher/isIframe";
 import config from "./config.json";
 import "./App.css";
 
-import { getKeystore }  from "./morpher/keystore";
+import { getKeystore } from "./morpher/keystore";
+import { sha256 } from "./morpher/cryptoFunctions";
 
 const {
   getEncryptedSeed,
   saveWalletEmailPassword,
-  restoreKeystoreFromMail,
   getKeystoreFromEncryptedSeed,
   backupFacebookSeed,
   changePasswordEncryptedSeed,
@@ -39,13 +39,18 @@ class App extends Component {
   async componentDidMount() {
     let encryptedKeystore = localStorage.getItem("encryptedSeed") || "";
     let email = localStorage.getItem("email") || "";
+    let password = window.sessionStorage.getItem("password") || "";
     if (encryptedKeystore !== "" && email !== "") {
       let loginType = localStorage.getItem("loginType") || "";
       this.setState({ loginType });
       this.setState({ hasWallet: true, walletEmail: email });
+      if (password !== "") {
+        this.setState({ walletPassword: password });
+        this.unlockWallet();
+      }
     }
 
-    var self = this
+    var self = this;
     if (isIframe()) {
       this.connection = connectToParent({
         parentOrigin: "http://localhost:3000",
@@ -66,8 +71,14 @@ class App extends Component {
           },
           isLoggedIn() {
             //return "ok"
-            if(self.state.isLoggedIn) return {isLoggedIn: true, unlockedWallet: self.state.unlockedWallet, walletEmail: self.state.walletEmail, accounts: self.state.accounts};
-            else return { isLoggedIn: false }
+            if (self.state.isLoggedIn)
+              return {
+                isLoggedIn: true,
+                unlockedWallet: self.state.unlockedWallet,
+                walletEmail: self.state.walletEmail,
+                accounts: self.state.accounts,
+              };
+            else return { isLoggedIn: false };
           },
           logout() {
             //maybe confirm?!
@@ -78,35 +89,50 @@ class App extends Component {
     }
   }
 
-  unlockWallet = async (e) => {
+  formSubmitUnlockWallet = async (e) => {
     e.preventDefault();
     let encryptedSeed = localStorage.getItem("encryptedSeed") || "";
-    let email = localStorage.getItem("email") || "";
+    let password = await sha256(this.state.walletPassword);
+    sessionStorage.setItem("password", password);
     if (encryptedSeed === "") {
       this.setState({ hasWallet: false });
     }
 
     encryptedSeed = JSON.parse(encryptedSeed);
-    try {
-      let keystore = getKeystoreFromEncryptedSeed(
-        encryptedSeed,
-        this.state.walletPassword
-      );
+    await this.unlockWallet(encryptedSeed, password);
 
-      if (isIframe()) {
-        //let parent = await this.connection.promise;
-        //await parent.onLogin(this.state.accounts[0], this.state.walletEmail)
-        (await this.connection.promise).onLogin(this.state.accounts[0], this.state.walletEmail);
-      }
+    if (isIframe()) {
+      //let parent = await this.connection.promise;
+      //await parent.onLogin(this.state.accounts[0], this.state.walletEmail)
+      (await this.connection.promise).onLogin(
+        this.state.accounts[0],
+        this.state.walletEmail
+      );
+    }
+  };
+
+  unlockWallet = async (encryptedSeed, password) => {
+    try {
+      let keystore = await getKeystoreFromEncryptedSeed(
+        encryptedSeed,
+        password
+      );
+      let accounts = await keystore.getAddresses();
+
       this.setState({
         hasWallet: true,
         unlockedWallet: true,
         keystore,
-        walletEmail: email,
+        accounts,
       });
     } catch (e) {
       console.error(e);
-      this.setState({ loginFailure: true });
+      this.setState({
+        loginFailure: true,
+        accounts: null,
+        hasWallet: true,
+        unlockedWallet: false,
+      });
     }
   };
 
@@ -120,33 +146,58 @@ class App extends Component {
        */
       let keystore = null;
       let created = false;
+      //double hashed passwords for recovery
+      let password = await sha256(this.state.walletPassword);
       try {
         console.log("trying to find keystore from mail");
-        let encryptedSeed = await getEncryptedSeedFromMail(this.state.walletEmail);
-        keystore = await getKeystoreFromEncryptedSeed(encryptedSeed, this.state.walletPassword);
+        let encryptedSeed = await getEncryptedSeedFromMail(
+          this.state.walletEmail
+        );
+        keystore = await getKeystoreFromEncryptedSeed(
+          encryptedSeed,
+          password
+        );
       } catch (e) {
         console.log("keystore not found in mail, creating a new one");
         /**
          * If no wallet was found, then create a new one (seed = false) otherwise use the decrypted seed from above
          */
-        keystore = await getKeystore(this.state.walletPassword);
+        keystore = await getKeystore(password);
         created = true;
       }
-      let encryptedSeed = await getEncryptedSeed(keystore, this.state.walletPassword);
+      let encryptedSeed = await getEncryptedSeed(
+        keystore,
+        password
+      );
 
-      window.localStorage.setItem("encryptedSeed", JSON.stringify(encryptedSeed));
+      window.localStorage.setItem(
+        "encryptedSeed",
+        JSON.stringify(encryptedSeed)
+      );
+      window.sessionStorage.setItem("password", password);
       window.localStorage.setItem("email", this.state.walletEmail);
       if (created) {
         saveWalletEmailPassword(this.state.walletEmail, encryptedSeed);
       }
+      let accounts = await keystore.getAddresses();
+      this.setState({
+        keystore,
+        accounts,
+        isLoggedIn: true,
+        hasWallet: true,
+        unlockedWallet: true,
+      });
+
       if (isIframe()) {
         //let parent = await this.connection.promise;
         //await parent.onLogin(this.state.accounts[0], this.state.walletEmail)
-        (await this.connection.promise).onLogin(this.state.accounts[0], this.state.walletEmail);
+        (await this.connection.promise).onLogin(
+          this.state.accounts[0],
+          this.state.walletEmail
+        );
       }
-      this.setState({keystore, isLoggedIn: true, hasWallet: true, unlockedWallet: true});
-    }catch (e) {
-      console.log(e)
+    } catch (e) {
+      console.log(e);
     }
   };
 
@@ -269,7 +320,7 @@ class App extends Component {
     ) : !this.state.unlockedWallet ? (
       <div>
         <h1>Unlock your Wallet</h1>
-        <form onSubmit={this.unlockWallet}>
+        <form onSubmit={this.formSubmitUnlockWallet}>
           <input
             type="password"
             name="walletPassword"

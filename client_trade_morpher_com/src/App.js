@@ -3,12 +3,11 @@
  */
 import React, { Component } from "react";
 import getWeb3 from "./getWeb3";
-import ZeroWallet from 'zerowallet-sdk';
+import ZeroWallet from "zerowallet-sdk";
 import "./App.css";
 //import { connectToChild } from 'penpal';
 
 class App extends Component {
-
   //connection;
 
   state = {
@@ -29,24 +28,23 @@ class App extends Component {
     this.zeroWallet = new ZeroWallet("ws://127.0.0.1:7545");
     //let web3 = await this.zeroWallet.getProvider();
 
-    let res = await this.zeroWallet.isLoggedIn()
-    if(res.isLoggedIn == true) {
-      this.setState({walletEmail: res.walletEmail})
-      this.setState({isAuthenticated: true})
+    let res = await this.zeroWallet.isLoggedIn();
+    if (res.isLoggedIn === true) {
+      this.setState({ walletEmail: res.walletEmail });
+      this.setState({ isAuthenticated: true });
     }
 
-    this.zeroWallet.onLogin((walletAddress, walletEmail)=>{
-      this.setState({walletEmail: walletEmail})
-      this.setState({walletAddress: walletAddress})
-      this.setState({isAuthenticated: true})
-    })
+    this.zeroWallet.onLogin((walletAddress, walletEmail) => {
+      this.setState({ walletEmail: walletEmail });
+      this.setState({ walletAddress: walletAddress });
+      this.setState({ isAuthenticated: true });
+    });
 
-    this.zeroWallet.onLogout(()=>{
-      this.setState({walletEmail: ""})
-      this.setState({walletAddress: ""})
-      this.setState({isAuthenticated: false})
-    })
-
+    this.zeroWallet.onLogout(() => {
+      this.setState({ walletEmail: "" });
+      this.setState({ walletAddress: "" });
+      this.setState({ isAuthenticated: false });
+    });
   }
 
   startWeb3Init = async (user_id, app_id) => {
@@ -63,23 +61,9 @@ class App extends Component {
     }
   };
 
-  sendEth = async() => {
-    console.log(this.zeroWallet)
-  }
-
-  logout = () => {
-    localStorage.clear();
-    //this.setState({ isAuthenticated: false, token: "", user: null, web3: null, hasWallet:false });
-    window.location.reload();
-  };
-
-
-
-  onFailure = (error) => {
-    alert(error);
-  };
-
-  sendEther = async (amount, to) => {
+  sendEth = async () => {
+    let amount = 1;
+    let to = "0x687b9F4D948D5151b3F28e747773063b1f0a4a6F";
     const { web3, accounts } = this.state;
     let result = await web3.eth.sendTransaction({
       from: accounts[0],
@@ -89,11 +73,35 @@ class App extends Component {
     console.log(result);
   };
 
+  logout = () => {
+    localStorage.clear();
+    //this.setState({ isAuthenticated: false, token: "", user: null, web3: null, hasWallet:false });
+    window.location.reload();
+  };
+
+  onFailure = (error) => {
+    alert(error);
+  };
 
 
   render() {
-    let content = this.state.isAuthenticated ? (<div><h2>Hi {this.state.walletEmail}</h2> <div><button onClick={this.sendEth}>Send eth</button></div></div>) : (<div>Not logged in!</div>);
-    return <div className="App"><h1>Welcome to the trade engine!</h1><br />{content}</div>;
+    let content = this.state.isAuthenticated ? (
+      <div>
+        <h2>Hi {this.state.walletEmail}</h2>{" "}
+        <div>
+          <button onClick={this.sendEth}>Send eth</button>
+        </div>
+      </div>
+    ) : (
+      <div>Not logged in!</div>
+    );
+    return (
+      <div className="App">
+        <h1>Welcome to the trade engine!</h1>
+        <br />
+        {content}
+      </div>
+    );
   }
 }
 
