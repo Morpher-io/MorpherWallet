@@ -7,7 +7,7 @@
 
 
 import Web3ProviderEngine from "web3-provider-engine";
-import HookedWalletSubprovider from "web3-provider-engine/subproviders/hooked-wallet-ethtx";
+import HookedWalletSubprovider from "web3-provider-engine/subproviders/hooked-wallet";
 import WebsockerSubprovider from 'web3-provider-engine/subproviders/websocket';
 import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
 //import Web3Subprovider from 'web3-provider-engine/subproviders/web3';
@@ -157,13 +157,13 @@ export default class ZeroWallet {
         getAccounts: async cb => {
           const widgetCommunication = (await this.widget).communication;
           const result = await widgetCommunication.getAccounts();
-          console.log(result);
           cb(null, result);
         },
         signTransaction: async (txParams, cb) => {
           const widgetCommunication = (await this.widget).communication;
-          const { error, result } = await widgetCommunication.signTransaction(txParams);
-          cb(error, result);
+          const result = await widgetCommunication.signTransaction(txParams);
+          console.log(result);
+          cb(result);
         },
         /*
         signMessage: async (msgParams, cb) => {
