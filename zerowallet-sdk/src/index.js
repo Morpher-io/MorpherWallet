@@ -162,8 +162,7 @@ export default class ZeroWallet {
         signTransaction: async (txParams, cb) => {
           const widgetCommunication = (await this.widget).communication;
           const result = await widgetCommunication.signTransaction(txParams);
-          console.log(result);
-          cb(result);
+          return result;
         },
         /*
         signMessage: async (msgParams, cb) => {

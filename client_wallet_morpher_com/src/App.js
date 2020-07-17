@@ -62,15 +62,22 @@ class App extends Component {
               return [];
             }
           },
-          signTransaction(txObj) {
-            return new Promise((resolve, reject) => {
+          async signTransaction(txObj) {
+            let signedTx = await new Promise((resolve, reject) => {
               //see if we are logged in?!
               try {
-                self.state.keystore.signTransaction(txObj, resolve);
+                self.state.keystore.signTransaction(txObj, function(err, result) {
+                  if(err) {
+                    reject(err);
+                  }
+                  resolve(result);
+                });
               } catch (e) {
                 reject(e);
               }
             });
+            console.log(signedTx);
+            return signedTx;
           },
           isLoggedIn() {
             //return "ok"
