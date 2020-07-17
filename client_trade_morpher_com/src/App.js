@@ -32,6 +32,8 @@ class App extends Component {
     if (res.isLoggedIn === true) {
       this.setState({ walletEmail: res.walletEmail });
       let web3 = await getWeb3();
+      let accounts = await web3.eth.getAccounts();
+      console.log(accounts);
       this.setState({ isAuthenticated: true, web3 });
     }
 
@@ -39,7 +41,9 @@ class App extends Component {
       this.setState({ walletEmail: walletEmail });
       this.setState({ walletAddress: walletAddress });
       let web3 = await getWeb3();
-      console.log(web3);
+      
+      let accounts = await web3.eth.getAccounts();
+      console.log(accounts);
       this.setState({ isAuthenticated: true, web3 });
     });
 
@@ -67,9 +71,9 @@ class App extends Component {
   sendEth = async () => {
     let amount = 1;
     let to = "0x687b9F4D948D5151b3F28e747773063b1f0a4a6F";
-    const { web3, accounts } = this.state;
+    const { web3, walletAddress } = this.state;
     let result = await web3.eth.sendTransaction({
-      from: accounts[0],
+      from: walletAddress,
       to,
       value: amount * 1000000000000000000,
     });

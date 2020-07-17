@@ -7,8 +7,10 @@
 
 
 import Web3ProviderEngine from "web3-provider-engine";
-import HookedWalletSubprovider from "web3-provider-engine/subproviders/hooked-wallet";
+import HookedWalletSubprovider from "web3-provider-engine/subproviders/hooked-wallet-ethtx";
 import WebsockerSubprovider from 'web3-provider-engine/subproviders/websocket';
+import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
+//import Web3Subprovider from 'web3-provider-engine/subproviders/web3';
 import styles from "./styles";
 import onWindowLoad from "./onWindowLoad";
 import { connectToChild } from 'penpal';
@@ -148,13 +150,15 @@ export default class ZeroWallet {
     //engine.addProvider(new FilterSubprovider());
     //engine.addProvider(new NonceSubprovider());
     engine.addProvider(
-      //new RpcSubprovider({
-      //  rpcUrl: "http://127.0.0.1:7545",
-      //})
+    //  new RpcSubprovider({
+    //    rpcUrl: "http://127.0.0.1:7545",
+    //  })
       new WebsockerSubprovider({
         rpcUrl: this.wsRPCEndpointUrl
       })
     );
+
+
    
     engine.addProvider(
       new HookedWalletSubprovider({

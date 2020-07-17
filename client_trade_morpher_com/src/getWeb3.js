@@ -1,12 +1,10 @@
 import Web3 from "web3";
 
-const getWeb3 = () =>
+const getWeb3 = () => 
   new Promise((resolve, reject) => {
     // Wait for loading completion to avoid race conditions with web3 injection timing.
-    window.addEventListener("load", async () => {
-      console.log("bla");
+    if (['loaded', 'interactive', 'complete'].indexOf(document.readyState) > -1) {
       const web3 = new Web3(window.zerowallet.getProvider());
-      console.log("bluub");
       resolve(web3);
        
       // // Modern dapp browsers...
@@ -47,7 +45,7 @@ const getWeb3 = () =>
       //   console.log("No web3 instance injected, using Local web3.");
       //   resolve(web3);
       // }
-    });
+    };
   });
 
 export default getWeb3;
