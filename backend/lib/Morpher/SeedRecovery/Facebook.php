@@ -10,10 +10,13 @@ class Facebook
      * @param $encryptedSeed is the seed encrypted with the user_id
      * @param $originalSignupEmail is the mail that might differ from the facebook email address, originally used to signup to Morpher (email/password signup with additional facebook recovery later added). If false, then facebook was used to signup to morpher in the first place
      */
-    static function saveAndOverride($accessToken, $key, $encryptedSeed, $originalSignupEmail = false)
+    static function saveAndOverride($key, $encryptedSeed, $originalSignupEmail = false)
     {
         $db = \Morpher\DbConnector::getInstance();
 
+        /**
+         * WE're not checking the seed or user_token or anything else that let's us access and decrypt the key
+        
         // Call Facebook API
         $facebook = new \Facebook\Facebook([
             'app_id'      => getenv("FACEBOOK_APP_ID"),
@@ -28,7 +31,7 @@ class Facebook
         if (!$originalSignupEmail) {
             $originalSignupEmail = $facebook_user_info["email"];
         }
-
+         */
         $result = $db->connection->query("SELECT * FROM `User` WHERE user_email = " . $db->escapeString($originalSignupEmail));
         $user_id = 0;
         if ($result->num_rows > 0) {
@@ -39,24 +42,12 @@ class Facebook
 
             $user_id = $db->connection->insert_id;
         }
-
-        /**
-         * validate key
-         */
-        $validateKey = hash("sha256", getenv("FACEBOOK_APP_ID") . $facebook_user_info["id"]);
-        if ($validateKey == $key) {
-
-            $db->connection->query("INSERT INTO Recovery (recoverytype_idfk, user_idfk, recovery_encryptedSeed, recovery_key) VALUES (2, $user_id, " . $db->escapeString(json_encode($encryptedSeed)) . "," . $db->escapeString($key) . ")");
-
-            $recovery_id = $db->connection->insert_id;
-
-            return ["recovery_id" => $recovery_id];
-        } else {
-            return ["error" => "Key isn't validated, aborting insert"];
-        }
+        $db->connection->query("INSERT INTO Recovery (recoverytype_idfk, user_idfk, recovery_encryptedSeed, recovery_key) VALUES (2, $user_id, " . $db->escapeString(json_encode($encryptedSeed)) . "," . $db->escapeString($key) . ")");
+        $recovery_id = $db->connection->insert_id;
+        return ["recovery_id" => $recovery_id];
     }
 
-    static function getEncryptedSeed($accessToken, $key)
+    static function getEncryptedSeed($accessToken)
     {
         $db = \Morpher\DbConnector::getInstance();
 
@@ -75,12 +66,11 @@ class Facebook
         /**
          * validate key
          */
-        $validateKey = hash("sha256", getenv("FACEBOOK_APP_ID") . $facebook_user_info["id"]);
-        if ($validateKey == $key) {
-            $result = $db->connection->query("SELECT * FROM `Recovery` WHERE recovery_key = " . $db->escapeString($key). " AND recoverytype_idfk = 2");
-            if ($result->num_rows > 0) {
-                return $result->fetch_object()->recovery_encryptedSeed;
-            }
+        $key = hash("sha256", getenv("FACEBOOK_APP_ID") . $facebook_user_info["id"]);
+
+        $result = $db->connection->query("SELECT * FROM `Recovery` WHERE recovery_key = " . $db->escapeString($key) . " AND recoverytype_idfk = 2");
+        if ($result->num_rows > 0) {
+            return $result->fetch_object()->recovery_encryptedSeed;
         }
 
         return false;
