@@ -1,35 +1,64 @@
-const getKeystore = require("./keystore");
+const { getKeystore }  = require("./keystore");
 const config = require("./../config.json");
 const { cryptoEncrypt, cryptoDecrypt, sha256 } = require("./cryptoFunctions");
 
+const changePasswordEncryptedSeed = async (
+  encryptedSeed,
+  oldPassword,
+  newPassword
+) => {
+  let seed = await cryptoDecrypt(
+    oldPassword,
+    encryptedSeed.ciphertext,
+    encryptedSeed.iv,
+    encryptedSeed.salt
+  );
+  return await cryptoEncrypt(newPassword, seed);
+};
+
+const getKeystoreFromEncryptedSeed = async (encryptedSeed, password) =>
+  new Promise(async (resolve, reject) => {
+    try {
+      let seed = await cryptoDecrypt(
+        password,
+        encryptedSeed.ciphertext,
+        encryptedSeed.iv,
+        encryptedSeed.salt
+      );
+      let keystore = await getKeystore(password, seed);
+      resolve(keystore);
+    } catch (e) {
+      reject(e);
+    }
+  });
 
 const getEncryptedSeed = async (keystore, password) => {
-    let pwDerivedKey = await new Promise((resolve, reject) => {
-      keystore.keyFromPassword(password, (err, key) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(key);
-      });
+  let pwDerivedKey = await new Promise((resolve, reject) => {
+    keystore.keyFromPassword(password, (err, key) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(key);
     });
-  
-    let encryptedSeed = await cryptoEncrypt(
-      password,
-      await keystore.getSeed(pwDerivedKey)
-    );
-    return encryptedSeed;
-  };
+  });
 
-const restoreKeystoreFromMail = async (email, password) =>  {
+  let encryptedSeed = await cryptoEncrypt(
+    password,
+    await keystore.getSeed(pwDerivedKey)
+  );
+  return encryptedSeed;
+};
+
+const getEncryptedSeedFromMail = async (email) =>
   new Promise(async (resolve, reject) => {
-    let key = sha256(email);
+    let key = await sha256(email);
+
     let options = {
       method: "POST",
       body: JSON.stringify({ key: key }),
       mode: "cors",
       cache: "default",
     };
-    let seed = false;
     let response = await fetch(
       config.BACKEND_ENDPOINT + "/index.php?endpoint=restoreEmailPassword",
       options
@@ -44,28 +73,13 @@ const restoreKeystoreFromMail = async (email, password) =>  {
       /**
        * Wallet was found on server, attempting to decrypt with the password
        */
-      let encryptedSeedObject = JSON.parse(responseBody);
-      try {
-        seed = await cryptoDecrypt(
-          password,
-          encryptedSeedObject.ciphertext,
-          encryptedSeedObject.iv,
-          encryptedSeedObject.salt
-        );
-        let keystore = getKeystore(password, seed);
-        resolve(keystore);
-      } catch (e) {
-        reject(e);
-      }
+      resolve(JSON.parse(responseBody));
     }
     reject("seed not found");
   });
-}
-
-
 
 const saveWalletEmailPassword = async (userEmail, encryptedSeed) => {
-  let key = sha256(userEmail);
+  let key = await sha256(userEmail);
   let options = {
     method: "POST",
     body: JSON.stringify({
@@ -85,8 +99,65 @@ const saveWalletEmailPassword = async (userEmail, encryptedSeed) => {
   return response;
 };
 
+const backupFacebookSeed = async (userEmail, userid, encryptedSeed) =>
+  new Promise(async (resolve, reject) => {
+    let key = await sha256(config.FACEBOOK_APP_ID + userid);
+    const options = {
+      method: "POST",
+      body: JSON.stringify({
+        seed: encryptedSeed,
+        key: key,
+        email: userEmail,
+      }),
+      mode: "cors",
+      cache: "default",
+    };
+    try {
+      fetch(
+        config.BACKEND_ENDPOINT + "/index.php?endpoint=saveFacebook",
+        options
+      ).then((r) => {
+        r.json().then((response) => {
+          resolve(response);
+        });
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+
+const recoverFacebookSeed = async (accessToken) =>
+  new Promise((resolve, reject) => {
+    const options = {
+      method: "POST",
+      body: JSON.stringify({ accessToken: accessToken }),
+      mode: "cors",
+      cache: "default",
+    };
+    fetch(
+      config.BACKEND_ENDPOINT + "/index.php?endpoint=restoreFacebook",
+      options
+    ).then((r) => {
+      r.json().then(async (responseBody) => {
+        if (responseBody !== false) {
+          //initiate recovery
+          let encryptedSeed = JSON.parse(responseBody);
+          resolve(encryptedSeed);
+        } else {
+          reject(
+            "Your account wasn't found with Facebook recovery, create one with username and password first"
+          );
+        }
+      });
+    });
+  });
+
 module.exports = {
   getEncryptedSeed,
   saveWalletEmailPassword,
-  restoreKeystoreFromMail,
+  getKeystoreFromEncryptedSeed,
+  changePasswordEncryptedSeed,
+  backupFacebookSeed,
+  recoverFacebookSeed,
+  getEncryptedSeedFromMail,
 };

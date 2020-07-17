@@ -9,6 +9,8 @@
 import Web3ProviderEngine from "web3-provider-engine";
 import HookedWalletSubprovider from "web3-provider-engine/subproviders/hooked-wallet";
 import WebsockerSubprovider from 'web3-provider-engine/subproviders/websocket';
+import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
+//import Web3Subprovider from 'web3-provider-engine/subproviders/web3';
 import styles from "./styles";
 import onWindowLoad from "./onWindowLoad";
 import { connectToChild } from 'penpal';
@@ -35,6 +37,7 @@ onWindowLoad().then(() => {
   }
   document.body.appendChild(tempCachingIFrame);
 });
+let iframeLoadedFired = false;
 
 export default class ZeroWallet {
   
@@ -77,9 +80,21 @@ export default class ZeroWallet {
   }
 
   async isLoggedIn() {
-    console.log("hello");
+    await this.iframeLoaded();
     const widgetCommunication = (await this.widget).communication;
     return widgetCommunication.isLoggedIn();
+  }
+
+  async iframeLoaded() {
+    return new Promise((resolve) => {
+      if(iframeLoadedFired) {
+        resolve();
+      }
+      tempCachingIFrame.onload = () => {
+        iframeLoadedFired = true;
+        resolve();
+      }
+    });
   }
 
   async _initWidget() {
@@ -134,29 +149,20 @@ export default class ZeroWallet {
     //engine.addProvider(new SubscriptionsSubprovider());
     //engine.addProvider(new FilterSubprovider());
     //engine.addProvider(new NonceSubprovider());
-    engine.addProvider(
-      //new RpcSubprovider({
-      //  rpcUrl: "http://127.0.0.1:7545",
-      //})
-      new WebsockerSubprovider({
-        rpcUrl: this.wsRPCEndpointUrl
-      })
-    );
+
+
    
     engine.addProvider(
       new HookedWalletSubprovider({
         getAccounts: async cb => {
           const widgetCommunication = (await this.widget).communication;
-          const { error, result } = await widgetCommunication.getAccounts();
-          if (!error && result) {
-            this._selectedAddress = result[0];
-          }
-          cb(error, result);
+          const result = await widgetCommunication.getAccounts();
+          cb(null, result);
         },
         signTransaction: async (txParams, cb) => {
           const widgetCommunication = (await this.widget).communication;
-          const { error, result } = await widgetCommunication.signTransaction(txParams);
-          cb(error, result);
+          const result = await widgetCommunication.signTransaction(txParams);
+          return result;
         },
         /*
         signMessage: async (msgParams, cb) => {
@@ -193,6 +199,16 @@ export default class ZeroWallet {
         */
       }),
     );
+
+    
+    engine.addProvider(
+      //  new RpcSubprovider({
+      //    rpcUrl: "http://127.0.0.1:7545",
+      //  })
+        new WebsockerSubprovider({
+          rpcUrl: this.wsRPCEndpointUrl
+        })
+      );
 
    
 

@@ -15,10 +15,10 @@ switch ($_GET['endpoint']) {
         $result = \Morpher\SeedRecovery\Password::getEncryptedSeed($data->key);
         break;
     case 'saveFacebook':
-        $result = \Morpher\SeedRecovery\Facebook::saveAndOverride($data->accessToken, $data->key, $data->seed, $data->email);
+        $result = \Morpher\SeedRecovery\Facebook::saveAndOverride($data->key, $data->seed, $data->email);
         break;
     case 'restoreFacebook':
-        $result = \Morpher\SeedRecovery\Facebook::getEncryptedSeed($data->accessToken, $data->key);
+        $result = \Morpher\SeedRecovery\Facebook::getEncryptedSeed($data->accessToken);
         break;
     default:
         $result = false;
