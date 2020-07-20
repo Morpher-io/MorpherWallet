@@ -111,7 +111,7 @@ class App extends Component {
     encryptedSeed = JSON.parse(encryptedSeed);
     await this.unlockWallet(encryptedSeed, password);
 
-   
+
   };
 
   unlockWallet = async (encryptedSeed, password) => {
@@ -222,6 +222,11 @@ class App extends Component {
     window.location.reload();
   };
 
+  close = async () => {
+    console.log("closed");
+    //(await this.connection.promise).onClose();
+  }
+
   facebookResponseAddRecovery = async (response) => {
     let encryptedSeedFromPassword = localStorage.getItem("encryptedSeed") || "";
 
@@ -311,6 +316,7 @@ class App extends Component {
             placeholder="Strong Password"
             value={this.state.walletPassword}
             onChange={this.handleInputChange}
+            className="Input"
           />
           <input type="submit" value="Login / Create new Wallet" />
         </form>
@@ -367,6 +373,9 @@ class App extends Component {
         <div>
           <button onClick={this.logout} className="button">
             Log out
+          </button>
+          <button onClick={this.close} className="button">
+              Close
           </button>
         </div>
         {!this.state.hasWalletRecovery ? (
