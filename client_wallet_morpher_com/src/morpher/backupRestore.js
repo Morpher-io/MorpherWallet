@@ -99,7 +99,34 @@ const saveWalletEmailPassword = async (userEmail, encryptedSeed) => {
   return response;
 };
 
-const backupFacebookSeed = async (userEmail, userid, encryptedSeed) =>
+const backupGoogleSeed = async (userEmail, userid, encryptedSeed) =>
+  new Promise(async (resolve, reject) => {
+    let key = await sha256(config.GOOGLE_APP_ID + userid);
+    const options = {
+      method: "POST",
+      body: JSON.stringify({
+        seed: encryptedSeed,
+        key: key,
+        email: userEmail,
+      }),
+      mode: "cors",
+      cache: "default",
+    };
+    try {
+      fetch(
+        config.BACKEND_ENDPOINT + "/index.php?endpoint=saveGoogle",
+        options
+      ).then((r) => {
+        r.json().then((response) => {
+          resolve(response);
+        });
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+
+  const backupFacebookSeed = async (userEmail, userid, encryptedSeed) =>
   new Promise(async (resolve, reject) => {
     let key = await sha256(config.FACEBOOK_APP_ID + userid);
     const options = {
@@ -160,4 +187,5 @@ module.exports = {
   backupFacebookSeed,
   recoverFacebookSeed,
   getEncryptedSeedFromMail,
+  backupGoogleSeed,
 };

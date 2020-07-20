@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import FacebookLogin from "react-facebook-login";
+import GoogleBtn from './components/GoogleBtn';
 import { connectToParent } from "penpal";
 import isIframe from "./morpher/isIframe";
 import config from "./config.json";
@@ -235,8 +236,8 @@ class App extends Component {
     }
 
     let encryptedSeedFromFacebookUserID = await changePasswordEncryptedSeed(
-      encryptedSeedFromPassword,
-      this.state.walletPassword,
+      JSON.parse(encryptedSeedFromPassword),
+      window.sessionStorage.getItem("password"),
       response.userID
     );
     try {
@@ -358,6 +359,7 @@ class App extends Component {
               callback={this.facebookRecovery}
               textButton="Recover your Wallet"
             />
+            
           </div>
         ) : (
           <div></div>
@@ -365,6 +367,7 @@ class App extends Component {
       </div>
     ) : (
       <div>
+        <h1>Welcome!</h1>
         <h3>You are successfully logged in!</h3>
 
         <div>
@@ -380,7 +383,7 @@ class App extends Component {
         </div>
         {!this.state.hasWalletRecovery ? (
           <div>
-            <h2>Add Password Recovery</h2>
+            <h3>Add Password Recovery</h3>
             <br />
             <FacebookLogin
               appId={config.FACEBOOK_APP_ID}
@@ -389,6 +392,10 @@ class App extends Component {
               callback={this.facebookResponseAddRecovery}
               textButton="Add Facebook Recovery"
             />
+            
+            <br />
+            
+            <GoogleBtn walletEmail={this.state.walletEmail} walletPassword={this.state.walletPassword} />
           </div>
         ) : (
           <div></div>
