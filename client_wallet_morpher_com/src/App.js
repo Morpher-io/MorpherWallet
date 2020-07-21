@@ -167,6 +167,10 @@ class App extends Component {
         let encryptedSeed = await getEncryptedSeedFromMail(
           this.state.walletEmail
         );
+        window.localStorage.setItem(
+          "encryptedSeed",
+          JSON.stringify(encryptedSeed)
+        );
         console.log("found keystore, trying to unlock");
 
         return this.unlockWallet(encryptedSeed, password);
@@ -309,7 +313,7 @@ class App extends Component {
         newPasswordForLocalStorage
       );
       saveWalletEmailPassword(this.state.walletEmail, encryptedSeedPassword);
-      window.localStorage.setItem("encryptedSeed", encryptedSeedPassword);
+      window.localStorage.setItem("encryptedSeed", JSON.stringify(encryptedSeedPassword));
       window.localStorage.setItem("email", this.state.walletEmail);
       this.setState({
         hasWalletRecovery: true,
@@ -361,6 +365,7 @@ class App extends Component {
         </form>
         {this.state.loginFailure ? (
           <div>
+            <b>The Password you provided is invalid!</b>
             <br />
             <FacebookLogin
               appId={config.FACEBOOK_APP_ID}
@@ -389,6 +394,9 @@ class App extends Component {
         </form>
         {this.state.loginFailure ? (
           <div>
+            <br />
+            <b>The Password you provided is invalid!</b>
+            <br />
             <br />
             <FacebookLogin
               appId={config.FACEBOOK_APP_ID}

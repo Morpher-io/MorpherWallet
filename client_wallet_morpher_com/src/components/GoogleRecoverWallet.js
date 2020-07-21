@@ -7,8 +7,11 @@ import {
   saveWalletEmailPassword,
 } from "../morpher/backupRestore";
 
-import sha256 from "../morpher/cryptoFunctions";
+import { sha256 } from "../morpher/cryptoFunctions";
 
+/**
+ * This is used to recover from password loss via Google
+ */
 class GoogleRecoverWallet extends Component {
   constructor(props) {
     super(props);
@@ -17,7 +20,7 @@ class GoogleRecoverWallet extends Component {
       isLogined: false,
       loginButtonText: props.loginButtonText || "Recover Wallet with Google",
       logoutButtonText: props.loginButtonText || "Remove Google Recovery",
-      walletEmail: props.walletEmail
+      walletEmail: props.walletEmail,
     };
 
     this.login = this.login.bind(this);
@@ -28,32 +31,32 @@ class GoogleRecoverWallet extends Component {
 
   async login(response) {
     if (response.accessToken) {
-
-    try {
-      let encryptedSeedFacebook = await recoverGoogleSeed(
-        response.accessToken
-      );
-      var newPasswordForLocalStorage = prompt(
-        "Enter a new password for you local vault",
-        "Super Strong Pass0wrd!"
-      );
-      //double hashing the password
-      newPasswordForLocalStorage = await sha256(newPasswordForLocalStorage);
-      let encryptedSeedPassword = await changePasswordEncryptedSeed(
-        encryptedSeedFacebook,
-        response.userID,
-        newPasswordForLocalStorage
-      );
-      saveWalletEmailPassword(this.state.walletEmail, encryptedSeedPassword);
-      window.localStorage.setItem("encryptedSeed", encryptedSeedPassword);
-      window.sessionStorage.setItem("password",newPasswordForLocalStorage);
+      try {
+        let encryptedSeedFacebook = await recoverGoogleSeed(
+          response.accessToken
+        );
+        var newPasswordForLocalStorage = prompt(
+          "Enter a new password for you local vault",
+          "Super Strong Pass0wrd!"
+        );
+        //double hashing the password
+        newPasswordForLocalStorage = await sha256(newPasswordForLocalStorage);
+        let encryptedSeedPassword = await changePasswordEncryptedSeed(
+          encryptedSeedFacebook,
+          response.profileObj.googleId,
+          newPasswordForLocalStorage
+        );
+        saveWalletEmailPassword(this.state.walletEmail, encryptedSeedPassword);
+        window.localStorage.setItem("encryptedSeed", JSON.stringify(encryptedSeedPassword));
+        window.sessionStorage.setItem("password", newPasswordForLocalStorage);
+        this.props.recoverySuccessful();
+      } catch (e) {
+        console.log(e);
+        alert(
+          "Your account wasn't found with Google recovery, create one with username and password first"
+        );
+      }
       
-    } catch (e) {
-      alert(
-        "Your account wasn't found with Google recovery, create one with username and password first"
-      );
-    }
-      console.log(response);
     }
   }
 
@@ -76,14 +79,14 @@ class GoogleRecoverWallet extends Component {
   render() {
     return (
       <div>
-          <GoogleLogin
-            clientId={config.GOOGLE_APP_ID}
-            buttonText={this.state.loginButtonText}
-            onSuccess={this.login}
-            onFailure={this.handleLoginFailure}
-            cookiePolicy={"single_host_origin"}
-            responseType="code,token"
-          />
+        <GoogleLogin
+          clientId={config.GOOGLE_APP_ID}
+          buttonText={this.state.loginButtonText}
+          onSuccess={this.login}
+          onFailure={this.handleLoginFailure}
+          cookiePolicy={"single_host_origin"}
+          responseType="code,token"
+        />
       </div>
     );
   }

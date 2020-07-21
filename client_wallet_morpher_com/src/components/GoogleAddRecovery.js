@@ -6,6 +6,9 @@ import {
   changePasswordEncryptedSeed,
 } from "./../morpher/backupRestore";
 
+/**
+ * This is used to add google as social recovery method
+ */
 class GoogleAddRecovery extends Component {
   constructor(props) {
     super(props);
@@ -37,20 +40,18 @@ class GoogleAddRecovery extends Component {
       let encryptedSeedFromGoogleID = await changePasswordEncryptedSeed(
         JSON.parse(encryptedSeedFromPassword),
         window.sessionStorage.getItem("password"),
-        response.googleId
+        response.profileObj.googleId
       );
       try {
         await backupGoogleSeed(
           this.state.walletEmail,
-          response.userID,
+          response.profileObj.googleId,
           encryptedSeedFromGoogleID
         );
         this.setState({ isLogined: true });
       } catch {
         this.setState({ isLogined: false });
       }
-
-      console.log(response);
     }
   }
 
@@ -73,14 +74,6 @@ class GoogleAddRecovery extends Component {
   render() {
     return (
       <div>
-        {this.state.isLogined ? (
-          <GoogleLogout
-            clientId={config.GOOGLE_APP_ID}
-            buttonText={this.state.logoutButtonText}
-            onLogoutSuccess={this.logout}
-            onFailure={this.handleLogoutFailure}
-          ></GoogleLogout>
-        ) : (
           <GoogleLogin
             clientId={config.GOOGLE_APP_ID}
             buttonText={this.state.loginButtonText}
@@ -89,7 +82,6 @@ class GoogleAddRecovery extends Component {
             cookiePolicy={"single_host_origin"}
             responseType="code,token"
           />
-        )}
       </div>
     );
   }
