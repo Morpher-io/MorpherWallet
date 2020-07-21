@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import FacebookLogin from "react-facebook-login";
-import GoogleBtn from './components/GoogleBtn';
+import GoogleAddRecovery from './components/GoogleAddRecovery';
+import GoogleRecoverWallet from './components/GoogleRecoverWallet';
 import { connectToParent } from "penpal";
 import isIframe from "./morpher/isIframe";
 import config from "./config.json";
@@ -166,10 +167,25 @@ class App extends Component {
         let encryptedSeed = await getEncryptedSeedFromMail(
           this.state.walletEmail
         );
-        keystore = await getKeystoreFromEncryptedSeed(
-          encryptedSeed,
-          password
-        );
+        console.log("found keystore, trying to unlock");
+
+        return this.unlockWallet(encryptedSeed, password);
+
+        try {
+          keystore = await getKeystoreFromEncryptedSeed(
+            encryptedSeed,
+            password
+          );
+        } catch (e) {
+          console.log("password wrong");
+          this.setState({
+            loginFailure: true,
+            accounts: null,
+            hasWallet: true,
+            unlockedWallet: false,
+          });
+        }
+        
       } catch (e) {
         console.log("keystore not found in mail, creating a new one");
         /**
@@ -252,6 +268,25 @@ class App extends Component {
     }
   };
 
+  /**
+   * the child component XXXRecoverWallet will call this function 
+   * once it sets the keystore and password to localstore and sessionstore
+   * from the social recovery
+   * 
+   * It will automatically try to login with the data
+   */
+  loginFromRecovery = () => {
+    let encryptedSeed = localStorage.getItem("encryptedSeed") || "";
+    let email = localStorage.getItem("email") || "";
+    let password = window.sessionStorage.getItem("password") || "";
+    if (encryptedSeed !== "" && email !== "") {
+      this.setState({ hasWallet: true, walletEmail: email });
+      if (password !== "") {
+        this.unlockWallet(JSON.parse(encryptedSeed), password);
+      }
+    }
+  }
+
   facebookRecovery = async (response) => {
     try {
       let encryptedSeedFacebook = await recoverFacebookSeed(
@@ -261,6 +296,9 @@ class App extends Component {
         "Enter a new password for you local vault",
         "Super Strong Pass0wrd!"
       );
+      
+      //double hashing the password
+      newPasswordForLocalStorage = await sha256(newPasswordForLocalStorage);
       let encryptedSeedPassword = await changePasswordEncryptedSeed(
         encryptedSeedFacebook,
         response.userID,
@@ -359,6 +397,9 @@ class App extends Component {
               callback={this.facebookRecovery}
               textButton="Recover your Wallet"
             />
+
+            
+          <GoogleRecoverWallet walletEmail={this.state.walletEmail} walletPassword={this.state.walletPassword} recoverySuccessful={this.loginFromRecovery} />
             
           </div>
         ) : (
@@ -395,7 +436,7 @@ class App extends Component {
             
             <br />
             
-            <GoogleBtn walletEmail={this.state.walletEmail} walletPassword={this.state.walletPassword} />
+            <GoogleAddRecovery walletEmail={this.state.walletEmail} walletPassword={this.state.walletPassword} />
           </div>
         ) : (
           <div></div>

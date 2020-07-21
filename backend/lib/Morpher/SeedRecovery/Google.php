@@ -13,7 +13,7 @@ class Google
     {
         $db = \Morpher\DbConnector::getInstance();
 
-       
+
         $result = $db->connection->query("SELECT * FROM `User` WHERE user_email = " . $db->escapeString($originalSignupEmail));
         $user_id = 0;
         if ($result->num_rows > 0) {
@@ -34,26 +34,30 @@ class Google
         $db = \Morpher\DbConnector::getInstance();
 
         // Call Facebook API
-        $facebook = new \Facebook\Facebook([
-            'app_id'      => getenv("FACEBOOK_APP_ID"),
-            'app_secret'     => getenv("FACEBOOK_APP_SECRET"),
-            'default_graph_version'  => 'v7.0'
-        ]);
+        $client = new \Google_Client(array('application_name' => 'ZeroWallet-Recoverable', 'client_id' => getenv("GOOGLE_APP_ID"), 'client_secret' => getenv("GOOGLE_SECRET_ID")));
+        $client->setAccessToken($accessToken);
+        //if (!$client->isAccessTokenExpired()) {
+        $client->setScopes(array(
+            "https://www.googleapis.com/auth/plus.login",
+            "https://www.googleapis.com/auth/userinfo.email",
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "https://www.googleapis.com/auth/plus.me"
+        ));
+        $oAuth = new \Google_Service_Oauth2($client);
+        $userData = $oAuth->userinfo_v2_me->get();
+        error_log("id: " . $userData['id']);
 
-        $facebook->setDefaultAccessToken($accessToken);
+        $key = hash("sha256", getenv("GOOGLE_APP_ID") . $userData["id"]);
 
-        $graph_response = $facebook->get("/me?fields=name,email", $accessToken);
-        $facebook_user_info = $graph_response->getGraphUser();
-
-        /**
-         * validate key
-         */
-        $key = hash("sha256", getenv("FACEBOOK_APP_ID") . $facebook_user_info["id"]);
-
-        $result = $db->connection->query("SELECT * FROM `Recovery` WHERE recovery_key = " . $db->escapeString($key) . " AND recoverytype_idfk = 2");
+        $result = $db->connection->query("SELECT * FROM `Recovery` WHERE recovery_key = " . $db->escapeString($key) . " AND recoverytype_idfk = 3");
         if ($result->num_rows > 0) {
             return $result->fetch_object()->recovery_encryptedSeed;
         }
+
+        //}
+
+
+
 
         return false;
     }

@@ -6,7 +6,7 @@ import {
   changePasswordEncryptedSeed,
 } from "./../morpher/backupRestore";
 
-class GoogleBtn extends Component {
+class GoogleAddRecovery extends Component {
   constructor(props) {
     super(props);
 
@@ -95,4 +95,4 @@ class GoogleBtn extends Component {
   }
 }
 
-export default GoogleBtn;
+export default GoogleAddRecovery;

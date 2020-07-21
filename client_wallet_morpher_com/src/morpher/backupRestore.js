@@ -153,7 +153,7 @@ const backupGoogleSeed = async (userEmail, userid, encryptedSeed) =>
     }
   });
 
-const recoverFacebookSeed = async (accessToken) =>
+  const recoverFacebookSeed = async (accessToken) =>
   new Promise((resolve, reject) => {
     const options = {
       method: "POST",
@@ -178,6 +178,31 @@ const recoverFacebookSeed = async (accessToken) =>
       });
     });
   });
+  const recoverGoogleSeed = async (accessToken) =>
+    new Promise((resolve, reject) => {
+      const options = {
+        method: "POST",
+        body: JSON.stringify({ accessToken: accessToken }),
+        mode: "cors",
+        cache: "default",
+      };
+      fetch(
+        config.BACKEND_ENDPOINT + "/index.php?endpoint=restoreGoogle",
+        options
+      ).then((r) => {
+        r.json().then(async (responseBody) => {
+          if (responseBody !== false) {
+            //initiate recovery
+            let encryptedSeed = JSON.parse(responseBody);
+            resolve(encryptedSeed);
+          } else {
+            reject(
+              "Your account wasn't found with Google recovery, create one with username and password first"
+            );
+          }
+        });
+      });
+    });
 
 module.exports = {
   getEncryptedSeed,
@@ -188,4 +213,5 @@ module.exports = {
   recoverFacebookSeed,
   getEncryptedSeedFromMail,
   backupGoogleSeed,
+  recoverGoogleSeed,
 };
