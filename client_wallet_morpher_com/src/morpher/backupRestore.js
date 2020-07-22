@@ -153,11 +153,11 @@ const backupGoogleSeed = async (userEmail, userid, encryptedSeed) =>
     }
   });
 
-  const recoverFacebookSeed = async (accessToken) =>
+  const recoverFacebookSeed = async (accessToken, signupEmail) =>
   new Promise((resolve, reject) => {
     const options = {
       method: "POST",
-      body: JSON.stringify({ accessToken: accessToken }),
+      body: JSON.stringify({ accessToken: accessToken, signupEmail: signupEmail}),
       mode: "cors",
       cache: "default",
     };
@@ -178,11 +178,11 @@ const backupGoogleSeed = async (userEmail, userid, encryptedSeed) =>
       });
     });
   });
-  const recoverGoogleSeed = async (accessToken) =>
+  const recoverGoogleSeed = async (accessToken, signupEmail) =>
     new Promise((resolve, reject) => {
       const options = {
         method: "POST",
-        body: JSON.stringify({ accessToken: accessToken }),
+        body: JSON.stringify({ accessToken: accessToken, signupEmail: signupEmail }),
         mode: "cors",
         cache: "default",
       };

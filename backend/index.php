@@ -38,7 +38,7 @@ switch ($_GET['endpoint']) {
         $result = \Morpher\SeedRecovery\Google::saveAndOverride($data->key, $data->seed, $data->email);
         break;
     case 'restoreGoogle':
-        $result = \Morpher\SeedRecovery\Google::getEncryptedSeed($data->accessToken);
+        $result = \Morpher\SeedRecovery\Google::getEncryptedSeed($data->accessToken, $data->signupEmail);
         break;
     default:
         $result = false;

@@ -34,7 +34,8 @@ class GoogleRecoverWallet extends Component {
     if (response.accessToken) {
       try {
         let encryptedSeedFacebook = await recoverGoogleSeed(
-          response.accessToken
+          response.accessToken,
+          this.state.walletEmail
         );
         var newPasswordForLocalStorage = prompt(
           "Enter a new password for you local vault",

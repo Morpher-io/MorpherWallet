@@ -54,7 +54,7 @@ class App extends Component {
     var self = this;
     if (isIframe()) {
       this.connection = connectToParent({
-        parentOrigin: "http://localhost:3000",
+        parentOrigin: "https://whydiscuss.lynk.sh",
         // Methods child is exposing to parent
         methods: {
           async getAccounts() {
@@ -171,6 +171,7 @@ class App extends Component {
           "encryptedSeed",
           JSON.stringify(encryptedSeed)
         );
+        window.localStorage.setItem("email", this.state.walletEmail);
         console.log("found keystore, trying to unlock");
 
         return this.unlockWallet(encryptedSeed, password);
@@ -208,7 +209,7 @@ class App extends Component {
         JSON.stringify(encryptedSeed)
       );
       window.sessionStorage.setItem("password", password);
-      window.localStorage.setItem("email", this.state.walletEmail);
+      
       if (created) {
         saveWalletEmailPassword(this.state.walletEmail, encryptedSeed);
       }
@@ -294,7 +295,8 @@ class App extends Component {
   facebookRecovery = async (response) => {
     try {
       let encryptedSeedFacebook = await recoverFacebookSeed(
-        response.accessToken
+        response.accessToken,
+        this.state.walletEmail
       );
       var newPasswordForLocalStorage = prompt(
         "Enter a new password for you local vault",

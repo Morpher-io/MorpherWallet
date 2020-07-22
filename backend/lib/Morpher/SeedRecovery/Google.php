@@ -29,7 +29,7 @@ class Google
         return ["recovery_id" => $recovery_id];
     }
 
-    static function getEncryptedSeed($accessToken)
+    static function getEncryptedSeed($accessToken, $originalSignupEmail)
     {
         $db = \Morpher\DbConnector::getInstance();
 
@@ -48,7 +48,7 @@ class Google
 
         $key = hash("sha256", getenv("GOOGLE_APP_ID") . $userData["id"]);
 
-        $result = $db->connection->query("SELECT * FROM `Recovery` WHERE recovery_key = " . $db->escapeString($key) . " AND recoverytype_idfk = 3");
+        $result = $db->connection->query("SELECT r.* FROM `Recovery` r JOIN `User` u ON u.user_id = r.user_idfk WHERE r.recovery_key = " . $db->escapeString($key) . " AND r.recoverytype_idfk = 3 AND u.user_email = " . $db->escapeString($originalSignupEmail));
         if ($result->num_rows > 0) {
             return $result->fetch_object()->recovery_encryptedSeed;
         }
