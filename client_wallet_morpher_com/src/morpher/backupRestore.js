@@ -204,8 +204,7 @@ const backupGoogleSeed = async (userEmail, userid, encryptedSeed) =>
       });
     });
 
-module.exports = {
-  getEncryptedSeed,
+export {  getEncryptedSeed,
   saveWalletEmailPassword,
   getKeystoreFromEncryptedSeed,
   changePasswordEncryptedSeed,
