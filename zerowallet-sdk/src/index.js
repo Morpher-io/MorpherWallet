@@ -16,7 +16,7 @@ import onWindowLoad from "./onWindowLoad";
 import { connectToChild } from 'penpal';
 
 
-const WIDGET_URL = 'https://summerbean.lynk.sh';
+const WIDGET_URL = 'http://localhost:3001';
 const ZEROWALLET_IFRAME_CLASS = 'zerowallet-iframe';
 const ZEROWALLET_CONTAINER_CLASS = 'zerowallet-container';
 

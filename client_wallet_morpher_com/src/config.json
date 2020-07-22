@@ -1,5 +1,5 @@
 {
     "FACEBOOK_APP_ID": "299132904630133",
     "GOOGLE_APP_ID": "376509986959-k6tstmq30f4spbp9vd1u94tvt8dg714b.apps.googleusercontent.com",
-    "BACKEND_ENDPOINT": "https://walkcrop.lynk.sh"
+    "BACKEND_ENDPOINT": "http://localhost:8080"
 }

@@ -54,7 +54,7 @@ class App extends Component {
     var self = this;
     if (isIframe()) {
       this.connection = connectToParent({
-        parentOrigin: "https://whydiscuss.lynk.sh",
+        parentOrigin: "http://localhost:3000",
         // Methods child is exposing to parent
         methods: {
           async getAccounts() {
