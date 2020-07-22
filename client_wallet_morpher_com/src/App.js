@@ -7,6 +7,8 @@ import isIframe from "./morpher/isIframe";
 import config from "./config.json";
 import "./App.css";
 
+import { ChangePassword } from "./ChangePassword"
+
 import { getKeystore } from "./morpher/keystore";
 const { sha256 } = require("./morpher/cryptoFunctions");
 
@@ -247,7 +249,12 @@ class App extends Component {
   close = async () => {
     console.log("closed");
     //(await this.connection.promise).onClose();
-  }
+  };
+
+  togglePasswordChange = () => {
+    if(this.state.changePassword) this.setState({ changePassword: false }); 
+    else this.setState({ changePassword: true }); 
+  };
 
   facebookResponseAddRecovery = async (response) => {
     let encryptedSeedFromPassword = localStorage.getItem("encryptedSeed") || "";
@@ -431,7 +438,12 @@ class App extends Component {
           <button onClick={this.close} className="button">
               Close
           </button>
+          <button onClick={this.togglePasswordChange} className="button">
+            Change Password
+          </button>
         </div>
+        <br />
+        {this.state.changePassword ? <ChangePassword /> : <div />}
         {!this.state.hasWalletRecovery ? (
           <div>
             <h3>Add Password Recovery</h3>
