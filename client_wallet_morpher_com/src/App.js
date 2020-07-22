@@ -8,7 +8,7 @@ import config from "./config.json";
 import "./App.css";
 
 import { getKeystore } from "./morpher/keystore";
-import { sha256 } from "./morpher/cryptoFunctions";
+const { sha256 } = require("./morpher/cryptoFunctions");
 
 const {
   getEncryptedSeed,

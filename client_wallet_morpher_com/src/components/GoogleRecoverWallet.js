@@ -1,13 +1,14 @@
 import React, { Component } from "react";
 import { GoogleLogin } from "react-google-login";
 import config from "../config.json";
-import {
+
+const { sha256 } = require("../morpher/cryptoFunctions");
+
+const {
   changePasswordEncryptedSeed,
   recoverGoogleSeed,
   saveWalletEmailPassword,
-} from "../morpher/backupRestore";
-
-import { sha256 } from "../morpher/cryptoFunctions";
+} = require("../morpher/backupRestore");
 
 /**
  * This is used to recover from password loss via Google

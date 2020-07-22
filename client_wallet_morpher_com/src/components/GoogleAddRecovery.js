@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import { GoogleLogin, GoogleLogout } from "react-google-login";
 import config from "./../config.json";
-import {
+const {
   backupGoogleSeed,
   changePasswordEncryptedSeed,
-} from "./../morpher/backupRestore";
+} = require("./../morpher/backupRestore");
 
 /**
  * This is used to add google as social recovery method

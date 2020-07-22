@@ -47,9 +47,6 @@ class Google
         $userData = $oAuth->userinfo_v2_me->get();
 
         $key = hash("sha256", getenv("GOOGLE_APP_ID") . $userData["id"]);
-        error_log($userData["id"]);
-        error_log(getenv("GOOGLE_APP_ID"));
-        error_log($key);
 
         $result = $db->connection->query("SELECT * FROM `Recovery` WHERE recovery_key = " . $db->escapeString($key) . " AND recoverytype_idfk = 3");
         if ($result->num_rows > 0) {
