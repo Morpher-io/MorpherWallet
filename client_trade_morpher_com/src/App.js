@@ -22,9 +22,11 @@ class App extends Component {
     hasWallet: false,
     hasWalletRecovery: false,
     loginFailure: false,
+    showWallet: false
   };
 
   async componentDidMount() {
+
     this.zeroWallet = new ZeroWallet("ws://127.0.0.1:7545");
     //let web3 = await this.zeroWallet.getProvider();
 
@@ -41,10 +43,12 @@ class App extends Component {
       this.setState({ walletEmail: walletEmail });
       this.setState({ walletAddress: walletAddress });
       let web3 = await getWeb3();
-      
+
       let accounts = await web3.eth.getAccounts();
       console.log(accounts);
       this.setState({ isAuthenticated: true, web3 });
+      document.getElementsByClassName("zerowallet-iframe")[0].style.display = "none"
+
     });
 
     this.zeroWallet.onLogout(() => {
@@ -80,6 +84,19 @@ class App extends Component {
     console.log(result);
   };
 
+  toggleWallet = async() => {
+    if(this.state.showWallet) {
+      document.getElementsByClassName("zerowallet-iframe")[0].style.display = "none"
+      this.setState({ showWallet: false });
+
+    } else {
+      document.getElementsByClassName("zerowallet-iframe")[0].style.display = ""
+      this.setState({ showWallet: true });
+
+    }
+
+  }
+
   logout = () => {
     localStorage.clear();
     //this.setState({ isAuthenticated: false, token: "", user: null, web3: null, hasWallet:false });
@@ -97,6 +114,7 @@ class App extends Component {
         <h2>Hi {this.state.walletEmail}</h2>{" "}
         <div>
           <button onClick={this.sendEth}>Send eth</button>
+          <button onClick={this.toggleWallet}>Wallet</button>
         </div>
       </div>
     ) : (
