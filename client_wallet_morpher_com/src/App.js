@@ -310,19 +310,11 @@ class App extends Component {
         response.userID,
         newPasswordForLocalStorage
       );
-      let keystore = getKeystoreFromEncryptedSeed(
-        encryptedSeedPassword,
-        newPasswordForLocalStorage
-      );
       saveWalletEmailPassword(this.state.walletEmail, encryptedSeedPassword);
       window.localStorage.setItem("encryptedSeed", JSON.stringify(encryptedSeedPassword));
       window.localStorage.setItem("email", this.state.walletEmail);
-      this.setState({
-        hasWalletRecovery: true,
-        hasWallet: true,
-        unlockedWallet: true,
-        keystore,
-      });
+      window.sessionStorage.setItem("password", newPasswordForLocalStorage);
+      this.loginFromRecovery();
     } catch (e) {
       alert(
         "Your account wasn't found with Facebook recovery, create one with username and password first"
