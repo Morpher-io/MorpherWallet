@@ -137,6 +137,7 @@ export default class ZeroWallet {
 
     const communication = await connection.promise;
     //communication.retrieveSession();
+    //added stuff
 
     return { communication, iframe: connection.iframe, widgetFrame };
   }
