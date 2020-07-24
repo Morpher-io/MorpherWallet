@@ -6,9 +6,14 @@ include('config.php');
 
 $payload = file_get_contents('php://input');
 $data = json_decode($payload);
+$result = "";
+
+if (!isset($_GET['endpoint'])) {
+    die("No Endpoint selected, aborting");
+}
 
 switch ($_GET['endpoint']) {
-    /**
+        /**
      * Email / Password recovery
      */
     case 'saveEmailPassword':
@@ -21,9 +26,9 @@ switch ($_GET['endpoint']) {
     case 'getRecoveryMethods':
         $result = \Morpher\UserInfo::getRecoveryMethods($data->email);
 
-    /**
-     * Facebook Recovery
-     */
+        /**
+         * Facebook Recovery
+         */
     case 'saveFacebook':
         $result = \Morpher\SeedRecovery\Facebook::saveAndOverride($data->key, $data->seed, $data->email);
         break;
@@ -31,14 +36,24 @@ switch ($_GET['endpoint']) {
         $result = \Morpher\SeedRecovery\Facebook::getEncryptedSeed($data->accessToken, $data->signupEmail);
         break;
 
-    /**
-     * Google Recovery
-     */
+        /**
+         * Google Recovery
+         */
     case 'saveGoogle':
         $result = \Morpher\SeedRecovery\Google::saveAndOverride($data->key, $data->seed, $data->email);
         break;
     case 'restoreGoogle':
         $result = \Morpher\SeedRecovery\Google::getEncryptedSeed($data->accessToken, $data->signupEmail);
+        break;
+
+    /**
+      * Google Recovery
+    */
+    case 'saveTwitter':
+        $result = \Morpher\SeedRecovery\Twitter::saveAndOverride($data->key, $data->seed, $data->email);
+        break;
+    case 'restoreTwitter':
+        $result = \Morpher\SeedRecovery\Twitter::getEncryptedSeed($data->accessToken, $data->accessTokenSecret, $data->signupEmail);
         break;
     default:
         $result = false;
