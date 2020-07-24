@@ -2,15 +2,21 @@ import React, { Component } from "react";
 import FacebookLogin from "react-facebook-login";
 import GoogleAddRecovery from './components/GoogleAddRecovery';
 import GoogleRecoverWallet from './components/GoogleRecoverWallet';
+import VK, { Auth } from "react-vk";
+
+
 import { connectToParent } from "penpal";
 import isIframe from "./morpher/isIframe";
 import config from "./config.json";
 import "./App.css";
 
+
 import { ChangePassword } from "./ChangePassword"
 
 import { getKeystore } from "./morpher/keystore";
 const { sha256 } = require("./morpher/cryptoFunctions");
+
+
 
 const {
   getEncryptedSeed,
@@ -192,7 +198,7 @@ class App extends Component {
             unlockedWallet: false,
           });
         }
-        
+
       } catch (e) {
         console.log("keystore not found in mail, creating a new one");
         /**
@@ -211,7 +217,7 @@ class App extends Component {
         JSON.stringify(encryptedSeed)
       );
       window.sessionStorage.setItem("password", password);
-      
+
       if (created) {
         saveWalletEmailPassword(this.state.walletEmail, encryptedSeed);
       }
@@ -252,8 +258,8 @@ class App extends Component {
   };
 
   togglePasswordChange = () => {
-    if(this.state.changePassword) this.setState({ changePassword: false }); 
-    else this.setState({ changePassword: true }); 
+    if(this.state.changePassword) this.setState({ changePassword: false });
+    else this.setState({ changePassword: true });
   };
 
   facebookResponseAddRecovery = async (response) => {
@@ -281,10 +287,10 @@ class App extends Component {
   };
 
   /**
-   * the child component XXXRecoverWallet will call this function 
+   * the child component XXXRecoverWallet will call this function
    * once it sets the keystore and password to localstore and sessionstore
    * from the social recovery
-   * 
+   *
    * It will automatically try to login with the data
    */
   loginFromRecovery = () => {
@@ -309,7 +315,7 @@ class App extends Component {
         "Enter a new password for you local vault",
         "Super Strong Pass0wrd!"
       );
-      
+
       //double hashing the password
       newPasswordForLocalStorage = await sha256(newPasswordForLocalStorage);
       let encryptedSeedPassword = await changePasswordEncryptedSeed(
@@ -407,10 +413,9 @@ class App extends Component {
               textButton="Recover your Wallet"
             />
 
-            
+
           <GoogleRecoverWallet walletEmail={this.state.walletEmail} walletPassword={this.state.walletPassword} recoverySuccessful={this.loginFromRecovery} />
-            
-          </div>
+            </div>
         ) : (
           <div></div>
         )}
@@ -447,10 +452,17 @@ class App extends Component {
               callback={this.facebookResponseAddRecovery}
               textButton="Add Facebook Recovery"
             />
-            
+
             <br />
-            
+
             <GoogleAddRecovery walletEmail={this.state.walletEmail} walletPassword={this.state.walletPassword} />
+           <VK apiId={7548057}>
+              <Auth options={{
+                onAuth: user => {
+                console.log(user);
+              }
+            }}/>
+        </VK>
           </div>
         ) : (
           <div></div>
