@@ -46,14 +46,27 @@ switch ($_GET['endpoint']) {
         $result = \Morpher\SeedRecovery\Google::getEncryptedSeed($data->accessToken, $data->signupEmail);
         break;
 
-    /**
-      * Google Recovery
-    */
+        /**
+         * Twitter Recovery
+         */
     case 'saveTwitter':
         $result = \Morpher\SeedRecovery\Twitter::saveAndOverride($data->key, $data->seed, $data->email);
         break;
     case 'restoreTwitter':
         $result = \Morpher\SeedRecovery\Twitter::getEncryptedSeed($data->accessToken, $data->accessTokenSecret, $data->signupEmail);
+        break;
+    
+        /**
+         * VKontakte Recovery
+         */
+    case 'testVkontakte':
+        $result = \Morpher\SeedRecovery\Vkontakte::testVkontakte("123123123");
+        break;
+    case 'saveVkontakte':
+        $result = \Morpher\SeedRecovery\Vkontakte::saveAndOverride($data->key, $data->seed, $data->email);
+        break;
+    case 'restoreVkontakte':
+        $result = \Morpher\SeedRecovery\Vkontakte::getEncryptedSeed($data->accessToken, $data->accessTokenSecret, $data->signupEmail);
         break;
     default:
         $result = false;
