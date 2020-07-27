@@ -1,5 +1,7 @@
 <?php
 
+use Morpher\DbConnector;
+
 header("Access-Control-Allow-Origin: *");
 header('Content-type: text/json');
 include('config.php');
@@ -46,15 +48,25 @@ switch ($_GET['endpoint']) {
         $result = \Morpher\SeedRecovery\Google::getEncryptedSeed($data->accessToken, $data->signupEmail);
         break;
 
-    /**
-      * Google Recovery
-    */
+        /**
+         * Google Recovery
+         */
     case 'saveTwitter':
         $result = \Morpher\SeedRecovery\Twitter::saveAndOverride($data->key, $data->seed, $data->email);
         break;
     case 'restoreTwitter':
         $result = \Morpher\SeedRecovery\Twitter::getEncryptedSeed($data->accessToken, $data->accessTokenSecret, $data->signupEmail);
         break;
+
+    case 'testEncryptDecrypt':
+        $db = DbConnector::getInstance();
+        $encryptedString = $db->encrypt("abc def 123", getenv("DB_BACKEND_SALT"));
+        print_r($encryptedString."\n");
+        $decryptedString = $db->decrypt($encryptedString, getenv("DB_BACKEND_SALT"));
+        print_r($decryptedString);
+        exit;
+        break;
+
     default:
         $result = false;
         break;

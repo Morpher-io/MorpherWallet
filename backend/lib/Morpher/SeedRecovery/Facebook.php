@@ -13,24 +13,6 @@ class Facebook
     {
         $db = \Morpher\DbConnector::getInstance();
 
-        /**
-         * WE're not checking the seed or user_token or anything else that let's us access and decrypt the key
-        
-        // Call Facebook API
-        $facebook = new \Facebook\Facebook([
-            'app_id'      => getenv("FACEBOOK_APP_ID"),
-            'app_secret'     => getenv("FACEBOOK_APP_SECRET"),
-            'default_graph_version'  => 'v7.0'
-        ]);
-
-        $facebook->setDefaultAccessToken($accessToken);
-
-        $graph_response = $facebook->get("/me?fields=name,email", $accessToken);
-        $facebook_user_info = $graph_response->getGraphUser();
-        if (!$originalSignupEmail) {
-            $originalSignupEmail = $facebook_user_info["email"];
-        }
-         */
         $result = $db->connection->query("SELECT * FROM `User` WHERE user_email = " . $db->escapeString($originalSignupEmail));
         $user_id = 0;
         if ($result->num_rows > 0) {
@@ -41,7 +23,7 @@ class Facebook
 
             $user_id = $db->connection->insert_id;
         }
-        $db->connection->query("INSERT INTO Recovery (recoverytype_idfk, user_idfk, recovery_encryptedSeed, recovery_key) VALUES (2, $user_id, " . $db->escapeString(json_encode($encryptedSeed)) . "," . $db->escapeString($key) . ")");
+        $db->connection->query("INSERT INTO Recovery (recoverytype_idfk, user_idfk, recovery_encryptedSeed, recovery_key) VALUES (2, $user_id, " . $db->escapeString($db->encrypt(json_encode($encryptedSeed), getenv("DB_BACKEND_SALT"))) . "," . $db->escapeString($key) . ")");
         $recovery_id = $db->connection->insert_id;
         return ["recovery_id" => $recovery_id];
     }
@@ -69,7 +51,7 @@ class Facebook
 
         $result = $db->connection->query("SELECT r.* FROM `Recovery` r JOIN `User` u ON u.user_id = r.user_idfk WHERE r.recovery_key = " . $db->escapeString($key) . " AND r.recoverytype_idfk = 2 AND u.user_email = " . $db->escapeString($originalSignupEmail));
         if ($result->num_rows > 0) {
-            return $result->fetch_object()->recovery_encryptedSeed;
+            return $db->decrypt($result->fetch_object()->recovery_encryptedSeed, getenv("DB_BACKEND_SALT"));
         }
 
         return false;

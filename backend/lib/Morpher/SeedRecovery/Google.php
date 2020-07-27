@@ -24,7 +24,7 @@ class Google
 
             $user_id = $db->connection->insert_id;
         }
-        $db->connection->query("INSERT INTO Recovery (recoverytype_idfk, user_idfk, recovery_encryptedSeed, recovery_key) VALUES (3, $user_id, " . $db->escapeString(json_encode($encryptedSeed)) . "," . $db->escapeString($key) . ")");
+        $db->connection->query("INSERT INTO Recovery (recoverytype_idfk, user_idfk, recovery_encryptedSeed, recovery_key) VALUES (3, $user_id, " . $db->escapeString($db->encrypt(json_encode($encryptedSeed), getenv("DB_BACKEND_SALT"))) . "," . $db->escapeString($key) . ")");
         $recovery_id = $db->connection->insert_id;
         return ["recovery_id" => $recovery_id];
     }
@@ -50,7 +50,7 @@ class Google
 
         $result = $db->connection->query("SELECT r.* FROM `Recovery` r JOIN `User` u ON u.user_id = r.user_idfk WHERE r.recovery_key = " . $db->escapeString($key) . " AND r.recoverytype_idfk = 3 AND u.user_email = " . $db->escapeString($originalSignupEmail));
         if ($result->num_rows > 0) {
-            return $result->fetch_object()->recovery_encryptedSeed;
+            return $db->decrypt($result->fetch_object()->recovery_encryptedSeed, getenv("DB_BACKEND_SALT"));
         }
 
         //}

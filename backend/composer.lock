@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9d2f6dbb6ceb0db3e72f4149bc4e3687",
+    "content-hash": "801c2fd68091a6afcfe4dfff92fe97f8",
     "packages": [
         {
             "name": "abraham/twitteroauth",
@@ -949,6 +949,59 @@
             ],
             "description": "A polyfill for getallheaders.",
             "time": "2019-03-08T08:55:37+00:00"
+        },
+        {
+            "name": "stymiee/php-simple-encryption",
+            "version": "1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/stymiee/php-simple-encryption.git",
+                "reference": "b1a8d7c8b92ef87a969abcdfe5d929a736c349ef"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/stymiee/php-simple-encryption/zipball/b1a8d7c8b92ef87a969abcdfe5d929a736c349ef",
+                "reference": "b1a8d7c8b92ef87a969abcdfe5d929a736c349ef",
+                "shasum": ""
+            },
+            "require": {
+                "ext-openssl": "*",
+                "php": ">=7.2.0"
+            },
+            "require-dev": {
+                "nunomaduro/phpinsights": "@stable",
+                "phpmd/phpmd": "@stable",
+                "phpunit/phpunit": "^8",
+                "squizlabs/php_codesniffer": "3.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Encryption\\": [
+                        "src/Encryption/"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "John Conde",
+                    "email": "stymiee@gmail.com",
+                    "homepage": "https://stymiee.dev",
+                    "role": "Developer"
+                }
+            ],
+            "description": "The PHP Simple Encryption library is designed to simplify the process of encrypting and decrypting data while ensuring best practices are followed. By default is uses a secure encryption algorithm and generates a cryptologically strong initialization vector so developers do not need to becomes experts in encryption to securely store sensitive data.",
+            "homepage": "https://github.com/stymiee/php-simple-encryption",
+            "keywords": [
+                "encryption",
+                "openssl",
+                "php"
+            ],
+            "time": "2020-07-09T16:43:36+00:00"
         }
     ],
     "packages-dev": [],

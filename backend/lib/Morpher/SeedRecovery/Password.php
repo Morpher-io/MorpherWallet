@@ -19,18 +19,19 @@ class Password
             $user_id = $db->connection->insert_id;
         }
 
-        $db->connection->query("INSERT INTO Recovery (recoverytype_idfk, user_idfk, recovery_encryptedSeed, recovery_key) VALUES (1, $user_id, " . $db->escapeString(json_encode($encryptedSeed)) . "," . $db->escapeString($key) . ")");
+        $db->connection->query("INSERT INTO Recovery (recoverytype_idfk, user_idfk, recovery_encryptedSeed, recovery_key) VALUES (1, $user_id, " . $db->escapeString($db->encrypt(json_encode($encryptedSeed), getenv("DB_BACKEND_SALT"))) . "," . $db->escapeString($key) . ")");
 
         $recovery_id = $db->connection->insert_id;
         return ["recovery_id" => $recovery_id];
     }
 
-    static function getEncryptedSeed($key) {
+    static function getEncryptedSeed($key)
+    {
         $db = \Morpher\DbConnector::getInstance();
 
-        $result = $db->connection->query("SELECT * FROM `Recovery` WHERE recovery_key = ".$db->escapeString($key));
-        if($result->num_rows > 0) {
-            return $result->fetch_object()->recovery_encryptedSeed;
+        $result = $db->connection->query("SELECT * FROM `Recovery` WHERE recovery_key = " . $db->escapeString($key));
+        if ($result->num_rows > 0) {
+            return $db->decrypt($result->fetch_object()->recovery_encryptedSeed, getenv("DB_BACKEND_SALT"));
         }
         return false;
     }
