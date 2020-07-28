@@ -33,7 +33,7 @@ class Vkontakte
 
     static function testVkontakte($accessToken) {
         $vk = new \VK\Client\VKApiClient();
-        $response = $vk->account()->getgetProfileInfo($accessToken);
+        $response = $vk->account()->getProfileInfo($accessToken);
         print_r($response);
     }
 
