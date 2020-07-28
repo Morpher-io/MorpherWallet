@@ -58,15 +58,6 @@ switch ($_GET['endpoint']) {
         $result = \Morpher\SeedRecovery\Twitter::getEncryptedSeed($data->accessToken, $data->accessTokenSecret, $data->signupEmail);
         break;
 
-    case 'testEncryptDecrypt':
-        $db = DbConnector::getInstance();
-        $encryptedString = $db->encrypt("abc def 123", getenv("DB_BACKEND_SALT"));
-        print_r($encryptedString."\n");
-        $decryptedString = $db->decrypt($encryptedString, getenv("DB_BACKEND_SALT"));
-        print_r($decryptedString);
-        exit;
-        break;
-
     default:
         $result = false;
         break;
