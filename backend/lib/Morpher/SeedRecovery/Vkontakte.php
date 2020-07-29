@@ -31,10 +31,18 @@ class Vkontakte
         return ["recovery_id" => $recovery_id];
     }
 
-    static function testVkontakte($accessToken) {
-        $vk = new \VK\Client\VKApiClient();
-        $response = $vk->account()->getProfileInfo($accessToken);
-        print_r($response);
+    static function testVkontakte($code) {
+        //$vk = new \VK\Client\VKApiClient();
+        //$response = $vk->account()->getProfileInfo($accessToken);
+        //print_r($response);
+		$oauth = new \VK\OAuth\VKOAuth();
+		$client_id = "7548057";
+		$client_secret = "JIXHqq4nlf4SxljBgb1E";
+		$redirect_uri = "http://dev-test.morpher.com.s3-website.eu-central-1.amazonaws.com";
+		$response = $oauth->getAccessToken($client_id, $client_secret, $redirect_uri, $code);
+		$access_token = $response['access_token'];
+		$user_id = $response['user_id'];
+		print_r($response);
     }
 
     static function getEncryptedSeed($accessToken, $originalSignupEmail)
