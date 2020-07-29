@@ -1,0 +1,17 @@
+{
+  "name": "zerowallet-sdk",
+  "version": "0.0.1",
+  "description": "This is an SDK for the zero-wallet to simple add it to the website. Drop-In Replacement for Fortmatic/Portis/MetaMask",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Thomas Wiesner (thomas@morpher.com)",
+  "license": "ISC",
+  "dependencies": {
+    "eth-lightwallet": "^4.0.0",
+    "penpal": "^5.1.1",
+    "web3": "^1.2.9",
+    "web3-provider-engine": "^15.0.12"
+  }
+}
