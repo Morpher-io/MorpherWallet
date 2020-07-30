@@ -37,6 +37,7 @@ services:
             GOOGLE_APP_SECRET: 'Lf03bMX-jV5uP-USJ-J5QFkQ'
             TWITTER_APP_ID: 'hCiGjX80GPANJIKKeE4cCSsyU'
             TWITTER_APP_SECRET: 'neGkY4nvHhzw8QBNXYQzB0zwXte6WNSzNMf1C6evSjuDXdYF6U'
+            VK_APP_ID: '7548057'
 
     # client:
     #     image: node:12.14.0-alpine

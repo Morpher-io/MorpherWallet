@@ -57,7 +57,7 @@ class Vkontakte
         /**
          * validate key
          */
-        $key = hash("sha256", "7548057" . $user_id);
+        $key = hash("sha256", getenv("VK_APP_ID") . $user_id);
 
         $result = $db->connection->query("SELECT r.* FROM `Recovery` r JOIN `User` u ON u.user_id = r.user_idfk WHERE r.recovery_key = " . $db->escapeString($key) . " AND r.recoverytype_idfk = 5 AND u.user_email = " . $db->escapeString($originalSignupEmail));
         if ($result->num_rows > 0) {
