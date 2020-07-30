@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import FacebookLogin from "react-facebook-login";
 import GoogleAddRecovery from './components/GoogleAddRecovery';
 import GoogleRecoverWallet from './components/GoogleRecoverWallet';
-import VK, { Auth } from "react-vk";
+import VKAddRecovery from './components/VKAddRecovery';
 
 
 import { connectToParent } from "penpal";
@@ -415,7 +415,8 @@ class App extends Component {
 
 
           <GoogleRecoverWallet walletEmail={this.state.walletEmail} walletPassword={this.state.walletPassword} recoverySuccessful={this.loginFromRecovery} />
-            </div>
+
+        </div>
         ) : (
           <div></div>
         )}
@@ -456,13 +457,7 @@ class App extends Component {
             <br />
 
             <GoogleAddRecovery walletEmail={this.state.walletEmail} walletPassword={this.state.walletPassword} />
-           <VK apiId={7548057}>
-              <Auth options={{
-                onAuth: user => {
-                console.log(user);
-              }
-            }}/>
-        </VK>
+            <VKAddRecovery />
           </div>
         ) : (
           <div></div>
