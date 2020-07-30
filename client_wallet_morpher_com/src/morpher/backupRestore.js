@@ -168,7 +168,7 @@ const backupVKSeed = async (userEmail, userid, encryptedSeed) =>
       };
       try {
         fetch(
-            config.BACKEND_ENDPOINT + "/index.php?endpoint=saveVK",
+            config.BACKEND_ENDPOINT + "/index.php?endpoint=saveVkontakte",
             options
         ).then((r) => {
           r.json().then((response) => {
@@ -240,7 +240,7 @@ const recoverVKSeed = async (accessToken, signupEmail) =>
         cache: "default",
       };
       fetch(
-          config.BACKEND_ENDPOINT + "/index.php?endpoint=restoreVK",
+          config.BACKEND_ENDPOINT + "/index.php?endpoint=restoreVkontakte",
           options
       ).then((r) => {
         r.json().then(async (responseBody) => {

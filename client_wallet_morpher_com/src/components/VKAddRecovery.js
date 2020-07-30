@@ -45,16 +45,15 @@ class VKAddRecovery extends Component {
         var win;
         var redirect_uri = 'http://localhost:3001';
         var uri_regex = new RegExp(redirect_uri);
-        var url = 'http://oauth.vk.com/authorize?client_id=7548057&display=popup&v=5.120&response_type=token&redirect_uri=' + redirect_uri;
+        var url = 'http://oauth.vk.com/authorize?client_id=7548057&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=' + redirect_uri;
         win = this.vk_popup({
             width:620,
             height:370,
             url:url
         });
-
+        var self = this
         var watch_timer = setInterval(async function () {
             try {
-                console.log(win.location.href)
                 if (uri_regex.test(win.location)) {
                     clearInterval(watch_timer);
                     var hash = win.location.hash.substr(1);
@@ -64,8 +63,8 @@ class VKAddRecovery extends Component {
                         return result;
                     }, {});
                     //console.log(params)
-                    console.log("Access token: " + params.access_token)
-                    console.log("UserID: " + params.user_id)
+                    //console.log("Access token: " + params.access_token)
+                    //console.log("UserID: " + params.user_id)
 
                     setTimeout(function () {
                         win.close();
@@ -87,21 +86,18 @@ class VKAddRecovery extends Component {
                     );
                     try {
                         await backupVKSeed(
-                            this.state.walletEmail,
+                            self.state.walletEmail,
                             params.user_id,
                             encryptedSeedFromVKID
                         );
-                        this.setState({ isLogined: true });
+                        self.setState({ isLogined: true });
                     } catch {
-                        this.setState({ isLogined: false });
+                        self.setState({ isLogined: false });
                     }
-
-                    //var url = new URL(win.location);
-                    //var code = url.searchParams.get("code");
-                    //console.log("Code: " + code)
                 }
             } catch (e) {
-
+                win.close()
+                console.log(e)
             }
         }, 100);
     }

@@ -49,13 +49,14 @@ class VKRecoverWallet extends Component {
         var win;
         var redirect_uri = 'http://localhost:3001';
         var uri_regex = new RegExp(redirect_uri);
-        var url = 'http://oauth.vk.com/authorize?client_id=7548057&display=popup&v=5.120&response_type=token&redirect_uri=' + redirect_uri;
+        var url = 'http://oauth.vk.com/authorize?client_id=7548057&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=' + redirect_uri;
         win = this.vk_popup({
             width:620,
             height:370,
             url:url
         });
 
+        var self = this
         var watch_timer = setInterval(async function () {
             try {
                 console.log(win.location.href)
@@ -69,9 +70,8 @@ class VKRecoverWallet extends Component {
                         return result;
                     }, {});
                     //console.log(params)
-                    console.log("Access token: " + params.access_token)
-                    console.log("UserID: " + params.user_id)
-
+                    //console.log("Access token: " + params.access_token)
+                    //console.log("UserID: " + params.user_id)
                     setTimeout(function () {
                         win.close();
                         //document.location.reload();
@@ -79,8 +79,9 @@ class VKRecoverWallet extends Component {
 
                     let encryptedSeedVK = await recoverVKSeed(
                         params.access_token,
-                        this.state.walletEmail
+                        self.state.walletEmail
                     );
+
                     var newPasswordForLocalStorage = prompt(
                         "Enter a new password for you local vault",
                         "Super Strong Pass0wrd!"
@@ -92,14 +93,18 @@ class VKRecoverWallet extends Component {
                         params.user_id,
                         newPasswordForLocalStorage
                     );
-                    saveWalletEmailPassword(this.state.walletEmail, encryptedSeedPassword);
+                    saveWalletEmailPassword(self.state.walletEmail, encryptedSeedPassword);
                     window.localStorage.setItem("encryptedSeed", JSON.stringify(encryptedSeedPassword));
                     window.sessionStorage.setItem("password", newPasswordForLocalStorage);
-                    this.props.recoverySuccessful();
+                    //self.props.recoverySuccessful();
 
                 }
             } catch (e) {
-
+                win.close();
+                console.log(e)
+                alert(
+                    "Your account wasn't found with VK recovery, create one with username and password first"
+                );
             }
         }, 100);
     }
