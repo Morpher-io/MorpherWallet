@@ -60,14 +60,14 @@ switch ($_GET['endpoint']) {
          * VKontakte Recovery
          */
     case 'testVkontakte':
-		$code = $_GET['code'];
-        $result = \Morpher\SeedRecovery\Vkontakte::testVkontakte($code);
+		$accessToken = $_GET['token'];
+        $result = \Morpher\SeedRecovery\Vkontakte::testVkontakte($accessToken);
         break;
-    case 'saveVkontakte':
+    case 'saveVkontakte':;
         $result = \Morpher\SeedRecovery\Vkontakte::saveAndOverride($data->key, $data->seed, $data->email);
         break;
     case 'restoreVkontakte':
-        $result = \Morpher\SeedRecovery\Vkontakte::getEncryptedSeed($data->accessToken, $data->accessTokenSecret, $data->signupEmail);
+        $result = \Morpher\SeedRecovery\Vkontakte::getEncryptedSeed($data->accessToken, $data->signupEmail);
         break;
     default:
         $result = false;

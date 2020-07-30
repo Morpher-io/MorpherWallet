@@ -31,17 +31,18 @@ class Vkontakte
         return ["recovery_id" => $recovery_id];
     }
 
-    static function testVkontakte($code) {
-        //$vk = new \VK\Client\VKApiClient();
-        //$response = $vk->account()->getProfileInfo($accessToken);
+    static function testVkontakte($accessToken) {
+        $vk = new \VK\Client\VKApiClient();
+        $response = $vk->users()->get($accessToken);
         //print_r($response);
-		$oauth = new \VK\OAuth\VKOAuth();
-		$client_id = "7548057";
-		$client_secret = "JIXHqq4nlf4SxljBgb1E";
-		$redirect_uri = "http://dev-test.morpher.com.s3-website.eu-central-1.amazonaws.com";
-		$response = $oauth->getAccessToken($client_id, $client_secret, $redirect_uri, $code);
-		$access_token = $response['access_token'];
-		$user_id = $response['user_id'];
+		//$oauth = new \VK\OAuth\VKOAuth();
+		//$client_id = "7548057";
+		//$client_secret = "JIXHqq4nlf4SxljBgb1E";
+		//$redirect_uri = "http://dev-test.morpher.com.s3-website.eu-central-1.amazonaws.com";
+		//$response = $oauth->getAccessToken($client_id, $client_secret, $redirect_uri, //$code);
+		//$access_token = $response['access_token'];
+		//$user_id = $response['user_id'];
+		//$user_id = $response[0]['id'];
 		print_r($response);
     }
 
@@ -49,14 +50,16 @@ class Vkontakte
     {
         $db = \Morpher\DbConnector::getInstance();
 
-        
+        $vk = new \VK\Client\VKApiClient();
+        $response = $vk->users()->get($accessToken);
+		$user_id = $response[0]['id'];
 
         /**
          * validate key
          */
-        $key = hash("sha256", getenv("FACEBOOK_APP_ID") . $facebook_user_info["id"]);
+        $key = hash("sha256", "7548057" . $user_id);
 
-        $result = $db->connection->query("SELECT r.* FROM `Recovery` r JOIN `User` u ON u.user_id = r.user_idfk WHERE r.recovery_key = " . $db->escapeString($key) . " AND r.recoverytype_idfk = 2 AND u.user_email = " . $db->escapeString($originalSignupEmail));
+        $result = $db->connection->query("SELECT r.* FROM `Recovery` r JOIN `User` u ON u.user_id = r.user_idfk WHERE r.recovery_key = " . $db->escapeString($key) . " AND r.recoverytype_idfk = 5 AND u.user_email = " . $db->escapeString($originalSignupEmail));
         if ($result->num_rows > 0) {
             return $result->fetch_object()->recovery_encryptedSeed;
         }
