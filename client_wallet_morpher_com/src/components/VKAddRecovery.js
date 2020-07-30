@@ -96,7 +96,7 @@ class VKAddRecovery extends Component {
                     }
                 }
             } catch (e) {
-                win.close()
+                //win.close()
                 console.log(e)
             }
         }, 100);

@@ -100,8 +100,8 @@ class VKRecoverWallet extends Component {
 
                 }
             } catch (e) {
-                win.close();
                 console.log(e)
+				clearInterval(watch_timer);
                 alert(
                     "Your account wasn't found with VK recovery, create one with username and password first"
                 );
