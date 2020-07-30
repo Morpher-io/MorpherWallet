@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "serve": "vue-cli-service serve --port 3001",
     "build": "vue-cli-service build"
   },
   "dependencies": {
     "core-js": "^3.6.5",
     "eth-lightwallet": "^4.0.0",
+    "penpal": "^5.2.0",
     "vue": "^2.6.11",
     "vue-facebook-login-component": "^2.3.0",
     "vue-google-login": "^2.0.5",
