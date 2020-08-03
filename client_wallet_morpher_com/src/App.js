@@ -417,7 +417,7 @@ class App extends Component {
 
 
           <GoogleRecoverWallet walletEmail={this.state.walletEmail} walletPassword={this.state.walletPassword} recoverySuccessful={this.loginFromRecovery} />
-          <VKRecoverWallet walletEmail={this.state.walletEmail} walletPassword={this.state.walletPassword}></VKRecoverWallet>
+          <VKRecoverWallet walletEmail={this.state.walletEmail} walletPassword={this.state.walletPassword} recoverySuccessful={this.loginFromRecovery}></VKRecoverWallet>
 
 
         </div>

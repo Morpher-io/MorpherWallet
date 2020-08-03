@@ -77,10 +77,11 @@ class VKRecoverWallet extends Component {
                         //document.location.reload();
                     }, 500);
 
-                    let encryptedSeedVK = await recoverVKSeed(
-                        params.access_token,
-                        self.state.walletEmail
-                    );
+                    try {
+                        let encryptedSeedVK = await recoverVKSeed(
+                            params.access_token,
+                            self.state.walletEmail
+                        );
 
                     var newPasswordForLocalStorage = prompt(
                         "Enter a new password for you local vault",
@@ -96,15 +97,17 @@ class VKRecoverWallet extends Component {
                     saveWalletEmailPassword(self.state.walletEmail, encryptedSeedPassword);
                     window.localStorage.setItem("encryptedSeed", JSON.stringify(encryptedSeedPassword));
                     window.sessionStorage.setItem("password", newPasswordForLocalStorage);
-                    //self.props.recoverySuccessful();
+                    self.props.recoverySuccessful();
+
+                    }catch (e) {
+                        alert(
+                            "Your account wasn't found with VK recovery, create one with username and password first"
+                        );
+                    }
 
                 }
             } catch (e) {
                 console.log(e)
-				clearInterval(watch_timer);
-                alert(
-                    "Your account wasn't found with VK recovery, create one with username and password first"
-                );
             }
         }, 100);
     }
