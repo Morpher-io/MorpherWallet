@@ -32,28 +32,35 @@
       </form>
       <button @click="cancel">Cancel</button>
       <br />
+      <div v-if="loginFailure">
+        <br />
+        <b>The Password you provided is invalid!</b>
+        <br />
+
+      </div>
     </div>
     <div v-if="hasWallet && unlockedWallet">
-      <p>Authenticated</p>
-      <h1>Hi  {{email}}</h1>
-      <div>Loading Web3, accounts, and contract...</div>
+      <h1>Welcome!</h1>
+      <h3>You are successfully logged in!</h3>
       <div>
-        <h2>Good to Go!</h2>
         <p>Your Account: {{accounts[0]}}</p>
         <button>
-        SEND TRANSACTION
+          Log out
+        </button>
+        <button>
+          Close
+        </button>
+        <button>
+          Change Password
         </button>
       </div>
 
       <div>
         <h2>Add Password Recovery</h2>
         <br />
-        <v-facebook-login app-id="299132904630133"  @sdk-init="handleSdkInit2" @login="addFacebookRecovery"  v-model="facebook2.model"
+        <v-facebook-login app-id="299132904630133"  @sdk-init="handleSdkInit" @login="addFacebookRecovery"  v-model="facebook.model"
         ><span slot="login">ADD FACEBOOK RECOVERY</span>
         </v-facebook-login>
-      </div>
-      <div>
-        <button @click="logout">Log out</button>
       </div>
   </div>
   </div>
@@ -106,15 +113,39 @@
         FB: {},
         model: {},
         scope: {}
-      },
-      facebook2: {
-        FB: {},
-        model: {},
-        scope: {}
       }
     }
   },
   methods: {
+    unlockWallet: async function(encryptedSeed, password) {
+      try {
+        let keystore = await getKeystoreFromEncryptedSeed(
+                encryptedSeed,
+                password
+        );
+        let accounts = await keystore.getAddresses();
+
+        this.hasWallet = true;
+        this.unlockedWallet = true
+        this.keystore = keystore;
+        this.accounts = accounts;
+
+        if (isIframe()) {
+          //let parent = await this.connection.promise;
+          //await parent.onLogin(this.state.accounts[0], this.state.walletEmail)
+          (await this.connection.promise).onLogin(
+                  this.accounts[0],
+                  this.walletEmail
+          );
+        }
+      } catch (e) {
+        console.error(e);
+        this.loginFailure = true;
+        this.accounts = null;
+        this.hasWallet = true;
+        this.unlockedWallet = false;
+      }
+    },
     createWallet: async function (e){
       try {
         //console.log(e);
@@ -181,6 +212,20 @@
       } catch (e) {
         console.log(e);
       }
+    },
+    handleSdkInit({ FB, scope }){
+      this.facebook.scope = scope
+      this.facebook.FB = FB
+    },
+    async addFacebookRecovery(data) {
+      console.log(data.authResponse.accessToken)
+      var self = this
+      this.facebook.FB.api('/me', {fields: 'id, name, email'}, async function (user) {
+        console.log(user)
+        //let key = await sha256("299132904630133" + user.id);
+      })
+      let fbToken = data.authResponse.accessToken
+      console.log("fbtoken: " + fbToken)
     }
   },
   mounted(){
