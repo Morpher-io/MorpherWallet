@@ -153,6 +153,33 @@ const backupGoogleSeed = async (userEmail, userid, encryptedSeed) =>
     }
   });
 
+const backupVKSeed = async (userEmail, userid, encryptedSeed) =>
+    new Promise(async (resolve, reject) => {
+      let key = await sha256(config.VK_APP_ID + userid);
+      const options = {
+        method: "POST",
+        body: JSON.stringify({
+          seed: encryptedSeed,
+          key: key,
+          email: userEmail,
+        }),
+        mode: "cors",
+        cache: "default",
+      };
+      try {
+        fetch(
+            config.BACKEND_ENDPOINT + "/index.php?endpoint=saveVkontakte",
+            options
+        ).then((r) => {
+          r.json().then((response) => {
+            resolve(response);
+          });
+        });
+      } catch (e) {
+        reject(e);
+      }
+    });
+
   const recoverFacebookSeed = async (accessToken, signupEmail) =>
   new Promise((resolve, reject) => {
     const options = {
@@ -204,6 +231,32 @@ const backupGoogleSeed = async (userEmail, userid, encryptedSeed) =>
       });
     });
 
+const recoverVKSeed = async (accessToken, signupEmail) =>
+    new Promise((resolve, reject) => {
+      const options = {
+        method: "POST",
+        body: JSON.stringify({ accessToken: accessToken, signupEmail: signupEmail }),
+        mode: "cors",
+        cache: "default",
+      };
+      fetch(
+          config.BACKEND_ENDPOINT + "/index.php?endpoint=restoreVkontakte",
+          options
+      ).then((r) => {
+        r.json().then(async (responseBody) => {
+          if (responseBody !== false) {
+            //initiate recovery
+            let encryptedSeed = JSON.parse(responseBody);
+            resolve(encryptedSeed);
+          } else {
+            reject(
+                "Your account wasn't found with VK recovery, create one with username and password first"
+            );
+          }
+        });
+      });
+    });
+
 export {  getEncryptedSeed,
   saveWalletEmailPassword,
   getKeystoreFromEncryptedSeed,
@@ -213,4 +266,6 @@ export {  getEncryptedSeed,
   getEncryptedSeedFromMail,
   backupGoogleSeed,
   recoverGoogleSeed,
+  backupVKSeed,
+  recoverVKSeed
 };
