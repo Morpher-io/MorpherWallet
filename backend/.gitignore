@@ -1,2 +1,29 @@
-vendor/
-.idea
+# Dependency directories
+node_modules/
+
+# dotenv environment variables file
+.env
+
+# Compiled ts files
+dist/
+
+# Typescript source folder
+# src/
+
+# OS X hidden file
+.DS_Store
+
+# ide info
+# .vscode/
+.idea/
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
