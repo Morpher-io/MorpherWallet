@@ -33,6 +33,12 @@ services:
             DB_DATABASE: 'zerowallet'
             FACEBOOK_APP_ID: '299132904630133'
             FACEBOOK_APP_SECRET: 'db3693734c6dd7c5581d5e1f012e3e84'
+            GOOGLE_APP_ID: '376509986959-k6tstmq30f4spbp9vd1u94tvt8dg714b.apps.googleusercontent.com'
+            GOOGLE_APP_SECRET: 'Lf03bMX-jV5uP-USJ-J5QFkQ'
+            TWITTER_APP_ID: 'hCiGjX80GPANJIKKeE4cCSsyU'
+            TWITTER_APP_SECRET: 'neGkY4nvHhzw8QBNXYQzB0zwXte6WNSzNMf1C6evSjuDXdYF6U'
+            VK_APP_ID: '7548057'
+
     # client:
     #     image: node:12.14.0-alpine
     #     tty: true

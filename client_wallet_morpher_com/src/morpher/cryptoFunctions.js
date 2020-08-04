@@ -131,4 +131,4 @@ const sha256 = async (inputString) => {
   return hashHex;
 };
 
-module.exports = { cryptoDecrypt, cryptoEncrypt, sha256 };
+export { cryptoDecrypt, cryptoEncrypt, sha256 };

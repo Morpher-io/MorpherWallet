@@ -9,7 +9,7 @@
 import Web3ProviderEngine from "web3-provider-engine";
 import HookedWalletSubprovider from "web3-provider-engine/subproviders/hooked-wallet";
 import WebsockerSubprovider from 'web3-provider-engine/subproviders/websocket';
-import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
+//import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
 //import Web3Subprovider from 'web3-provider-engine/subproviders/web3';
 import styles from "./styles";
 import onWindowLoad from "./onWindowLoad";
@@ -28,12 +28,10 @@ tempCachingIFrame.style.border = 'none';
 tempCachingIFrame.style.position = 'absolute';
 tempCachingIFrame.style.top = '-999px';
 tempCachingIFrame.style.left = '-999px';
-tempCachingIFrame.src = WIDGET_URL;
+//tempCachingIFrame.src = "about:blank"; //WIDGET_URL;
 onWindowLoad().then(() => {
   if (document.getElementsByClassName(ZEROWALLET_IFRAME_CLASS).length) {
-    console.warn(
-      'Portis script was already loaded. This might cause unexpected behavior. If loading with a <script> tag, please make sure that you only load it once.',
-    );
+    console.warn('Zerowallet script was already loaded. This might cause unexpected behavior. If loading with a <script> tag, please make sure that you only load it once.');
   }
   document.body.appendChild(tempCachingIFrame);
 });
@@ -90,15 +88,19 @@ export default class ZeroWallet {
       if(iframeLoadedFired) {
         resolve();
       }
+
       tempCachingIFrame.onload = () => {
         iframeLoadedFired = true;
         resolve();
-      }
+      };
     });
   }
 
   async _initWidget() {
+    tempCachingIFrame.src = WIDGET_URL;
+    
     await onWindowLoad();
+    console.log("init widget loaded");
     const style = document.createElement('style');
     style.innerHTML = styles;
 
@@ -134,6 +136,9 @@ export default class ZeroWallet {
     tempCachingIFrame.style.top=0;
     tempCachingIFrame.style.background = "white";
     tempCachingIFrame.style.border = '0 transparent';
+
+    
+
 
     const communication = await connection.promise;
     //communication.retrieveSession();

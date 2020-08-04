@@ -22,7 +22,10 @@ class App extends Component {
     hasWallet: false,
     hasWalletRecovery: false,
     loginFailure: false,
-    showWallet: false
+    showWallet: true,
+    balance: 0,
+    targetAddress: "0x123",
+    numberOfEther: 0,
   };
 
   async componentDidMount() {
@@ -47,7 +50,9 @@ class App extends Component {
       let accounts = await web3.eth.getAccounts();
       console.log(accounts);
       this.setState({ isAuthenticated: true, web3 });
-      document.getElementsByClassName("zerowallet-iframe")[0].style.display = "none"
+      let balance = web3.utils.fromWei(await web3.eth.getBalance(accounts[0]), "ether");
+      this.setState({balance});
+      this.toggleWallet();
 
     });
 
@@ -58,29 +63,22 @@ class App extends Component {
     });
   }
 
-  startWeb3Init = async (user_id, app_id) => {
-    try {
-      const web3 = await getWeb3(false, user_id + "" + app_id);
-      const accounts = await web3.eth.getAccounts();
-      this.setState({ web3, accounts });
-    } catch (error) {
-      // Catch any errors for any of the above operations.
-      alert(
-        `Failed to load web3, accounts, or contract. Check console for details.`
-      );
-      console.error(error);
-    }
-  };
-
-  sendEth = async () => {
-    let amount = 1;
-    let to = "0x687b9F4D948D5151b3F28e747773063b1f0a4a6F";
+  sendEther = async (e) => {
+    e.preventDefault();
+    let amount = this.state.numberOfEther;
+    let to = this.state.targetAddress;
     const { web3, walletAddress } = this.state;
     let result = await web3.eth.sendTransaction({
       from: walletAddress,
       to,
       value: amount * 1000000000000000000,
     });
+    if(result.status === true) {
+      alert("Sent was successful");
+      let accounts = await web3.eth.getAccounts();
+      let balance = web3.utils.fromWei(await web3.eth.getBalance(accounts[0]), "ether");
+      this.setState({balance});
+    }
     console.log(result);
   };
 
@@ -96,6 +94,15 @@ class App extends Component {
     }
 
   }
+
+  handleInputChange = (event) => {
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
+    this.setState({
+      [name]: value,
+    });
+  };
 
   logout = () => {
     localStorage.clear();
@@ -113,8 +120,31 @@ class App extends Component {
       <div>
         <h2>Hi {this.state.walletEmail}</h2>{" "}
         <div>
-          <button onClick={this.sendEth}>Send eth</button>
-          <button onClick={this.toggleWallet}>Wallet</button>
+          <span>Your Balance is {this.state.balance} ether</span>
+          <h3>Send some Ether</h3>
+          <form onSubmit={this.sendEther}>
+          Target Address: <input
+            type="text"
+            name="targetAddress"
+            placeholder="0x123"
+            value={this.state.targetAddress}
+            onChange={this.handleInputChange}
+          /><br />
+          Ether: 
+          <input
+            type="text"
+            name="numberOfEther"
+            placeholder="1"
+            value={this.state.numberOfEther}
+            onChange={this.handleInputChange}
+            className="Input"
+          /><br />
+          <input type="submit" value="Send Now" />
+        </form>
+          <br />
+          <br />
+          <br />
+          <button onClick={this.toggleWallet}>Show/Hide Wallet</button>
         </div>
       </div>
     ) : (
@@ -123,6 +153,7 @@ class App extends Component {
     return (
       <div className="App">
         <h1>Welcome to the trade engine!</h1>
+        
         <br />
         {content}
       </div>
