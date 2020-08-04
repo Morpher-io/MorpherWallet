@@ -49,6 +49,7 @@ class App extends Component {
   };
 
   async componentDidMount() {
+
     let encryptedSeed = localStorage.getItem("encryptedSeed") || "";
     let email = localStorage.getItem("email") || "";
     let password = window.sessionStorage.getItem("password") || "";
@@ -108,6 +109,7 @@ class App extends Component {
           },
         },
       });
+      
     }
   }
 
@@ -185,21 +187,6 @@ class App extends Component {
         console.log("found keystore, trying to unlock");
 
         return this.unlockWallet(encryptedSeed, password);
-
-        try {
-          keystore = await getKeystoreFromEncryptedSeed(
-            encryptedSeed,
-            password
-          );
-        } catch (e) {
-          console.log("password wrong");
-          this.setState({
-            loginFailure: true,
-            accounts: null,
-            hasWallet: true,
-            unlockedWallet: false,
-          });
-        }
 
       } catch (e) {
         console.log("keystore not found in mail, creating a new one");
