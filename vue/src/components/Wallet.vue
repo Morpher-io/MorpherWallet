@@ -26,7 +26,7 @@
                 type="password"
                 name="walletPassword"
                 placeholder="Strong Password"
-                v-model="password"
+                v-model="walletPassword"
         />
         <button>Unlock Wallet</button>
       </form>
@@ -36,7 +36,11 @@
         <br />
         <b>The Password you provided is invalid!</b>
         <br />
-
+        <v-facebook-login app-id="299132904630133"  @sdk-init="handleSdkInit" @login="facebookRecovery"  v-model="facebook.model"
+        ><span slot="login">RECOVER WITH FACEBOOK</span>
+        </v-facebook-login>
+        <GoogleLogin :params="{client_id: '376509986959-k6tstmq30f4spbp9vd1u94tvt8dg714b.apps.googleusercontent.com'}" :onSuccess="googleRecovery">Recover with Google</GoogleLogin>
+        <VKRecoverWallet :walletEmail="walletEmail"> </VKRecoverWallet>
       </div>
     </div>
     <div v-if="hasWallet && unlockedWallet">
@@ -44,7 +48,7 @@
       <h3>You are successfully logged in!</h3>
       <div>
         <p>Your Account: {{accounts[0]}}</p>
-        <button>
+        <button @click="logout">
           Log out
         </button>
         <button>
@@ -61,6 +65,8 @@
         <v-facebook-login app-id="299132904630133"  @sdk-init="handleSdkInit" @login="addFacebookRecovery"  v-model="facebook.model"
         ><span slot="login">ADD FACEBOOK RECOVERY</span>
         </v-facebook-login>
+        <GoogleLogin :params="{client_id: '376509986959-k6tstmq30f4spbp9vd1u94tvt8dg714b.apps.googleusercontent.com'}" :onSuccess="addGoogleRecovery">Add Google recovery</GoogleLogin>
+        <VKAddRecovery :walletEmail="walletEmail"> </VKAddRecovery>
       </div>
   </div>
   </div>
@@ -81,18 +87,23 @@
     changePasswordEncryptedSeed,
     recoverFacebookSeed,
     getEncryptedSeedFromMail,
+    backupGoogleSeed,
+    recoverGoogleSeed
   } = require("../utils/backupRestore");
 
   import VFacebookLogin from 'vue-facebook-login-component'
   import GoogleLogin from 'vue-google-login';
-
+  import VKAddRecovery from './VKAddRecovery';
+  import VKRecoverWallet from './VKRecoverWallet';
 
 
   export default {
   name: 'Wallet',
   components: {
     VFacebookLogin,
-    GoogleLogin
+    GoogleLogin,
+    VKAddRecovery,
+    VKRecoverWallet
   },
   data: function(){
     return {
@@ -213,19 +224,126 @@
         console.log(e);
       }
     },
+    cancel(){
+      localStorage.clear();
+      location.reload();
+    },
+    async logout(){
+      if (isIframe()) {
+        (await this.connection.promise).onLogout();
+      }
+      localStorage.clear();
+      window.location.reload();
+    },
     handleSdkInit({ FB, scope }){
       this.facebook.scope = scope
       this.facebook.FB = FB
     },
     async addFacebookRecovery(data) {
-      console.log(data.authResponse.accessToken)
-      var self = this
-      this.facebook.FB.api('/me', {fields: 'id, name, email'}, async function (user) {
-        console.log(user)
-        //let key = await sha256("299132904630133" + user.id);
-      })
-      let fbToken = data.authResponse.accessToken
-      console.log("fbtoken: " + fbToken)
+      let userID = data.authResponse.userID
+      let encryptedSeedFromPassword = localStorage.getItem("encryptedSeed") || "";
+      if (encryptedSeedFromPassword === "") {
+        throw new Error("Keystore not found, aborting");
+      }
+
+      let encryptedSeedFromFacebookUserID = await changePasswordEncryptedSeed(
+              JSON.parse(encryptedSeedFromPassword),
+              window.sessionStorage.getItem("password"),
+              userID
+      );
+      try {
+        await backupFacebookSeed(
+                this.walletEmail,
+                userID,
+                encryptedSeedFromFacebookUserID
+        );
+        this.hasWalletRecovery = true;
+      } catch {
+        this.hasWalletRecovery = false;
+      }
+    },
+    async facebookRecovery(data) {
+      try {
+        let userID = data.authResponse.userID
+        let fbToken = data.authResponse.accessToken
+        let encryptedSeedFacebook = await recoverFacebookSeed(
+                fbToken,
+                this.walletEmail
+        );
+        var newPasswordForLocalStorage = prompt(
+                "Enter a new password for you local vault",
+                "Super Strong Pass0wrd!"
+        );
+
+        //double hashing the password
+        newPasswordForLocalStorage = await sha256(newPasswordForLocalStorage);
+        let encryptedSeedPassword = await changePasswordEncryptedSeed(
+                encryptedSeedFacebook,
+                userID,
+                newPasswordForLocalStorage
+        );
+        saveWalletEmailPassword(this.walletEmail, encryptedSeedPassword);
+        window.localStorage.setItem("encryptedSeed", JSON.stringify(encryptedSeedPassword));
+        window.localStorage.setItem("email", this.walletEmail);
+        window.sessionStorage.setItem("password", newPasswordForLocalStorage);
+        //this.loginFromRecovery();
+      } catch (e) {
+        alert(
+                "Your account wasn't found with Facebook recovery, create one with username and password first"
+        );
+      }
+    },
+    async addGoogleRecovery(data) {
+      let userID = data.Da
+      let encryptedSeedFromPassword = localStorage.getItem("encryptedSeed") || "";
+      if (encryptedSeedFromPassword === "") {
+        throw new Error("Keystore not found, aborting");
+      }
+
+      let encryptedSeedFromFacebookUserID = await changePasswordEncryptedSeed(
+              JSON.parse(encryptedSeedFromPassword),
+              window.sessionStorage.getItem("password"),
+              userID
+      );
+      try {
+        await backupGoogleSeed(
+                this.walletEmail,
+                userID,
+                encryptedSeedFromFacebookUserID
+        );
+        this.hasWalletRecovery = true;
+      } catch(e) {
+        console.log(e)
+        this.hasWalletRecovery = false;
+      }
+    },
+    async googleRecovery(data){
+      try {
+        let userID = data.Da
+        let accessToken = data.wc.access_token
+        let encryptedSeedFacebook = await recoverGoogleSeed(
+                accessToken,
+                this.walletEmail
+        );
+        var newPasswordForLocalStorage = prompt(
+                "Enter a new password for you local vault",
+                "Super Strong Pass0wrd!"
+        );
+        //double hashing the password
+        newPasswordForLocalStorage = await sha256(newPasswordForLocalStorage);
+        let encryptedSeedPassword = await changePasswordEncryptedSeed(
+                encryptedSeedFacebook,
+                userID,
+                newPasswordForLocalStorage
+        );
+        saveWalletEmailPassword(this.walletEmail, encryptedSeedPassword);
+        window.localStorage.setItem("encryptedSeed", JSON.stringify(encryptedSeedPassword));
+        window.sessionStorage.setItem("password", newPasswordForLocalStorage);
+      } catch (e) {
+        alert(
+                "Your account wasn't found with Google recovery, create one with username and password first"
+        );
+      }
     }
   },
   mounted(){
@@ -248,7 +366,7 @@
         // Methods child is exposing to parent
         methods: {
           async getAccounts() {
-            if(self.state.keystore != null) {
+            if(self.keystore != null) {
               return await self.keystore.getAddresses();
             } else {
               return [];
