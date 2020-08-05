@@ -10,7 +10,7 @@ const { sha256 } = require("./morpher/cryptoFunctions");
 export class ChangeEmail extends Component {
     state = {
         newEmail: '',
-        newEmailRepeat: ''
+        password: ''
     };
 
     handleInputChange = (event) => {
@@ -25,22 +25,24 @@ export class ChangeEmail extends Component {
 
     formSubmitChangeEmail = async (e) => {
         e.preventDefault();
+        if(!this.state.newEmail) return
+        let storedPassword = window.sessionStorage.getItem("password")
+        let password = await sha256(this.state.password);
 
-        if(this.state.newEmail === this.state.newEmailRepeat) {
+        if(storedPassword === password) {
             let encryptedSeed = JSON.parse(localStorage.getItem("encryptedSeed"))
             let oldEmail = localStorage.getItem("email")
-            console.log(oldEmail)
             await changeEmail(oldEmail, this.state.newEmail, encryptedSeed)
             window.localStorage.setItem("email", this.state.newEmail);
             alert('Password changed successfully.')
 
             this.setState({
                 newEmail: '',
-                newEmailRepeat: ''
+                password: ''
             });
         }
 
-        else alert('New emails do not match.')
+        else alert('Password is not right!')
 
     };
 
@@ -54,10 +56,10 @@ export class ChangeEmail extends Component {
         onChange={this.handleInputChange}
         />
         <input
-        type="text"
-        name="newEmailRepeat"
-        placeholder="New Email Again"
-        value={this.state.newEmailRepeat}
+        type="password"
+        name="password"
+        placeholder="Emter password"
+        value={this.state.password}
         onChange={this.handleInputChange}
         />
         <input type="submit" value="Submit" />
