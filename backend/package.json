@@ -34,6 +34,7 @@
     "express-rate-limit": "^3.5.1",
     "facebook-nodejs-business-sdk": "^7.0.3",
     "fb": "^2.0.0",
+    "googleapis": "^58.0.0",
     "helmet": "^3.15.0",
     "isomorphic-fetch": "^2.2.1",
     "moment": "^2.23.0",
@@ -47,6 +48,7 @@
     "ts-node": "^7.0.1",
     "typescript": "^3.6.3",
     "validate.js": "^0.13.1",
+    "vk-io": "^4.0.0-rc.30",
     "winston": "^3.1.0",
     "winston-aws-cloudwatch": "^3.0.0"
   },

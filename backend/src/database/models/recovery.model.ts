@@ -1,16 +1,6 @@
-import {
-    AutoIncrement,
-    BelongsTo,
-    Column,
-    DataType,
-    ForeignKey,
-    Model,
-    PrimaryKey,
-    Table,
-} from "sequelize-typescript";
-import {Recovery_Type} from "./recovery_type.model";
-import {User} from "./user.model";
-
+import { AutoIncrement, BelongsTo, Column, DataType, ForeignKey, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import { Recovery_Type } from './recovery_type.model';
+import { User } from './user.model';
 
 @Table({ timestamps: false })
 export class Recovery extends Model<Recovery> {
@@ -40,13 +30,13 @@ export class Recovery extends Model<Recovery> {
     user_id;
 
     @Column
-    encrypted_seed: string
+    encrypted_seed: string;
 
     @Column
-    key: string
+    key: string;
 
     @Column
-    extra_information: string
+    extra_information: string;
 
     @Column({
         type: DataType.BIGINT

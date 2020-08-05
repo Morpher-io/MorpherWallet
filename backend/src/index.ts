@@ -7,15 +7,14 @@ import * as cors from 'cors';
 import * as morgan from 'morgan';
 import * as helmet from 'helmet';
 import * as bodyParser from 'body-parser';
-import {sequelize, User} from './database/models';
-import {seedDatabase, successResponse} from './helpers/functions/util';
-import { Logger } from "./helpers/winston";
-import {saveEmailPassword} from "./controllers/wallet.controller";
+import { sequelize, User } from './database/models';
+import {encrypt, successResponse} from './helpers/functions/util';
+import { Logger } from './helpers/functions/winston';
 
-// Create v1 routes instance for REST endpoint +
+// Import v1 routes instance for REST endpoint.
 const v1 = require('./routes/v1/')(express);
 
-// Express App
+// REST backend initialization.
 const app = express();
 
 const rateLimit = require('express-rate-limit');
@@ -25,10 +24,10 @@ const webLimiter = rateLimit({
     max: 60 // limit each IP to 60 requests per minute
 });
 
-// apply a rate limit to the web endpoints
+// apply a rate limit to the web endpoints.
 app.use('/v1/', webLimiter);
 
-// CORS - Cross-Origin Resource Sharing
+// CORS - Cross-Origin Resource Sharing.
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
@@ -43,7 +42,7 @@ app.use((req, res, next) => {
 });
 app.use(cors());
 
-// Use morgan combined with winston logger
+// Use morgan combined with winston for logging.
 app.use(morgan('combined'));
 
 // Use helmet and body parser library
@@ -51,14 +50,14 @@ app.use(helmet());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({ limit: '1mb' })); //app.use(bodyParser.json());
 
-// Assign v1 routes to the express app
+// Assign v1 routes to the express app.
 app.use('/v1', v1);
 
 app.get('/', async (req, res) => {
     return successResponse(res, { message: 'Pending Morpher API' });
 });
 
-// Create Express HTTP Server instance using native http module
+// Create Express HTTP Server instance using native http module.
 const httpServer = http.createServer(app);
 
 process.on('unhandledRejection', (error: any, promise) => {
@@ -69,7 +68,7 @@ process.on('unhandledRejection', (error: any, promise) => {
 httpServer.listen(process.env.PORT, async () => {
     console.log(`🚀Express Server ready at http://localhost:${process.env.PORT}`);
 
-    // CAREFUL: Sync changes to database - Use force: true to delete everything and create new database
+    // Database initialization.
     await sequelize.sync();
     Logger.info('Connected to database');
 });

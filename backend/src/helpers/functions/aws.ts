@@ -1,4 +1,3 @@
-
 const region = 'eu-central-1';
 
 const myArgs = process.argv.slice(2);
@@ -37,7 +36,6 @@ const loadSecretEnv = async () => {
                 const secret = data.SecretString;
                 parsedSecret = JSON.parse(secret);
             } else {
-
                 // If there is no secret string then descrpy the secret data
                 const buff = new Buffer(data.SecretBinary.toString(), 'base64');
                 const secret = buff.toString('ascii');
@@ -46,7 +44,7 @@ const loadSecretEnv = async () => {
             let text = '';
             // copy all secret properties into the env variables
             Object.keys(parsedSecret).forEach(key => {
-                text+=key + '=' + parsedSecret[key] + "\n";
+                text += key + '=' + parsedSecret[key] + '\n';
             });
 
             const fs = require('fs');
@@ -55,7 +53,7 @@ const loadSecretEnv = async () => {
             console.log('Completed - AWS Environment Loading');
         }
     } catch (err) {
-        console.log("Error getting aws secret environment:" + err.message )
+        console.log('Error getting aws secret environment:' + err.message);
     }
 };
 

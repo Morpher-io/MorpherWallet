@@ -25,7 +25,7 @@ export const sequelize = new Sequelize({
         max: 100,
         min: 0,
         idle: 200000,
-        acquire: 1000000,
+        acquire: 1000000
     }
 });
 

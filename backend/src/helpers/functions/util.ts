@@ -1,7 +1,6 @@
-import awaitTo from 'await-to-js';
-import {Recovery_Type} from "../../database/models";
+import { Recovery_Type } from '../../database/models';
 
-const { promisify } = require('util');
+const crypto = require('crypto');
 
 /**
  * Function which returns error REST Response
@@ -48,22 +47,44 @@ const formatMarketId = (type: string, symbol: string) => {
     return (type + '_' + symbol).toUpperCase().replace(/[^a-zA-Z0-9]/g, '_');
 };
 
-async function seedDatabase(){
-    const recoveryTypes = [{ id: 1, name: 'Email/Password' }, { id: 2, name: 'Facebook' }, { id: 3, name: 'Google' },
-        { id: 4, name: 'Twitter' }, { id: 5, name: 'VKontakte' }
-    ]
+// Helper function to add the recovery types in a fresh database.
+async function seedDatabase() {
+    const recoveryTypes = [
+        { id: 1, name: 'Email/Password' },
+        { id: 2, name: 'Facebook' },
+        { id: 3, name: 'Google' },
+        { id: 4, name: 'Twitter' },
+        { id: 5, name: 'VKontakte' }
+    ];
 
     await Recovery_Type.bulkCreate(recoveryTypes);
 
-    console.log('Recovery types added successfully to database.')
+    console.log('Recovery types added successfully to database.');
 }
 
+// Black box encryption functions.
+function encrypt(text, key) {
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
+    let encrypted = cipher.update(text);
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+    return { iv: iv.toString('hex'), encryptedData: encrypted.toString('hex') };
+}
 
-// @ts-ignore
-export {
-    errorResponse,
-    successResponse,
-    asyncForEach,
-    formatMarketId,
-    seedDatabase
-};
+function decrypt(text, key) {
+    const iv = Buffer.from(text.iv, 'hex');
+    const encryptedText = Buffer.from(text.encryptedData, 'hex');
+    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), iv);
+    let decrypted = decipher.update(encryptedText);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString();
+}
+
+function sha256(text) {
+    return crypto
+        .createHash('sha256')
+        .update(text)
+        .digest('base64');
+}
+
+export { errorResponse, successResponse, asyncForEach, formatMarketId, seedDatabase, encrypt, decrypt, sha256 };
