@@ -3,6 +3,8 @@ import { decrypt, encrypt, errorResponse, successResponse, sha256 } from '../hel
 const { to } = require('await-to-js');
 import * as moment from 'moment';
 
+import { Request, Response } from 'express';
+
 import { VK } from 'vk-io';
 import { Facebook } from 'fb';
 const options = {
@@ -16,7 +18,7 @@ const OAuth2 = Google.auth.OAuth2;
 const oauth2Client = new OAuth2();
 
 // Function to save new signups to the database.
-export async function saveEmailPassword(req, res) {
+export async function saveEmailPassword(req: Request, res: Response) {
     // Get sequelize transactions to rollback changes in case of failure.
     const [err, transaction] = await to(getTransaction());
     if (err) return errorResponse(res, err.message);
@@ -31,16 +33,16 @@ export async function saveEmailPassword(req, res) {
         let userId;
 
         // Attempt to get user from database.
-        const [, user] = await to(User.findOne({ where: email, transaction }));
+        const [, user] = await to(User.findOne({ where: { email }, raw:true, transaction }));
 
         if (user) {
             // If it exists, set the userId and delete the associated recovery method.
-            userId = user.dataValues.id;
+            userId = user.id;
 
             await Recovery.destroy({ where: { user_id: user.id, [Op.and]: { recovery_type_id: recoveryTypeId } }, transaction });
         } else {
             // If it doesnt exist create a new one.
-            userId = (await User.create({ email, created_at: moment.utc().valueOf() }, { transaction })).dataValues.id;
+            userId = (await User.create({ email }, { transaction })).dataValues.id;
         }
 
         // Create a new recovery method.
@@ -49,9 +51,8 @@ export async function saveEmailPassword(req, res) {
                 {
                     recovery_type_id: recoveryTypeId,
                     user_id: userId,
-                    encrypted_seed: JSON.stringify(encrypt(encryptedSeed, process.env.DB_BACKEND_SALT)),
-                    key,
-                    created_at: moment.utc().valueOf()
+                    encrypted_seed: JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT)),
+                    key
                 },
                 { transaction }
             )
@@ -66,7 +67,7 @@ export async function saveEmailPassword(req, res) {
     } catch (error) {
         // If an error happened anywhere along the way, rollback all the changes.
         await transaction.rollback();
-        return errorResponse(res, error.stack);
+        return errorResponse(res, error.message);
     }
 }
 
@@ -82,7 +83,7 @@ export async function getEncryptedSeed(req, res) {
             encryptedSeed: decrypt(JSON.parse(result.encrypted_seed), process.env.DB_BACKEND_SALT)
         });
     // Otherwise return an error.
-    else return errorResponse(res, 'Encrypted seed could not be found.', 404);
+    else return successResponse(res, 'Seed not found, creating new wallet.');
 }
 
 // Function to return all recovery types from the database.
@@ -97,7 +98,7 @@ export async function getRecoveryTypes(req, res) {
 export async function getFacebookEncryptedSeed(req, res) {
     // Get access token and email from request body.
     const accessToken = req.body.accessToken;
-    const originalSignupEmail = req.body.originalSignupEmail;
+    const signupEmail = req.body.signupEmail;
 
     // Set facebook access token and make the query for the current profile.
     FB.setAccessToken(accessToken);
@@ -107,7 +108,7 @@ export async function getFacebookEncryptedSeed(req, res) {
     const key = sha256(process.env.FACEBOOK_APP_ID + '.' + result.id);
 
     // Attempt to get user from database with the given email address.
-    const user = await User.findOne({ where: { email: originalSignupEmail }, raw: true });
+    const user = await User.findOne({ where: { email: signupEmail }, raw: true });
 
     if (user) {
         // If user exists return the decrypted seed.
@@ -124,7 +125,7 @@ export async function getFacebookEncryptedSeed(req, res) {
 export async function getGoogleEncryptedSeed(req, res) {
     // Get access token and email from request body.
     const accessToken = req.body.accessToken;
-    const originalSignupEmail = req.body.originalSignupEmail;
+    const signupEmail = req.body.signupEmail;
 
     // Set google access token and make the query for the current profile.
     oauth2Client.setCredentials({ access_token: accessToken });
@@ -138,7 +139,7 @@ export async function getGoogleEncryptedSeed(req, res) {
     const key = sha256(process.env.GOOGLE_APP_ID + '.' + result.data.id);
 
     // Attempt to get user from database with the given email address.
-    const user = await User.findOne({ where: { email: originalSignupEmail } });
+    const user = await User.findOne({ where: { email: signupEmail } });
 
     if (user) {
         // If user exists return the decrypted seed.
@@ -155,7 +156,7 @@ export async function getGoogleEncryptedSeed(req, res) {
 export async function getVKontakteEncryptedSeed(req, res) {
     // Get access token and email from request body.
     const accessToken = req.body.accessToken;
-    const originalSignupEmail = req.body.originalSignupEmail;
+    const signupEmail = req.body.signupEmail;
 
     // Set vkontakte access token and make the query for the current profile.
     const vk = new VK({
@@ -167,7 +168,7 @@ export async function getVKontakteEncryptedSeed(req, res) {
     const key = sha256(process.env.VKONTAKTE_APP_ID + '.' + result[0].id);
 
     // Attempt to get user from database with the given email address.
-    const user = await User.findOne({ where: { email: originalSignupEmail } });
+    const user = await User.findOne({ where: { email: signupEmail } });
 
     if (user) {
         // If user exists return the decrypted seed.

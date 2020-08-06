@@ -1,5 +1,6 @@
 import { AutoIncrement, Column, DataType, HasMany, Model, PrimaryKey, Table, Unique } from 'sequelize-typescript';
 import { Recovery } from './recovery.model';
+import * as moment from 'moment';
 
 @Table({ timestamps: false })
 export class User extends Model<User> {
@@ -10,12 +11,13 @@ export class User extends Model<User> {
 
     @Unique
     @Column({
-        type: DataType.STRING
+        type: DataType.TEXT
     })
     email;
 
     @Column({
-        type: DataType.BIGINT
+        type: DataType.BIGINT,
+        defaultValue: () => moment.utc().valueOf()
     })
     created_at;
 

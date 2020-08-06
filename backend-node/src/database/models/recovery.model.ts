@@ -1,6 +1,7 @@
 import { AutoIncrement, BelongsTo, Column, DataType, ForeignKey, Model, PrimaryKey, Table } from 'sequelize-typescript';
 import { Recovery_Type } from './recovery_type.model';
 import { User } from './user.model';
+import * as moment from 'moment';
 
 @Table({ timestamps: false })
 export class Recovery extends Model<Recovery> {
@@ -29,17 +30,24 @@ export class Recovery extends Model<Recovery> {
     })
     user_id;
 
-    @Column
+    @Column({
+        type: DataType.TEXT
+    })
     encrypted_seed: string;
 
-    @Column
+    @Column({
+        type: DataType.TEXT
+    })
     key: string;
 
-    @Column
+    @Column({
+        type: DataType.TEXT
+    })
     extra_information: string;
 
     @Column({
-        type: DataType.BIGINT
+        type: DataType.BIGINT,
+        defaultValue: () => moment.utc().valueOf()
     })
     created_at;
 

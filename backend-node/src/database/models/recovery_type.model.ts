@@ -9,7 +9,7 @@ export class Recovery_Type extends Model<Recovery_Type> {
     id: number;
 
     @Column({
-        type: DataType.STRING
+        type: DataType.TEXT
     })
     name;
 
