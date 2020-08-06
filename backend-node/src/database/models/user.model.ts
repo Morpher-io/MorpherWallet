@@ -8,6 +8,7 @@ export class User extends Model<User> {
     @Column
     id: number;
 
+    @Unique
     @Column({
         type: DataType.STRING
     })

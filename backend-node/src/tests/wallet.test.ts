@@ -1,7 +1,7 @@
 import * as expect from 'expect';
 import { describe, it, beforeEach } from 'mocha';
 import { sequelize } from '../database/models';
-import {sha256} from "../helpers/functions/util";
+import { sha256 } from '../helpers/functions/util';
 
 const app = require('../index').app;
 const request = require('supertest');
@@ -32,10 +32,10 @@ const facebookData = {
 const facebookRecovery = {
     accessToken: 'longAccessToken',
     originalSignupEmail: 'arjet@morpher.com'
-}
+};
 
 describe('Wallet controller test cases', async () => {
-    it('successfully creates the user and recovery method', async () => {
+    it.only('successfully creates the user and recovery method', async () => {
         const walletResponse = await request(app)
             .post('/v1/saveEmailPassword')
             .send(bodyData)

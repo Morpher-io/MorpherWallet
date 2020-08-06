@@ -37,10 +37,10 @@ export async function saveEmailPassword(req, res) {
             // If it exists, set the userId and delete the associated recovery method.
             userId = user.dataValues.id;
 
-            await Recovery.destroy({ where: { user_id: user.id, [Op.and]: { recovery_type_id: recoveryTypeId }}, transaction });
+            await Recovery.destroy({ where: { user_id: user.id, [Op.and]: { recovery_type_id: recoveryTypeId } }, transaction });
         } else {
             // If it doesnt exist create a new one.
-            userId = (await User.create({ email, created_at: moment.utc().valueOf()}, { transaction })).dataValues.id;
+            userId = (await User.create({ email, created_at: moment.utc().valueOf() }, { transaction })).dataValues.id;
         }
 
         // Create a new recovery method.
@@ -112,7 +112,8 @@ export async function getFacebookEncryptedSeed(req, res) {
     if (user) {
         // If user exists return the decrypted seed.
         const recovery = await Recovery.findOne({ where: { key, [Op.and]: { recovery_type_id: 2 } }, raw: true });
-        if (recovery) return successResponse(res, { encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
+        if (recovery)
+            return successResponse(res, { encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
     }
 
     // If user does not exist return an error.
@@ -142,7 +143,8 @@ export async function getGoogleEncryptedSeed(req, res) {
     if (user) {
         // If user exists return the decrypted seed.
         const recovery = await Recovery.findOne({ where: { key, [Op.and]: { recovery_type_id: 3 } }, raw: true });
-        if (recovery) return successResponse(res, { encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
+        if (recovery)
+            return successResponse(res, { encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
     }
 
     // If user does not exist return an error.
@@ -170,7 +172,8 @@ export async function getVKontakteEncryptedSeed(req, res) {
     if (user) {
         // If user exists return the decrypted seed.
         const recovery = await Recovery.findOne({ where: { key, [Op.and]: { recovery_type_id: 5 } }, raw: true });
-        if (recovery) return successResponse(res, { encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
+        if (recovery)
+            return successResponse(res, { encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
     }
 
     // If user does not exist return an error.
