@@ -25,6 +25,10 @@ switch ($_GET['endpoint']) {
 
     case 'getRecoveryMethods':
         $result = \Morpher\UserInfo::getRecoveryMethods($data->email);
+		
+	case 'changeEmail':
+        $result = \Morpher\SeedRecovery\Email::change($data->oldemail, $data->newemail, $data->key, $data->seed);
+        break;	
 
         /**
          * Facebook Recovery
