@@ -55,12 +55,16 @@ const getEncryptedSeedFromMail = async (email) =>
 
         let options = {
             method: "POST",
-            body: JSON.stringify({ key: key }),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ key }),
             mode: "cors",
             cache: "default",
         };
         let response = await fetch(
-            config.BACKEND_ENDPOINT + "/index.php?endpoint=restoreEmailPassword",
+            config.BACKEND_ENDPOINT + "/v1/getEncryptedSeed",
             options
         );
         let responseBody = await response.json();
@@ -69,11 +73,11 @@ const getEncryptedSeedFromMail = async (email) =>
          * Login /Create Wallet is in one function
          * @todo: Separate Login and Create Wallet into separate functions so that upon failed "login" a recovery can be suggested
          */
-        if (responseBody !== false) {
+        if (responseBody.success) {
             /**
              * Wallet was found on server, attempting to decrypt with the password
              */
-            resolve(JSON.parse(responseBody));
+            resolve(JSON.parse(responseBody.encryptedSeed));
         }
         reject("seed not found");
     });
@@ -82,38 +86,20 @@ const saveWalletEmailPassword = async (userEmail, encryptedSeed) => {
     let key = await sha256(userEmail);
     let options = {
         method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
-            key: key,
-            seed: encryptedSeed,
+            key,
+            encryptedSeed,
             email: userEmail,
         }),
         mode: "cors",
         cache: "default",
     };
     let result = await fetch(
-        config.BACKEND_ENDPOINT + "/index.php?endpoint=saveEmailPassword",
-        options
-    );
-
-    let response = await result.json();
-    return response;
-};
-
-const changeEmail = async (oldEmail, newEmail, encryptedSeed) => {
-    let key = await sha256(newEmail);
-    let options = {
-        method: "POST",
-        body: JSON.stringify({
-            key: key,
-            seed: encryptedSeed,
-            oldemail: oldEmail,
-            newemail: newEmail
-        }),
-        mode: "cors",
-        cache: "default",
-    };
-    let result = await fetch(
-        config.BACKEND_ENDPOINT + "/index.php?endpoint=changeEmail",
+        config.BACKEND_ENDPOINT + "/v1/saveEmailPassword",
         options
     );
 
@@ -126,17 +112,22 @@ const backupGoogleSeed = async (userEmail, userid, encryptedSeed) =>
         let key = await sha256(config.GOOGLE_APP_ID + userid);
         const options = {
             method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({
-                seed: encryptedSeed,
-                key: key,
+                encryptedSeed,
+                key,
                 email: userEmail,
+                recoveryTypeId: 3
             }),
             mode: "cors",
             cache: "default",
         };
         try {
             fetch(
-                config.BACKEND_ENDPOINT + "/index.php?endpoint=saveGoogle",
+                config.BACKEND_ENDPOINT + "/v1/saveEmailPassword",
                 options
             ).then((r) => {
                 r.json().then((response) => {
@@ -153,17 +144,22 @@ const backupFacebookSeed = async (userEmail, userid, encryptedSeed) =>
         let key = await sha256(config.FACEBOOK_APP_ID + userid);
         const options = {
             method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({
-                seed: encryptedSeed,
+                encryptedSeed,
                 key: key,
                 email: userEmail,
+                recoveryTypeId: 2
             }),
             mode: "cors",
             cache: "default",
         };
         try {
             fetch(
-                config.BACKEND_ENDPOINT + "/index.php?endpoint=saveFacebook",
+                config.BACKEND_ENDPOINT + "/v1/saveEmailPassword",
                 options
             ).then((r) => {
                 r.json().then((response) => {
@@ -179,18 +175,22 @@ const recoverFacebookSeed = async (accessToken, signupEmail) =>
     new Promise((resolve, reject) => {
         const options = {
             method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({ accessToken: accessToken, signupEmail: signupEmail}),
             mode: "cors",
             cache: "default",
         };
         fetch(
-            config.BACKEND_ENDPOINT + "/index.php?endpoint=restoreFacebook",
+            config.BACKEND_ENDPOINT + "/v1/getFacebookEncryptedSeed",
             options
         ).then((r) => {
             r.json().then(async (responseBody) => {
-                if (responseBody !== false) {
+                if (responseBody.success){
                     //initiate recovery
-                    let encryptedSeed = JSON.parse(responseBody);
+                    let encryptedSeed = JSON.parse(responseBody.encryptedSeed);
                     resolve(encryptedSeed);
                 } else {
                     reject(
@@ -204,18 +204,22 @@ const recoverGoogleSeed = async (accessToken, signupEmail) =>
     new Promise((resolve, reject) => {
         const options = {
             method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({ accessToken: accessToken, signupEmail: signupEmail }),
             mode: "cors",
             cache: "default",
         };
         fetch(
-            config.BACKEND_ENDPOINT + "/index.php?endpoint=restoreGoogle",
+            config.BACKEND_ENDPOINT + "/v1/getGoogleEncryptedSeed",
             options
         ).then((r) => {
             r.json().then(async (responseBody) => {
-                if (responseBody !== false) {
+                if (responseBody.success) {
                     //initiate recovery
-                    let encryptedSeed = JSON.parse(responseBody);
+                    let encryptedSeed = JSON.parse(responseBody.encryptedSeed);
                     resolve(encryptedSeed);
                 } else {
                     reject(
@@ -226,8 +230,95 @@ const recoverGoogleSeed = async (accessToken, signupEmail) =>
         });
     });
 
-export {
-    getEncryptedSeed,
+const recoverVKSeed = async (accessToken, signupEmail) =>
+    new Promise((resolve, reject) => {
+        const options = {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ accessToken: accessToken, signupEmail: signupEmail }),
+            mode: "cors",
+            cache: "default",
+        };
+        fetch(
+            config.BACKEND_ENDPOINT + "/v1/getVKontakteEncryptedSeed",
+            options
+        ).then((r) => {
+            r.json().then(async (responseBody) => {
+                if (responseBody.success) {
+                    //initiate recovery
+                    let encryptedSeed = JSON.parse(responseBody.encryptedSeed);
+                    resolve(encryptedSeed);
+                } else {
+                    reject(
+                        "Your account wasn't found with VK recovery, create one with username and password first"
+                    );
+                }
+            });
+        });
+    });
+
+const backupVKSeed = async (userEmail, userid, encryptedSeed) =>
+    new Promise(async (resolve, reject) => {
+        let key = await sha256(config.VK_APP_ID + userid);
+        const options = {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                encryptedSeed,
+                key,
+                email: userEmail,
+                recoveryTypeId: 5
+            }),
+            mode: "cors",
+            cache: "default",
+        };
+        try {
+            fetch(
+                config.BACKEND_ENDPOINT + "/v1/saveEmailPassword",
+                options
+            ).then((r) => {
+                r.json().then((response) => {
+                    resolve(response);
+                });
+            });
+        } catch (e) {
+            reject(e);
+        }
+    });
+
+const changeEmail = async (oldEmail, newEmail, encryptedSeed) => {
+    let key = await sha256(newEmail);
+    let options = {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            key,
+            encryptedSeed,
+            oldEmail,
+            newEmail
+        }),
+        mode: "cors",
+        cache: "default",
+    };
+    let result = await fetch(
+        config.BACKEND_ENDPOINT + "/v1/changeEmail",
+        options
+    );
+
+    let response = await result.json();
+    return response;
+};
+
+export {  getEncryptedSeed,
     saveWalletEmailPassword,
     getKeystoreFromEncryptedSeed,
     changePasswordEncryptedSeed,
@@ -236,5 +327,7 @@ export {
     getEncryptedSeedFromMail,
     backupGoogleSeed,
     recoverGoogleSeed,
+    backupVKSeed,
+    recoverVKSeed,
     changeEmail
 };

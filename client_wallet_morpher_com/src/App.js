@@ -396,7 +396,7 @@ class App extends Component {
         </form>
         {this.state.loginFailure ? (
           <div>
-            <br />
+            <br /
             <b>The Password you provided is invalid!</b>
             <br />
             <br />

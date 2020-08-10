@@ -155,7 +155,7 @@
             );
           }
         } catch (e) {
-          console.error(e);
+          // console.error(e);
           this.loginFailure = true;
           this.accounts = null;
           this.hasWallet = true;
@@ -179,11 +179,13 @@
             let encryptedSeed = await getEncryptedSeedFromMail(
                     this.walletEmail
             );
+
             window.localStorage.setItem(
                     "encryptedSeed",
                     JSON.stringify(encryptedSeed)
             );
             window.localStorage.setItem("email", this.walletEmail);
+            window.sessionStorage.setItem("password", password);
             console.log("found keystore, trying to unlock");
 
             return this.unlockWallet(encryptedSeed, password);
@@ -205,6 +207,7 @@
                   "encryptedSeed",
                   JSON.stringify(encryptedSeed)
           );
+          window.localStorage.setItem("email", this.walletEmail);
           window.sessionStorage.setItem("password", password);
 
           if (created) {
@@ -259,6 +262,7 @@
         this.loginType =  loginType;
         this.hasWallet = true;
         this.walletEmail = email;
+
         if (password !== "") {
           this.unlockWallet(JSON.parse(encryptedSeed), password);
         }

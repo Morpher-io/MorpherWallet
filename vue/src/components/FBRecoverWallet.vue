@@ -1,7 +1,7 @@
 <template>
     <div>
         <v-facebook-login app-id="299132904630133"  @sdk-init="handleSdkInit" @login="onLogin"  v-model="facebook.model"
-            ><span slot="login">Recover with Facebbok</span>
+            ><span slot="login">Recover with Facebook</span>
         </v-facebook-login>
     </div>
 </template>
