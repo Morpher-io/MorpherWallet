@@ -8,7 +8,7 @@ const crypto = require('crypto');
  * @param err
  * @param code
  */
-const errorResponse = function(res, err, code = null) {
+const errorResponse = function(res, err, code = 404) {
     if (typeof err === 'object' && typeof err.message !== 'undefined') err = err.message;
     if (code !== null) res.statusCode = code;
     console.log(err);

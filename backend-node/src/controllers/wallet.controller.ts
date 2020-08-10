@@ -17,6 +17,60 @@ const Google = require('googleapis').google;
 const OAuth2 = Google.auth.OAuth2;
 const oauth2Client = new OAuth2();
 
+// Function to change email for current existing user.
+export async function changeEmail(req, res) {
+    const oldEmail = req.body.oldEmail;
+    const newEmail = req.body.newEmail;
+    const key = req.body.key;
+    const encryptedSeed = req.body.encryptedSeed;
+
+    // Get sequelize transactions to rollback changes in case of failure.
+    const [err, transaction] = await to(getTransaction());
+    if (err) return errorResponse(res, err.message);
+
+    let userId;
+
+    try{
+        // Attempt to get user from database.
+        const [, user] = await to(User.findOne({ where: { email: oldEmail }, transaction }));
+
+        if (user) {
+            // If it exists, update the new email and add a new Recovery entry.
+            userId = user.id;
+
+            user.email = newEmail;
+            await user.save({ transaction });
+
+            await Recovery.destroy({ where: { user_id: user.id, [Op.and]: { recovery_type_id: 1 } }, transaction });
+
+            const recoveryId = (
+                await Recovery.create(
+                    {
+                        recovery_type_id: 1,
+                        user_id: userId,
+                        encrypted_seed: JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT)),
+                        key
+                    },
+                    { transaction }
+                )
+            ).dataValues.id;
+
+            // Commit changes to database and return successfully.
+            await transaction.commit();
+
+            return successResponse(res, {
+                recovery_id: recoveryId
+            });
+        } else {
+            return errorResponse(res, 'User not found.');
+        }
+    } catch (error) {
+        // If an error happened anywhere along the way, rollback all the changes.
+        await transaction.rollback();
+        return errorResponse(res, error.message);
+    }
+}
+
 // Function to save new signups to the database.
 export async function saveEmailPassword(req: Request, res: Response) {
     // Get sequelize transactions to rollback changes in case of failure.
@@ -78,12 +132,14 @@ export async function getEncryptedSeed(req, res) {
     // Simply get Recovery instance that has this key and return it if its found.
     const [error, result] = await to(Recovery.findOne({ where: { key }, raw: true }));
 
-    if (result)
+    if (result){
         return successResponse(res, {
             encryptedSeed: decrypt(JSON.parse(result.encrypted_seed), process.env.DB_BACKEND_SALT)
         });
+    }
+
     // Otherwise return an error.
-    else return successResponse(res, 'Seed not found, creating new wallet.');
+    else return errorResponse(res, 'Seed not found, creating new wallet.');
 }
 
 // Function to return all recovery types from the database.
@@ -91,7 +147,7 @@ export async function getRecoveryTypes(req, res) {
     const recoveryMethods = await Recovery_Type.findAll({ raw: true });
 
     if (recoveryMethods.length > 0) return successResponse(res, recoveryMethods);
-    else return errorResponse(res, 'Recovery methods could not be found', 404);
+    else return errorResponse(res, 'Recovery methods could not be found');
 }
 
 // Function to get encrypted seed from facebook recovery.
@@ -105,7 +161,7 @@ export async function getFacebookEncryptedSeed(req, res) {
     const result = await FB.api('/me?fields=name,email', 'get');
 
     // Hash the facebook id with user id to get the database key.
-    const key = sha256(process.env.FACEBOOK_APP_ID + '.' + result.id);
+    const key = sha256(process.env.FACEBOOK_APP_ID + result.id);
 
     // Attempt to get user from database with the given email address.
     const user = await User.findOne({ where: { email: signupEmail }, raw: true });
@@ -118,7 +174,7 @@ export async function getFacebookEncryptedSeed(req, res) {
     }
 
     // If user does not exist return an error.
-    return errorResponse(res, 'User not found.', 404);
+    return errorResponse(res, 'User not found.');
 }
 
 // Function to get encrypted seed from google recovery.
@@ -136,7 +192,7 @@ export async function getGoogleEncryptedSeed(req, res) {
     const result = await oauth2.userinfo.get();
 
     // Hash the facebook id with user id to get the database key.
-    const key = sha256(process.env.GOOGLE_APP_ID + '.' + result.data.id);
+    const key = sha256(process.env.GOOGLE_APP_ID + result.data.id);
 
     // Attempt to get user from database with the given email address.
     const user = await User.findOne({ where: { email: signupEmail } });
@@ -149,7 +205,7 @@ export async function getGoogleEncryptedSeed(req, res) {
     }
 
     // If user does not exist return an error.
-    return errorResponse(res, 'User not found.', 404);
+    return errorResponse(res, 'User not found.');
 }
 
 // Function to get encrypted seed from vkontakte recovery.
@@ -165,7 +221,7 @@ export async function getVKontakteEncryptedSeed(req, res) {
     const result = await vk.api.users.get([accessToken]);
 
     // Hash the facebook id with user id to get the database key.
-    const key = sha256(process.env.VKONTAKTE_APP_ID + '.' + result[0].id);
+    const key = sha256(process.env.VKONTAKTE_APP_ID + result[0].id);
 
     // Attempt to get user from database with the given email address.
     const user = await User.findOne({ where: { email: signupEmail } });
@@ -178,5 +234,5 @@ export async function getVKontakteEncryptedSeed(req, res) {
     }
 
     // If user does not exist return an error.
-    return errorResponse(res, 'User not found.', 404);
+    return errorResponse(res, 'User not found.');
 }

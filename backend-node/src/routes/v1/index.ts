@@ -4,6 +4,7 @@ const WalletController = require('../../controllers/wallet.controller');
 module.exports = function(express) {
     const router = express.Router();
 
+    router.post('/changeEmail', WalletController.changeEmail);
     router.post('/saveEmailPassword', WalletController.saveEmailPassword);
     router.post('/getEncryptedSeed', WalletController.getEncryptedSeed);
     router.get('/getRecoveryTypes', WalletController.getRecoveryTypes);

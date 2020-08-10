@@ -73,11 +73,11 @@ const getEncryptedSeedFromMail = async (email) =>
          * Login /Create Wallet is in one function
          * @todo: Separate Login and Create Wallet into separate functions so that upon failed "login" a recovery can be suggested
          */
-        if (responseBody.status === 200) {
+        if (responseBody.success) {
             /**
              * Wallet was found on server, attempting to decrypt with the password
              */
-            resolve(JSON.parse(responseBody));
+            resolve(JSON.parse(responseBody.encryptedSeed));
         }
         reject("seed not found");
     });
@@ -188,9 +188,9 @@ const recoverFacebookSeed = async (accessToken, signupEmail) =>
             options
         ).then((r) => {
             r.json().then(async (responseBody) => {
-                if (responseBody.status === 200){
+                if (responseBody.success){
                     //initiate recovery
-                    let encryptedSeed = JSON.parse(responseBody);
+                    let encryptedSeed = JSON.parse(responseBody.encryptedSeed);
                     resolve(encryptedSeed);
                 } else {
                     reject(
@@ -217,9 +217,9 @@ const recoverGoogleSeed = async (accessToken, signupEmail) =>
             options
         ).then((r) => {
             r.json().then(async (responseBody) => {
-                if (responseBody.status === 200) {
+                if (responseBody.success) {
                     //initiate recovery
-                    let encryptedSeed = JSON.parse(responseBody);
+                    let encryptedSeed = JSON.parse(responseBody.encryptedSeed);
                     resolve(encryptedSeed);
                 } else {
                     reject(
@@ -247,9 +247,9 @@ const recoverVKSeed = async (accessToken, signupEmail) =>
             options
         ).then((r) => {
             r.json().then(async (responseBody) => {
-                if (responseBody.status === 200) {
+                if (responseBody.success) {
                     //initiate recovery
-                    let encryptedSeed = JSON.parse(responseBody);
+                    let encryptedSeed = JSON.parse(responseBody.encryptedSeed);
                     resolve(encryptedSeed);
                 } else {
                     reject(
@@ -292,6 +292,32 @@ const backupVKSeed = async (userEmail, userid, encryptedSeed) =>
         }
     });
 
+const changeEmail = async (oldEmail, newEmail, encryptedSeed) => {
+    let key = await sha256(newEmail);
+    let options = {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            key,
+            encryptedSeed,
+            oldEmail,
+            newEmail
+        }),
+        mode: "cors",
+        cache: "default",
+    };
+    let result = await fetch(
+        config.BACKEND_ENDPOINT + "/v1/changeEmail",
+        options
+    );
+
+    let response = await result.json();
+    return response;
+};
+
 export {  getEncryptedSeed,
     saveWalletEmailPassword,
     getKeystoreFromEncryptedSeed,
@@ -303,4 +329,5 @@ export {  getEncryptedSeed,
     recoverGoogleSeed,
     backupVKSeed,
     recoverVKSeed,
+    changeEmail
 };
