@@ -37,7 +37,6 @@
         methods: {
             async formSubmitChangeEmail (e) {
                 e.preventDefault();
-                return
                 if(!this.newEmail) return
                 let storedPassword = window.sessionStorage.getItem("password")
                 let password = await sha256(this.password);
