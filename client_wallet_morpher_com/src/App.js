@@ -14,6 +14,7 @@ import "./App.css";
 
 
 import { ChangePassword } from "./ChangePassword"
+import { ChangeEmail } from "./ChangeEmail"
 
 import { getKeystore } from "./morpher/keystore";
 const { sha256 } = require("./morpher/cryptoFunctions");
@@ -109,7 +110,7 @@ class App extends Component {
           },
         },
       });
-      
+
     }
   }
 
@@ -249,6 +250,11 @@ class App extends Component {
   togglePasswordChange = () => {
     if(this.state.changePassword) this.setState({ changePassword: false });
     else this.setState({ changePassword: true });
+  };
+
+  toggleEmailChange = () => {
+    if(this.state.changeEmail) this.setState({ changeEmail: false });
+    else this.setState({ changeEmail: true });
   };
 
   facebookResponseAddRecovery = async (response) => {
@@ -430,9 +436,13 @@ class App extends Component {
           <button onClick={this.togglePasswordChange} className="button">
             Change Password
           </button>
+          <button onClick={this.toggleEmailChange} className="button">
+              Change Email
+          </button>
         </div>
         <br />
         {this.state.changePassword ? <ChangePassword /> : <div />}
+        {this.state.changeEmail ? <ChangeEmail /> : <div />}
         {!this.state.hasWalletRecovery ? (
           <div>
             <h3>Add Password Recovery</h3>

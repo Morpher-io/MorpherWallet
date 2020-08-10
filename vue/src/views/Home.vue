@@ -52,9 +52,18 @@
         <button>
           Close
         </button>
-        <button>
+        <button @click="showChangePassword = !showChangePassword">
           Change Password
         </button>
+        <button @click="showChangeEmail = !showChangeEmail">
+          Change Email
+        </button>
+      </div>
+      <div v-if="showChangePassword">
+        <ChangePassword></ChangePassword>
+      </div>
+      <div v-if="showChangeEmail">
+        <ChangeEmail :emailChanged="emailChanged"></ChangeEmail>
       </div>
 
       <div>
@@ -88,6 +97,8 @@
   import GoogleRecoverWallet from '../components/GoogleRecoverWallet';
   import VKAddRecovery from '../components/VKAddRecovery';
   import VKRecoverWallet from '../components/VKRecoverWallet';
+  import ChangePassword from "../components/ChangePassword"
+  import ChangeEmail from "../components/ChangeEmail"
 
 
   export default {
@@ -98,7 +109,9 @@
       GoogleAddRecovery,
       GoogleRecoverWallet,
       VKAddRecovery,
-      VKRecoverWallet
+      VKRecoverWallet,
+      ChangePassword,
+      ChangeEmail
     },
     data: function(){
       return {
@@ -115,6 +128,8 @@
         hasWalletRecovery: false,
         loginFailure: false,
         keystore: null,
+        showChangePassword: false,
+        showChangeEmail:false
       }
     },
     methods: {
@@ -212,6 +227,15 @@
           }
         } catch (e) {
           console.log(e);
+        }
+      },
+      emailChanged: async function(){
+        if (isIframe()) {
+          //let parent = await this.connection.promise;
+          //await parent.onLogin(this.state.accounts[0], this.state.walletEmail)
+          (await this.connection.promise).onEmailChange(
+                  this.walletEmail
+          );
         }
       },
       cancel(){
