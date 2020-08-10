@@ -63,7 +63,7 @@
         <ChangePassword></ChangePassword>
       </div>
       <div v-if="showChangeEmail">
-        <ChangeEmail></ChangeEmail>
+        <ChangeEmail :emailChanged="emailChanged"></ChangeEmail>
       </div>
 
       <div>
@@ -227,6 +227,15 @@
           }
         } catch (e) {
           console.log(e);
+        }
+      },
+      emailChanged: async function(){
+        if (isIframe()) {
+          //let parent = await this.connection.promise;
+          //await parent.onLogin(this.state.accounts[0], this.state.walletEmail)
+          (await this.connection.promise).onEmailChange(
+                  this.walletEmail
+          );
         }
       },
       cancel(){

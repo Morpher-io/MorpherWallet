@@ -33,9 +33,11 @@
                 password: ""
             }
         },
+        props: ['emailChanged'],
         methods: {
             async formSubmitChangeEmail (e) {
                 e.preventDefault();
+                return
                 if(!this.newEmail) return
                 let storedPassword = window.sessionStorage.getItem("password")
                 let password = await sha256(this.password);
@@ -48,6 +50,7 @@
 
                     this.newEmail = "";
                     this.password = "";
+                    this.emailChanged()
                 }
 
                 else alert('Password is not right!')
