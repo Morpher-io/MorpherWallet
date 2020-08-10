@@ -2,16 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fc484971-a70a-4fca-98c9-83d9fb41cb7f" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend-node/src/controllers/wallet.controller.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend-node/src/controllers/wallet.controller.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend-node/src/database/models/recovery.model.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend-node/src/database/models/recovery.model.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend-node/src/database/models/recovery_type.model.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend-node/src/database/models/recovery_type.model.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend-node/src/database/models/user.model.ts" beforeDir="false" afterPath="$PROJECT_DIR$/backend-node/src/database/models/user.model.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client_wallet_morpher_com/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/client_wallet_morpher_com/src/App.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vue/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/vue/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vue/src/config.json" beforeDir="false" afterPath="$PROJECT_DIR$/vue/src/config.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vue/src/router/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/vue/src/router/index.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/vue/src/utils/backupRestore.js" beforeDir="false" afterPath="$PROJECT_DIR$/vue/src/utils/backupRestore.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -68,7 +59,8 @@
       <workItem from="1596705635358" duration="1170000" />
       <workItem from="1596718560160" duration="136000" />
       <workItem from="1596720376175" duration="37000" />
-      <workItem from="1596720792194" duration="5983000" />
+      <workItem from="1596720792194" duration="6553000" />
+      <workItem from="1596790856919" duration="4321000" />
     </task>
     <servers />
   </component>

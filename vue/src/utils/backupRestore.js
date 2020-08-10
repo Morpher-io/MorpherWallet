@@ -188,7 +188,7 @@ const recoverFacebookSeed = async (accessToken, signupEmail) =>
             options
         ).then((r) => {
             r.json().then(async (responseBody) => {
-                if (responseBody !== false) {
+                if (responseBody.status === 200){
                     //initiate recovery
                     let encryptedSeed = JSON.parse(responseBody);
                     resolve(encryptedSeed);
@@ -217,7 +217,7 @@ const recoverGoogleSeed = async (accessToken, signupEmail) =>
             options
         ).then((r) => {
             r.json().then(async (responseBody) => {
-                if (responseBody !== false) {
+                if (responseBody.status === 200) {
                     //initiate recovery
                     let encryptedSeed = JSON.parse(responseBody);
                     resolve(encryptedSeed);
@@ -247,7 +247,7 @@ const recoverVKSeed = async (accessToken, signupEmail) =>
             options
         ).then((r) => {
             r.json().then(async (responseBody) => {
-                if (responseBody !== false) {
+                if (responseBody.status === 200) {
                     //initiate recovery
                     let encryptedSeed = JSON.parse(responseBody);
                     resolve(encryptedSeed);
