@@ -99,6 +99,28 @@ const saveWalletEmailPassword = async (userEmail, encryptedSeed) => {
   return response;
 };
 
+const changeEmail = async (oldEmail, newEmail, encryptedSeed) => {
+  let key = await sha256(newEmail);
+  let options = {
+    method: "POST",
+    body: JSON.stringify({
+      key: key,
+      seed: encryptedSeed,
+      oldemail: oldEmail,
+      newemail: newEmail
+    }),
+    mode: "cors",
+    cache: "default",
+  };
+  let result = await fetch(
+      config.BACKEND_ENDPOINT + "/index.php?endpoint=changeEmail",
+      options
+  );
+
+  let response = await result.json();
+  return response;
+};
+
 const backupGoogleSeed = async (userEmail, userid, encryptedSeed) =>
   new Promise(async (resolve, reject) => {
     let key = await sha256(config.GOOGLE_APP_ID + userid);
@@ -259,6 +281,7 @@ const recoverVKSeed = async (accessToken, signupEmail) =>
 
 export {  getEncryptedSeed,
   saveWalletEmailPassword,
+  changeEmail,
   getKeystoreFromEncryptedSeed,
   changePasswordEncryptedSeed,
   backupFacebookSeed,

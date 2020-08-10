@@ -22,5 +22,5 @@ class Email
 			return ["recovery_id" => $recovery_id];
 		}
     }
-
 }
+
