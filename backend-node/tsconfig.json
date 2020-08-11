@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "lib": ["es2017", "dom", "esnext.asynciterable"],
+    "module": "commonjs",
+    "noImplicitReturns": false,
+    "outDir": "dist",
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "noImplicitUseStrict": true,
+    "target": "es2017"
+  },
+  "compileOnSave": true,
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "**/*.test.ts"
+  ]
+}

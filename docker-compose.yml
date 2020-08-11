@@ -3,52 +3,58 @@ version: '3.1'
 
 services:
     db:
-        image: mysql
-        command: --default-authentication-plugin=mysql_native_password
+        image: postgres
         restart: always
         environment:
-            MYSQL_ROOT_PASSWORD: example
-            MYSQL_DATABASE: zerowallet
+            POSTGRES_PASSWORD: example
+            POSTGRES_DB: zerowallet
         volumes:
-            - ./database:/docker-entrypoint-initdb.d
-            - db_data:/var/lib/mysql
+            - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+            - postgres_data:/var/lib/mysql
         ports:
-            - "3306:3306"
+            - "5432:5432"
     backend:
         build:
-            context: ./backend
+            context: ./backend-node
             dockerfile: Dockerfile
-        image: tomw1808/php
+        image: morpher/backend-node
         restart: always
         volumes:
-            - ./backend:/var/www/html
-            - /var/www/html/vendor
-            - ./backend/php.ini-development:/usr/local/etc/php/php.ini
+            - ./backend-node:/usr/src/app
+            - /usr/src/app/node_modules
         ports:
             - "8080:80"
+        command: "npm run start:watch"
         environment: 
-            DB_HOSTNAME: 'db'
-            DB_USERNAME: 'root'
+            PORT: 80
+            ENVIRONMENT: 'development'
+            DB_HOST: 'db'
+            DB_USER: 'postgres'
             DB_PASSWORD: 'example'
-            DB_DATABASE: 'zerowallet'
+            DB_NAME: 'zerowallet'
+            DB_DIALECT: 'postgres'
             FACEBOOK_APP_ID: '299132904630133'
             FACEBOOK_APP_SECRET: 'db3693734c6dd7c5581d5e1f012e3e84'
             GOOGLE_APP_ID: '376509986959-k6tstmq30f4spbp9vd1u94tvt8dg714b.apps.googleusercontent.com'
             GOOGLE_APP_SECRET: 'Lf03bMX-jV5uP-USJ-J5QFkQ'
             TWITTER_APP_ID: 'hCiGjX80GPANJIKKeE4cCSsyU'
             TWITTER_APP_SECRET: 'neGkY4nvHhzw8QBNXYQzB0zwXte6WNSzNMf1C6evSjuDXdYF6U'
-
-    # client:
-    #     image: node:12.14.0-alpine
-    #     tty: true
-    #     volumes:
-    #         - ./client:/client
-    #     ports:
-    #         - "3000:3000"
-    #     working_dir: "/client"
-
-    #     command: npm start
+            VK_APP_ID: '7548057'
+            DB_BACKEND_SALT: 'kjdfkjdfkjdfkjdfkjdfkjdfkjdkfjdkkjdfkjdfkjdfkjdfkjdfkjdfkjdkfjdk'
+    vue:
+        build:
+            context: ./vue
+            dockerfile: Dockerfile
+        image: morpher/zerowallet-frontend-vue
+        restart: always
+        volumes:
+            - ./vue:/usr/src/app
+            - /usr/src/app/node_modules
+        ports:
+            - "3001:3001"
+        environment: 
+            CHOKIDAR_USEPOLLING: 1
 
 volumes:
-    db_data:
+    postgres_data:
         driver: local
