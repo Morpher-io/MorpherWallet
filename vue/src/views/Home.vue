@@ -271,7 +271,7 @@
       if (isIframe()) {
         this.connection = connectToParent({
           parentOrigin: "http://localhost:3000",
-          // Methods child is exposing to parent
+          // Methods child is exposing to parent 
           methods: {
             async getAccounts() {
               if(self.keystore != null) {
