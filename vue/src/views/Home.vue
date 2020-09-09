@@ -21,7 +21,7 @@
     </div>
     <div v-if="unlockedWallet == false && hasWallet">
       <h1>Unlock your Wallet</h1>
-      <form v-on:submit.prevent="unlockWallet">
+      <form v-on:submit.prevent="unlockWallet()">
         <input
                 type="password"
                 name="walletPassword"
@@ -135,10 +135,17 @@
     methods: {
       unlockWallet: async function(encryptedSeed, password) {
         try {
+
+          if(!encryptedSeed) encryptedSeed = await getEncryptedSeedFromMail(this.walletEmail)
+
+          if(!password) password = await sha256(this.walletPassword);
+
+
           let keystore = await getKeystoreFromEncryptedSeed(
                   encryptedSeed,
                   password
           );
+
           let accounts = await keystore.getAddresses();
 
           this.hasWallet = true;
@@ -155,7 +162,7 @@
             );
           }
         } catch (e) {
-          // console.error(e);
+          //console.error(e);
           this.loginFailure = true;
           this.accounts = null;
           this.hasWallet = true;
@@ -271,7 +278,7 @@
       if (isIframe()) {
         this.connection = connectToParent({
           parentOrigin: "http://localhost:3000",
-          // Methods child is exposing to parent 
+          // Methods child is exposing to parent
           methods: {
             async getAccounts() {
               if(self.keystore != null) {
