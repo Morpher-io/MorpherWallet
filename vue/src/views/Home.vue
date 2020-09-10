@@ -58,12 +58,18 @@
         <button @click="showChangeEmail = !showChangeEmail">
           Change Email
         </button>
+        <button @click="showExportWallet = !showExportWallet">
+          Backup Wallet
+        </button>
       </div>
       <div v-if="showChangePassword">
         <ChangePassword></ChangePassword>
       </div>
       <div v-if="showChangeEmail">
         <ChangeEmail :emailChanged="emailChanged"></ChangeEmail>
+      </div>
+      <div v-if="showExportWallet">
+        <ExportWallet></ExportWallet>
       </div>
 
       <div>
@@ -99,7 +105,7 @@
   import VKRecoverWallet from '../components/VKRecoverWallet';
   import ChangePassword from "../components/ChangePassword"
   import ChangeEmail from "../components/ChangeEmail"
-
+  import ExportWallet from "../components/ExportWallet"
 
   export default {
     name: 'Wallet',
@@ -111,7 +117,8 @@
       VKAddRecovery,
       VKRecoverWallet,
       ChangePassword,
-      ChangeEmail
+      ChangeEmail,
+      ExportWallet
     },
     data: function(){
       return {
@@ -129,7 +136,8 @@
         loginFailure: false,
         keystore: null,
         showChangePassword: false,
-        showChangeEmail:false
+        showChangeEmail:false,
+        showExportWallet: false
       }
     },
     methods: {
