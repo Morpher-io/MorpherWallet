@@ -23,6 +23,7 @@
     const { sha256 } = require("../utils/cryptoFunctions");
     const {
         changeEmail,
+        validateInput
     } = require("../utils/backupRestore");
 
     export default {
@@ -37,23 +38,28 @@
         methods: {
             async formSubmitChangeEmail (e) {
                 e.preventDefault();
-                if(!this.newEmail) return
-                let storedPassword = window.sessionStorage.getItem("password")
-                let password = await sha256(this.password);
-                if(storedPassword === password) {
-                    let encryptedSeed = JSON.parse(localStorage.getItem("encryptedSeed"))
-                    let oldEmail = localStorage.getItem("email")
-                    await changeEmail(oldEmail, this.newEmail, encryptedSeed)
-                    window.localStorage.setItem("email", this.newEmail);
-                    alert('Email changed successfully.')
+                if(!this.newEmail) return;
 
-                    this.newEmail = "";
-                    this.password = "";
-                    this.emailChanged()
+                const emailMessage = await validateInput('email', this.newEmail);
+                if(emailMessage) alert(emailMessage);
+
+                else{
+                    let storedPassword = window.sessionStorage.getItem("password")
+                    let password = await sha256(this.password);
+                    if(storedPassword === password) {
+                        let encryptedSeed = JSON.parse(localStorage.getItem("encryptedSeed"))
+                        let oldEmail = localStorage.getItem("email")
+                        await changeEmail(oldEmail, this.newEmail, encryptedSeed)
+                        window.localStorage.setItem("email", this.newEmail);
+                        alert('Email changed successfully.')
+
+                        this.newEmail = "";
+                        this.password = "";
+                        this.emailChanged()
+                    }
+
+                    else alert('Password is not right!')
                 }
-
-                else alert('Password is not right!')
-
             }
         },
         mounted(){

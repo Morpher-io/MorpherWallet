@@ -82,6 +82,48 @@ const getEncryptedSeedFromMail = async (email) =>
         reject("seed not found");
     });
 
+const validateInput = async (fieldName, inputFieldValue) => {
+    let options = {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            fieldName,
+            inputFieldValue,
+        }),
+        mode: "cors",
+        cache: "default",
+    };
+    let result = await fetch(
+        config.BACKEND_ENDPOINT + "/v1/validateInput",
+        options
+    );
+
+    let response = await result.json();
+
+    if(fieldName === 'email'){
+        if(response.success === false) return('Please input a valid email.');
+    }
+
+    if(fieldName === 'password'){
+        if(response.success === false){
+            let badPasswordMessage = 'Password must have';
+
+            for (const reason of response.validationFails) {
+                if(reason === 'min') badPasswordMessage += ' at least 8 characters,';
+                if(reason === 'uppercase') badPasswordMessage += ' at least 1 uppercase character,';
+                if(reason === 'lowercase') badPasswordMessage += ' at least 1 lowercase character,';
+                if(reason === 'digits') badPasswordMessage += ' at least 1 numerical digit,';
+            }
+
+            badPasswordMessage = badPasswordMessage.slice(0, -1) + '.';
+            return(badPasswordMessage);
+        }
+    }
+};
+
 const saveWalletEmailPassword = async (userEmail, encryptedSeed) => {
     let key = await sha256(userEmail);
     let options = {
@@ -319,6 +361,7 @@ const changeEmail = async (oldEmail, newEmail, encryptedSeed) => {
 };
 
 export {  getEncryptedSeed,
+    validateInput,
     saveWalletEmailPassword,
     getKeystoreFromEncryptedSeed,
     changePasswordEncryptedSeed,
