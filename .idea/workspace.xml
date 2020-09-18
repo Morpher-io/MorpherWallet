@@ -31,8 +31,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="88deb412-e4af-4ba5-b8c5-c319da5ea13b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vue/src/components/ExportWallet.vue" beforeDir="false" afterPath="$PROJECT_DIR$/vue/src/components/ExportWallet.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vue/src/views/Home.vue" beforeDir="false" afterPath="$PROJECT_DIR$/vue/src/views/Home.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,6 +103,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
     <state x="892" y="185" width="776" height="802" key="find.popup" timestamp="1597068644962">

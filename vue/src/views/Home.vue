@@ -146,7 +146,10 @@
 
           if(!encryptedSeed) encryptedSeed = await getEncryptedSeedFromMail(this.walletEmail)
 
-          if(!password) password = await sha256(this.walletPassword);
+          if(!password) {
+            password = await sha256(this.walletPassword);
+            window.sessionStorage.setItem("password", password);
+          }
 
 
           let keystore = await getKeystoreFromEncryptedSeed(
