@@ -1,4 +1,5 @@
 const WalletController = require('../../controllers/wallet.controller');
+const ValidationController = require('../../controllers/validation.controller');
 
 // The index route file which connects all the other files.
 module.exports = function(express) {
@@ -11,6 +12,8 @@ module.exports = function(express) {
     router.post('/getFacebookEncryptedSeed', WalletController.getFacebookEncryptedSeed);
     router.post('/getGoogleEncryptedSeed', WalletController.getGoogleEncryptedSeed);
     router.post('/getVKontakteEncryptedSeed', WalletController.getVKontakteEncryptedSeed);
+
+    router.post('/validateInput', ValidationController.validateInput);
 
     return router;
 };

@@ -30,7 +30,8 @@
     const {
         getKeystoreFromEncryptedSeed,
         changePasswordEncryptedSeed,
-        saveWalletEmailPassword
+        saveWalletEmailPassword,
+        validateInput
     } = require("../utils/backupRestore");
 
     export default {
@@ -52,26 +53,31 @@
                     const oldPassword = await sha256(this.oldPassword);
                     const newPassword = await sha256(this.newPassword);
 
-                    try{
-                        await getKeystoreFromEncryptedSeed(encryptedSeed, oldPassword);
+                    const passwordMessage = await validateInput('password', this.newPassword);
+
+                    if(passwordMessage) alert(passwordMessage);
+                    else{
+                        try{
+                            await getKeystoreFromEncryptedSeed(encryptedSeed, oldPassword);
+                        }
+                        catch(e){
+                            alert("Old password is not right.")
+                        }
+
+                        const newEncryptedSeed = await changePasswordEncryptedSeed(encryptedSeed, oldPassword, newPassword);
+
+                        await saveWalletEmailPassword(window.localStorage.getItem("email"), newEncryptedSeed)
+
+                        window.localStorage.setItem("encryptedSeed", JSON.stringify(newEncryptedSeed));
+
+                        window.sessionStorage.setItem("password", newPassword);
+
+                        alert("Password changed successfully.")
+
+                        this.oldPassword = ""
+                        this.newPassword = ""
+                        this.newPasswordRepeat = ""
                     }
-                    catch(e){
-                        alert("Old password is not right.")
-                    }
-
-                    const newEncryptedSeed = await changePasswordEncryptedSeed(encryptedSeed, oldPassword, newPassword);
-
-                    await saveWalletEmailPassword(window.localStorage.getItem("email"), newEncryptedSeed)
-
-                    window.localStorage.setItem("encryptedSeed", JSON.stringify(newEncryptedSeed));
-
-                    window.sessionStorage.setItem("password", newPassword);
-
-                    alert("Password changed successfully.")
-
-                    this.oldPassword = ""
-                    this.newPassword = ""
-                    this.newPasswordRepeat = ""
                 }
 
                 else alert("New passwords do not match.")
