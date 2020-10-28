@@ -1,84 +1,106 @@
 <template>
-  <div>
-    <div v-if="hasWallet == false">
-      <h1>Signup/Login to your wallet</h1>
-      <form v-on:submit.prevent="createWallet">
-        <input
-          type="text"
-          name="walletEmail"
-          placeholder="example@example.com"
-          v-model="walletEmail"
-        />
-        <input
-          type="password"
-          name="walletPassword"
-          placeholder="Strong Password"
-          v-model="walletPassword"
-        />
-        <button>Login / Create new Wallet</button>
-      </form>
-      <br />
-    </div>
-    <div v-if="unlockedWallet == false && hasWallet">
-      <h1>Unlock your Wallet</h1>
-      <form v-on:submit.prevent="unlockWallet()">
-        <input
-          type="password"
-          name="walletPassword"
-          placeholder="Strong Password"
-          v-model="walletPassword"
-        />
-        <button>Unlock Wallet</button>
-      </form>
-      <button @click="cancel">Cancel</button>
-      <br />
-      <div v-if="loginFailure">
-        <br />
-        <b>The Password you provided is invalid!</b>
-        <br />
-        <FBRecoverWallet :walletEmail="walletEmail"></FBRecoverWallet>
-        <GoogleRecoverWallet :walletEmail="walletEmail"></GoogleRecoverWallet>
-        <VKRecoverWallet :walletEmail="walletEmail"> </VKRecoverWallet>
-      </div>
-    </div>
-    <div v-if="hasWallet && unlockedWallet">
-      <h1>Welcome!</h1>
-      <h3>You are successfully logged in!</h3>
-      <div>
-        <p>Your Account: {{ accounts[0] }}</p>
-        <button @click="logout">Log out</button>
-        <button>Close</button>
-        <button @click="showChangePassword = !showChangePassword">
-          Change Password
-        </button>
-        <button @click="showChangeEmail = !showChangeEmail">
-          Change Email
-        </button>
+  <section class="section">
+    <div class="container">
+      <spinner v-model="showSpinner" v-bind:status="status"></spinner>
+      <figure class="image mb-5">
+        <img src="/img/morpher-solid.svg" style="max-width: 500px" />
+      </figure>
+      <signup v-if="!hasWallet && signup" v-on:unlockWallet="unlockWallet"></signup>
+      <div v-if="!hasWallet && login">
+        <h1 class="title">Signup/Login to your wallet</h1>
+        <form v-on:submit.prevent="createWallet">
+          <div class="field">
+            <label class="label">Email</label>
+            <div class="control">
+              <input
+                type="text"
+                name="walletEmail"
+                placeholder="example@example.com"
+                v-model="walletEmail"
+              />
+            </div>
 
-        <button @click="showExportWallet = !showExportWallet">
-          Backup Wallet
-        </button>
-      </div>
-      <div v-if="showChangePassword">
-        <ChangePassword></ChangePassword>
-      </div>
-      <div v-if="showChangeEmail">
-        <ChangeEmail :emailChanged="emailChanged"></ChangeEmail>
-      </div>
+            <p class="help">Use this as your Email for Wallet Recovery</p>
+          </div>
+          <div class="control">
+            <input
+              type="password"
+              name="walletPassword"
+              placeholder="Strong Password"
+              v-model="walletPassword"
+            />
+          </div>
 
-      <div v-if="showExportWallet">
-        <ExportWallet></ExportWallet>
-      </div>
-
-      <div>
-        <h2>Add Password Recovery</h2>
+          <div class="field is-grouped">
+            <div class="control">
+              <button class="button is-link">Login / Create Wallet</button>
+            </div>
+          </div>
+        </form>
         <br />
-        <FBAddRecovery :walletEmail="walletEmail"></FBAddRecovery>
-        <GoogleAddRecovery :walletEmail="walletEmail"></GoogleAddRecovery>
-        <VKAddRecovery :walletEmail="walletEmail"> </VKAddRecovery>
+      </div>
+      <div v-if="unlockedWallet == false && hasWallet">
+        <h1>Welcome Back!</h1>
+        <h2>Unlock your Wallet</h2>
+        <form v-on:submit.prevent="unlockWalletLoadSeedFromEmail()">
+          <input
+            type="password"
+            name="walletPassword"
+            placeholder="Strong Password"
+            v-model="walletPassword"
+          />
+          <button>Unlock Wallet</button>
+        </form>
+        <button @click="cancel">Cancel</button>
+        <br />
+        <div v-if="loginFailure">
+          <br />
+          <b>The Password you provided is invalid!</b>
+          <br />
+          <FBRecoverWallet :walletEmail="walletEmail"></FBRecoverWallet>
+          <GoogleRecoverWallet :walletEmail="walletEmail"></GoogleRecoverWallet>
+          <VKRecoverWallet :walletEmail="walletEmail"> </VKRecoverWallet>
+        </div>
+      </div>
+      <div v-if="hasWallet && unlockedWallet">
+        <h1>Welcome!</h1>
+        <h3>You are successfully logged in!</h3>
+        <div>
+          <p>Your Account: {{ accounts[0] }}</p>
+          <button @click="logout">Log out</button>
+          <button>Close</button>
+          <button @click="showChangePassword = !showChangePassword">
+            Change Password
+          </button>
+          <button @click="showChangeEmail = !showChangeEmail">
+            Change Email
+          </button>
+
+          <button @click="showExportWallet = !showExportWallet">
+            Backup Wallet
+          </button>
+        </div>
+        <div v-if="showChangePassword">
+          <ChangePassword></ChangePassword>
+        </div>
+        <div v-if="showChangeEmail">
+          <ChangeEmail :emailChanged="emailChanged"></ChangeEmail>
+        </div>
+
+        <div v-if="showExportWallet">
+          <ExportWallet></ExportWallet>
+        </div>
+
+        <div>
+          <h2>Add Password Recovery</h2>
+          <br />
+          <FBAddRecovery :walletEmail="walletEmail"></FBAddRecovery>
+          <GoogleAddRecovery :walletEmail="walletEmail"></GoogleAddRecovery>
+          <VKAddRecovery :walletEmail="walletEmail"> </VKAddRecovery>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
 
@@ -107,6 +129,10 @@ import ChangeEmail from "../components/ChangeEmail";
 
 import ExportWallet from "../components/ExportWallet";
 
+import Spinner from "../components/loading-spinner/Spinner";
+
+import Signup from "../components/Signup";
+
 export default {
   name: "Wallet",
   components: {
@@ -119,12 +145,15 @@ export default {
     ChangePassword,
     ChangeEmail,
     ExportWallet,
+    Spinner,
+    Signup,
   },
   data: function () {
     return {
       connection: null,
       walletEmail: "",
       walletPassword: "",
+      walletPasswordRepeat: "",
       isAuthenticated: false,
       unlockedWallet: false,
       user: null,
@@ -138,109 +167,54 @@ export default {
       showChangePassword: false,
       showChangeEmail: false,
       showExportWallet: false,
+      showSpinner: false,
+      status: "",
+      signup: true,
+      login: false,
+      invalidEmail: false,
+      invalidPassword: false,
     };
   },
   methods: {
-    unlockWallet: async function (encryptedSeed, password) {
+    unlockWalletLoadSeedFromEmail: function (password) {
+      this.showSpinner = true;
       try {
-        if (!encryptedSeed)
-          encryptedSeed = await getEncryptedSeedFromMail(this.walletEmail);
-
-        if (!password) {
-          password = await sha256(this.walletPassword);
-          window.sessionStorage.setItem("password", password);
-        }
-
-        let keystore = await getKeystoreFromEncryptedSeed(
-          encryptedSeed,
-          password
-        );
-
-        let accounts = await keystore.getAddresses();
-
-        this.hasWallet = true;
-        this.unlockedWallet = true;
-        this.keystore = keystore;
-        this.accounts = accounts;
-
-        if (isIframe()) {
-          //let parent = await this.connection.promise;
-          //await parent.onLogin(this.state.accounts[0], this.state.walletEmail)
-          (await this.connection.promise).onLogin(
-            this.accounts[0],
-            this.walletEmail
-          );
-        }
+        getEncryptedSeedFromMail(this.walletEmail).then((seed) => {
+          this.unlockedWallet(seed, password);
+        });
       } catch (e) {
-        //console.error(e);
+        console.error(e);
         this.loginFailure = true;
         this.accounts = null;
         this.hasWallet = true;
         this.unlockedWallet = false;
+        this.showSpinner = false;
       }
     },
-    createWallet: async function (e) {
+    unlockWallet: function (encryptedSeed, password) {
+      this.showSpinner = true;
+      this.status = "Unlocking Wallet";
       try {
-        //console.log(e);
-        e.preventDefault();
+        if (!encryptedSeed) {
+          throw new Error("No Seed given, abort!");
+        }
 
-        const emailMessage = await validateInput("email", this.walletEmail);
-        const passwordMessage = await validateInput(
-          "password",
-          this.walletPassword
-        );
-
-        if (emailMessage) alert(emailMessage);
-        if (passwordMessage) alert(passwordMessage);
-        else {
-          /**
-           * First try to fetch the wallet from the server, in case the browser-cache was cleared
-           */
-          let keystore = null;
-          let created = false;
-          //double hashed passwords for recovery
-          let password = await sha256(this.walletPassword);
-          try {
-            console.log("trying to find keystore from mail");
-            let encryptedSeed = await getEncryptedSeedFromMail(
-              this.walletEmail
-            );
-
-            window.localStorage.setItem(
-              "encryptedSeed",
-              JSON.stringify(encryptedSeed)
-            );
-            window.localStorage.setItem("email", this.walletEmail);
-            window.sessionStorage.setItem("password", password);
-            console.log("found keystore, trying to unlock");
-
-            return this.unlockWallet(encryptedSeed, password);
-          } catch (e) {
-            console.log("keystore not found in mail, creating a new one");
-            /**
-             * If no wallet was found, then create a new one (seed = false) otherwise use the decrypted seed from above
-             */
-            keystore = await getKeystore(password);
-            created = true;
-          }
-          let encryptedSeed = await getEncryptedSeed(keystore, password);
-
-          window.localStorage.setItem(
-            "encryptedSeed",
-            JSON.stringify(encryptedSeed)
-          );
-          window.localStorage.setItem("email", this.walletEmail);
+        if (!password) {
+          password = sha256(this.walletPassword);
           window.sessionStorage.setItem("password", password);
+        }
 
-          if (created) {
-            saveWalletEmailPassword(this.walletEmail, encryptedSeed);
-          }
+        let keystore = getKeystoreFromEncryptedSeed(
+          encryptedSeed,
+          password
+        ).then(async (keystore) => {
           let accounts = await keystore.getAddresses();
-          this.keystore = keystore;
-          this.accounts = accounts;
-          this.isLoggedIn = true;
           this.hasWallet = true;
           this.unlockedWallet = true;
+          this.keystore = keystore;
+          this.accounts = accounts;
+
+          this.showSpinner = false;
 
           if (isIframe()) {
             //let parent = await this.connection.promise;
@@ -250,9 +224,13 @@ export default {
               this.walletEmail
             );
           }
-        }
+        });
       } catch (e) {
-        console.log(e);
+        console.error(e);
+        this.loginFailure = true;
+        this.accounts = null;
+        this.hasWallet = true;
+        this.unlockedWallet = false;
       }
     },
     emailChanged: async function () {

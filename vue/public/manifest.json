@@ -1,0 +1,43 @@
+{
+    "short_name": "MorpherWallet",
+    "name": "Morpher Wallet",
+    "icons": [
+      {
+        "src": "/favicon.ico",
+        "type": "image/x-icon",
+        "sizes": "64x64"
+      },
+      {
+        "src": "/img/icons/favicon-196x196.png",
+        "type": "image/png",
+        "sizes": "196x196"
+      },
+      {
+        "src": "/img/icons/favicon-128x128.png",
+        "type": "image/png",
+        "sizes": "128x128"
+      },
+      {
+        "src": "/img/icons/favicon-96x96.png",
+        "type": "image/png",
+        "sizes": "96x96"
+      },
+      {
+        "src": "/img/icons/favicon-48x48.png",
+        "type": "image/png",
+        "sizes": "48x48"
+      },
+      {
+        "src": "/img/icons/favicon-32x32.png",
+        "type": "image/png",
+        "sizes": "32x32"
+      },
+      {
+        "src": "/img/icons/favicon-16x16.png",
+        "type": "image/png",
+        "sizes": "16x16"
+      }
+    ],
+    "start_url": "/",
+    "display": "standalone"
+  }
