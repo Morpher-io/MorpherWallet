@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve --port 3001",
-    "build": "vue-cli-service build",
-    "preinstall": "cd ./eth-lightwallet && npm install"
+    "build": "vue-cli-service build"
   },
   "dependencies": {
     "core-js": "^3.6.5",

@@ -1,8 +1,6 @@
 <template>
-    <div>
-        <div>
-            <GoogleLogin :params="{client_id: '376509986959-k6tstmq30f4spbp9vd1u94tvt8dg714b.apps.googleusercontent.com'}" :onSuccess="onLogin">Recover with Google</GoogleLogin>
-        </div>
+    <div class="control is-expanded">
+        <GoogleLogin type="button" class="button is-fullwidth" :params="{client_id: '376509986959-k6tstmq30f4spbp9vd1u94tvt8dg714b.apps.googleusercontent.com'}" :onSuccess="onLogin">Google</GoogleLogin>
     </div>
 </template>
 

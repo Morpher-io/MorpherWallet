@@ -2,9 +2,9 @@
   <div>
     <spinner v-model="showSpinner" v-bind:status="status"></spinner>
     <div class="container">
-      <h2 class="title">Signup</h2>
-      <h4 class="subtitle">Create a new Morpher Wallet</h4>
-      <form v-on:submit.prevent="createWallet">
+      <h2 class="title">Login</h2>
+      <h4 class="subtitle">Unleash Your Blockchain Experience</h4>
+      <form v-on:submit.prevent="fetchUser">
         <div class="field">
           <label class="label">Email</label>
           <div class="control">
@@ -16,11 +16,6 @@
               v-model="walletEmail"
             />
           </div>
-
-          <p class="help">Use this Email-Address for Wallet Recovery</p>
-          <p class="help is-danger" v-if="invalidEmail">
-            {{ invalidEmail }}
-          </p>
         </div>
 
         <div class="field">
@@ -34,57 +29,56 @@
               placeholder="Strong Password!"
               v-model="walletPassword"
             />
-            <password
-              v-model="walletPassword"
-              :strength-meter-only="true"
-              :secure-length="8"
-              style="max-width: initial; margin-top: -8px"
-            />
-            <p class="help">
-              Use a strong Password! It encrypts your Wallet and keeps your
-              Funds secure.
-            </p>
 
-            <p class="help is-danger" v-if="invalidPassword">
-              {{ invalidPassword }}
-            </p>
+            <div v-if="showRecovery">
+              <p class="help is-danger">
+                The Password you provided can't be used to de-crypt your wallet.
+                Do you want to restore your Account?
+              </p>
+            </div>
           </div>
         </div>
-        <div class="field">
-          <label class="label">Repeat Password</label>
-          <div class="control">
-            <input
-              type="password"
-              class="input"
-              name="walletPasswordRepeat"
-              placeholder="Repeat Password"
-              v-model="walletPasswordRepeat"
-            />
-          </div>
+        <div class="field" v-if="showRecovery">
+          <article class="message is-warning">
+            <div class="message-header">
+              <p>Account Recovery</p>
+            </div>
+            <div class="message-body">
+              <p class="content">
+                <strong>Can't remember the password?</strong> We don't know your
+                password either, it's <i>that</i> secure. But, if you connected
+                any of these social services to your wallet, then try to restore
+                your wallet!
+              </p>
+              <div class="field is-grouped" v-if="showRecovery">
+                <FBRecoverWallet :walletEmail="walletEmail"></FBRecoverWallet>
+                <GoogleRecoverWallet
+                  :walletEmail="walletEmail"
+                ></GoogleRecoverWallet>
+                <VKRecoverWallet :walletEmail="walletEmail"> </VKRecoverWallet>
+              </div>
+            </div>
+          </article>
         </div>
-
         <div class="field is-grouped">
           <div class="control is-expanded">
             <button class="button is-primary is-fullwidth" type="submit">
               <span class="icon is-small">
-                <i class="far fa-file"></i>
+                <i class="fas fa-unlock"></i>
               </span>
-              <span> Create new Wallet </span>
+              <span> Unlock </span>
             </button>
           </div>
           <div class="control">
             <button
               type="button"
               class="button is-light"
-              v-on:click="
-                $emit('login-wallet');
-                return;
-              "
+              v-on:click="$emit('create-wallet')"
             >
               <span class="icon is-small">
-                <i class="fas fa-unlock"></i>
+                <i class="far fa-file"></i>
               </span>
-              <span> Login instead </span>
+              <span> Create new Wallet </span>
             </button>
           </div>
         </div>
@@ -95,10 +89,12 @@
 </template>
 <script>
 import Spinner from "../components/loading-spinner/Spinner";
-import Password from "vue-password-strength-meter";
+import FBRecoverWallet from "../components/FBRecoverWallet";
+import GoogleRecoverWallet from "../components/GoogleRecoverWallet";
+
+import VKRecoverWallet from "../components/VKRecoverWallet";
 const { sha256 } = require("../utils/cryptoFunctions");
 
-import isIframe from "../utils/isIframe";
 import { getKeystore } from "../utils/keystore";
 const {
   getEncryptedSeed,
@@ -109,65 +105,33 @@ const {
 } = require("../utils/backupRestore");
 
 export default {
-  name: "Singup",
+  name: "Login",
   components: {
-    Password,
     Spinner,
+    FBRecoverWallet,
+    GoogleRecoverWallet,
+    VKRecoverWallet,
   },
   data: function () {
     return {
       walletEmail: "",
       walletPassword: "",
-      walletPasswordRepeat: "",
       showSpinner: false,
       status: "",
-      invalidEmail: false,
-      invalidPassword: false,
-      onSuccessfulCreate: undefined,
     };
   },
+  props: {
+    showRecovery: {
+      type: Boolean,
+      default: false,
+    },
+  },
   methods: {
-    createWallet: async function (e) {
+    fetchUser: async function (e) {
       try {
-        //console.log(e);
         e.preventDefault();
-        this.invalidEmail = false;
-        this.invalidPassword = false;
 
-        if (this.walletPassword != this.walletPasswordRepeat) {
-          this.invalidPassword =
-            "The passwords are not the identical, please repeat the password";
-          return;
-        }
-
-        /**
-         * Validating Email
-         */
         this.showSpinner = true;
-        this.status = "Validating Email";
-        const emailMessage = await validateInput("email", this.walletEmail);
-        if (emailMessage) {
-          this.showSpinner = false;
-          this.status = "";
-          this.invalidEmail = emailMessage;
-          return;
-        }
-
-        /**
-         * Validating Password
-         */
-        this.status = "Validating Password";
-        const passwordMessage = await validateInput(
-          "password",
-          this.walletPassword
-        );
-
-        if (passwordMessage) {
-          this.showSpinner = false;
-          this.status = "";
-          this.invalidPassword = passwordMessage;
-          return;
-        }
 
         /**
          * First try to fetch the wallet from the server, in case the browser-cache was cleared
@@ -189,7 +153,9 @@ export default {
           window.sessionStorage.setItem("password", password);
           console.log("found keystore, trying to unlock");
           this.status = "Found User, Trying to Unlock Wallet";
+
           this.$emit("unlock-wallet", encryptedSeed, password);
+          this.showSpinner = false;
           return; // this.unlockWallet(encryptedSeed, password);
         } catch (e) {
           console.log("keystore not found in mail, creating a new one");
@@ -197,24 +163,13 @@ export default {
            * If no wallet was found, then create a new one (seed = false) otherwise use the decrypted seed from above
            */
 
-          this.status = "Creating new Keystore";
-          keystore = await getKeystore(password);
-          created = true;
+          this.status = "The user wasn't found: Signup first!";
+          let self = this;
+          setTimeout(function () {
+            self.showSpinner = false;
+            self.$emit("create-wallet");
+          }, 1500);
         }
-        let encryptedSeed = await getEncryptedSeed(keystore, password);
-
-        window.localStorage.setItem(
-          "encryptedSeed",
-          JSON.stringify(encryptedSeed)
-        );
-        window.localStorage.setItem("email", this.walletEmail);
-        window.sessionStorage.setItem("password", password);
-
-        if (created) {
-          saveWalletEmailPassword(this.walletEmail, encryptedSeed);
-        }
-        this.$emit("unlock-wallet", encryptedSeed, password);
-        this.showSpinner = false;
       } catch (e) {
         console.log(e);
       }

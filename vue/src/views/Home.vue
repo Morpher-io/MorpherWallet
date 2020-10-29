@@ -5,98 +5,174 @@
       <figure class="image mb-5">
         <img src="/img/morpher-solid.svg" style="max-width: 500px" />
       </figure>
-      <signup v-if="!hasWallet && signup" v-on:unlockWallet="unlockWallet"></signup>
-      <div v-if="!hasWallet && login">
-        <h1 class="title">Signup/Login to your wallet</h1>
-        <form v-on:submit.prevent="createWallet">
-          <div class="field">
-            <label class="label">Email</label>
-            <div class="control">
-              <input
-                type="text"
-                name="walletEmail"
-                placeholder="example@example.com"
-                v-model="walletEmail"
-              />
-            </div>
+      <signup
+        v-if="!hasWallet && signup"
+        v-on:unlock-wallet="unlockWallet"
+        v-on:login-wallet="signup = false"
+      ></signup>
+      <login
+        v-if="!hasWallet && !signup"
+        v-on:unlock-wallet="unlockWallet"
+        v-on:create-wallet="signup = true"
+        :show-recovery="loginFailure"
+      ></login>
+      <unlock
+        v-if="hasWallet && !unlockedWallet"
+        v-on:logout-user="logout"
+        :wallet-email="walletEmail"
+        v-on:unlock-wallet="unlockedWallet"
+        :show-recovery="loginFailure"
+      ></unlock>
 
-            <p class="help">Use this as your Email for Wallet Recovery</p>
+      <div v-if="hasWallet && unlockedWallet" class="container">
+        <div class="columns is-mobile">
+          <div class="column">
+            <h4 class="subtitle mb-0">Hello {{ walletEmail }}</h4>
+            <p class="content is-small has-text-weight-light">
+              Not you? <a v-on:click="logout">Sign Out!</a>
+            </p>
           </div>
-          <div class="control">
-            <input
-              type="password"
-              name="walletPassword"
-              placeholder="Strong Password"
-              v-model="walletPassword"
-            />
-          </div>
+          <div class="column is-narrow">
+            <div
+              class="dropdown is-right"
+              v-bind:class="{ 'is-active': dropdownIsActive }"
+            >
+              <div class="dropdown-trigger">
+                <figure
+                  class="image is-64x64"
+                  style="cursor: pointer"
+                  v-on:click="dropdownIsActive = !dropdownIsActive"
+                  aria-haspopup="true"
+                  aria-controls="dropdown-menu"
+                >
+                  <img
+                    class="is-rounded"
+                    style="border: 3px solid #00c386"
+                    :src="
+                      'https://robohash.org/' +
+                      accounts[0] +
+                      '?gravatar=hashed&set=3'
+                    "
+                  />
+                </figure>
+              </div>
+              <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                <div class="dropdown-content">
+                  <div class="dropdown-item">
+                    <p>Add Social Recovery</p>
+                  </div>
+                  <div class="dropdown-item">
+                    <FBAddRecovery :walletEmail="walletEmail"></FBAddRecovery>
+                  </div>
+                  <div class="dropdown-item">
+                    <GoogleAddRecovery
+                      :walletEmail="walletEmail"
+                    ></GoogleAddRecovery>
+                  </div>
+                  <div class="dropdown-item">
+                    <VKAddRecovery :walletEmail="walletEmail"> </VKAddRecovery>
+                  </div>
+                  <hr class="dropdown-divider" />
+                  <div class="dropdown-item">
+                    <p>Settings</p>
+                  </div>
+                  <a
+                    href="#"
+                    class="dropdown-item"
+                    @click="
+                      showChangePassword = !showChangePassword;
+                      dropdownIsActive = !dropdownIsActive;
+                    "
+                    >Change Password</a
+                  >
+                  <a
+                    href="#"
+                    class="dropdown-item"
+                    @click="
+                      showChangeEmail = !showChangeEmail;
+                      dropdownIsActive = !dropdownIsActive;
+                    "
+                    >Change Email</a
+                  >
+                  <a
+                    href="#"
+                    class="dropdown-item"
+                    @click="
+                      showExportWallet = !showExportWallet;
+                      dropdownIsActive = !dropdownIsActive;
+                    "
+                    >Export Seed Phrase</a
+                  >
+                  <hr class="dropdown-divider" />
 
-          <div class="field is-grouped">
-            <div class="control">
-              <button class="button is-link">Login / Create Wallet</button>
+                  <a
+                    href="#"
+                    class="dropdown-item"
+                    v-on:click="
+                      logout();
+                      dropdownIsActive = !dropdownIsActive;
+                    "
+                    >Logout</a
+                  >
+                </div>
+              </div>
             </div>
           </div>
-        </form>
-        <br />
-      </div>
-      <div v-if="unlockedWallet == false && hasWallet">
-        <h1>Welcome Back!</h1>
-        <h2>Unlock your Wallet</h2>
-        <form v-on:submit.prevent="unlockWalletLoadSeedFromEmail()">
-          <input
-            type="password"
-            name="walletPassword"
-            placeholder="Strong Password"
-            v-model="walletPassword"
-          />
-          <button>Unlock Wallet</button>
-        </form>
-        <button @click="cancel">Cancel</button>
-        <br />
-        <div v-if="loginFailure">
-          <br />
-          <b>The Password you provided is invalid!</b>
-          <br />
-          <FBRecoverWallet :walletEmail="walletEmail"></FBRecoverWallet>
-          <GoogleRecoverWallet :walletEmail="walletEmail"></GoogleRecoverWallet>
-          <VKRecoverWallet :walletEmail="walletEmail"> </VKRecoverWallet>
         </div>
-      </div>
-      <div v-if="hasWallet && unlockedWallet">
-        <h1>Welcome!</h1>
-        <h3>You are successfully logged in!</h3>
         <div>
           <p>Your Account: {{ accounts[0] }}</p>
-          <button @click="logout">Log out</button>
-          <button>Close</button>
-          <button @click="showChangePassword = !showChangePassword">
-            Change Password
-          </button>
-          <button @click="showChangeEmail = !showChangeEmail">
-            Change Email
-          </button>
-
-          <button @click="showExportWallet = !showExportWallet">
-            Backup Wallet
-          </button>
-        </div>
-        <div v-if="showChangePassword">
-          <ChangePassword></ChangePassword>
-        </div>
-        <div v-if="showChangeEmail">
-          <ChangeEmail :emailChanged="emailChanged"></ChangeEmail>
         </div>
 
-        <div v-if="showExportWallet">
-          <ExportWallet></ExportWallet>
-        </div>
+        <article class="message" v-if="showChangePassword">
+          <div class="message-header">
+            <p>Change the Password</p>
+            <button
+              class="delete"
+              aria-label="delete"
+              v-on:click="showChangePassword = false;"
+            ></button>
+          </div>
+          <div class="message-body">
+            <ChangePassword></ChangePassword>
+          </div>
+        </article>
 
-        <div>
-          <h2>Add Password Recovery</h2>
-          <br />
-          <FBAddRecovery :walletEmail="walletEmail"></FBAddRecovery>
-          <GoogleAddRecovery :walletEmail="walletEmail"></GoogleAddRecovery>
-          <VKAddRecovery :walletEmail="walletEmail"> </VKAddRecovery>
+        
+        <article class="message" v-if="showChangeEmail">
+          <div class="message-header">
+            <p>Change Your Email Address</p>
+            <button
+              class="delete"
+              aria-label="delete"
+              v-on:click="showChangeEmail = false;"
+            ></button>
+          </div>
+          <div class="message-body">
+             <ChangeEmail :emailChanged="emailChanged"></ChangeEmail>
+          </div>
+        </article>
+       
+        
+        <article class="message" v-if="showExportWallet">
+          <div class="message-header">
+            <p>Export the Wallet Seed Phrase</p>
+            <button
+              class="delete"
+              aria-label="delete"
+              v-on:click="showExportWallet = false;"
+            ></button>
+          </div>
+          <div class="message-body">
+             <ExportWallet></ExportWallet>
+          </div>
+        </article>
+        <div class="field is-grouped">
+          <div class="control is-expanded">
+            <button class="button is-primary is-fullwidth" v-on:click="logout()">
+              Logout
+            </button>
+          </div>
+          
         </div>
       </div>
     </div>
@@ -119,11 +195,9 @@ const {
 } = require("../utils/backupRestore");
 
 import FBAddRecovery from "../components/FBAddRecovery";
-import FBRecoverWallet from "../components/FBRecoverWallet";
+
 import GoogleAddRecovery from "../components/GoogleAddRecovery";
-import GoogleRecoverWallet from "../components/GoogleRecoverWallet";
 import VKAddRecovery from "../components/VKAddRecovery";
-import VKRecoverWallet from "../components/VKRecoverWallet";
 import ChangePassword from "../components/ChangePassword";
 import ChangeEmail from "../components/ChangeEmail";
 
@@ -132,21 +206,22 @@ import ExportWallet from "../components/ExportWallet";
 import Spinner from "../components/loading-spinner/Spinner";
 
 import Signup from "../components/Signup";
+import Login from "../components/Login";
+import Unlock from "../components/Unlock";
 
 export default {
   name: "Wallet",
   components: {
     FBAddRecovery,
-    FBRecoverWallet,
     GoogleAddRecovery,
-    GoogleRecoverWallet,
     VKAddRecovery,
-    VKRecoverWallet,
     ChangePassword,
     ChangeEmail,
     ExportWallet,
     Spinner,
     Signup,
+    Login,
+    Unlock,
   },
   data: function () {
     return {
@@ -169,28 +244,13 @@ export default {
       showExportWallet: false,
       showSpinner: false,
       status: "",
-      signup: true,
-      login: false,
+      signup: false,
       invalidEmail: false,
       invalidPassword: false,
+      dropdownIsActive: false,
     };
   },
   methods: {
-    unlockWalletLoadSeedFromEmail: function (password) {
-      this.showSpinner = true;
-      try {
-        getEncryptedSeedFromMail(this.walletEmail).then((seed) => {
-          this.unlockedWallet(seed, password);
-        });
-      } catch (e) {
-        console.error(e);
-        this.loginFailure = true;
-        this.accounts = null;
-        this.hasWallet = true;
-        this.unlockedWallet = false;
-        this.showSpinner = false;
-      }
-    },
     unlockWallet: function (encryptedSeed, password) {
       this.showSpinner = true;
       this.status = "Unlocking Wallet";
@@ -199,32 +259,41 @@ export default {
           throw new Error("No Seed given, abort!");
         }
 
+        let email = localStorage.getItem("email") || "";
+        if(email && this.walletEmail == "") {
+          this.walletEmail = email;
+        }
+
         if (!password) {
           password = sha256(this.walletPassword);
           window.sessionStorage.setItem("password", password);
         }
 
-        let keystore = getKeystoreFromEncryptedSeed(
-          encryptedSeed,
-          password
-        ).then(async (keystore) => {
-          let accounts = await keystore.getAddresses();
-          this.hasWallet = true;
-          this.unlockedWallet = true;
-          this.keystore = keystore;
-          this.accounts = accounts;
+        let keystore = getKeystoreFromEncryptedSeed(encryptedSeed, password)
+          .then(async (keystore) => {
+            let accounts = await keystore.getAddresses();
+            this.hasWallet = true;
+            this.unlockedWallet = true;
+            this.keystore = keystore;
+            this.accounts = accounts;
 
-          this.showSpinner = false;
+            this.showSpinner = false;
 
-          if (isIframe()) {
-            //let parent = await this.connection.promise;
-            //await parent.onLogin(this.state.accounts[0], this.state.walletEmail)
-            (await this.connection.promise).onLogin(
-              this.accounts[0],
-              this.walletEmail
-            );
-          }
-        });
+            if (isIframe()) {
+              //let parent = await this.connection.promise;
+              //await parent.onLogin(this.state.accounts[0], this.state.walletEmail)
+              (await this.connection.promise).onLogin(
+                this.accounts[0],
+                this.walletEmail
+              );
+            }
+          })
+          .catch((e) => {
+            console.log(e);
+            this.showSpinner = false;
+            this.loginFailure = true;
+            window.sessionStorage.removeItem("password");
+          });
       } catch (e) {
         console.error(e);
         this.loginFailure = true;
@@ -245,11 +314,17 @@ export default {
       location.reload();
     },
     async logout() {
+      this.showSpinner = true;
+      this.status = "Logging out...";
       if (isIframe()) {
         (await this.connection.promise).onLogout();
       }
       localStorage.clear();
+      // this.hasWallet = false;
+      // this.walletEmail = "";
+      // this.signup = false;
       window.location.reload();
+      //this.showSpinner = false;
     },
   },
   mounted() {
