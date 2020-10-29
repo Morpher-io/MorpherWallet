@@ -3,7 +3,7 @@
     <spinner v-model="showSpinner" v-bind:status="status"></spinner>
     <div class="container">
       <h2 class="title">Login</h2>
-      <h4 class="subtitle">Unleash Your Blockchain Experience</h4>
+      <h4 class="subtitle">Unleash the Blockchain Experience</h4>
       <form v-on:submit.prevent="fetchUser">
         <div class="field">
           <label class="label">Email</label>

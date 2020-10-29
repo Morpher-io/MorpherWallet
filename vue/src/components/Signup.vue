@@ -3,7 +3,7 @@
     <spinner v-model="showSpinner" v-bind:status="status"></spinner>
     <div class="container">
       <h2 class="title">Signup</h2>
-      <h4 class="subtitle">Create a new Morpher Wallet</h4>
+      <h4 class="subtitle">Create a new Wallet</h4>
       <form v-on:submit.prevent="createWallet">
         <div class="field">
           <label class="label">Email</label>
