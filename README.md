@@ -1,9 +1,20 @@
 # Zerowallet Fortmatic/Portis drop-in replacement
 A wallet which needs zero installation and zero configuration (almost!)
 
-# Components
+# Installation
 
-For development you need to run wallet first. It will throw errors, because it's supposed to run in an iFrame. Then run the sample trade app and use the wallet as a keystore, running on a different domain.
+First you need the eth-lightwallet repository/folder in the frontend. Either download the whole repository from 
+https://github.com/Morpher-io/eth-lightwallet or simply clone it into the folder:
+
+`cd vue && git clone git@github.com:Morpher-io/eth-lightwallet.git && cd ..`
+
+then start docker-compose:
+
+`docker-compose up`
+
+
+
+# Components
 
 ## SDK
 In /zerowallet-sdk you find the actual SDK. This is used in a sample trade app (see below). You can basically do:
