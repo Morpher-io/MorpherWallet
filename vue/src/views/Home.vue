@@ -95,6 +95,15 @@
                     >Change Email</a
                   >
                   <a
+                          href="#"
+                          class="dropdown-item"
+                          @click="
+                      showChange2FA = !showChange2FA;
+                      dropdownIsActive = !dropdownIsActive;
+                    "
+                  >Change 2FA</a
+                  >
+                  <a
                     href="#"
                     class="dropdown-item"
                     @click="
@@ -151,6 +160,20 @@
              <ChangeEmail :emailChanged="emailChanged"></ChangeEmail>
           </div>
         </article>
+
+        <article class="message" v-if="showChange2FA">
+          <div class="message-header">
+            <p>Change the 2-Factor-Authentication method</p>
+            <button
+                    class="delete"
+                    aria-label="delete"
+                    v-on:click="showChange2FA = false;"
+            ></button>
+          </div>
+          <div class="message-body">
+            <Change2FA></Change2FA>
+          </div>
+        </article>
        
         
         <article class="message" v-if="showExportWallet">
@@ -200,6 +223,7 @@ import GoogleAddRecovery from "../components/GoogleAddRecovery";
 import VKAddRecovery from "../components/VKAddRecovery";
 import ChangePassword from "../components/ChangePassword";
 import ChangeEmail from "../components/ChangeEmail";
+import Change2FA from "../components/Change2FA";
 
 import ExportWallet from "../components/ExportWallet";
 
@@ -217,6 +241,7 @@ export default {
     VKAddRecovery,
     ChangePassword,
     ChangeEmail,
+    Change2FA,
     ExportWallet,
     Spinner,
     Signup,
@@ -241,6 +266,7 @@ export default {
       keystore: null,
       showChangePassword: false,
       showChangeEmail: false,
+      showChange2FA: false,
       showExportWallet: false,
       showSpinner: false,
       status: "",
@@ -272,6 +298,7 @@ export default {
         let keystore = getKeystoreFromEncryptedSeed(encryptedSeed, password)
           .then(async (keystore) => {
             let accounts = await keystore.getAddresses();
+            
             this.hasWallet = true;
             this.unlockedWallet = true;
             this.keystore = keystore;

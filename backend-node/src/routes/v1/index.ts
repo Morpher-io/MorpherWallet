@@ -9,6 +9,8 @@ module.exports = function(express) {
     router.post('/saveEmailPassword', WalletController.saveEmailPassword);
     router.post('/getEncryptedSeed', WalletController.getEncryptedSeed);
     router.get('/getRecoveryTypes', WalletController.getRecoveryTypes);
+    router.post('/get2FAMethods', WalletController.get2FAMethods);
+    router.post('/change2FAMethods', WalletController.change2FAMethods);
     router.post('/getFacebookEncryptedSeed', WalletController.getFacebookEncryptedSeed);
     router.post('/getGoogleEncryptedSeed', WalletController.getGoogleEncryptedSeed);
     router.post('/getVKontakteEncryptedSeed', WalletController.getVKontakteEncryptedSeed);

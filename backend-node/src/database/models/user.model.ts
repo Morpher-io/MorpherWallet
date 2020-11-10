@@ -16,6 +16,11 @@ export class User extends Model<User> {
     email;
 
     @Column({
+        type: DataType.JSONB
+    })
+    payload;
+
+    @Column({
         type: DataType.BIGINT,
         defaultValue: () => moment.utc().valueOf()
     })

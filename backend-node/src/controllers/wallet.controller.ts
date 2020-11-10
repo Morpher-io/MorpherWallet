@@ -96,7 +96,8 @@ export async function saveEmailPassword(req: Request, res: Response) {
             await Recovery.destroy({ where: { user_id: user.id, [Op.and]: { recovery_type_id: recoveryTypeId } }, transaction });
         } else {
             // If it doesnt exist create a new one.
-            userId = (await User.create({ email }, { transaction })).dataValues.id;
+            const payload = { email: false, authenticator: false };
+            userId = (await User.create({ email, payload }, { transaction })).dataValues.id;
         }
 
         // Create a new recovery method.
@@ -146,8 +147,42 @@ export async function getEncryptedSeed(req, res) {
 export async function getRecoveryTypes(req, res) {
     const recoveryMethods = await Recovery_Type.findAll({ raw: true });
 
-    if (recoveryMethods.length > 0) return successResponse(res, recoveryMethods);
-    else return errorResponse(res, 'Recovery methods could not be found');
+    if (recoveryMethods.length > 0) { return successResponse(res, recoveryMethods); }
+    else { return errorResponse(res, 'Recovery methods could not be found'); }
+}
+
+// Function to return all 2FA methods from the database.
+export async function get2FAMethods(req, res) {
+    const email = req.body.email;
+    const twoFAMethods = await User.findOne({ where: { email }, raw: true });
+
+    const payload = {};
+    if(twoFAMethods['payload'] !== null){
+        if(twoFAMethods['payload'].email !== undefined){ payload['email'] = twoFAMethods.payload.email };
+        if(twoFAMethods['payload'].authenticator !== undefined){ payload['authenticator'] = twoFAMethods.payload.authenticator };
+    }
+
+    if (twoFAMethods) { return successResponse(res, payload); }
+    else { return errorResponse(res, '2FA methods could not be found'); }
+}
+
+// Function to change 2FA methods from the database.
+export async function change2FAMethods(req, res) {
+    const email = req.body.email;
+    const toggleEmail = req.body.toggleEmail;
+    const toggleAuthenticator = req.body.toggleAuthenticator;
+
+    const user = await User.findOne({ where: { email } });
+
+    if(user){
+        user.payload.email = toggleEmail;
+        user.payload.authenticator = toggleAuthenticator;
+        user.changed('payload', true);
+        await user.save();
+        return successResponse(res, { message: 'User payload updated successfully.' });
+    }
+
+    else return errorResponse(res, 'User could not be found.');
 }
 
 // Function to get encrypted seed from facebook recovery.
