@@ -360,7 +360,7 @@ const changeEmail = async (oldEmail, newEmail, encryptedSeed) => {
     return response;
 };
 
-const get2FAMethods = async (email, seed) => {
+const getPayload = async (email, seed) => {
     let options = {
         method: "POST",
         headers: {
@@ -375,7 +375,7 @@ const get2FAMethods = async (email, seed) => {
         cache: "default",
     };
     let result = await fetch(
-        config.BACKEND_ENDPOINT + "/v1/get2FAMethods",
+        config.BACKEND_ENDPOINT + "/v1/getPayload",
         options
     );
 
@@ -407,6 +407,28 @@ const change2FAMethods = async (email, toggleEmail, toggleAuthenticator) => {
     return response;
 }
 
+const send2FAEmail = async (email) => {
+    let options = {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            email,
+        }),
+        mode: "cors",
+        cache: "default",
+    };
+    let result = await fetch(
+        config.BACKEND_ENDPOINT + "/v1/send2FAEmail",
+        options
+    );
+
+    let response = await result.json();
+    return response;
+}
+
 export {  getEncryptedSeed,
     validateInput,
     saveWalletEmailPassword,
@@ -420,6 +442,7 @@ export {  getEncryptedSeed,
     backupVKSeed,
     recoverVKSeed,
     changeEmail,
-    get2FAMethods,
-    change2FAMethods
+    getPayload,
+    change2FAMethods,
+    send2FAEmail
 };

@@ -13,7 +13,7 @@
 
 
 <script>
-    import { get2FAMethods, change2FAMethods, getUserFromEncryptedSeed } from "../utils/backupRestore";
+    import { getPayload, change2FAMethods } from "../utils/backupRestore";
 
     const { sha256 } = require("../utils/cryptoFunctions");
 
@@ -44,11 +44,9 @@
         },
         async mounted(){
             let email = localStorage.getItem("email");
-            let key = localStorage.getItem("encryptedSeed");
-
 
             try{
-                const twoFAMethods = await get2FAMethods(email);
+                const twoFAMethods = await getPayload(email);
 
                 if(twoFAMethods.email !== undefined) this.email = twoFAMethods.email
                 if(twoFAMethods.authenticator !== undefined) this.authenticator = twoFAMethods.authenticator

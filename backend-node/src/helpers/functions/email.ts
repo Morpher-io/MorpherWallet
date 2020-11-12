@@ -6,7 +6,7 @@ export async function sendEmail2FA(payload, email){
         secretAccessKey: process.env.ACCESS_KEY_SECRET
     });
 
-    const emailBody = `Please confirm email 2FA: ${JSON.stringify(payload)}`;
+    const emailBody = `Your email verification code is: ${payload}`;
 
     const params = {
         Destination: {

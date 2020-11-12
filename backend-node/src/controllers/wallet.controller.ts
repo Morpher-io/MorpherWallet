@@ -7,6 +7,7 @@ import { Request, Response } from 'express';
 
 import { VK } from 'vk-io';
 import { Facebook } from 'fb';
+import {sendEmail2FA} from "../helpers/functions/email";
 const options = {
     app_id: process.env.FACEBOOK_APP_ID,
     app_secret: process.env.FACEBOOK_APP_SECRET,
@@ -152,7 +153,7 @@ export async function getRecoveryTypes(req, res) {
 }
 
 // Function to return all 2FA methods from the database.
-export async function get2FAMethods(req, res) {
+export async function getPayload(req, res) {
     const email = req.body.email;
     const twoFAMethods = await User.findOne({ where: { email }, raw: true });
 
@@ -160,6 +161,8 @@ export async function get2FAMethods(req, res) {
     if(twoFAMethods['payload'] !== null){
         if(twoFAMethods['payload'].email !== undefined){ payload['email'] = twoFAMethods.payload.email };
         if(twoFAMethods['payload'].authenticator !== undefined){ payload['authenticator'] = twoFAMethods.payload.authenticator };
+        if(twoFAMethods['payload'].emailVerificationCode !== undefined){ payload['emailVerificationCode'] = twoFAMethods.payload.emailVerificationCode };
+        if(twoFAMethods['payload'].authenticatorVerificationCode !== undefined){ payload['authenticatorVerificationCode'] = twoFAMethods.payload.authenticatorVerificationCode };
     }
 
     if (twoFAMethods) { return successResponse(res, payload); }
@@ -270,4 +273,27 @@ export async function getVKontakteEncryptedSeed(req, res) {
 
     // If user does not exist return an error.
     return errorResponse(res, 'User not found.');
+}
+
+export async function send2FAEmail(req, res){
+    const email = req.body.email;
+
+    try{
+        const verificationCode = randomFixedInteger(6);
+        const user = await User.findOne({ where: { email } });
+        user.payload.emailVerificationCode = verificationCode;
+        user.changed('payload', true);
+        await user.save();
+
+        // await sendEmail2FA(verificationCode, email);
+
+        return successResponse(res, { verificationCode })
+    }
+    catch (e) {
+        return errorResponse(res, 'There was a problem parsing the email');
+    }
+}
+
+const randomFixedInteger = function (length) {
+    return Math.floor(Math.pow(10, length-1) + Math.random() * (Math.pow(10, length) - Math.pow(10, length-1) - 1));
 }

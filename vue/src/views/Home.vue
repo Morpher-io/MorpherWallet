@@ -24,7 +24,52 @@
         :show-recovery="loginFailure"
       ></unlock>
 
-      <div v-if="hasWallet && unlockedWallet" class="container">
+      <div v-if="hasWallet && unlockedWallet && twoFAEmail" class="container">
+        <article class="message is-warning">
+          <div class="message-header">
+            <p>Please input two FA email code</p>
+          </div>
+          <div class="message-body">
+            <form v-on:submit.prevent="validateEmailCode">
+              <input style="margin:10px" type="text" id="email" class="option" v-model="emailCode">
+              <label style="margin:10px" class="boxLabel" for="email">Email Code</label>
+              <span></span>
+              <input type="submit" style="margin: 10px" value="Submit" />
+            </form>
+          </div>
+
+        </article>
+
+      </div>
+      <div v-if="hasWallet && unlockedWallet && twoFAAuthenticator" class="container">
+        <article class="message is-warning">
+          <div class="message-header">
+            <p>Please input two FA Authenticator code</p>
+          </div>
+          <div class="message-body">
+            <form v-on:submit.prevent="validateAuthenticatorCode">
+              <input style="margin:10px" type="text" id="authenticator" class="option" v-model="authenticatorCode">
+              <label style="margin:10px" class="boxLabel" for="authenticator">Authenticator Code</label>
+              <span></span>
+              <input type="submit" style="margin: 10px" value="Submit" />
+            </form>
+          </div>
+        </article>
+
+      </div>
+
+      <div v-if="hasWallet && unlockedWallet && twoFA" class="container">
+        <div class="field is-grouped">
+          <div class="control is-expanded">
+            <button class="button is-primary is-fullwidth" v-on:click="logout()">
+              Logout
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <div v-if="hasWallet && unlockedWallet && !twoFAEmail && !twoFAAuthenticator" class="container">
         <div class="columns is-mobile">
           <div class="column">
             <h4 class="subtitle mb-0">Hello {{ walletEmail }}</h4>
@@ -198,7 +243,7 @@
           
         </div>
       </div>
-    </div>
+      </div>
   </section>
 </template>
 
@@ -232,6 +277,7 @@ import Spinner from "../components/loading-spinner/Spinner";
 import Signup from "../components/Signup";
 import Login from "../components/Login";
 import Unlock from "../components/Unlock";
+import {getPayload, send2FAEmail} from "../utils/backupRestore";
 
 export default {
   name: "Wallet",
@@ -274,6 +320,14 @@ export default {
       invalidEmail: false,
       invalidPassword: false,
       dropdownIsActive: false,
+      emailCode: "",
+      authenticatorCode: "",
+      emailVerificationCode: "",
+      authenticatorVerificationCode: "",
+      twoFA: false,
+      twoFAEmail: false,
+      twoFAAuthenticator: false,
+      doneLoading: false,
     };
   },
   methods: {
@@ -298,7 +352,7 @@ export default {
         let keystore = getKeystoreFromEncryptedSeed(encryptedSeed, password)
           .then(async (keystore) => {
             let accounts = await keystore.getAddresses();
-            
+
             this.hasWallet = true;
             this.unlockedWallet = true;
             this.keystore = keystore;
@@ -340,6 +394,18 @@ export default {
       localStorage.clear();
       location.reload();
     },
+    validateEmailCode(){
+      if(this.emailCode === String(this.emailVerificationCode)){
+        this.twoFAEmail = false;
+        if(this.twoFAAuthenticator === false){
+          this.twoFA = false;
+        }
+      }
+      else alert('Email code is not right')
+    },
+    validateAuthenticatorCode(){
+
+    },
     async logout() {
       this.showSpinner = true;
       this.status = "Logging out...";
@@ -354,21 +420,43 @@ export default {
       //this.showSpinner = false;
     },
   },
+  async created(){
+
+  },
   mounted() {
     let encryptedSeed = localStorage.getItem("encryptedSeed") || "";
     let email = localStorage.getItem("email") || "";
-    let password = window.sessionStorage.getItem("password") || "";
-    if (encryptedSeed !== "" && email !== "") {
-      let loginType = localStorage.getItem("loginType") || "";
-      this.loginType = loginType;
-      this.hasWallet = true;
-      this.walletEmail = email;
 
-      if (password !== "") {
-        this.unlockWallet(JSON.parse(encryptedSeed), password);
-      }
+    if(email !== ""){
+      getPayload(email).then(twoFAMethods => {
+        console.log(twoFAMethods)
+        this.twoFAEmail = twoFAMethods.email;
+        this.twoFAAuthenticator = twoFAMethods.authenticator;
+
+        if(this.twoFAEmail || this.twoFAAuthenticator) this.twoFA = true
+
+        if(this.twoFAEmail) {
+          send2FAEmail(email).then(response => {
+            this.emailVerificationCode = response.verificationCode;
+          })
+
+        }
+        let password = window.sessionStorage.getItem("password") || "";
+        if (encryptedSeed !== "" && email !== "") {
+          let loginType = localStorage.getItem("loginType") || "";
+          this.loginType = loginType;
+          this.hasWallet = true;
+          this.walletEmail = email;
+
+          if (password !== "") {
+            this.unlockWallet(JSON.parse(encryptedSeed), password);
+          }
+        }
+      })
     }
     var self = this;
+
+
     if (isIframe()) {
       this.connection = connectToParent({
         parentOrigin: "http://localhost:3000",

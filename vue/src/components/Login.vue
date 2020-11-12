@@ -145,6 +145,8 @@ export default {
           this.status = "Looking up User from Database";
           let encryptedSeed = await getEncryptedSeedFromMail(this.walletEmail);
 
+          console.log(encryptedSeed)
+
           window.localStorage.setItem(
             "encryptedSeed",
             JSON.stringify(encryptedSeed)
