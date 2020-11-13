@@ -8,12 +8,14 @@
       <signup
         v-if="!hasWallet && signup"
         v-on:unlock-wallet="unlockWallet"
+        v-on:update-twofa="updateTwoFA"
         v-on:login-wallet="signup = false"
       ></signup>
       <login
         v-if="!hasWallet && !signup"
         v-on:unlock-wallet="unlockWallet"
         v-on:create-wallet="signup = true"
+        v-on:update-twofa="updateTwoFA"
         :show-recovery="loginFailure"
       ></login>
       <unlock
@@ -21,6 +23,7 @@
         v-on:logout-user="logout"
         :wallet-email="walletEmail"
         v-on:unlock-wallet="unlockedWallet"
+        v-on:update-twofa="updateTwoFA"
         :show-recovery="loginFailure"
       ></unlock>
 
@@ -260,7 +263,8 @@ const {
   getKeystoreFromEncryptedSeed,
   getEncryptedSeedFromMail,
   validateInput,
-  verifyAuthenticatorCode
+  verifyAuthenticatorCode,
+  verifyEmailCode
 } = require("../utils/backupRestore");
 
 import FBAddRecovery from "../components/FBAddRecovery";
@@ -386,6 +390,11 @@ export default {
         this.unlockedWallet = false;
       }
     },
+    updateTwoFA (email, authenticator, twoFA){
+      this.twoFAEmail = email;
+      this.twoFAAuthenticator = authenticator;
+      this.twoFA = twoFA;
+    },
     emailChanged: async function () {
       if (isIframe()) {
         //let parent = await this.connection.promise;
@@ -397,10 +406,13 @@ export default {
       localStorage.clear();
       location.reload();
     },
-    validateEmailCode(){
-      if(this.emailCode === String(this.emailVerificationCode)){
+    async validateEmailCode(){
+      let email = localStorage.getItem("email");
+      const result = await verifyEmailCode(email, this.emailCode)
+      if (result.verified) {
         this.twoFAEmail = false;
-        if(this.twoFAAuthenticator === false){
+        localStorage.setItem('emailCode', 'true')
+        if (this.twoFAAuthenticator === false) {
           this.twoFA = false;
         }
       }
@@ -412,6 +424,7 @@ export default {
       const result = await verifyAuthenticatorCode(email, this.authenticatorCode)
       if(result.verified){
         this.twoFAAuthenticator = false;
+        localStorage.setItem('authenticatorCode', 'true')
         if(this.twoFAEmail === false){
           this.twoFA = false;
         }
@@ -430,10 +443,7 @@ export default {
       // this.signup = false;
       window.location.reload();
       //this.showSpinner = false;
-    },
-  },
-  async created(){
-
+    }
   },
   mounted() {
     let encryptedSeed = localStorage.getItem("encryptedSeed") || "";
@@ -441,18 +451,17 @@ export default {
 
     if(email !== ""){
       getPayload(email).then(twoFAMethods => {
-        console.log(twoFAMethods)
+
         this.twoFAEmail = twoFAMethods.email;
         this.twoFAAuthenticator = twoFAMethods.authenticator;
 
+        let emailConfirmed = localStorage.getItem('emailCode')
+        let authenticatorConfirmed = localStorage.getItem('authenticatorCode')
+        if(emailConfirmed === 'true') this.twoFAEmail = false
+        if(authenticatorConfirmed === 'true') this.twoFAAuthenticator = false
+
         if(this.twoFAEmail || this.twoFAAuthenticator) this.twoFA = true
 
-        if(this.twoFAEmail && this.emailVerificationCode !== '') {
-          send2FAEmail(email).then(response => {
-            this.emailVerificationCode = response.verificationCode;
-          })
-
-        }
         let password = window.sessionStorage.getItem("password") || "";
         if (encryptedSeed !== "" && email !== "") {
           let loginType = localStorage.getItem("loginType") || "";

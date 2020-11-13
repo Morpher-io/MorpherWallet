@@ -1,8 +1,6 @@
 import { getTransaction, Op, Recovery, Recovery_Type, User } from '../database/models';
-import { decrypt, encrypt, errorResponse, successResponse, sha256 } from '../helpers/functions/util';
+import {decrypt, encrypt, errorResponse, successResponse, sha256, randomFixedInteger} from '../helpers/functions/util';
 const { to } = require('await-to-js');
-import * as moment from 'moment';
-
 import { Request, Response } from 'express';
 
 import { VK } from 'vk-io';
@@ -59,6 +57,17 @@ export async function changeEmail(req, res) {
             // Commit changes to database and return successfully.
             await transaction.commit();
 
+            // Send 2fa for changed email.
+            const verificationCode = randomFixedInteger(6);
+            user.payload.email = true;
+            user.payload.authenticator = false;
+            user.payload.emailVerificationCode = verificationCode;
+            user.payload.authenticator_qr = null;
+            user.changed('payload', true);
+            await user.save();
+
+            await sendEmail2FA(verificationCode, user.email);
+
             return successResponse(res, {
                 recovery_id: recoveryId
             });
@@ -97,7 +106,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
             await Recovery.destroy({ where: { user_id: user.id, [Op.and]: { recovery_type_id: recoveryTypeId } }, transaction });
         } else {
             // If it doesnt exist create a new one.
-            const payload = { email: false, authenticator: false };
+            const payload = { email: true, authenticator: false };
             userId = (await User.create({ email, payload }, { transaction })).dataValues.id;
         }
 
@@ -273,27 +282,4 @@ export async function getVKontakteEncryptedSeed(req, res) {
 
     // If user does not exist return an error.
     return errorResponse(res, 'User not found.');
-}
-
-export async function send2FAEmail(req, res){
-    const email = req.body.email;
-
-    try{
-        const verificationCode = randomFixedInteger(6);
-        const user = await User.findOne({ where: { email } });
-        user.payload.emailVerificationCode = verificationCode;
-        user.changed('payload', true);
-        await user.save();
-
-        // await sendEmail2FA(verificationCode, email);
-
-        return successResponse(res, { verificationCode })
-    }
-    catch (e) {
-        return errorResponse(res, 'There was a problem parsing the email');
-    }
-}
-
-const randomFixedInteger = function (length) {
-    return Math.floor(Math.pow(10, length-1) + Math.random() * (Math.pow(10, length) - Math.pow(10, length-1) - 1));
 }

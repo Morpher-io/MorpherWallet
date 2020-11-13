@@ -496,6 +496,29 @@ const verifyAuthenticatorCode = async (email, code) => {
     return response;
 }
 
+const verifyEmailCode = async (email, code) => {
+    let options = {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            email,
+            code
+        }),
+        mode: "cors",
+        cache: "default",
+    };
+    let result = await fetch(
+        config.BACKEND_ENDPOINT + "/v1/verifyEmailCode",
+        options
+    );
+
+    let response = await result.json();
+    return response;
+}
+
 export {  getEncryptedSeed,
     validateInput,
     saveWalletEmailPassword,
@@ -514,5 +537,6 @@ export {  getEncryptedSeed,
     send2FAEmail,
     generateQRCode,
     getQRCode,
-    verifyAuthenticatorCode
+    verifyAuthenticatorCode,
+    verifyEmailCode
 };

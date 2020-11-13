@@ -1,6 +1,7 @@
 import { authenticator } from 'otplib';
-import { errorResponse, successResponse } from "../helpers/functions/util";
+import { errorResponse, randomFixedInteger, successResponse } from "../helpers/functions/util";
 import { User } from "../database/models";
+import { sendEmail2FA } from "../helpers/functions/email";
 const QRCode = require('qrcode')
 
 export async function validateInput(req, res) {
@@ -175,9 +176,49 @@ export async function verifyAuthenticatorCode(req, res){
 
     try{
         const result = authenticator.check(code, user.authenticator_secret);
-        return successResponse(res, { verified: result })
+        return successResponse(res, { verified: result, code })
     }
     catch (e) {
         return errorResponse(res, 'Could not verify authenticator code.')
+    }
+}
+
+export async function send2FAEmail(req, res){
+    const email = req.body.email;
+
+    try{
+        const verificationCode = randomFixedInteger(6);
+        const user = await User.findOne({ where: { email } });
+        user.payload.emailVerificationCode = verificationCode;
+        user.changed('payload', true);
+        await user.save();
+
+        await sendEmail2FA(verificationCode, email);
+
+        return successResponse(res, { verificationCode })
+    }
+    catch (e) {
+        console.log(e)
+        return errorResponse(res, 'There was a problem parsing the email');
+    }
+}
+
+export async function verifyEmailCode(req, res){
+    const code = req.body.code;
+    const email = req.body.email;
+    const user = await User.findOne({ where: { email } });
+
+    console.log(code, email, user.payload)
+
+    let result = false;
+
+    try{
+        if(user.payload.emailVerificationCode === Number(code)){
+            result = true
+        }
+        return successResponse(res, { verified: result, code })
+    }
+    catch (e) {
+        return errorResponse(res, 'Could not verify email code.')
     }
 }
