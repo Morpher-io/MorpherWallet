@@ -69,7 +69,7 @@
         </div>
       </div>
 
-      <div v-if="hasWallet && unlockedWallet && !twoFAEmail && !twoFAAuthenticator" class="container">
+      <div v-if="!twoFAEmail && !twoFAAuthenticator && hasWallet && unlockedWallet " class="container">
         <div class="columns is-mobile">
           <div class="column">
             <h4 class="subtitle mb-0">Hello {{ walletEmail }}</h4>
@@ -260,6 +260,7 @@ const {
   getKeystoreFromEncryptedSeed,
   getEncryptedSeedFromMail,
   validateInput,
+  verifyAuthenticatorCode
 } = require("../utils/backupRestore");
 
 import FBAddRecovery from "../components/FBAddRecovery";
@@ -269,6 +270,7 @@ import VKAddRecovery from "../components/VKAddRecovery";
 import ChangePassword from "../components/ChangePassword";
 import ChangeEmail from "../components/ChangeEmail";
 import Change2FA from "../components/Change2FA";
+import Input2FA from "../components/Input2FA";
 
 import ExportWallet from "../components/ExportWallet";
 
@@ -288,6 +290,7 @@ export default {
     ChangePassword,
     ChangeEmail,
     Change2FA,
+    Input2FA,
     ExportWallet,
     Spinner,
     Signup,
@@ -403,8 +406,17 @@ export default {
       }
       else alert('Email code is not right')
     },
-    validateAuthenticatorCode(){
+    async validateAuthenticatorCode(){
+      let email = localStorage.getItem("email");
 
+      const result = await verifyAuthenticatorCode(email, this.authenticatorCode)
+      if(result.verified){
+        this.twoFAAuthenticator = false;
+        if(this.twoFAEmail === false){
+          this.twoFA = false;
+        }
+      }
+      else alert('Authenticator code is not right')
     },
     async logout() {
       this.showSpinner = true;
@@ -435,7 +447,7 @@ export default {
 
         if(this.twoFAEmail || this.twoFAAuthenticator) this.twoFA = true
 
-        if(this.twoFAEmail) {
+        if(this.twoFAEmail && this.emailVerificationCode !== '') {
           send2FAEmail(email).then(response => {
             this.emailVerificationCode = response.verificationCode;
           })

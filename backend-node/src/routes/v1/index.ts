@@ -17,6 +17,9 @@ module.exports = function(express) {
     router.post('/getVKontakteEncryptedSeed', WalletController.getVKontakteEncryptedSeed);
 
     router.post('/validateInput', ValidationController.validateInput);
+    router.post('/generateAuthenticatorQR', ValidationController.generateAuthenticatorQR);
+    router.post('/verifyAuthenticatorCode', ValidationController.verifyAuthenticatorCode);
+    router.post('/getQRCode', ValidationController.getQRCode);
 
     return router;
 };

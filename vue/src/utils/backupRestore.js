@@ -429,6 +429,73 @@ const send2FAEmail = async (email) => {
     return response;
 }
 
+const generateQRCode = async (email) => {
+    let options = {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            email,
+        }),
+        mode: "cors",
+        cache: "default",
+    };
+    let result = await fetch(
+        config.BACKEND_ENDPOINT + "/v1/generateAuthenticatorQR",
+        options
+    );
+
+    let response = await result.json();
+    return response;
+}
+
+const getQRCode = async (email) => {
+    let options = {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            email,
+        }),
+        mode: "cors",
+        cache: "default",
+    };
+    let result = await fetch(
+        config.BACKEND_ENDPOINT + "/v1/getQRCode",
+        options
+    );
+
+    let response = await result.json();
+    return response;
+}
+
+const verifyAuthenticatorCode = async (email, code) => {
+    let options = {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            email,
+            code
+        }),
+        mode: "cors",
+        cache: "default",
+    };
+    let result = await fetch(
+        config.BACKEND_ENDPOINT + "/v1/verifyAuthenticatorCode",
+        options
+    );
+
+    let response = await result.json();
+    return response;
+}
+
 export {  getEncryptedSeed,
     validateInput,
     saveWalletEmailPassword,
@@ -444,5 +511,8 @@ export {  getEncryptedSeed,
     changeEmail,
     getPayload,
     change2FAMethods,
-    send2FAEmail
+    send2FAEmail,
+    generateQRCode,
+    getQRCode,
+    verifyAuthenticatorCode
 };

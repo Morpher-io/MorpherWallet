@@ -8,12 +8,18 @@
             <label class="boxLabel" for="authenticator">Authenticator</label>
             <input type="submit" style="margin: 10px" value="Submit" />
         </form>
+
+        <img v-if="this.qrCode !== '' || this.qrCode !== undefined" style="height: 400px" v-bind:src="this.qrCode" />
+
+        <br>
+
+        <input type="submit" style="margin: 10px" value="Generate QR Code" v-on:click="generateQR" />
     </div>
 </template>
 
 
 <script>
-    import { getPayload, change2FAMethods } from "../utils/backupRestore";
+    import { getPayload, change2FAMethods, getQRCode, generateQRCode } from "../utils/backupRestore";
 
     const { sha256 } = require("../utils/cryptoFunctions");
 
@@ -23,6 +29,7 @@
             return {
                 email: false,
                 authenticator: false,
+                qrCode: ''
             }
         },
         props: [''],
@@ -40,6 +47,13 @@
                     alert("Email is not right.")
                 }
 
+            },
+
+            async generateQR(){
+                let email = localStorage.getItem("email");
+
+                const qrCode = await generateQRCode(email);
+                this.qrCode = qrCode.image;
             }
         },
         async mounted(){
@@ -47,6 +61,9 @@
 
             try{
                 const twoFAMethods = await getPayload(email);
+
+                const qrCode = await getQRCode(email);
+                this.qrCode = qrCode.image;
 
                 if(twoFAMethods.email !== undefined) this.email = twoFAMethods.email
                 if(twoFAMethods.authenticator !== undefined) this.authenticator = twoFAMethods.authenticator

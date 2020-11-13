@@ -16,6 +16,16 @@ export class User extends Model<User> {
     email;
 
     @Column({
+        type: DataType.TEXT
+    })
+    authenticator_qr;
+
+    @Column({
+        type: DataType.TEXT
+    })
+    authenticator_secret;
+
+    @Column({
         type: DataType.JSONB
     })
     payload;

@@ -1,3 +1,8 @@
+import { authenticator } from 'otplib';
+import { errorResponse, successResponse } from "../helpers/functions/util";
+import { User } from "../database/models";
+const QRCode = require('qrcode')
+
 export async function validateInput(req, res) {
     const fieldName = req.body.fieldName;
     const inputFieldValue = req.body.inputFieldValue;
@@ -122,4 +127,57 @@ export async function validateInput(req, res) {
 
         return res.json(validateReturn);
     } else return res.json(validateReturn);
+}
+
+export async function generateAuthenticatorQR(req, res){
+    const email = req.body.email;
+    const user = await User.findOne({ where: { email } });
+
+    user.authenticator_secret = authenticator.generateSecret();
+
+    const otp = authenticator.keyuri(email, "Morpher Wallet", user.authenticator_secret);
+
+    try{
+        const result = await QRCode.toDataURL(otp);
+
+        user.authenticator_qr = result;
+        await user.save();
+        return successResponse(res, {
+            image: result
+        })
+    }
+    catch (e) {
+        return errorResponse(res, 'Could not generate QR code.')
+    }
+
+}
+
+export async function getQRCode(req, res){
+    const email = req.body.email;
+
+    try{
+        const user = await User.findOne({ where: { email } });
+        const result = user.authenticator_qr || '';
+        return successResponse(res, {
+            image: result
+        })
+    }
+    catch (e) {
+        return errorResponse(res, 'Could not generate QR code.')
+    }
+
+}
+
+export async function verifyAuthenticatorCode(req, res){
+    const code = req.body.code;
+    const email = req.body.email;
+    const user = await User.findOne({ where: { email } });
+
+    try{
+        const result = authenticator.check(code, user.authenticator_secret);
+        return successResponse(res, { verified: result })
+    }
+    catch (e) {
+        return errorResponse(res, 'Could not verify authenticator code.')
+    }
 }
