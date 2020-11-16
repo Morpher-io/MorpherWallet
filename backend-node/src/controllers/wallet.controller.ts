@@ -5,7 +5,9 @@ import { Request, Response } from 'express';
 
 import { VK } from 'vk-io';
 import { Facebook } from 'fb';
-import {sendEmail2FA} from "../helpers/functions/email";
+import { sendEmail2FA } from "../helpers/functions/email";
+import { authenticator } from "otplib";
+const QRCode = require('qrcode')
 const options = {
     app_id: process.env.FACEBOOK_APP_ID,
     app_secret: process.env.FACEBOOK_APP_SECRET,
@@ -159,42 +161,6 @@ export async function getRecoveryTypes(req, res) {
     else { return errorResponse(res, 'Recovery methods could not be found'); }
 }
 
-// Function to return all 2FA methods from the database.
-export async function getPayload(req, res) {
-    const email = req.body.email;
-    const twoFAMethods = await User.findOne({ where: { email }, raw: true });
-
-    const payload = {};
-    if(twoFAMethods['payload'] !== null){
-        if(twoFAMethods['payload'].email !== undefined){ payload['email'] = twoFAMethods.payload.email };
-        if(twoFAMethods['payload'].authenticator !== undefined){ payload['authenticator'] = twoFAMethods.payload.authenticator };
-        if(twoFAMethods['payload'].emailVerificationCode !== undefined){ payload['emailVerificationCode'] = twoFAMethods.payload.emailVerificationCode };
-        if(twoFAMethods['payload'].authenticatorConfirmed !== undefined){ payload['authenticatorConfirmed'] = twoFAMethods.payload.authenticatorConfirmed };
-    }
-
-    if (twoFAMethods) { return successResponse(res, payload); }
-    else { return errorResponse(res, '2FA methods could not be found'); }
-}
-
-// Function to change 2FA methods from the database.
-export async function change2FAMethods(req, res) {
-    const email = req.body.email;
-    const toggleEmail = req.body.toggleEmail;
-    const toggleAuthenticator = req.body.toggleAuthenticator;
-
-    const user = await User.findOne({ where: { email } });
-
-    if(user){
-        user.payload.email = toggleEmail;
-        user.payload.authenticator = toggleAuthenticator;
-        user.changed('payload', true);
-        await user.save();
-        return successResponse(res, { message: 'User payload updated successfully.' });
-    }
-
-    else return errorResponse(res, 'User could not be found.');
-}
-
 // Function to get encrypted seed from facebook recovery.
 export async function getFacebookEncryptedSeed(req, res) {
     // Get access token and email from request body.
@@ -280,4 +246,143 @@ export async function getVKontakteEncryptedSeed(req, res) {
 
     // If user does not exist return an error.
     return errorResponse(res, 'User not found.');
+}
+
+
+// Function to return all 2FA methods from the database.
+export async function getPayload(req, res) {
+    const email = req.body.email;
+    const twoFAMethods = await User.findOne({ where: { email }, raw: true });
+
+    const payload = {};
+    if(twoFAMethods['payload'] !== null){
+        if(twoFAMethods['payload'].email !== undefined){ payload['email'] = twoFAMethods.payload.email };
+        if(twoFAMethods['payload'].authenticator !== undefined){ payload['authenticator'] = twoFAMethods.payload.authenticator };
+        if(twoFAMethods['payload'].emailVerificationCode !== undefined){ payload['emailVerificationCode'] = twoFAMethods.payload.emailVerificationCode };
+        if(twoFAMethods['payload'].authenticatorConfirmed !== undefined){ payload['authenticatorConfirmed'] = twoFAMethods.payload.authenticatorConfirmed };
+    }
+
+    if (twoFAMethods) { return successResponse(res, payload); }
+    else { return errorResponse(res, '2FA methods could not be found'); }
+}
+
+// Function to change 2FA methods from the database.
+export async function change2FAMethods(req, res) {
+    const email = req.body.email;
+    const toggleEmail = req.body.toggleEmail;
+    const toggleAuthenticator = req.body.toggleAuthenticator;
+
+    const user = await User.findOne({ where: { email } });
+
+    if(user){
+        user.payload.email = toggleEmail;
+        user.payload.authenticator = toggleAuthenticator;
+        user.changed('payload', true);
+        await user.save();
+        return successResponse(res, { message: 'User payload updated successfully.' });
+    }
+
+    else return errorResponse(res, 'User could not be found.');
+}
+
+
+export async function generateAuthenticatorQR(req, res){
+    const email = req.body.email;
+    const user = await User.findOne({ where: { email } });
+
+    user.authenticator_secret = authenticator.generateSecret();
+
+    console.log(user.authenticator_secret)
+
+    const otp = authenticator.keyuri(email, "Morpher Wallet", user.authenticator_secret);
+
+    try{
+        const result = await QRCode.toDataURL(otp);
+
+        user.authenticator_qr = result;
+        user.payload.authenticator = false;
+        user.payload.authenticatorConfirmed = false;
+        user.changed('payload', true);
+        await user.save();
+        return successResponse(res, {
+            image: result
+        })
+    }
+    catch (e) {
+        return errorResponse(res, 'Could not generate QR code.')
+    }
+
+}
+
+export async function getQRCode(req, res){
+    const email = req.body.email;
+
+    try{
+        const user = await User.findOne({ where: { email } });
+        const result = user.authenticator_qr || '';
+        return successResponse(res, {
+            image: result
+        })
+    }
+    catch (e) {
+        return errorResponse(res, 'Could not generate QR code.')
+    }
+
+}
+
+export async function verifyAuthenticatorCode(req, res){
+    const code = req.body.code;
+    const email = req.body.email;
+    const user = await User.findOne({ where: { email } });
+
+    try{
+        const result = authenticator.check(code, user.authenticator_secret);
+
+        console.log(result)
+        user.payload.authenticatorConfirmed = result;
+        user.changed('payload', true);
+        await user.save();
+        return successResponse(res, { verified: result, code })
+    }
+    catch (e) {
+        return errorResponse(res, 'Could not verify authenticator code.')
+    }
+}
+
+export async function send2FAEmail(req, res){
+    const email = req.body.email;
+
+    try{
+        const verificationCode = randomFixedInteger(6);
+        const user = await User.findOne({ where: { email } });
+        user.payload.emailVerificationCode = verificationCode;
+        user.changed('payload', true);
+        await user.save();
+
+        await sendEmail2FA(verificationCode, email);
+
+        return successResponse(res, { verificationCode })
+    }
+    catch (e) {
+        console.log(e)
+        return errorResponse(res, 'There was a problem parsing the email');
+    }
+}
+
+export async function verifyEmailCode(req, res){
+    const code = req.body.code;
+    const email = req.body.email;
+    const user = await User.findOne({ where: { email } });
+
+    let result = false;
+
+    try{
+        if(user.payload.emailVerificationCode === Number(code)){
+            result = true
+        }
+        return successResponse(res, { verified: result, code })
+    }
+    catch (e) {
+        return errorResponse(res, 'Could not verify email code.')
+    }
 }

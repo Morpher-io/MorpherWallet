@@ -2,7 +2,7 @@ import { authenticator } from 'otplib';
 import { errorResponse, randomFixedInteger, successResponse } from "../helpers/functions/util";
 import { User } from "../database/models";
 import { sendEmail2FA } from "../helpers/functions/email";
-const QRCode = require('qrcode')
+
 
 export async function validateInput(req, res) {
     const fieldName = req.body.fieldName;
@@ -128,105 +128,4 @@ export async function validateInput(req, res) {
 
         return res.json(validateReturn);
     } else return res.json(validateReturn);
-}
-
-export async function generateAuthenticatorQR(req, res){
-    const email = req.body.email;
-    const user = await User.findOne({ where: { email } });
-
-    user.authenticator_secret = authenticator.generateSecret();
-
-    console.log(user.authenticator_secret)
-
-    const otp = authenticator.keyuri(email, "Morpher Wallet", user.authenticator_secret);
-
-    try{
-        const result = await QRCode.toDataURL(otp);
-
-        user.authenticator_qr = result;
-        user.payload.authenticator = false;
-        user.payload.authenticatorConfirmed = false;
-        user.changed('payload', true);
-        await user.save();
-        return successResponse(res, {
-            image: result
-        })
-    }
-    catch (e) {
-        return errorResponse(res, 'Could not generate QR code.')
-    }
-
-}
-
-export async function getQRCode(req, res){
-    const email = req.body.email;
-
-    try{
-        const user = await User.findOne({ where: { email } });
-        const result = user.authenticator_qr || '';
-        return successResponse(res, {
-            image: result
-        })
-    }
-    catch (e) {
-        return errorResponse(res, 'Could not generate QR code.')
-    }
-
-}
-
-export async function verifyAuthenticatorCode(req, res){
-    const code = req.body.code;
-    const email = req.body.email;
-    const user = await User.findOne({ where: { email } });
-
-    try{
-        const result = authenticator.check(code, user.authenticator_secret);
-
-        console.log(result)
-        user.payload.authenticatorConfirmed = result;
-        user.changed('payload', true);
-        await user.save();
-        return successResponse(res, { verified: result, code })
-    }
-    catch (e) {
-        return errorResponse(res, 'Could not verify authenticator code.')
-    }
-}
-
-export async function send2FAEmail(req, res){
-    const email = req.body.email;
-
-    try{
-        const verificationCode = randomFixedInteger(6);
-        const user = await User.findOne({ where: { email } });
-        user.payload.emailVerificationCode = verificationCode;
-        user.changed('payload', true);
-        await user.save();
-
-        await sendEmail2FA(verificationCode, email);
-
-        return successResponse(res, { verificationCode })
-    }
-    catch (e) {
-        console.log(e)
-        return errorResponse(res, 'There was a problem parsing the email');
-    }
-}
-
-export async function verifyEmailCode(req, res){
-    const code = req.body.code;
-    const email = req.body.email;
-    const user = await User.findOne({ where: { email } });
-
-    let result = false;
-
-    try{
-        if(user.payload.emailVerificationCode === Number(code)){
-            result = true
-        }
-        return successResponse(res, { verified: result, code })
-    }
-    catch (e) {
-        return errorResponse(res, 'Could not verify email code.')
-    }
 }
