@@ -136,12 +136,17 @@ export async function generateAuthenticatorQR(req, res){
 
     user.authenticator_secret = authenticator.generateSecret();
 
+    console.log(user.authenticator_secret)
+
     const otp = authenticator.keyuri(email, "Morpher Wallet", user.authenticator_secret);
 
     try{
         const result = await QRCode.toDataURL(otp);
 
         user.authenticator_qr = result;
+        user.payload.authenticator = false;
+        user.payload.authenticatorConfirmed = false;
+        user.changed('payload', true);
         await user.save();
         return successResponse(res, {
             image: result
@@ -176,6 +181,11 @@ export async function verifyAuthenticatorCode(req, res){
 
     try{
         const result = authenticator.check(code, user.authenticator_secret);
+
+        console.log(result)
+        user.payload.authenticatorConfirmed = result;
+        user.changed('payload', true);
+        await user.save();
         return successResponse(res, { verified: result, code })
     }
     catch (e) {
@@ -207,8 +217,6 @@ export async function verifyEmailCode(req, res){
     const code = req.body.code;
     const email = req.body.email;
     const user = await User.findOne({ where: { email } });
-
-    console.log(code, email, user.payload)
 
     let result = false;
 

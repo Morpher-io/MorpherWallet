@@ -57,16 +57,14 @@ export async function changeEmail(req, res) {
             // Commit changes to database and return successfully.
             await transaction.commit();
 
-            // Send 2fa for changed email.
-            const verificationCode = randomFixedInteger(6);
             user.payload.email = true;
             user.payload.authenticator = false;
-            user.payload.emailVerificationCode = verificationCode;
+            user.payload.authenticatorConfirmed = false;
+            user.payload.emailVerificationCode = '';
             user.payload.authenticator_qr = null;
             user.changed('payload', true);
             await user.save();
 
-            await sendEmail2FA(verificationCode, user.email);
 
             return successResponse(res, {
                 recovery_id: recoveryId
@@ -106,7 +104,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
             await Recovery.destroy({ where: { user_id: user.id, [Op.and]: { recovery_type_id: recoveryTypeId } }, transaction });
         } else {
             // If it doesnt exist create a new one.
-            const payload = { email: true, authenticator: false };
+            const payload = { email: true, authenticator: false, authenticatorConfirmed: false };
             userId = (await User.create({ email, payload }, { transaction })).dataValues.id;
         }
 
@@ -171,7 +169,7 @@ export async function getPayload(req, res) {
         if(twoFAMethods['payload'].email !== undefined){ payload['email'] = twoFAMethods.payload.email };
         if(twoFAMethods['payload'].authenticator !== undefined){ payload['authenticator'] = twoFAMethods.payload.authenticator };
         if(twoFAMethods['payload'].emailVerificationCode !== undefined){ payload['emailVerificationCode'] = twoFAMethods.payload.emailVerificationCode };
-        if(twoFAMethods['payload'].authenticatorVerificationCode !== undefined){ payload['authenticatorVerificationCode'] = twoFAMethods.payload.authenticatorVerificationCode };
+        if(twoFAMethods['payload'].authenticatorConfirmed !== undefined){ payload['authenticatorConfirmed'] = twoFAMethods.payload.authenticatorConfirmed };
     }
 
     if (twoFAMethods) { return successResponse(res, payload); }
