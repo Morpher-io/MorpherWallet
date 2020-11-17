@@ -360,7 +360,8 @@ const changeEmail = async (oldEmail, newEmail, encryptedSeed) => {
     return response;
 };
 
-const getPayload = async (email, seed) => {
+const getPayload = async (email) => {
+    let key = await sha256(email);
     let options = {
         method: "POST",
         headers: {
@@ -368,8 +369,7 @@ const getPayload = async (email, seed) => {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            email,
-            seed
+            key
         }),
         mode: "cors",
         cache: "default",
@@ -384,6 +384,7 @@ const getPayload = async (email, seed) => {
 }
 
 const change2FAMethods = async (email, toggleEmail, toggleAuthenticator) => {
+    let key = await sha256(email);
     let options = {
         method: "POST",
         headers: {
@@ -391,7 +392,7 @@ const change2FAMethods = async (email, toggleEmail, toggleAuthenticator) => {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            email,
+            key,
             toggleEmail,
             toggleAuthenticator
         }),
@@ -408,6 +409,7 @@ const change2FAMethods = async (email, toggleEmail, toggleAuthenticator) => {
 }
 
 const send2FAEmail = async (email) => {
+    let key = await sha256(email);
     let options = {
         method: "POST",
         headers: {
@@ -415,7 +417,7 @@ const send2FAEmail = async (email) => {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            email,
+            key,
         }),
         mode: "cors",
         cache: "default",
@@ -430,6 +432,7 @@ const send2FAEmail = async (email) => {
 }
 
 const generateQRCode = async (email) => {
+    let key = await sha256(email);
     let options = {
         method: "POST",
         headers: {
@@ -437,7 +440,7 @@ const generateQRCode = async (email) => {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            email,
+            key,
         }),
         mode: "cors",
         cache: "default",
@@ -452,6 +455,7 @@ const generateQRCode = async (email) => {
 }
 
 const getQRCode = async (email) => {
+    let key = await sha256(email);
     let options = {
         method: "POST",
         headers: {
@@ -459,7 +463,7 @@ const getQRCode = async (email) => {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            email,
+            key,
         }),
         mode: "cors",
         cache: "default",
@@ -474,6 +478,7 @@ const getQRCode = async (email) => {
 }
 
 const verifyAuthenticatorCode = async (email, code) => {
+    let key = await sha256(email);
     let options = {
         method: "POST",
         headers: {
@@ -481,7 +486,7 @@ const verifyAuthenticatorCode = async (email, code) => {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            email,
+            key,
             code
         }),
         mode: "cors",
@@ -497,6 +502,7 @@ const verifyAuthenticatorCode = async (email, code) => {
 }
 
 const verifyEmailCode = async (email, code) => {
+    let key = await sha256(email);
     let options = {
         method: "POST",
         headers: {
@@ -504,7 +510,7 @@ const verifyEmailCode = async (email, code) => {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            email,
+            key,
             code
         }),
         mode: "cors",
