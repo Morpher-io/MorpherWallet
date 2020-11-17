@@ -248,11 +248,11 @@ export async function getVKontakteEncryptedSeed(req, res) {
     return errorResponse(res, 'User not found.');
 }
 
-
 // Function to return all 2FA methods from the database.
 export async function getPayload(req, res) {
-    const email = req.body.email;
-    const twoFAMethods = await User.findOne({ where: { email }, raw: true });
+    const key = req.body.key;
+    const recovery = await Recovery.findOne({ where: { key } });
+    const twoFAMethods = await User.findOne({ where: { id: recovery.user_id }, raw: true });
 
     const payload = {};
     if(twoFAMethods['payload'] !== null){
@@ -268,11 +268,12 @@ export async function getPayload(req, res) {
 
 // Function to change 2FA methods from the database.
 export async function change2FAMethods(req, res) {
-    const email = req.body.email;
+    const key = req.body.key;
+    const recovery = await Recovery.findOne({ where: { key } });
     const toggleEmail = req.body.toggleEmail;
     const toggleAuthenticator = req.body.toggleAuthenticator;
 
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ where: { id: recovery.user_id } });
 
     if(user){
         user.payload.email = toggleEmail;
@@ -287,14 +288,13 @@ export async function change2FAMethods(req, res) {
 
 
 export async function generateAuthenticatorQR(req, res){
-    const email = req.body.email;
-    const user = await User.findOne({ where: { email } });
+    const key = req.body.key;
+    const recovery = await Recovery.findOne({ where: { key } });
+    const user = await User.findOne({ where: { id: recovery.user_id } });
 
     user.authenticator_secret = authenticator.generateSecret();
 
-    console.log(user.authenticator_secret)
-
-    const otp = authenticator.keyuri(email, "Morpher Wallet", user.authenticator_secret);
+    const otp = authenticator.keyuri(user.email, "Morpher Wallet", user.authenticator_secret);
 
     try{
         const result = await QRCode.toDataURL(otp);
@@ -315,10 +315,11 @@ export async function generateAuthenticatorQR(req, res){
 }
 
 export async function getQRCode(req, res){
-    const email = req.body.email;
+    const key = req.body.key;
+    const recovery = await Recovery.findOne({ where: { key } });
+    const user = await User.findOne({ where: { id: recovery.user_id } });
 
     try{
-        const user = await User.findOne({ where: { email } });
         const result = user.authenticator_qr || '';
         return successResponse(res, {
             image: result
@@ -332,13 +333,13 @@ export async function getQRCode(req, res){
 
 export async function verifyAuthenticatorCode(req, res){
     const code = req.body.code;
-    const email = req.body.email;
-    const user = await User.findOne({ where: { email } });
+    const key = req.body.key;
+    const recovery = await Recovery.findOne({ where: { key } });
+    const user = await User.findOne({ where: { id: recovery.user_id } });
 
     try{
         const result = authenticator.check(code, user.authenticator_secret);
 
-        console.log(result)
         user.payload.authenticatorConfirmed = result;
         user.changed('payload', true);
         await user.save();
@@ -350,16 +351,17 @@ export async function verifyAuthenticatorCode(req, res){
 }
 
 export async function send2FAEmail(req, res){
-    const email = req.body.email;
+    const key = req.body.key;
+    const recovery = await Recovery.findOne({ where: { key } });
+    const user = await User.findOne({ where: { id: recovery.user_id } });
 
     try{
         const verificationCode = randomFixedInteger(6);
-        const user = await User.findOne({ where: { email } });
         user.payload.emailVerificationCode = verificationCode;
         user.changed('payload', true);
         await user.save();
 
-        await sendEmail2FA(verificationCode, email);
+        await sendEmail2FA(verificationCode, user.email);
 
         return successResponse(res, { verificationCode })
     }
@@ -371,8 +373,9 @@ export async function send2FAEmail(req, res){
 
 export async function verifyEmailCode(req, res){
     const code = req.body.code;
-    const email = req.body.email;
-    const user = await User.findOne({ where: { email } });
+    const key = req.body.key;
+    const recovery = await Recovery.findOne({ where: { key } });
+    const user = await User.findOne({ where: { id: recovery.user_id } });
 
     let result = false;
 
