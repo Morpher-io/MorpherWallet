@@ -383,8 +383,7 @@ const getPayload = async (email) => {
     return response;
 }
 
-const change2FAMethods = async (email, toggleEmail, toggleAuthenticator) => {
-    let key = await sha256(email);
+const change2FAMethods = async (signedMessage, toggleEmail, toggleAuthenticator) => {
     let options = {
         method: "POST",
         headers: {
@@ -392,7 +391,7 @@ const change2FAMethods = async (email, toggleEmail, toggleAuthenticator) => {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            key,
+            signedMessage,
             toggleEmail,
             toggleAuthenticator
         }),

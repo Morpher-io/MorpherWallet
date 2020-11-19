@@ -22,8 +22,9 @@
 
 
 <script>
-    import { getPayload, change2FAMethods, getQRCode, generateQRCode, verifyAuthenticatorCode } from "../utils/backupRestore";
+    import { getPayload, change2FAMethods, getQRCode, generateQRCode, verifyAuthenticatorCode, getKeystoreFromEncryptedSeed } from "../utils/backupRestore";
 
+    import Lightwallet from 'eth-lightwallet'
     const { sha256 } = require("../utils/cryptoFunctions");
 
     export default {
@@ -42,14 +43,19 @@
             async formSubmitChange2FA (e) {
                 e.preventDefault();
 
-                let email = localStorage.getItem("email");
-
                 try{
                     if(!this.email && this.authenticator && !this.authenticatorConfirmed){
                         alert('Please confirm Authenticator first.')
                     }
                     else {
-                        await change2FAMethods(email, this.email, this.authenticator);
+                        let password = window.sessionStorage.getItem("password");
+                        let encryptedSeed = window.localStorage.getItem("encryptedSeed");
+                        let keystore = await getKeystoreFromEncryptedSeed(JSON.parse(encryptedSeed), password);
+                        const self = this;
+                        keystore.keyFromPassword(password, async function (err, pwDerivedKey) {
+                            let signedMessage = Lightwallet.signing.signMsg(keystore, pwDerivedKey, "authentication", keystore.addresses[0])
+                            await change2FAMethods(signedMessage, self.email, self.authenticator);
+                        })
                         alert('2FA methods changed successfully.')
                     }
                 }

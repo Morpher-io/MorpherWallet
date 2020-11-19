@@ -26,6 +26,16 @@ export class User extends Model<User> {
     authenticator_secret;
 
     @Column({
+        type: DataType.TEXT
+    })
+    eth_address;
+
+    @Column({
+        type: DataType.INTEGER
+    })
+    email_verification_code;
+
+    @Column({
         type: DataType.JSONB
     })
     payload;

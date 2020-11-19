@@ -2,6 +2,7 @@ import { getTransaction, Op, Recovery, Recovery_Type, User } from '../database/m
 import {decrypt, encrypt, errorResponse, successResponse, sha256, randomFixedInteger} from '../helpers/functions/util';
 const { to } = require('await-to-js');
 import { Request, Response } from 'express';
+const Util = require('ethereumjs-util');
 
 import { VK } from 'vk-io';
 import { Facebook } from 'fb';
@@ -62,7 +63,6 @@ export async function changeEmail(req, res) {
             user.payload.email = true;
             user.payload.authenticator = false;
             user.payload.authenticatorConfirmed = false;
-            user.payload.emailVerificationCode = '';
             user.payload.authenticator_qr = null;
             user.changed('payload', true);
             await user.save();
@@ -252,28 +252,31 @@ export async function getVKontakteEncryptedSeed(req, res) {
 export async function getPayload(req, res) {
     const key = req.body.key;
     const recovery = await Recovery.findOne({ where: { key } });
-    const twoFAMethods = await User.findOne({ where: { id: recovery.user_id }, raw: true });
+    const user = await User.findOne({ where: { id: recovery.user_id }, raw: true });
 
     const payload = {};
-    if(twoFAMethods['payload'] !== null){
-        if(twoFAMethods['payload'].email !== undefined){ payload['email'] = twoFAMethods.payload.email };
-        if(twoFAMethods['payload'].authenticator !== undefined){ payload['authenticator'] = twoFAMethods.payload.authenticator };
-        if(twoFAMethods['payload'].emailVerificationCode !== undefined){ payload['emailVerificationCode'] = twoFAMethods.payload.emailVerificationCode };
-        if(twoFAMethods['payload'].authenticatorConfirmed !== undefined){ payload['authenticatorConfirmed'] = twoFAMethods.payload.authenticatorConfirmed };
+    if(user['payload'] !== null){
+        if(user['payload'].email !== undefined){ payload['email'] = user.payload.email };
+        if(user['payload'].authenticator !== undefined){ payload['authenticator'] = user.payload.authenticator };
+        if(user['payload'].emailVerificationCode !== undefined){ payload['emailVerificationCode'] = user.payload.emailVerificationCode };
+        if(user['payload'].authenticatorConfirmed !== undefined){ payload['authenticatorConfirmed'] = user.payload.authenticatorConfirmed };
     }
 
-    if (twoFAMethods) { return successResponse(res, payload); }
+    if (user) { return successResponse(res, payload); }
     else { return errorResponse(res, '2FA methods could not be found'); }
 }
 
 // Function to change 2FA methods from the database.
 export async function change2FAMethods(req, res) {
-    const key = req.body.key;
-    const recovery = await Recovery.findOne({ where: { key } });
     const toggleEmail = req.body.toggleEmail;
     const toggleAuthenticator = req.body.toggleAuthenticator;
+    const signedMessage = req.body.signedMessage;
 
-    const user = await User.findOne({ where: { id: recovery.user_id } });
+    const msgHash = Util.keccak("authentication");
+
+    const eth_address = '0x' + (Util.pubToAddress(Util.ecrecover(msgHash, signedMessage.v, Buffer.from(signedMessage.r), Buffer.from(signedMessage.s)))).toString('hex');
+
+    const user = await User.findOne({ where: { eth_address } });
 
     if(user){
         user.payload.email = toggleEmail;
@@ -357,8 +360,7 @@ export async function send2FAEmail(req, res){
 
     try{
         const verificationCode = randomFixedInteger(6);
-        user.payload.emailVerificationCode = verificationCode;
-        user.changed('payload', true);
+        user.email_verification_code = verificationCode;
         await user.save();
 
         await sendEmail2FA(verificationCode, user.email);
@@ -380,7 +382,7 @@ export async function verifyEmailCode(req, res){
     let result = false;
 
     try{
-        if(user.payload.emailVerificationCode === Number(code)){
+        if(user.email_verification_code === Number(code)){
             result = true
         }
         return successResponse(res, { verified: result, code })
