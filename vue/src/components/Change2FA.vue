@@ -43,24 +43,28 @@
             async formSubmitChange2FA (e) {
                 e.preventDefault();
 
+                let email = localStorage.getItem("email");
+
                 try{
                     if(!this.email && this.authenticator && !this.authenticatorConfirmed){
                         alert('Please confirm Authenticator first.')
                     }
                     else {
+                        let nonce = (await change2FAMethods(email, null, this.email, this.authenticator)).nonce;
+                        
                         let password = window.sessionStorage.getItem("password");
                         let encryptedSeed = window.localStorage.getItem("encryptedSeed");
                         let keystore = await getKeystoreFromEncryptedSeed(JSON.parse(encryptedSeed), password);
                         const self = this;
                         keystore.keyFromPassword(password, async function (err, pwDerivedKey) {
-                            let signedMessage = Lightwallet.signing.signMsg(keystore, pwDerivedKey, "authentication", keystore.addresses[0])
-                            await change2FAMethods(signedMessage, self.email, self.authenticator);
+                            let signedMessage = Lightwallet.signing.signMsg(keystore, pwDerivedKey, "authentication" + '_' + nonce, keystore.addresses[0])
+                            await change2FAMethods(email, signedMessage, self.email, self.authenticator);
                         })
                         alert('2FA methods changed successfully.')
                     }
                 }
                 catch(e){
-                    alert("Email is not right.")
+                    console.log(e)
                 }
             },
 

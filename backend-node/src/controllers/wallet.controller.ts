@@ -271,22 +271,38 @@ export async function change2FAMethods(req, res) {
     const toggleEmail = req.body.toggleEmail;
     const toggleAuthenticator = req.body.toggleAuthenticator;
     const signedMessage = req.body.signedMessage;
+    const key = req.body.key;
 
-    const msgHash = Util.keccak("authentication");
+    if(signedMessage === null){
+        const recovery = await Recovery.findOne({ where: { key } });
+        const user = await User.findOne({ where: { id: recovery.user_id } });
 
-    const eth_address = '0x' + (Util.pubToAddress(Util.ecrecover(msgHash, signedMessage.v, Buffer.from(signedMessage.r), Buffer.from(signedMessage.s)))).toString('hex');
+        const nonce = randomFixedInteger(6);
+        user.nonce = nonce;
+        await user.save()
 
-    const user = await User.findOne({ where: { eth_address } });
-
-    if(user){
-        user.payload.email = toggleEmail;
-        user.payload.authenticator = toggleAuthenticator;
-        user.changed('payload', true);
-        await user.save();
-        return successResponse(res, { message: 'User payload updated successfully.' });
+        return successResponse(res, { nonce });
     }
 
-    else return errorResponse(res, 'User could not be found.');
+    else {
+        const recovery = await Recovery.findOne({ where: { key } });
+        const user = await User.findOne({ where: { id: recovery.user_id } });
+
+        const msgHash = Util.keccak("authentication" + '_' + user.nonce);
+
+        const eth_address = '0x' + (Util.pubToAddress(Util.ecrecover(msgHash, signedMessage.v, Buffer.from(signedMessage.r), Buffer.from(signedMessage.s)))).toString('hex');
+
+        if(user.eth_address === eth_address){
+            user.payload.email = toggleEmail;
+            user.payload.authenticator = toggleAuthenticator;
+            user.nonce = randomFixedInteger(6);
+            user.changed('payload', true);
+            await user.save();
+            return successResponse(res, { message: 'User payload updated successfully.' });
+        }
+
+        else return errorResponse(res, 'User could not be found.');
+    }
 }
 
 

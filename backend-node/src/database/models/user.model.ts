@@ -36,6 +36,11 @@ export class User extends Model<User> {
     email_verification_code;
 
     @Column({
+        type: DataType.INTEGER
+    })
+    nonce;
+
+    @Column({
         type: DataType.JSONB
     })
     payload;
