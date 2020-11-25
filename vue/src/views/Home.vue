@@ -22,7 +22,7 @@
         v-if="hasWallet && !unlockedWallet"
         v-on:logout-user="logout"
         :wallet-email="walletEmail"
-        v-on:unlock-wallet="unlockedWallet"
+        v-on:unlock-wallet="unlockWallet"
         v-on:update-twofa="updateTwoFA"
         :show-recovery="loginFailure"
       ></unlock>
@@ -158,7 +158,7 @@
                       showExportWallet = !showExportWallet;
                       dropdownIsActive = !dropdownIsActive;
                     "
-                    >Export Seed Phrase</a
+                    >Export Keystore V3 Object</a
                   >
                   <hr class="dropdown-divider" />
 
@@ -284,6 +284,7 @@ import Signup from "../components/Signup";
 import Login from "../components/Login";
 import Unlock from "../components/Unlock";
 import {getPayload, send2FAEmail} from "../utils/backupRestore";
+import {getAccountsFromKeystore} from "../utils/utils";
 
 export default {
   name: "Wallet",
@@ -335,15 +336,16 @@ export default {
       twoFAEmail: false,
       twoFAAuthenticator: false,
       doneLoading: false,
+      selectedAccount: undefined
     };
   },
   methods: {
-    unlockWallet: function (encryptedSeed, password) {
+    unlockWallet: function (encryptedWallet, password) {
       this.showSpinner = true;
       this.status = "Unlocking Wallet";
       try {
-        if (!encryptedSeed) {
-          throw new Error("No Seed given, abort!");
+        if (!encryptedWallet) {
+          throw new Error("No Encrypted Wallet given, abort!");
         }
 
         let email = localStorage.getItem("email") || "";
@@ -356,20 +358,23 @@ export default {
           window.sessionStorage.setItem("password", password);
         }
 
-        let keystore = getKeystoreFromEncryptedSeed(encryptedSeed, password)
+        let keystore = getKeystoreFromEncryptedSeed(encryptedWallet, password)
           .then(async (keystore) => {
-            let accounts = await keystore.getAddresses();
+            let accounts = getAccountsFromKeystore(keystore);
 
             this.hasWallet = true;
             this.unlockedWallet = true;
             this.keystore = keystore;
             this.accounts = accounts;
-
+            if(accounts.length > 0) {
+              this.selectedAccount = accounts[0];
+            }
             this.showSpinner = false;
 
             if (isIframe()) {
               //let parent = await this.connection.promise;
               //await parent.onLogin(this.state.accounts[0], this.state.walletEmail)
+              console.log("calling iframe");
               (await this.connection.promise).onLogin(
                 this.accounts[0],
                 this.walletEmail
@@ -388,6 +393,7 @@ export default {
         this.accounts = null;
         this.hasWallet = true;
         this.unlockedWallet = false;
+        this.selectedAccount = undefined;
       }
     },
     updateTwoFA (email, authenticator, twoFA){
@@ -457,10 +463,16 @@ export default {
 
         let emailConfirmed = localStorage.getItem('emailCode')
         let authenticatorConfirmed = localStorage.getItem('authenticatorCode')
-        if(emailConfirmed === 'true') this.twoFAEmail = false
-        if(authenticatorConfirmed === 'true') this.twoFAAuthenticator = false
+        if(emailConfirmed === 'true') {
+          this.twoFAEmail = false;
+        }
+        if(authenticatorConfirmed === 'true') {
+          this.twoFAAuthenticator = false;
+        }
 
-        if(this.twoFAEmail || this.twoFAAuthenticator) this.twoFA = true
+        if(this.twoFAEmail || this.twoFAAuthenticator) {
+          this.twoFA = true;
+        }
 
         let password = window.sessionStorage.getItem("password") || "";
         if (encryptedSeed !== "" && email !== "") {
@@ -485,20 +497,24 @@ export default {
         methods: {
           async getAccounts() {
             if (self.keystore != null) {
-              return await self.keystore.getAddresses();
+              return self.accounts;
             } else {
               return [];
             }
           },
           async signTransaction(txObj) {
+            if(txObj.nonce == undefined) {
+              console.error("No nonce defined, aborting tx signing");
+            }
+            
             let signedTx = await new Promise((resolve, reject) => {
               //see if we are logged in?!
               try {
-                self.keystore.signTransaction(txObj, function (err, result) {
+                self.keystore[self.selectedAccount].signTransaction(txObj, function (err, result) {
                   if (err) {
                     reject(err);
                   }
-                  resolve(result);
+                  resolve(result.rawTransaction);
                 });
               } catch (e) {
                 reject(e);
@@ -509,6 +525,7 @@ export default {
           },
           isLoggedIn() {
             //return "ok"
+            console.log("Called is Logged In");
             if (self.unlockedWallet)
               return {
                 isLoggedIn: true,

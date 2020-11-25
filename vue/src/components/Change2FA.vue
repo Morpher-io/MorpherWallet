@@ -24,7 +24,7 @@
 <script>
     import { getPayload, change2FAMethods, getQRCode, generateQRCode, verifyAuthenticatorCode, getKeystoreFromEncryptedSeed } from "../utils/backupRestore";
 
-    import Lightwallet from 'eth-lightwallet'
+
     const { sha256 } = require("../utils/cryptoFunctions");
 
     export default {
@@ -55,11 +55,13 @@
                         let password = window.sessionStorage.getItem("password");
                         let encryptedSeed = window.localStorage.getItem("encryptedSeed");
                         let keystore = await getKeystoreFromEncryptedSeed(JSON.parse(encryptedSeed), password);
-                        const self = this;
-                        keystore.keyFromPassword(password, async function (err, pwDerivedKey) {
-                            let signedMessage = Lightwallet.signing.signMsg(keystore, pwDerivedKey, "authentication" + '_' + nonce, keystore.addresses[0])
-                            await change2FAMethods(email, signedMessage, self.email, self.authenticator);
-                        })
+                        await change2FAMethods(email, keystore[0].sign("authentication" + "_" + nonce), this.email, this.authenticator);
+                        // const self = this;
+
+                        // keystore.keyFromPassword(password, async function (err, pwDerivedKey) {
+                        //     let signedMessage = Lightwallet.signing.signMsg(keystore, pwDerivedKey, "authentication" + '_' + nonce, keystore.addresses[0])
+                        //     await change2FAMethods(email, signedMessage, self.email, self.authenticator);
+                        // })
                         alert('2FA methods changed successfully.')
                     }
                 }

@@ -51,6 +51,10 @@ export default class ZeroWallet {
     return this.provider;
   }
 
+  getChainId() {
+    return this.chainId;
+  }
+
   async showZeroWallet() {
     const widgetCommunication = (await this.widget).communication;
     return widgetCommunication.showZeroWallet();
@@ -155,17 +159,21 @@ export default class ZeroWallet {
     //engine.addProvider(new FilterSubprovider());
     //engine.addProvider(new NonceSubprovider());
 
-
+    let self = this;
    
     engine.addProvider(
       new HookedWalletSubprovider({
         getAccounts: async cb => {
           const widgetCommunication = (await this.widget).communication;
           const result = await widgetCommunication.getAccounts();
+          console.log(result);
           cb(null, result);
         },
         signTransaction: async (txParams, cb) => {
           const widgetCommunication = (await this.widget).communication;
+         
+          txParams.chainId = self.getChainId();
+          
           const result = await widgetCommunication.signTransaction(txParams);
           return result;
         },

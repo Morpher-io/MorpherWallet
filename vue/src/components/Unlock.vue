@@ -93,14 +93,14 @@ export default {
     },
   },
   methods: {
-    unlockWalletLoadSeedFromEmail: function (password) {
+    unlockWalletLoadSeedFromEmail: function () {
       this.showSpinner = true;
       this.status = "Fetching User from Database";
 
       try {
         getEncryptedSeedFromMail(this.walletEmail)
           .then((seed) => {
-            this.$emit("unlock-wallet", seed, password);
+            this.$emit("unlock-wallet", seed, this.walletPassword);
             this.showSpinner = false;
           })
           .catch((e) => {

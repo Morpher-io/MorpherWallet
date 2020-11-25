@@ -30,7 +30,7 @@ class App extends Component {
 
   async componentDidMount() {
 
-    this.zeroWallet = new ZeroWallet("ws://127.0.0.1:7545");
+    this.zeroWallet = new ZeroWallet("ws://127.0.0.1:7545", 5777);
     //let web3 = await this.zeroWallet.getProvider();
 
     let res = await this.zeroWallet.isLoggedIn();
@@ -43,6 +43,7 @@ class App extends Component {
     }
 
     this.zeroWallet.onLogin(async (walletAddress, walletEmail) => {
+      console.log("On Login arrived");
       this.setState({ walletEmail: walletEmail });
       this.setState({ walletAddress: walletAddress });
       let web3 = await getWeb3();

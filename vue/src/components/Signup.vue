@@ -202,9 +202,11 @@ export default {
 
           this.status = "Creating new Keystore";
           keystore = await getKeystore(password);
+          console.log(keystore);
           created = true;
         }
         let encryptedSeed = await getEncryptedSeed(keystore, password);
+        console.log(encryptedSeed);
 
         window.localStorage.setItem(
           "encryptedSeed",

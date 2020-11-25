@@ -1,4 +1,5 @@
 const { getKeystore }  = require("./keystore");
+const Accounts = require('web3-eth-accounts');
 const config = require("./../config.json");
 const { cryptoEncrypt, cryptoDecrypt, sha256 } = require("./cryptoFunctions");
 
@@ -16,9 +17,11 @@ const changePasswordEncryptedSeed = async (
     return await cryptoEncrypt(newPassword, seed);
 };
 
-const getKeystoreFromEncryptedSeed = async (encryptedSeed, password) =>
+const getKeystoreFromEncryptedSeed = async (encryptedWalletObject, password) =>
     new Promise(async (resolve, reject) => {
         try {
+            resolve(await getKeystore(password, encryptedWalletObject));
+            return;
             let seed = await cryptoDecrypt(
                 password,
                 encryptedSeed.ciphertext,
@@ -33,6 +36,7 @@ const getKeystoreFromEncryptedSeed = async (encryptedSeed, password) =>
     });
 
 const getEncryptedSeed = async (keystore, password) => {
+    return await keystore.encrypt(password);
     let pwDerivedKey = await new Promise((resolve, reject) => {
         keystore.keyFromPassword(password, (err, key) => {
             if (err) {
