@@ -100,12 +100,14 @@ const { sha256 } = require("../utils/cryptoFunctions");
 
 import isIframe from "../utils/isIframe";
 import { getKeystore } from "../utils/keystore";
+import {getPayload} from "../utils/backupRestore";
 const {
   getEncryptedSeed,
   saveWalletEmailPassword,
   getKeystoreFromEncryptedSeed,
   getEncryptedSeedFromMail,
   validateInput,
+  send2FAEmail
 } = require("../utils/backupRestore");
 
 export default {
@@ -176,6 +178,7 @@ export default {
         let created = false;
         //double hashed passwords for recovery
         let password = await sha256(this.walletPassword);
+        this.$emit("update-twofa", true, false, true);
         try {
           console.log("trying to find keystore from mail");
           this.status = "Looking up User from Database";
@@ -211,7 +214,8 @@ export default {
         window.sessionStorage.setItem("password", password);
 
         if (created) {
-          saveWalletEmailPassword(this.walletEmail, encryptedSeed);
+          await saveWalletEmailPassword(this.walletEmail, encryptedSeed);
+          await send2FAEmail(this.walletEmail)
         }
         this.$emit("unlock-wallet", encryptedSeed, password);
         this.showSpinner = false;

@@ -360,6 +360,172 @@ const changeEmail = async (oldEmail, newEmail, encryptedSeed) => {
     return response;
 };
 
+const getPayload = async (email) => {
+    let key = await sha256(email);
+    let options = {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            key
+        }),
+        mode: "cors",
+        cache: "default",
+    };
+    let result = await fetch(
+        config.BACKEND_ENDPOINT + "/v1/getPayload",
+        options
+    );
+
+    let response = await result.json();
+    return response;
+}
+
+const change2FAMethods = async (email, signedMessage, toggleEmail, toggleAuthenticator) => {
+    let key = await sha256(email);
+    let options = {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            key,
+            signedMessage,
+            toggleEmail,
+            toggleAuthenticator
+        }),
+        mode: "cors",
+        cache: "default",
+    };
+    let result = await fetch(
+        config.BACKEND_ENDPOINT + "/v1/change2FAMethods",
+        options
+    );
+
+    let response = await result.json();
+    return response;
+}
+
+const send2FAEmail = async (email) => {
+    let key = await sha256(email);
+    let options = {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            key,
+        }),
+        mode: "cors",
+        cache: "default",
+    };
+    let result = await fetch(
+        config.BACKEND_ENDPOINT + "/v1/send2FAEmail",
+        options
+    );
+
+    let response = await result.json();
+    return response;
+}
+
+const generateQRCode = async (email) => {
+    let key = await sha256(email);
+    let options = {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            key,
+        }),
+        mode: "cors",
+        cache: "default",
+    };
+    let result = await fetch(
+        config.BACKEND_ENDPOINT + "/v1/generateAuthenticatorQR",
+        options
+    );
+
+    let response = await result.json();
+    return response;
+}
+
+const getQRCode = async (email) => {
+    let key = await sha256(email);
+    let options = {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            key,
+        }),
+        mode: "cors",
+        cache: "default",
+    };
+    let result = await fetch(
+        config.BACKEND_ENDPOINT + "/v1/getQRCode",
+        options
+    );
+
+    let response = await result.json();
+    return response;
+}
+
+const verifyAuthenticatorCode = async (email, code) => {
+    let key = await sha256(email);
+    let options = {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            key,
+            code
+        }),
+        mode: "cors",
+        cache: "default",
+    };
+    let result = await fetch(
+        config.BACKEND_ENDPOINT + "/v1/verifyAuthenticatorCode",
+        options
+    );
+
+    let response = await result.json();
+    return response;
+}
+
+const verifyEmailCode = async (email, code) => {
+    let key = await sha256(email);
+    let options = {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            key,
+            code
+        }),
+        mode: "cors",
+        cache: "default",
+    };
+    let result = await fetch(
+        config.BACKEND_ENDPOINT + "/v1/verifyEmailCode",
+        options
+    );
+
+    let response = await result.json();
+    return response;
+}
+
 export {  getEncryptedSeed,
     validateInput,
     saveWalletEmailPassword,
@@ -372,5 +538,12 @@ export {  getEncryptedSeed,
     recoverGoogleSeed,
     backupVKSeed,
     recoverVKSeed,
-    changeEmail
+    changeEmail,
+    getPayload,
+    change2FAMethods,
+    send2FAEmail,
+    generateQRCode,
+    getQRCode,
+    verifyAuthenticatorCode,
+    verifyEmailCode
 };

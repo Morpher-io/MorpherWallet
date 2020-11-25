@@ -90,4 +90,8 @@ function sha256(text) {
         .digest('hex');
 }
 
-export { errorResponse, successResponse, asyncForEach, formatMarketId, seedDatabase, encrypt, decrypt, sha256 };
+const randomFixedInteger = function (length) {
+    return Math.floor(Math.pow(10, length-1) + Math.random() * (Math.pow(10, length) - Math.pow(10, length-1) - 1));
+}
+
+export { errorResponse, successResponse, asyncForEach, formatMarketId, seedDatabase, encrypt, decrypt, sha256, randomFixedInteger };

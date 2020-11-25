@@ -96,14 +96,12 @@ import VKRecoverWallet from "../components/VKRecoverWallet";
 const { sha256 } = require("../utils/cryptoFunctions");
 
 import { getKeystore } from "../utils/keystore";
-import {getPayload} from "../utils/backupRestore";
 const {
   getEncryptedSeed,
   saveWalletEmailPassword,
   getKeystoreFromEncryptedSeed,
   getEncryptedSeedFromMail,
   validateInput,
-        send2FAEmail
 } = require("../utils/backupRestore");
 
 export default {
@@ -157,15 +155,6 @@ export default {
           window.sessionStorage.setItem("password", password);
           console.log("found keystore, trying to unlock");
           this.status = "Found User, Trying to Unlock Wallet";
-
-          getPayload(this.walletEmail).then(twoFAMethods => {
-            let twoFA = false
-            if(twoFAMethods.email || twoFAMethods.authenticator) twoFA = true
-            if(twoFAMethods.email) {
-              send2FAEmail(this.walletEmail)
-            }
-            this.$emit("update-twofa", twoFAMethods.email, twoFAMethods.authenticator, twoFA);
-          })
 
           this.$emit("unlock-wallet", encryptedSeed, password);
           this.showSpinner = false;

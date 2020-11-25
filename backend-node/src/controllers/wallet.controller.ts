@@ -1,12 +1,14 @@
 import { getTransaction, Op, Recovery, Recovery_Type, User } from '../database/models';
-import { decrypt, encrypt, errorResponse, successResponse, sha256 } from '../helpers/functions/util';
+import {decrypt, encrypt, errorResponse, successResponse, sha256, randomFixedInteger} from '../helpers/functions/util';
 const { to } = require('await-to-js');
-import * as moment from 'moment';
-
 import { Request, Response } from 'express';
+const Util = require('ethereumjs-util');
 
 import { VK } from 'vk-io';
 import { Facebook } from 'fb';
+import { sendEmail2FA } from "../helpers/functions/email";
+import { authenticator } from "otplib";
+const QRCode = require('qrcode')
 const options = {
     app_id: process.env.FACEBOOK_APP_ID,
     app_secret: process.env.FACEBOOK_APP_SECRET,
@@ -58,6 +60,14 @@ export async function changeEmail(req, res) {
             // Commit changes to database and return successfully.
             await transaction.commit();
 
+            user.payload.email = true;
+            user.payload.authenticator = false;
+            user.payload.authenticatorConfirmed = false;
+            user.payload.authenticator_qr = null;
+            user.changed('payload', true);
+            await user.save();
+
+
             return successResponse(res, {
                 recovery_id: recoveryId
             });
@@ -96,7 +106,8 @@ export async function saveEmailPassword(req: Request, res: Response) {
             await Recovery.destroy({ where: { user_id: user.id, [Op.and]: { recovery_type_id: recoveryTypeId } }, transaction });
         } else {
             // If it doesnt exist create a new one.
-            userId = (await User.create({ email }, { transaction })).dataValues.id;
+            const payload = { email: true, authenticator: false, authenticatorConfirmed: false };
+            userId = (await User.create({ email, payload }, { transaction })).dataValues.id;
         }
 
         // Create a new recovery method.
@@ -146,8 +157,8 @@ export async function getEncryptedSeed(req, res) {
 export async function getRecoveryTypes(req, res) {
     const recoveryMethods = await Recovery_Type.findAll({ raw: true });
 
-    if (recoveryMethods.length > 0) return successResponse(res, recoveryMethods);
-    else return errorResponse(res, 'Recovery methods could not be found');
+    if (recoveryMethods.length > 0) { return successResponse(res, recoveryMethods); }
+    else { return errorResponse(res, 'Recovery methods could not be found'); }
 }
 
 // Function to get encrypted seed from facebook recovery.
@@ -235,4 +246,164 @@ export async function getVKontakteEncryptedSeed(req, res) {
 
     // If user does not exist return an error.
     return errorResponse(res, 'User not found.');
+}
+
+// Function to return all 2FA methods from the database.
+export async function getPayload(req, res) {
+    const key = req.body.key;
+    const recovery = await Recovery.findOne({ where: { key } });
+    const user = await User.findOne({ where: { id: recovery.user_id }, raw: true });
+
+    const payload = {};
+    if(user['payload'] !== null){
+        if(user['payload'].email !== undefined){ payload['email'] = user.payload.email };
+        if(user['payload'].authenticator !== undefined){ payload['authenticator'] = user.payload.authenticator };
+        if(user['payload'].emailVerificationCode !== undefined){ payload['emailVerificationCode'] = user.payload.emailVerificationCode };
+        if(user['payload'].authenticatorConfirmed !== undefined){ payload['authenticatorConfirmed'] = user.payload.authenticatorConfirmed };
+    }
+
+    if (user) { return successResponse(res, payload); }
+    else { return errorResponse(res, '2FA methods could not be found'); }
+}
+
+// Function to change 2FA methods from the database.
+export async function change2FAMethods(req, res) {
+    const toggleEmail = req.body.toggleEmail;
+    const toggleAuthenticator = req.body.toggleAuthenticator;
+    const signedMessage = req.body.signedMessage;
+    const key = req.body.key;
+
+    if(signedMessage === null){
+        const recovery = await Recovery.findOne({ where: { key } });
+        const user = await User.findOne({ where: { id: recovery.user_id } });
+
+        const nonce = randomFixedInteger(6);
+        user.nonce = nonce;
+        await user.save()
+
+        return successResponse(res, { nonce });
+    }
+
+    else {
+        const recovery = await Recovery.findOne({ where: { key } });
+        const user = await User.findOne({ where: { id: recovery.user_id } });
+
+        const msgHash = Util.keccak("authentication" + '_' + user.nonce);
+
+        const eth_address = '0x' + (Util.pubToAddress(Util.ecrecover(msgHash, signedMessage.v, Buffer.from(signedMessage.r), Buffer.from(signedMessage.s)))).toString('hex');
+
+        if(user.eth_address === eth_address){
+            user.payload.email = toggleEmail;
+            user.payload.authenticator = toggleAuthenticator;
+            user.nonce = randomFixedInteger(6);
+            user.changed('payload', true);
+            await user.save();
+            return successResponse(res, { message: 'User payload updated successfully.' });
+        }
+
+        else return errorResponse(res, 'User could not be found.');
+    }
+}
+
+
+export async function generateAuthenticatorQR(req, res){
+    const key = req.body.key;
+    const recovery = await Recovery.findOne({ where: { key } });
+    const user = await User.findOne({ where: { id: recovery.user_id } });
+
+    user.authenticator_secret = authenticator.generateSecret();
+
+    const otp = authenticator.keyuri(user.email, "Morpher Wallet", user.authenticator_secret);
+
+    try{
+        const result = await QRCode.toDataURL(otp);
+
+        user.authenticator_qr = result;
+        user.payload.authenticator = false;
+        user.payload.authenticatorConfirmed = false;
+        user.changed('payload', true);
+        await user.save();
+        return successResponse(res, {
+            image: result
+        })
+    }
+    catch (e) {
+        return errorResponse(res, 'Could not generate QR code.')
+    }
+
+}
+
+export async function getQRCode(req, res){
+    const key = req.body.key;
+    const recovery = await Recovery.findOne({ where: { key } });
+    const user = await User.findOne({ where: { id: recovery.user_id } });
+
+    try{
+        const result = user.authenticator_qr || '';
+        return successResponse(res, {
+            image: result
+        })
+    }
+    catch (e) {
+        return errorResponse(res, 'Could not generate QR code.')
+    }
+
+}
+
+export async function verifyAuthenticatorCode(req, res){
+    const code = req.body.code;
+    const key = req.body.key;
+    const recovery = await Recovery.findOne({ where: { key } });
+    const user = await User.findOne({ where: { id: recovery.user_id } });
+
+    try{
+        const result = authenticator.check(code, user.authenticator_secret);
+
+        user.payload.authenticatorConfirmed = result;
+        user.changed('payload', true);
+        await user.save();
+        return successResponse(res, { verified: result, code })
+    }
+    catch (e) {
+        return errorResponse(res, 'Could not verify authenticator code.')
+    }
+}
+
+export async function send2FAEmail(req, res){
+    const key = req.body.key;
+    const recovery = await Recovery.findOne({ where: { key } });
+    const user = await User.findOne({ where: { id: recovery.user_id } });
+
+    try{
+        const verificationCode = randomFixedInteger(6);
+        user.email_verification_code = verificationCode;
+        await user.save();
+
+        await sendEmail2FA(verificationCode, user.email);
+
+        return successResponse(res, { verificationCode })
+    }
+    catch (e) {
+        console.log(e)
+        return errorResponse(res, 'There was a problem parsing the email');
+    }
+}
+
+export async function verifyEmailCode(req, res){
+    const code = req.body.code;
+    const key = req.body.key;
+    const recovery = await Recovery.findOne({ where: { key } });
+    const user = await User.findOne({ where: { id: recovery.user_id } });
+
+    let result = false;
+
+    try{
+        if(user.email_verification_code === Number(code)){
+            result = true
+        }
+        return successResponse(res, { verified: result, code })
+    }
+    catch (e) {
+        return errorResponse(res, 'Could not verify email code.')
+    }
 }

@@ -8,12 +8,14 @@
       <signup
         v-if="!hasWallet && signup"
         v-on:unlock-wallet="unlockWallet"
+        v-on:update-twofa="updateTwoFA"
         v-on:login-wallet="signup = false"
       ></signup>
       <login
         v-if="!hasWallet && !signup"
         v-on:unlock-wallet="unlockWallet"
         v-on:create-wallet="signup = true"
+        v-on:update-twofa="updateTwoFA"
         :show-recovery="loginFailure"
       ></login>
       <unlock
@@ -21,10 +23,56 @@
         v-on:logout-user="logout"
         :wallet-email="walletEmail"
         v-on:unlock-wallet="unlockedWallet"
+        v-on:update-twofa="updateTwoFA"
         :show-recovery="loginFailure"
       ></unlock>
 
-      <div v-if="hasWallet && unlockedWallet" class="container">
+      <div v-if="hasWallet && unlockedWallet && twoFAEmail" class="container">
+        <article class="message is-warning">
+          <div class="message-header">
+            <p>Please input two FA email code</p>
+          </div>
+          <div class="message-body">
+            <form v-on:submit.prevent="validateEmailCode">
+              <input style="margin:10px" type="text" id="email" class="option" v-model="emailCode">
+              <label style="margin:10px" class="boxLabel" for="email">Email Code</label>
+              <span></span>
+              <input type="submit" style="margin: 10px" value="Submit" />
+            </form>
+          </div>
+
+        </article>
+
+      </div>
+      <div v-if="hasWallet && unlockedWallet && twoFAAuthenticator" class="container">
+        <article class="message is-warning">
+          <div class="message-header">
+            <p>Please input two FA Authenticator code</p>
+          </div>
+          <div class="message-body">
+            <form v-on:submit.prevent="validateAuthenticatorCode">
+              <input style="margin:10px" type="text" id="authenticator" class="option" v-model="authenticatorCode">
+              <label style="margin:10px" class="boxLabel" for="authenticator">Authenticator Code</label>
+              <span></span>
+              <input type="submit" style="margin: 10px" value="Submit" />
+            </form>
+          </div>
+        </article>
+
+      </div>
+
+      <div v-if="hasWallet && unlockedWallet && twoFA" class="container">
+        <div class="field is-grouped">
+          <div class="control is-expanded">
+            <button class="button is-primary is-fullwidth" v-on:click="logout()">
+              Logout
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <div v-if="!twoFAEmail && !twoFAAuthenticator && hasWallet && unlockedWallet " class="container">
         <div class="columns is-mobile">
           <div class="column">
             <h4 class="subtitle mb-0">Hello {{ walletEmail }}</h4>
@@ -95,6 +143,15 @@
                     >Change Email</a
                   >
                   <a
+                          href="#"
+                          class="dropdown-item"
+                          @click="
+                      showChange2FA = !showChange2FA;
+                      dropdownIsActive = !dropdownIsActive;
+                    "
+                  >Change 2FA</a
+                  >
+                  <a
                     href="#"
                     class="dropdown-item"
                     @click="
@@ -151,6 +208,20 @@
              <ChangeEmail :emailChanged="emailChanged"></ChangeEmail>
           </div>
         </article>
+
+        <article class="message" v-if="showChange2FA">
+          <div class="message-header">
+            <p>Change the 2-Factor-Authentication method</p>
+            <button
+                    class="delete"
+                    aria-label="delete"
+                    v-on:click="showChange2FA = false;"
+            ></button>
+          </div>
+          <div class="message-body">
+            <Change2FA></Change2FA>
+          </div>
+        </article>
        
         
         <article class="message" v-if="showExportWallet">
@@ -175,7 +246,7 @@
           
         </div>
       </div>
-    </div>
+      </div>
   </section>
 </template>
 
@@ -192,6 +263,8 @@ const {
   getKeystoreFromEncryptedSeed,
   getEncryptedSeedFromMail,
   validateInput,
+  verifyAuthenticatorCode,
+  verifyEmailCode
 } = require("../utils/backupRestore");
 
 import FBAddRecovery from "../components/FBAddRecovery";
@@ -200,6 +273,8 @@ import GoogleAddRecovery from "../components/GoogleAddRecovery";
 import VKAddRecovery from "../components/VKAddRecovery";
 import ChangePassword from "../components/ChangePassword";
 import ChangeEmail from "../components/ChangeEmail";
+import Change2FA from "../components/Change2FA";
+import Input2FA from "../components/Input2FA";
 
 import ExportWallet from "../components/ExportWallet";
 
@@ -208,6 +283,7 @@ import Spinner from "../components/loading-spinner/Spinner";
 import Signup from "../components/Signup";
 import Login from "../components/Login";
 import Unlock from "../components/Unlock";
+import {getPayload, send2FAEmail} from "../utils/backupRestore";
 
 export default {
   name: "Wallet",
@@ -217,6 +293,8 @@ export default {
     VKAddRecovery,
     ChangePassword,
     ChangeEmail,
+    Change2FA,
+    Input2FA,
     ExportWallet,
     Spinner,
     Signup,
@@ -241,6 +319,7 @@ export default {
       keystore: null,
       showChangePassword: false,
       showChangeEmail: false,
+      showChange2FA: false,
       showExportWallet: false,
       showSpinner: false,
       status: "",
@@ -248,6 +327,14 @@ export default {
       invalidEmail: false,
       invalidPassword: false,
       dropdownIsActive: false,
+      emailCode: "",
+      authenticatorCode: "",
+      emailVerificationCode: "",
+      authenticatorVerificationCode: "",
+      twoFA: false,
+      twoFAEmail: false,
+      twoFAAuthenticator: false,
+      doneLoading: false,
     };
   },
   methods: {
@@ -272,6 +359,7 @@ export default {
         let keystore = getKeystoreFromEncryptedSeed(encryptedSeed, password)
           .then(async (keystore) => {
             let accounts = await keystore.getAddresses();
+
             this.hasWallet = true;
             this.unlockedWallet = true;
             this.keystore = keystore;
@@ -302,6 +390,11 @@ export default {
         this.unlockedWallet = false;
       }
     },
+    updateTwoFA (email, authenticator, twoFA){
+      this.twoFAEmail = email;
+      this.twoFAAuthenticator = authenticator;
+      this.twoFA = twoFA;
+    },
     emailChanged: async function () {
       if (isIframe()) {
         //let parent = await this.connection.promise;
@@ -312,6 +405,31 @@ export default {
     cancel() {
       localStorage.clear();
       location.reload();
+    },
+    async validateEmailCode(){
+      let email = localStorage.getItem("email");
+      const result = await verifyEmailCode(email, this.emailCode)
+      if (result.verified) {
+        this.twoFAEmail = false;
+        localStorage.setItem('emailCode', 'true')
+        if (this.twoFAAuthenticator === false) {
+          this.twoFA = false;
+        }
+      }
+      else alert('Email code is not right')
+    },
+    async validateAuthenticatorCode(){
+      let email = localStorage.getItem("email");
+
+      const result = await verifyAuthenticatorCode(email, this.authenticatorCode)
+      if(result.verified){
+        this.twoFAAuthenticator = false;
+        localStorage.setItem('authenticatorCode', 'true')
+        if(this.twoFAEmail === false){
+          this.twoFA = false;
+        }
+      }
+      else alert('Authenticator code is not right')
     },
     async logout() {
       this.showSpinner = true;
@@ -325,23 +443,41 @@ export default {
       // this.signup = false;
       window.location.reload();
       //this.showSpinner = false;
-    },
+    }
   },
   mounted() {
     let encryptedSeed = localStorage.getItem("encryptedSeed") || "";
     let email = localStorage.getItem("email") || "";
-    let password = window.sessionStorage.getItem("password") || "";
-    if (encryptedSeed !== "" && email !== "") {
-      let loginType = localStorage.getItem("loginType") || "";
-      this.loginType = loginType;
-      this.hasWallet = true;
-      this.walletEmail = email;
 
-      if (password !== "") {
-        this.unlockWallet(JSON.parse(encryptedSeed), password);
-      }
+    if(email !== ""){
+      getPayload(email).then(twoFAMethods => {
+
+        this.twoFAEmail = twoFAMethods.email;
+        this.twoFAAuthenticator = twoFAMethods.authenticator;
+
+        let emailConfirmed = localStorage.getItem('emailCode')
+        let authenticatorConfirmed = localStorage.getItem('authenticatorCode')
+        if(emailConfirmed === 'true') this.twoFAEmail = false
+        if(authenticatorConfirmed === 'true') this.twoFAAuthenticator = false
+
+        if(this.twoFAEmail || this.twoFAAuthenticator) this.twoFA = true
+
+        let password = window.sessionStorage.getItem("password") || "";
+        if (encryptedSeed !== "" && email !== "") {
+          let loginType = localStorage.getItem("loginType") || "";
+          this.loginType = loginType;
+          this.hasWallet = true;
+          this.walletEmail = email;
+
+          if (password !== "") {
+            this.unlockWallet(JSON.parse(encryptedSeed), password);
+          }
+        }
+      })
     }
     var self = this;
+
+
     if (isIframe()) {
       this.connection = connectToParent({
         parentOrigin: "http://localhost:3000",

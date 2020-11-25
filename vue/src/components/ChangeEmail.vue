@@ -20,6 +20,8 @@
 
 
 <script>
+    import isIframe from "../utils/isIframe";
+
     const { sha256 } = require("../utils/cryptoFunctions");
     const {
         changeEmail,
@@ -31,7 +33,9 @@
         data: function(){
             return {
                 newEmail: "",
-                password: ""
+                password: "",
+                showSpinner: false,
+                status: "",
             }
         },
         props: ['emailChanged'],
@@ -55,11 +59,22 @@
 
                         this.newEmail = "";
                         this.password = "";
-                        this.emailChanged()
+                        this.emailChanged();
+                        await this.logout();
                     }
 
                     else alert('Password is not right!')
                 }
+            },
+
+            async logout() {
+                this.showSpinner = true;
+                this.status = "Logging out...";
+                if (isIframe()) {
+                    (await this.connection.promise).onLogout();
+                }
+                localStorage.clear();
+                window.location.reload();
             }
         },
         mounted(){

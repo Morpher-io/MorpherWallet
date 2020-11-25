@@ -58,6 +58,7 @@ import VKRecoverWallet from "../components/VKRecoverWallet";
 const { sha256 } = require("../utils/cryptoFunctions");
 
 import { getKeystore } from "../utils/keystore";
+import {getPayload, send2FAEmail} from "../utils/backupRestore";
 const {
   getEncryptedSeed,
   saveWalletEmailPassword,
@@ -95,6 +96,7 @@ export default {
     unlockWalletLoadSeedFromEmail: function (password) {
       this.showSpinner = true;
       this.status = "Fetching User from Database";
+
       try {
         getEncryptedSeedFromMail(this.walletEmail)
           .then((seed) => {
