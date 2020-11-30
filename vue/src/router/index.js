@@ -1,14 +1,37 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
+import Wallet from '../views/Wallet.vue'
+import Login from '../views/Login.vue'
+import Signup from '../views/Signup.vue'
+import TwoFA from '../views/TwoFA.vue';
+import store from '../store/index';
 
 Vue.use(VueRouter)
 
-  const routes = [
+const routes = [
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login
+  },
+  {
+    path: '/signup',
+    name: 'Signup',
+    component: Signup
+  },
+  {
+    path: '/2fa',
+    name: 'TwoFA',
+    component: TwoFA
+  },
+
   {
     path: '/',
-    name: 'Home',
-    component: Home
+    name: 'Wallet',
+    component: Wallet,
+    meta: {
+      requiresAuth: true
+    }
   }
 ]
 
@@ -16,6 +39,22 @@ const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  if(to.matched.some(record => record.meta.requiresAuth)) {
+    if(store.getters.twoFaRequired) {
+      next('/2fa');
+      return;
+    }
+    if (store.getters.isLoggedIn) {
+      next()
+      return
+    }
+    next('/login')
+  } else {
+    next()
+  }
 })
 
 export default router

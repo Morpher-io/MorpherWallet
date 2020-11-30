@@ -70,16 +70,13 @@
             </button>
           </div>
           <div class="control">
-            <button
-              type="button"
-              class="button is-light"
-              v-on:click="$emit('create-wallet')"
-            >
-              <span class="icon is-small">
+            <router-link to="/signup" tag="button" class="button is-light">
+            <span class="icon is-small">
                 <i class="far fa-file"></i>
               </span>
+              
               <span> Create new Wallet </span>
-            </button>
+            </router-link>
           </div>
         </div>
       </form>
