@@ -1,5 +1,5 @@
 import { getTransaction, Op, Recovery, Recovery_Type, User } from '../database/models';
-import {decrypt, encrypt, errorResponse, successResponse, sha256, randomFixedInteger} from '../helpers/functions/util';
+import { decrypt, encrypt, errorResponse, successResponse, sha256, randomFixedInteger } from '../helpers/functions/util';
 const { to } = require('await-to-js');
 import { Request, Response } from 'express';
 const Util = require('ethereumjs-util');
@@ -32,7 +32,7 @@ export async function changeEmail(req, res) {
 
     let userId;
 
-    try{
+    try {
         // Attempt to get user from database.
         const [, user] = await to(User.findOne({ where: { email: oldEmail }, transaction }));
 
@@ -97,7 +97,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
         let userId;
 
         // Attempt to get user from database.
-        const [, user] = await to(User.findOne({ where: { email }, raw:true, transaction }));
+        const [, user] = await to(User.findOne({ where: { email }, raw: true, transaction }));
 
         if (user) {
             // If it exists, set the userId and delete the associated recovery method.
@@ -139,18 +139,35 @@ export async function saveEmailPassword(req: Request, res: Response) {
 // Function to get an encrypted seed from the database using a key.
 export async function getEncryptedSeed(req, res) {
     const key = req.body.key;
+    const email2fa = req.body.email2fa;
+    const authenticator2fa = req.body.authenticator2fa;
 
     // Simply get Recovery instance that has this key and return it if its found.
     const [error, result] = await to(Recovery.findOne({ where: { key }, raw: true }));
 
-    if (result){
+
+    if (result) {
+        const user = await User.findOne({ where: { id: result.user_id } });
+
+        console.log(email2fa);
+        console.log(authenticator2fa);
+        const email2FAVerified = await verifyEmail2FA(result.user_id, email2fa);
+        console.log(email2FAVerified);
+        const googleVerified = await verifyGoogle2FA(result.user_id, authenticator2fa);
+        console.log(googleVerified);
+        if (!email2FAVerified || !googleVerified) {
+            return errorResponse(res, 'Either Email2FA or Authenticator2FA was wrong. Try again.')
+        }
+        //avoid replay attack, generate a new Email 2FA after it was validated and seed was sent
+        updateEmail2fa(user.id);
+        //only if the codes are correct we get the juicy seed.
         return successResponse(res, {
             encryptedSeed: decrypt(JSON.parse(result.encrypted_seed), process.env.DB_BACKEND_SALT)
         });
     }
 
     // Otherwise return an error.
-    else return errorResponse(res, 'Seed not found, creating new wallet.');
+    return errorResponse(res, 'There is no user with this key.');
 }
 
 // Function to return all recovery types from the database.
@@ -255,11 +272,11 @@ export async function getPayload(req, res) {
     const user = await User.findOne({ where: { id: recovery.user_id }, raw: true });
 
     const payload = {};
-    if(user['payload'] !== null){
-        if(user['payload'].email !== undefined){ payload['email'] = user.payload.email };
-        if(user['payload'].authenticator !== undefined){ payload['authenticator'] = user.payload.authenticator };
-        if(user['payload'].emailVerificationCode !== undefined){ payload['emailVerificationCode'] = user.payload.emailVerificationCode };
-        if(user['payload'].authenticatorConfirmed !== undefined){ payload['authenticatorConfirmed'] = user.payload.authenticatorConfirmed };
+    if (user['payload'] !== null) {
+        if (user['payload'].email !== undefined) { payload['email'] = user.payload.email };
+        if (user['payload'].authenticator !== undefined) { payload['authenticator'] = user.payload.authenticator };
+        if (user['payload'].emailVerificationCode !== undefined) { payload['emailVerificationCode'] = user.payload.emailVerificationCode };
+        if (user['payload'].authenticatorConfirmed !== undefined) { payload['authenticatorConfirmed'] = user.payload.authenticatorConfirmed };
     }
 
     if (user) { return successResponse(res, payload); }
@@ -273,7 +290,7 @@ export async function change2FAMethods(req, res) {
     const signedMessage = req.body.signedMessage;
     const key = req.body.key;
 
-    if(signedMessage === null){
+    if (signedMessage === null) {
         const recovery = await Recovery.findOne({ where: { key } });
         const user = await User.findOne({ where: { id: recovery.user_id } });
 
@@ -292,7 +309,7 @@ export async function change2FAMethods(req, res) {
 
         const eth_address = '0x' + (Util.pubToAddress(Util.ecrecover(msgHash, signedMessage.v, Buffer.from(signedMessage.r), Buffer.from(signedMessage.s)))).toString('hex');
 
-        if(user.eth_address === eth_address){
+        if (user.eth_address === eth_address) {
             user.payload.email = toggleEmail;
             user.payload.authenticator = toggleAuthenticator;
             user.nonce = randomFixedInteger(6);
@@ -306,7 +323,7 @@ export async function change2FAMethods(req, res) {
 }
 
 
-export async function generateAuthenticatorQR(req, res){
+export async function generateAuthenticatorQR(req, res) {
     const key = req.body.key;
     const recovery = await Recovery.findOne({ where: { key } });
     const user = await User.findOne({ where: { id: recovery.user_id } });
@@ -315,7 +332,7 @@ export async function generateAuthenticatorQR(req, res){
 
     const otp = authenticator.keyuri(user.email, "Morpher Wallet", user.authenticator_secret);
 
-    try{
+    try {
         const result = await QRCode.toDataURL(otp);
 
         user.authenticator_qr = result;
@@ -333,12 +350,12 @@ export async function generateAuthenticatorQR(req, res){
 
 }
 
-export async function getQRCode(req, res){
+export async function getQRCode(req, res) {
     const key = req.body.key;
     const recovery = await Recovery.findOne({ where: { key } });
     const user = await User.findOne({ where: { id: recovery.user_id } });
 
-    try{
+    try {
         const result = user.authenticator_qr || '';
         return successResponse(res, {
             image: result
@@ -350,38 +367,43 @@ export async function getQRCode(req, res){
 
 }
 
-export async function verifyAuthenticatorCode(req, res){
+export async function verifyAuthenticatorCode(req, res) {
     const code = req.body.code;
     const key = req.body.key;
     const recovery = await Recovery.findOne({ where: { key } });
     const user = await User.findOne({ where: { id: recovery.user_id } });
 
-    try{
-        const result = authenticator.check(code, user.authenticator_secret);
 
-        user.payload.authenticatorConfirmed = result;
+    if (verifyGoogle2FA(recovery.user_id, code)) {
+        user.payload.authenticatorConfirmed = true;
         user.changed('payload', true);
         await user.save();
-        return successResponse(res, { verified: result, code })
-    }
-    catch (e) {
+        return successResponse(res, true)
+    } else {
         return errorResponse(res, 'Could not verify authenticator code.')
     }
+
 }
 
-export async function send2FAEmail(req, res){
+async function updateEmail2fa(user_id) {
+    const user = await User.findOne({ where: { id: user_id } });
+    const verificationCode = randomFixedInteger(6);
+    user.email_verification_code = verificationCode;
+    await user.save();
+    return user.email_verification_code;
+}
+
+export async function send2FAEmail(req, res) {
     const key = req.body.key;
     const recovery = await Recovery.findOne({ where: { key } });
     const user = await User.findOne({ where: { id: recovery.user_id } });
 
-    try{
-        const verificationCode = randomFixedInteger(6);
-        user.email_verification_code = verificationCode;
-        await user.save();
+    try {
+        let verificationCode = await updateEmail2fa(user.id);
 
         await sendEmail2FA(verificationCode, user.email);
 
-        return successResponse(res, { verificationCode })
+        return successResponse(res, { verificationCode });
     }
     catch (e) {
         console.log(e)
@@ -389,21 +411,25 @@ export async function send2FAEmail(req, res){
     }
 }
 
-export async function verifyEmailCode(req, res){
+export async function verifyEmailCode(req, res) {
     const code = req.body.code;
     const key = req.body.key;
     const recovery = await Recovery.findOne({ where: { key } });
-    const user = await User.findOne({ where: { id: recovery.user_id } });
-
-    let result = false;
-
-    try{
-        if(user.email_verification_code === Number(code)){
-            result = true
-        }
-        return successResponse(res, { verified: result, code })
-    }
-    catch (e) {
+    
+    if (verifyEmail2FA(recovery.user_id, code)) {
+        return successResponse(res, true)
+    } else {
         return errorResponse(res, 'Could not verify email code.')
     }
+
+}
+
+async function verifyEmail2FA(user_id: string, code: string): Promise<boolean> {
+    const user = await User.findOne({ where: { id: user_id } });
+    return (user.payload.email == false || user.email_verification_code === Number(code));
+}
+
+async function verifyGoogle2FA(user_id: string, code: string): Promise<boolean> {
+    const user = await User.findOne({ where: { id: user_id } });
+    return (user.payload.authenticator == false || authenticator.check(code, user.authenticator_secret));
 }

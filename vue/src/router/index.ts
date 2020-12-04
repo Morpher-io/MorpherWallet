@@ -6,6 +6,7 @@ import Signup from '../views/Signup.vue';
 import TwoFA from '../views/TwoFA.vue';
 import store from '../store/index';
 import Settings from '../views/Settings.vue';
+import Unlock from '../views/Unlock.vue';
 
 Vue.use(VueRouter);
 
@@ -31,7 +32,15 @@ const routes: Array<RouteConfig> = [
 	{
 		path: '/2fa',
 		name: 'TwoFA',
-		component: TwoFA
+		component: TwoFA,
+		meta: {
+			requires2fa: true
+		}
+	},
+	{
+		path: '/unlock',
+		name: 'Unlock',
+		component: Unlock
 	},
 
 	{
@@ -61,6 +70,18 @@ router.beforeEach((to, from, next) => {
 			return;
 		}
 		next('/login');
+	} else if(to.matched.some(record => record.meta.requires2fa)) {
+		if(store.getters.twoFaRequired) {
+			next();
+			return;
+		}
+		
+		if(store.getters.isLoggedIn) {
+			next("/");
+			return;
+		}
+
+		next("/login");
 	} else {
 		next();
 	}

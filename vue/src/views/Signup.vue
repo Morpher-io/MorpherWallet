@@ -120,13 +120,11 @@ export default class Signup extends mixins(Global) {
 
 		this.createWallet({ email, password })
 			.then(encryptedKeystore => {
-				this.$router.push('/');
+				this.$router.push('/2fa');
 			})
 			.catch(error => {
 				(err: any) => console.log(err);
 			});
-
-		this.$store.dispatch('createWallet', { email, password });
 	}
 }
 </script>

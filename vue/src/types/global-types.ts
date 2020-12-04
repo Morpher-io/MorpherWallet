@@ -54,3 +54,15 @@ export type TypeState = {
 	token: string;
 	twoFaRequired: Type2FARequired;
 };
+
+export type TypeUnlockWithPassword = {
+  __typename?: "TypeUnlockWithPassword";
+  password: string;
+};
+
+
+export type TypeUserFoundData = {
+  __typename?: "TypeFetchUser";
+  email: string;
+  hashedPassword: string;
+};

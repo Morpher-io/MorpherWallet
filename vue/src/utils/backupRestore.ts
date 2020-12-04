@@ -17,18 +17,18 @@ const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: string, passw
 				resolve(wallet);
 			});
 
-			
+
 			return;
 			/*
-            let seed = await cryptoDecrypt(
-                password,
-                encryptedSeed.ciphertext,
-                encryptedSeed.iv,
-                encryptedSeed.salt
-            );
-            let keystore = await getKeystore(password, seed);
-            resolve(keystore);
-            */
+			let seed = await cryptoDecrypt(
+				password,
+				encryptedSeed.ciphertext,
+				encryptedSeed.iv,
+				encryptedSeed.salt
+			);
+			let keystore = await getKeystore(password, seed);
+			resolve(keystore);
+			*/
 		} catch (e) {
 			reject(e);
 		}
@@ -37,40 +37,40 @@ const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: string, passw
 const getEncryptedSeed = async (keystore: any, password: string) => {
 	return await keystore.encrypt(password);
 	/*
-    let pwDerivedKey = await new Promise((resolve, reject) => {
-        keystore.keyFromPassword(password, (err, key) => {
-            if (err) {
-                reject(err);
-            }
-            resolve(key);
-        });
-    });
+	let pwDerivedKey = await new Promise((resolve, reject) => {
+		keystore.keyFromPassword(password, (err, key) => {
+			if (err) {
+				reject(err);
+			}
+			resolve(key);
+		});
+	});
 
-    let encryptedSeed = await cryptoEncrypt(
-        password,
-        await keystore.getSeed(pwDerivedKey)
-    );
-    return encryptedSeed;
-    */
+	let encryptedSeed = await cryptoEncrypt(
+		password,
+		await keystore.getSeed(pwDerivedKey)
+	);
+	return encryptedSeed;
+	*/
 };
 
-const getEncryptedSeedFromMail = async (email: string) =>
+const getEncryptedSeedFromMail = async (email: string, email2fa: string, authenticator2fa: string) =>
 	new Promise((resolve, reject) => {
-		 sha256(email).then((key:string) => {
+		sha256(email).then((key: string) => {
 			const options: RequestInit = {
 				method: 'POST',
 				headers: {
 					Accept: 'application/json',
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ key }),
+				body: JSON.stringify({ key, email2fa, authenticator2fa }),
 				mode: 'cors',
 				cache: 'default'
 			};
-			
+
 			fetch(config.BACKEND_ENDPOINT + '/v1/getEncryptedSeed', options).then(response => {
 				response.json().then(responseBody => {
-	
+
 					/**
 					 * Login /Create Wallet is in one function
 					 * @todo: Separate Login and Create Wallet into separate functions so that upon failed "login" a recovery can be suggested
@@ -83,18 +83,18 @@ const getEncryptedSeedFromMail = async (email: string) =>
 					}
 					reject('seed not found');
 				}
-				
+
 				);
 
-				
+
 			}
-				)
+			)
 
 
 		}
-			);
+		);
 
-	
+
 	});
 
 const validateInput = async (fieldName: string, inputFieldValue: string) => {
@@ -189,8 +189,8 @@ const backupGoogleSeed = async (userEmail: string, userid: string, encryptedSeed
 		}
 
 		);
-		
-		
+
+
 
 
 	});
@@ -226,7 +226,7 @@ const backupFacebookSeed = async (userEmail: string, userid: string, encryptedSe
 		}
 
 		);
-		
+
 	});
 
 const recoverFacebookSeed = async (accessToken: string, signupEmail: string) =>
@@ -343,8 +343,8 @@ const backupVKSeed = async (userEmail: string, userid: string, encryptedSeed: st
 		}
 
 		)
-		
-		
+
+
 	});
 
 const changeEmail = async (oldEmail: string, newEmail: string, encryptedSeed: string) => {
@@ -488,10 +488,13 @@ const verifyAuthenticatorCode = async (email: string, code: string) => {
 		mode: 'cors',
 		cache: 'default'
 	};
-	const result = await fetch(config.BACKEND_ENDPOINT + '/v1/verifyAuthenticatorCode', options);
-
-	const response = await result.json();
-	return response;
+	try {
+		await fetch(config.BACKEND_ENDPOINT + '/v1/verifyAuthenticatorCode', options);
+		//it will throw an exception if it fails
+		return true;
+	} catch (e) {
+		return false;
+	}
 };
 
 const verifyEmailCode = async (email: string, code: string) => {
@@ -509,10 +512,15 @@ const verifyEmailCode = async (email: string, code: string) => {
 		mode: 'cors',
 		cache: 'default'
 	};
-	const result = await fetch(config.BACKEND_ENDPOINT + '/v1/verifyEmailCode', options);
-
-	const response = await result.json();
-	return response;
+	try {
+		const result = await fetch(config.BACKEND_ENDPOINT + '/v1/verifyEmailCode', options);
+		console.log(result);
+		const body = await result.json();
+		console.log(body)
+		return body.success;
+	} catch (e) {
+		return false;
+	}
 };
 
 export {
