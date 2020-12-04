@@ -93,16 +93,16 @@ import FBRecoverWallet from "../components/FBRecoverWallet";
 import GoogleRecoverWallet from "../components/GoogleRecoverWallet";
 
 import VKRecoverWallet from "../components/VKRecoverWallet";
-const { sha256 } = require("../utils/cryptoFunctions");
+import { sha256 } from "../utils/cryptoFunctions";
 
 import { getKeystore } from "../utils/keystore";
-const {
+import {
   getEncryptedSeed,
   saveWalletEmailPassword,
   getKeystoreFromEncryptedSeed,
   getEncryptedSeedFromMail,
-  validateInput,
-} = require("../utils/backupRestore");
+  validateInput
+} from "../utils/backupRestore";
 
 export default {
   name: "Login",
@@ -110,24 +110,24 @@ export default {
     Spinner,
     FBRecoverWallet,
     GoogleRecoverWallet,
-    VKRecoverWallet,
+    VKRecoverWallet
   },
-  data: function () {
+  data: function() {
     return {
       walletEmail: "",
       walletPassword: "",
       showSpinner: false,
-      status: "",
+      status: ""
     };
   },
   props: {
     showRecovery: {
       type: Boolean,
-      default: false,
-    },
+      default: false
+    }
   },
   methods: {
-    fetchUser: async function (e) {
+    fetchUser: async function(e) {
       try {
         e.preventDefault();
 
@@ -136,16 +136,18 @@ export default {
         /**
          * First try to fetch the wallet from the server, in case the browser-cache was cleared
          */
-        let keystore = null;
-        let created = false;
+        const keystore = null;
+        const created = false;
         //double hashed passwords for recovery
-        let password = await sha256(this.walletPassword);
+        const password = await sha256(this.walletPassword);
         try {
           console.log("trying to find keystore from mail");
           this.status = "Looking up User from Database";
-          let encryptedSeed = await getEncryptedSeedFromMail(this.walletEmail);
+          const encryptedSeed = await getEncryptedSeedFromMail(
+            this.walletEmail
+          );
 
-          console.log(encryptedSeed)
+          console.log(encryptedSeed);
 
           window.localStorage.setItem(
             "encryptedSeed",
@@ -166,22 +168,22 @@ export default {
            */
 
           this.status = "The user wasn't found: Signup first!";
-          let self = this;
-          setTimeout(function () {
-            self.showSpinner = false;
-            self.$emit("create-wallet");
+
+          setTimeout(function() {
+            this.showSpinner = false;
+            this.$emit("create-wallet");
           }, 1500);
         }
       } catch (e) {
         console.log(e);
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
 <style scoped>
-/deep/ .Password__strength-meter {
+.Password__strength-meter {
   margin: 5px auto !important;
 }
 </style>

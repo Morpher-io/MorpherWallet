@@ -1,571 +1,169 @@
 <template>
-  <section class="section">
-    <div class="container">
-      <spinner v-model="showSpinner" v-bind:status="status"></spinner>
-      <figure class="image mb-5">
-        <img src="/img/morpher-solid.svg" style="max-width: 500px" />
-      </figure>
-      <signup
-        v-if="!hasWallet && signup"
-        v-on:unlock-wallet="unlockWallet"
-        v-on:update-twofa="updateTwoFA"
-        v-on:login-wallet="signup = false"
-      ></signup>
-      <login
-        v-if="!hasWallet && !signup"
-        v-on:unlock-wallet="unlockWallet"
-        v-on:create-wallet="signup = true"
-        v-on:update-twofa="updateTwoFA"
-        :show-recovery="loginFailure"
-      ></login>
-      <unlock
-        v-if="hasWallet && !unlockedWallet"
-        v-on:logout-user="logout"
-        :wallet-email="walletEmail"
-        v-on:unlock-wallet="unlockWallet"
-        v-on:update-twofa="updateTwoFA"
-        :show-recovery="loginFailure"
-      ></unlock>
+	<section class="section">
+		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
+		<div class="container">
+			<div class="container">
+				<div class="field is-grouped">
+					<div class="control is-expanded">
+						<button class="button is-primary is-fullwidth" v-on:click="logout()">
+							Logout
+						</button>
+					</div>
+				</div>
+			</div>
 
-      <div v-if="hasWallet && unlockedWallet && twoFAEmail" class="container">
-        <article class="message is-warning">
-          <div class="message-header">
-            <p>Please input two FA email code</p>
-          </div>
-          <div class="message-body">
-            <form v-on:submit.prevent="validateEmailCode">
-              <input style="margin:10px" type="text" id="email" class="option" v-model="emailCode">
-              <label style="margin:10px" class="boxLabel" for="email">Email Code</label>
-              <span></span>
-              <input type="submit" style="margin: 10px" value="Submit" />
-            </form>
-          </div>
+			<div class="container">
+				<div class="columns is-mobile">
+					<div class="column">
+						<h4 class="subtitle mb-0">Hello {{ walletEmail }}</h4>
+						<p class="content is-small has-text-weight-light">Not you? <a v-on:click="logout">Sign Out!</a></p>
+					</div>
+					<div class="column is-narrow">
+						<div class="dropdown is-right" v-bind:class="{ 'is-active': dropdownIsActive }">
+							<div class="dropdown-trigger">
+								<figure
+									class="image is-64x64"
+									style="cursor: pointer"
+									v-on:click="dropdownIsActive = !dropdownIsActive"
+									aria-haspopup="true"
+									aria-controls="dropdown-menu"
+								>
+									<img
+										class="is-rounded"
+										style="border: 3px solid #00c386"
+										:src="'https://robohash.org/' + accounts[0] + '?gravatar=hashed&set=3'"
+									/>
+								</figure>
+							</div>
+							<div class="dropdown-menu" id="dropdown-menu" role="menu">
+								<div class="dropdown-content">
+									<div class="dropdown-item">
+										<p>Add Social Recovery</p>
+									</div>
+									<div class="dropdown-item">
+										<FBAddRecovery :walletEmail="walletEmail"></FBAddRecovery>
+									</div>
+									<div class="dropdown-item">
+										<GoogleAddRecovery :walletEmail="walletEmail"></GoogleAddRecovery>
+									</div>
+									<div class="dropdown-item">
+										<VKAddRecovery :walletEmail="walletEmail"> </VKAddRecovery>
+									</div>
+									<hr class="dropdown-divider" />
+									<div class="dropdown-item">
+										<p>Settings</p>
+									</div>
+									<a
+										href="#"
+										class="dropdown-item"
+										@click="
+											dropdownIsActive = !dropdownIsActive;
+											$router.push('/settings/password');
+										"
+										>Change Password</a
+									>
+									<a
+										href="#"
+										class="dropdown-item"
+										@click="
+											dropdownIsActive = !dropdownIsActive;
+											$router.push('/settings/email');
+										"
+										>Change Email</a
+									>
+									<a
+										href="#"
+										class="dropdown-item"
+										@click="
+											dropdownIsActive = !dropdownIsActive;
+											$router.push('/settings/2fa');
+										"
+										>Change 2FA</a
+									>
+									<a
+										href="#"
+										class="dropdown-item"
+										@click="
+											dropdownIsActive = !dropdownIsActive;
+											$router.push('/settings/export');
+										"
+										>Export Keystore V3 Object</a
+									>
+									<hr class="dropdown-divider" />
 
-        </article>
+									<a
+										href="#"
+										class="dropdown-item"
+										v-on:click="
+											logout();
+											dropdownIsActive = !dropdownIsActive;
+										"
+										>Logout</a
+									>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div>
+					<p>Your Account: {{ accounts[0] }}</p>
+				</div>
 
-      </div>
-      <div v-if="hasWallet && unlockedWallet && twoFAAuthenticator" class="container">
-        <article class="message is-warning">
-          <div class="message-header">
-            <p>Please input two FA Authenticator code</p>
-          </div>
-          <div class="message-body">
-            <form v-on:submit.prevent="validateAuthenticatorCode">
-              <input style="margin:10px" type="text" id="authenticator" class="option" v-model="authenticatorCode">
-              <label style="margin:10px" class="boxLabel" for="authenticator">Authenticator Code</label>
-              <span></span>
-              <input type="submit" style="margin: 10px" value="Submit" />
-            </form>
-          </div>
-        </article>
-
-      </div>
-
-      <div v-if="hasWallet && unlockedWallet && twoFA" class="container">
-        <div class="field is-grouped">
-          <div class="control is-expanded">
-            <button class="button is-primary is-fullwidth" v-on:click="logout()">
-              Logout
-            </button>
-          </div>
-
-        </div>
-      </div>
-
-      <div v-if="!twoFAEmail && !twoFAAuthenticator && hasWallet && unlockedWallet " class="container">
-        <div class="columns is-mobile">
-          <div class="column">
-            <h4 class="subtitle mb-0">Hello {{ walletEmail }}</h4>
-            <p class="content is-small has-text-weight-light">
-              Not you? <a v-on:click="logout">Sign Out!</a>
-            </p>
-          </div>
-          <div class="column is-narrow">
-            <div
-              class="dropdown is-right"
-              v-bind:class="{ 'is-active': dropdownIsActive }"
-            >
-              <div class="dropdown-trigger">
-                <figure
-                  class="image is-64x64"
-                  style="cursor: pointer"
-                  v-on:click="dropdownIsActive = !dropdownIsActive"
-                  aria-haspopup="true"
-                  aria-controls="dropdown-menu"
-                >
-                  <img
-                    class="is-rounded"
-                    style="border: 3px solid #00c386"
-                    :src="
-                      'https://robohash.org/' +
-                      accounts[0] +
-                      '?gravatar=hashed&set=3'
-                    "
-                  />
-                </figure>
-              </div>
-              <div class="dropdown-menu" id="dropdown-menu" role="menu">
-                <div class="dropdown-content">
-                  <div class="dropdown-item">
-                    <p>Add Social Recovery</p>
-                  </div>
-                  <div class="dropdown-item">
-                    <FBAddRecovery :walletEmail="walletEmail"></FBAddRecovery>
-                  </div>
-                  <div class="dropdown-item">
-                    <GoogleAddRecovery
-                      :walletEmail="walletEmail"
-                    ></GoogleAddRecovery>
-                  </div>
-                  <div class="dropdown-item">
-                    <VKAddRecovery :walletEmail="walletEmail"> </VKAddRecovery>
-                  </div>
-                  <hr class="dropdown-divider" />
-                  <div class="dropdown-item">
-                    <p>Settings</p>
-                  </div>
-                  <a
-                    href="#"
-                    class="dropdown-item"
-                    @click="
-                      showChangePassword = !showChangePassword;
-                      dropdownIsActive = !dropdownIsActive;
-                    "
-                    >Change Password</a
-                  >
-                  <a
-                    href="#"
-                    class="dropdown-item"
-                    @click="
-                      showChangeEmail = !showChangeEmail;
-                      dropdownIsActive = !dropdownIsActive;
-                    "
-                    >Change Email</a
-                  >
-                  <a
-                          href="#"
-                          class="dropdown-item"
-                          @click="
-                      showChange2FA = !showChange2FA;
-                      dropdownIsActive = !dropdownIsActive;
-                    "
-                  >Change 2FA</a
-                  >
-                  <a
-                    href="#"
-                    class="dropdown-item"
-                    @click="
-                      showExportWallet = !showExportWallet;
-                      dropdownIsActive = !dropdownIsActive;
-                    "
-                    >Export Keystore V3 Object</a
-                  >
-                  <hr class="dropdown-divider" />
-
-                  <a
-                    href="#"
-                    class="dropdown-item"
-                    v-on:click="
-                      logout();
-                      dropdownIsActive = !dropdownIsActive;
-                    "
-                    >Logout</a
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <p>Your Account: {{ accounts[0] }}</p>
-        </div>
-
-        <article class="message" v-if="showChangePassword">
-          <div class="message-header">
-            <p>Change the Password</p>
-            <button
-              class="delete"
-              aria-label="delete"
-              v-on:click="showChangePassword = false;"
-            ></button>
-          </div>
-          <div class="message-body">
-            <ChangePassword></ChangePassword>
-          </div>
-        </article>
-
-        
-        <article class="message" v-if="showChangeEmail">
-          <div class="message-header">
-            <p>Change Your Email Address</p>
-            <button
-              class="delete"
-              aria-label="delete"
-              v-on:click="showChangeEmail = false;"
-            ></button>
-          </div>
-          <div class="message-body">
-             <ChangeEmail :emailChanged="emailChanged"></ChangeEmail>
-          </div>
-        </article>
-
-        <article class="message" v-if="showChange2FA">
-          <div class="message-header">
-            <p>Change the 2-Factor-Authentication method</p>
-            <button
-                    class="delete"
-                    aria-label="delete"
-                    v-on:click="showChange2FA = false;"
-            ></button>
-          </div>
-          <div class="message-body">
-            <Change2FA></Change2FA>
-          </div>
-        </article>
-       
-        
-        <article class="message" v-if="showExportWallet">
-          <div class="message-header">
-            <p>Export the Wallet Seed Phrase</p>
-            <button
-              class="delete"
-              aria-label="delete"
-              v-on:click="showExportWallet = false;"
-            ></button>
-          </div>
-          <div class="message-body">
-             <ExportWallet></ExportWallet>
-          </div>
-        </article>
-        <div class="field is-grouped">
-          <div class="control is-expanded">
-            <button class="button is-primary is-fullwidth" v-on:click="logout()">
-              Logout
-            </button>
-          </div>
-          
-        </div>
-      </div>
-      </div>
-  </section>
+				<div class="field is-grouped">
+					<div class="control is-expanded">
+						<button class="button is-primary is-fullwidth" v-on:click="logout()">
+							Logout
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
 </template>
 
+<script lang="ts">
+import Component, { mixins } from 'vue-class-component';
+import { Global, Authenticated } from '../mixins/mixins';
 
-<script>
-import { connectToParent } from "penpal";
-import isIframe from "../utils/isIframe";
-import { getKeystore } from "../utils/keystore";
-const { sha256 } = require("../utils/cryptoFunctions");
-
-const {
-  getEncryptedSeed,
-  saveWalletEmailPassword,
-  getKeystoreFromEncryptedSeed,
-  getEncryptedSeedFromMail,
-  validateInput,
-  verifyAuthenticatorCode,
-  verifyEmailCode
-} = require("../utils/backupRestore");
-
-import FBAddRecovery from "../components/FBAddRecovery";
-
-import GoogleAddRecovery from "../components/GoogleAddRecovery";
-import VKAddRecovery from "../components/VKAddRecovery";
-import ChangePassword from "../components/ChangePassword";
-import ChangeEmail from "../components/ChangeEmail";
-import Change2FA from "../components/Change2FA";
-import Input2FA from "../components/Input2FA";
-
-import ExportWallet from "../components/ExportWallet";
-
-import Spinner from "../components/loading-spinner/Spinner";
-
-import Signup from "../components/Signup";
-import Login from "../components/Login";
-import Unlock from "../components/Unlock";
-import {getPayload, send2FAEmail} from "../utils/backupRestore";
-import {getAccountsFromKeystore} from "../utils/utils";
-
-export default {
-  name: "Wallet",
-  components: {
-    FBAddRecovery,
-    GoogleAddRecovery,
-    VKAddRecovery,
-    ChangePassword,
-    ChangeEmail,
-    Change2FA,
-    Input2FA,
-    ExportWallet,
-    Spinner,
-    Signup,
-    Login,
-    Unlock,
-  },
-   beforeRouteEnter (to, from, next) {
-    // called before the route that renders this component is confirmed.
-    // does NOT have access to `this` component instance,
-    // because it has not been created yet when this guard is called!
-    $r
-  },
-  data: function () {
-    return {
-      connection: null,
-      walletEmail: "",
-      walletPassword: "",
-      walletPasswordRepeat: "",
-      isAuthenticated: false,
-      unlockedWallet: false,
-      user: null,
-      token: "",
-      isLoggedIn: false,
-      accounts: [],
-      hasWallet: false,
-      hasWalletRecovery: false,
-      loginFailure: false,
-      keystore: null,
-      showChangePassword: false,
-      showChangeEmail: false,
-      showChange2FA: false,
-      showExportWallet: false,
-      showSpinner: false,
-      status: "",
-      signup: false,
-      invalidEmail: false,
-      invalidPassword: false,
-      dropdownIsActive: false,
-      emailCode: "",
-      authenticatorCode: "",
-      emailVerificationCode: "",
-      authenticatorVerificationCode: "",
-      twoFA: false,
-      twoFAEmail: false,
-      twoFAAuthenticator: false,
-      doneLoading: false,
-      selectedAccount: undefined
-    };
-  },
-  methods: {
-    unlockWallet: function (encryptedWallet, password) {
-      this.showSpinner = true;
-      this.status = "Unlocking Wallet";
-      try {
-        if (!encryptedWallet) {
-          throw new Error("No Encrypted Wallet given, abort!");
-        }
-
-        let email = localStorage.getItem("email") || "";
-        if(email && this.walletEmail == "") {
-          this.walletEmail = email;
-        }
-
-        if (!password) {
-          password = sha256(this.walletPassword);
-          window.sessionStorage.setItem("password", password);
-        }
-
-        let keystore = getKeystoreFromEncryptedSeed(encryptedWallet, password)
-          .then(async (keystore) => {
-            let accounts = getAccountsFromKeystore(keystore);
-
-            this.hasWallet = true;
-            this.unlockedWallet = true;
-            this.keystore = keystore;
-            this.accounts = accounts;
-            if(accounts.length > 0) {
-              this.selectedAccount = accounts[0];
-            }
-            this.showSpinner = false;
-
-            if (isIframe()) {
-              //let parent = await this.connection.promise;
-              //await parent.onLogin(this.state.accounts[0], this.state.walletEmail)
-              console.log("calling iframe");
-              (await this.connection.promise).onLogin(
-                this.accounts[0],
-                this.walletEmail
-              );
-            }
-          })
-          .catch((e) => {
-            console.log(e);
-            this.showSpinner = false;
-            this.loginFailure = true;
-            window.sessionStorage.removeItem("password");
-          });
-      } catch (e) {
-        console.error(e);
-        this.loginFailure = true;
-        this.accounts = null;
-        this.hasWallet = true;
-        this.unlockedWallet = false;
-        this.selectedAccount = undefined;
-      }
-    },
-    updateTwoFA (email, authenticator, twoFA){
-      this.twoFAEmail = email;
-      this.twoFAAuthenticator = authenticator;
-      this.twoFA = twoFA;
-    },
-    emailChanged: async function () {
-      if (isIframe()) {
-        //let parent = await this.connection.promise;
-        //await parent.onLogin(this.state.accounts[0], this.state.walletEmail)
-        (await this.connection.promise).onEmailChange(this.walletEmail);
-      }
-    },
-    cancel() {
-      localStorage.clear();
-      location.reload();
-    },
-    async validateEmailCode(){
-      let email = localStorage.getItem("email");
-      const result = await verifyEmailCode(email, this.emailCode)
-      if (result.verified) {
-        this.twoFAEmail = false;
-        localStorage.setItem('emailCode', 'true')
-        if (this.twoFAAuthenticator === false) {
-          this.twoFA = false;
-        }
-      }
-      else alert('Email code is not right')
-    },
-    async validateAuthenticatorCode(){
-      let email = localStorage.getItem("email");
-
-      const result = await verifyAuthenticatorCode(email, this.authenticatorCode)
-      if(result.verified){
-        this.twoFAAuthenticator = false;
-        localStorage.setItem('authenticatorCode', 'true')
-        if(this.twoFAEmail === false){
-          this.twoFA = false;
-        }
-      }
-      else alert('Authenticator code is not right')
-    },
-    async logout() {
-      this.showSpinner = true;
-      this.status = "Logging out...";
-      if (isIframe()) {
-        (await this.connection.promise).onLogout();
-      }
-      localStorage.clear();
-      // this.hasWallet = false;
-      // this.walletEmail = "";
-      // this.signup = false;
-      window.location.reload();
-      //this.showSpinner = false;
-    }
-  },
-  mounted() {
-    let encryptedSeed = localStorage.getItem("encryptedSeed") || "";
-    let email = localStorage.getItem("email") || "";
-
-    if(email !== ""){
-      getPayload(email).then(twoFAMethods => {
-
-        this.twoFAEmail = twoFAMethods.email;
-        this.twoFAAuthenticator = twoFAMethods.authenticator;
-
-        let emailConfirmed = localStorage.getItem('emailCode')
-        let authenticatorConfirmed = localStorage.getItem('authenticatorCode')
-        if(emailConfirmed === 'true') {
-          this.twoFAEmail = false;
-        }
-        if(authenticatorConfirmed === 'true') {
-          this.twoFAAuthenticator = false;
-        }
-
-        if(this.twoFAEmail || this.twoFAAuthenticator) {
-          this.twoFA = true;
-        }
-
-        let password = window.sessionStorage.getItem("password") || "";
-        if (encryptedSeed !== "" && email !== "") {
-          let loginType = localStorage.getItem("loginType") || "";
-          this.loginType = loginType;
-          this.hasWallet = true;
-          this.walletEmail = email;
-
-          if (password !== "") {
-            this.unlockWallet(JSON.parse(encryptedSeed), password);
-          }
-        }
-      })
-    }
-    var self = this;
+import FBAddRecovery from '../components/FBAddRecovery.vue';
+import GoogleAddRecovery from '../components/GoogleAddRecovery.vue';
+import VKAddRecovery from '../components/VKAddRecovery.vue';
 
 
-    if (isIframe()) {
-      this.connection = connectToParent({
-        parentOrigin: "http://localhost:3000",
-        // Methods child is exposing to parent
-        methods: {
-          async getAccounts() {
-            if (self.keystore != null) {
-              return self.accounts;
-            } else {
-              return [];
-            }
-          },
-          async signTransaction(txObj) {
-            if(txObj.nonce == undefined) {
-              console.error("No nonce defined, aborting tx signing");
-            }
-            
-            let signedTx = await new Promise((resolve, reject) => {
-              //see if we are logged in?!
-              try {
-                self.keystore[self.selectedAccount].signTransaction(txObj, function (err, result) {
-                  if (err) {
-                    reject(err);
-                  }
-                  resolve(result.rawTransaction);
-                });
-              } catch (e) {
-                reject(e);
-              }
-            });
-            console.log(signedTx);
-            return signedTx;
-          },
-          isLoggedIn() {
-            //return "ok"
-            console.log("Called is Logged In");
-            if (self.unlockedWallet)
-              return {
-                isLoggedIn: true,
-                unlockedWallet: self.unlockedWallet,
-                walletEmail: self.walletEmail,
-                accounts: self.accounts,
-              };
-            else return { isLoggedIn: false };
-          },
-          logout() {
-            //maybe confirm?!
-            //call onLogout callback to parent
-          },
-        },
-      });
-    }
-  },
-};
+@Component({
+	components: {
+		FBAddRecovery,
+		GoogleAddRecovery,
+		VKAddRecovery
+	}
+})
+export default class Wallet extends mixins(Global, Authenticated) {
+	dropdownIsActive = false;
+	selectedAccount = '';
+
+
+	logout() {
+		this.logoutWallet();
+		this.$router.push('/login');
+	}
+
+
+}
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 h3 {
-  margin: 40px 0 0;
+	margin: 40px 0 0;
 }
 ul {
-  list-style-type: none;
-  padding: 0;
+	list-style-type: none;
+	padding: 0;
 }
 li {
-  display: inline-block;
-  margin: 0 10px;
+	display: inline-block;
+	margin: 0 10px;
 }
 a {
-  color: #42b983;
+	color: #42b983;
 }
 </style>

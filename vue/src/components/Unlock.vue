@@ -3,7 +3,9 @@
     <spinner v-model="showSpinner" v-bind:status="status"></spinner>
     <div class="container">
       <h2 class="title">Welcome Back!</h2>
-      <h4 class="subtitle">Unleash Your Blockchain Experience, {{walletEmail}}</h4>
+      <h4 class="subtitle">
+        Unleash Your Blockchain Experience, {{ walletEmail }}
+      </h4>
       <form v-on:submit.prevent="unlockWalletLoadSeedFromEmail">
         <div class="field">
           <label class="label">Password</label>
@@ -55,17 +57,17 @@ import FBRecoverWallet from "../components/FBRecoverWallet";
 import GoogleRecoverWallet from "../components/GoogleRecoverWallet";
 
 import VKRecoverWallet from "../components/VKRecoverWallet";
-const { sha256 } = require("../utils/cryptoFunctions");
+import { sha256 } from "../utils/cryptoFunctions";
 
 import { getKeystore } from "../utils/keystore";
-import {getPayload, send2FAEmail} from "../utils/backupRestore";
-const {
+import { getPayload, send2FAEmail } from "../utils/backupRestore";
+import {
   getEncryptedSeed,
   saveWalletEmailPassword,
   getKeystoreFromEncryptedSeed,
   getEncryptedSeedFromMail,
-  validateInput,
-} = require("../utils/backupRestore");
+  validateInput
+} from "../utils/backupRestore";
 
 export default {
   name: "Unlock",
@@ -73,63 +75,62 @@ export default {
     Spinner,
     FBRecoverWallet,
     GoogleRecoverWallet,
-    VKRecoverWallet,
+    VKRecoverWallet
   },
-  data: function () {
+  data: function() {
     return {
       walletPassword: "",
       showSpinner: false,
-      status: "",
+      status: ""
     };
   },
   props: {
     showRecovery: {
       type: Boolean,
-      default: false,
+      default: false
     },
     walletEmail: {
       type: String,
-      required: true,
-    },
+      required: true
+    }
   },
   methods: {
-    unlockWalletLoadSeedFromEmail: function () {
+    unlockWalletLoadSeedFromEmail: function() {
       this.showSpinner = true;
       this.status = "Fetching User from Database";
 
       try {
         getEncryptedSeedFromMail(this.walletEmail)
-          .then((seed) => {
+          .then(seed => {
             this.$emit("unlock-wallet", seed, this.walletPassword);
             this.showSpinner = false;
           })
-          .catch((e) => {
+          .catch(e => {
             console.log(e);
             this.status = "There was a Problem - logging out completely.";
-            let self = this;
-            setTimeout(function () {
-              self.showSpinner = false;
-              self.$emit("logout-user");
+
+            setTimeout(function() {
+              this.showSpinner = false;
+              this.$emit("logout-user");
             }, 1500);
           });
       } catch (e) {
         console.error(e);
         this.status = "There was a Problem - logging out completely.";
-        let self = this;
-        setTimeout(function () {
+
+        setTimeout(function() {
           this.showSpinner = false;
           this.$emit("logout-user");
         }, 1500);
         this.showSpinner = false;
       }
-    },
-    
-  },
+    }
+  }
 };
 </script>
 
 <style scoped>
-/deep/ .Password__strength-meter {
+.Password__strength-meter {
   margin: 5px auto !important;
 }
 </style>

@@ -96,27 +96,27 @@
 <script>
 import Spinner from "../components/loading-spinner/Spinner";
 import Password from "vue-password-strength-meter";
-const { sha256 } = require("../utils/cryptoFunctions");
+import { sha256 } from "../utils/cryptoFunctions";
 
 import isIframe from "../utils/isIframe";
 import { getKeystore } from "../utils/keystore";
-import {getPayload} from "../utils/backupRestore";
-const {
+import { getPayload } from "../utils/backupRestore";
+import {
   getEncryptedSeed,
   saveWalletEmailPassword,
   getKeystoreFromEncryptedSeed,
   getEncryptedSeedFromMail,
   validateInput,
   send2FAEmail
-} = require("../utils/backupRestore");
+} from "../utils/backupRestore";
 
 export default {
   name: "Singup",
   components: {
     Password,
-    Spinner,
+    Spinner
   },
-  data: function () {
+  data: function() {
     return {
       walletEmail: "",
       walletPassword: "",
@@ -125,11 +125,11 @@ export default {
       status: "",
       invalidEmail: false,
       invalidPassword: false,
-      onSuccessfulCreate: undefined,
+      onSuccessfulCreate: undefined
     };
   },
   methods: {
-    createWallet: async function (e) {
+    createWallet: async function(e) {
       try {
         //console.log(e);
         e.preventDefault();
@@ -177,12 +177,14 @@ export default {
         let keystore = null;
         let created = false;
         //double hashed passwords for recovery
-        let password = await sha256(this.walletPassword);
+        const password = await sha256(this.walletPassword);
         this.$emit("update-twofa", true, false, true);
         try {
           console.log("trying to find keystore from mail");
           this.status = "Looking up User from Database";
-          let encryptedSeed = await getEncryptedSeedFromMail(this.walletEmail);
+          const encryptedSeed = await getEncryptedSeedFromMail(
+            this.walletEmail
+          );
 
           window.localStorage.setItem(
             "encryptedSeed",
@@ -205,7 +207,7 @@ export default {
           console.log(keystore);
           created = true;
         }
-        let encryptedSeed = await getEncryptedSeed(keystore, password);
+        const encryptedSeed = await getEncryptedSeed(keystore, password);
         console.log(encryptedSeed);
 
         window.localStorage.setItem(
@@ -217,20 +219,20 @@ export default {
 
         if (created) {
           await saveWalletEmailPassword(this.walletEmail, encryptedSeed);
-          await send2FAEmail(this.walletEmail)
+          await send2FAEmail(this.walletEmail);
         }
         this.$emit("unlock-wallet", encryptedSeed, password);
         this.showSpinner = false;
       } catch (e) {
         console.log(e);
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
 <style scoped>
-/deep/ .Password__strength-meter {
+.Password__strength-meter {
   margin: 5px auto !important;
 }
 </style>
