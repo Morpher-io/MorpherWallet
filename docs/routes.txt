@@ -1,0 +1,90 @@
+@startuml
+component login [
+Route: /login
+
+Description: Login screen
+ 
+ * Email / Password Input Fields
+]
+
+component signup #lightgrey [
+Route: /signup
+
+Description: Signup Screen
+ 
+ * Password Strengh Display
+]
+
+
+component unlock [
+Route: /unlock
+
+Description: Unlock screen
+ 
+ * Password Input Field only
+ * EncryptedKeystore in LocalStorage
+]
+
+component 2fa #white [
+Route: /2fa
+
+Description: 2FA Screen
+ 
+ * Input Email-2FA
+ * Input Authenticator 2FA
+] 
+
+
+component recovery #white [
+Route: /recovery
+
+Description: Account Recovery Screen
+ 
+ * Recovery Options for 
+ Facebook, Google, VKontakte
+]
+
+component wallet #lightgreen [
+Route: /
+
+Description: Wallet Screen
+
+ * Displays Ethereum Account
+]
+
+component settings #white [
+Route: /settings
+
+Description: Settings Screen
+
+ * Change Password
+ * Export Seed Phrase
+ * Change Email
+]
+component signtx #white [
+Route: /sign
+
+Description: Sign Transaction Screen
+
+ * Confirm/Cancel
+]
+'skinparam linetype ortho
+left to right direction
+'top to down direction
+skinparam nodesep 150
+skinparam ranksep 10
+:User: -> login 
+:User: -> unlock
+unlock -d->login:clear localstorage
+unlock -d->wallet:password correct
+login <-u-> signup:not registered
+login <-r-> 2fa
+login <-d-> recovery: wrong password
+login <..> wallet: no 2fa configured
+recovery -r-> wallet: recovered
+2fa -d-> wallet: normal flow
+wallet <-d-> settings
+wallet <-> signtx
+
+
+@enduml

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="842px" preserveAspectRatio="none" style="width:1379px;height:842px;" version="1.1" viewBox="0 0 1379 842" width="1379px" zoomAndPan="magnify"><defs><filter height="300%" id="faxh7rp16rpft" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[2c4d6263d6a9c508a624946e4f5b83db]
+entity login--><rect fill="#FEFECE" filter="url(#faxh7rp16rpft)" height="111.4844" style="stroke: #A80036; stroke-width: 1.5;" width="250" x="428" y="204"/><rect fill="#FEFECE" height="10" style="stroke: #A80036; stroke-width: 1.5;" width="15" x="658" y="209"/><rect fill="#FEFECE" height="2" style="stroke: #A80036; stroke-width: 1.5;" width="4" x="656" y="211"/><rect fill="#FEFECE" height="2" style="stroke: #A80036; stroke-width: 1.5;" width="4" x="656" y="215"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="89" x="443" y="236.9951">Route: /login</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="447" y="253.292"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="177" x="443" y="269.5889">Description: Login screen</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="447" y="285.8857"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="210" x="443" y="302.1826">* Email / Password Input Fields</text><!--MD5=[388f72378e697285ab83d1e46414999a]
+entity signup--><rect fill="#D3D3D3" filter="url(#faxh7rp16rpft)" height="111.4844" style="stroke: #A80036; stroke-width: 1.5;" width="230" x="36.5" y="8"/><rect fill="#D3D3D3" height="10" style="stroke: #A80036; stroke-width: 1.5;" width="15" x="246.5" y="13"/><rect fill="#D3D3D3" height="2" style="stroke: #A80036; stroke-width: 1.5;" width="4" x="244.5" y="15"/><rect fill="#D3D3D3" height="2" style="stroke: #A80036; stroke-width: 1.5;" width="4" x="244.5" y="19"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="103" x="51.5" y="40.9951">Route: /signup</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="55.5" y="57.292"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="189" x="51.5" y="73.5889">Description: Signup Screen</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="55.5" y="89.8857"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="190" x="51.5" y="106.1826">* Password Strengh Display</text><!--MD5=[2257fb6aba629642bc188bd4970b37ae]
+entity unlock--><rect fill="#FEFECE" filter="url(#faxh7rp16rpft)" height="127.7813" style="stroke: #A80036; stroke-width: 1.5;" width="291" x="6" y="502.5"/><rect fill="#FEFECE" height="10" style="stroke: #A80036; stroke-width: 1.5;" width="15" x="277" y="507.5"/><rect fill="#FEFECE" height="2" style="stroke: #A80036; stroke-width: 1.5;" width="4" x="275" y="509.5"/><rect fill="#FEFECE" height="2" style="stroke: #A80036; stroke-width: 1.5;" width="4" x="275" y="513.5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="102" x="21" y="535.4951">Route: /unlock</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="25" y="551.792"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="187" x="21" y="568.0889">Description: Unlock screen</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="25" y="584.3857"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="185" x="21" y="600.6826">* Password Input Field only</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="251" x="21" y="616.9795">* EncryptedKeystore in LocalStorage</text><!--MD5=[6771384fb3c9ed90fdea45a2511e625d]
+entity 2fa--><rect fill="#FFFFFF" filter="url(#faxh7rp16rpft)" height="127.7813" style="stroke: #A80036; stroke-width: 1.5;" width="213" x="446.5" y="465.5"/><rect fill="#FFFFFF" height="10" style="stroke: #A80036; stroke-width: 1.5;" width="15" x="639.5" y="470.5"/><rect fill="#FFFFFF" height="2" style="stroke: #A80036; stroke-width: 1.5;" width="4" x="637.5" y="472.5"/><rect fill="#FFFFFF" height="2" style="stroke: #A80036; stroke-width: 1.5;" width="4" x="637.5" y="476.5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="77" x="461.5" y="498.4951">Route: /2fa</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="465.5" y="514.792"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="167" x="461.5" y="531.0889">Description: 2FA Screen</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="465.5" y="547.3857"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="117" x="461.5" y="563.6826">* Input Email-2FA</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="173" x="461.5" y="579.9795">* Input Authenticator 2FA</text><!--MD5=[5507ed8005082c4b7f4cfeb635713f27]
+entity recovery--><rect fill="#FFFFFF" filter="url(#faxh7rp16rpft)" height="127.7813" style="stroke: #A80036; stroke-width: 1.5;" width="306" x="807" y="150.5"/><rect fill="#FFFFFF" height="10" style="stroke: #A80036; stroke-width: 1.5;" width="15" x="1093" y="155.5"/><rect fill="#FFFFFF" height="2" style="stroke: #A80036; stroke-width: 1.5;" width="4" x="1091" y="157.5"/><rect fill="#FFFFFF" height="2" style="stroke: #A80036; stroke-width: 1.5;" width="4" x="1091" y="161.5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="115" x="822" y="183.4951">Route: /recovery</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="826" y="199.792"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="266" x="822" y="216.0889">Description: Account Recovery Screen</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="826" y="232.3857"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="155" x="822" y="248.6826">* Recovery Options for</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="205" x="822" y="264.9795">Facebook, Google, VKontakte</text><!--MD5=[d80926c91208070f1daa3c471ba18e8e]
+entity wallet--><rect fill="#90EE90" filter="url(#faxh7rp16rpft)" height="111.4844" style="stroke: #A80036; stroke-width: 1.5;" width="241" x="839.5" y="459"/><rect fill="#90EE90" height="10" style="stroke: #A80036; stroke-width: 1.5;" width="15" x="1060.5" y="464"/><rect fill="#90EE90" height="2" style="stroke: #A80036; stroke-width: 1.5;" width="4" x="1058.5" y="466"/><rect fill="#90EE90" height="2" style="stroke: #A80036; stroke-width: 1.5;" width="4" x="1058.5" y="470"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="56" x="854.5" y="491.9951">Route: /</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="858.5" y="508.292"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="182" x="854.5" y="524.5889">Description: Wallet Screen</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="858.5" y="540.8857"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="201" x="854.5" y="557.1826">* Displays Ethereum Account</text><!--MD5=[44df82fb778fec0901a72cffa7010adb]
+entity settings--><rect fill="#FFFFFF" filter="url(#faxh7rp16rpft)" height="144.0781" style="stroke: #A80036; stroke-width: 1.5;" width="238" x="1130" y="442.5"/><rect fill="#FFFFFF" height="10" style="stroke: #A80036; stroke-width: 1.5;" width="15" x="1348" y="447.5"/><rect fill="#FFFFFF" height="2" style="stroke: #A80036; stroke-width: 1.5;" width="4" x="1346" y="449.5"/><rect fill="#FFFFFF" height="2" style="stroke: #A80036; stroke-width: 1.5;" width="4" x="1346" y="453.5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="112" x="1145" y="475.4951">Route: /settings</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="1149" y="491.792"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="198" x="1145" y="508.0889">Description: Settings Screen</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="1149" y="524.3857"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="136" x="1145" y="540.6826">* Change Password</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="147" x="1145" y="556.9795">* Export Seed Phrase</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="105" x="1145" y="573.2764">* Change Email</text><!--MD5=[d7db8d85b4d2b9acbdef7ef7d59da79b]
+entity signtx--><rect fill="#FFFFFF" filter="url(#faxh7rp16rpft)" height="111.4844" style="stroke: #A80036; stroke-width: 1.5;" width="296" x="812" y="720"/><rect fill="#FFFFFF" height="10" style="stroke: #A80036; stroke-width: 1.5;" width="15" x="1088" y="725"/><rect fill="#FFFFFF" height="2" style="stroke: #A80036; stroke-width: 1.5;" width="4" x="1086" y="727"/><rect fill="#FFFFFF" height="2" style="stroke: #A80036; stroke-width: 1.5;" width="4" x="1086" y="731"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="85" x="827" y="752.9951">Route: /sign</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="831" y="769.292"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="256" x="827" y="785.5889">Description: Sign Transaction Screen</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="831" y="801.8857"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="116" x="827" y="818.1826">* Confirm/Cancel</text><!--MD5=[fee662a292a0353a69bd162820bae93b]
+entity User--><ellipse cx="151.5" cy="279" fill="#FEFECE" filter="url(#faxh7rp16rpft)" rx="8" ry="8" style="stroke: #A80036; stroke-width: 2.0;"/><path d="M151.5,287 L151.5,314 M138.5,295 L164.5,295 M151.5,314 L138.5,329 M151.5,314 L164.5,329 " fill="none" filter="url(#faxh7rp16rpft)" style="stroke: #A80036; stroke-width: 2.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="32" x="135.5" y="348.9951">User</text><!--MD5=[bc81ebb8a732e08f29a60712843ac489]
+link User to login--><path d="M167.673,308.563 C209.259,303.254 328.263,288.062 422.941,275.976 " fill="none" id="User-&gt;login" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="427.999,275.33,418.5651,272.5013,423.0392,275.9628,419.5776,280.4369,427.999,275.33" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[cceef11bbb698b485e6288175ad1409e]
+link User to unlock--><path d="M151.5,352.017 C151.5,400.253 151.5,448.49 151.5,496.727 " fill="none" id="User-&gt;unlock" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="151.5,502,155.5,493,151.5,497,147.5,493,151.5,502" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[1b533634699c38dfb229b0b51997d5fa]
+link unlock to login--><path d="M236.248,502.143 C306.913,447.84 407.218,370.759 475.692,318.14 " fill="none" id="unlock-&gt;login" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="479.746,315.025,470.1722,317.3362,475.7811,318.0712,475.0461,323.6801,479.746,315.025" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="113" x="306" y="363.5669">clear localstorage</text><!--MD5=[23f7279906379ffa8cd777bbe90b0e51]
+link unlock to wallet--><path d="M271.739,630.62 C318.987,652.624 374.682,674.477 428,685.5 C536.81,707.995 571.014,715.494 678,685.5 C755.976,663.639 833.787,613.528 887.689,573.171 " fill="none" id="unlock-&gt;wallet" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="891.853,570.038,882.2562,572.2517,887.8573,573.0437,887.0653,578.6448,891.853,570.038" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="109" x="498.5" y="681.5669">password correct</text><!--MD5=[e31cc7482cc9374773b69f5423572001]
+link signup to login--><path d="M270.437,121.362 C322.089,146.703 382.565,176.373 434.201,201.706 " fill="none" id="signup-login" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="438.852,203.988,432.5348,196.432,434.3634,201.7851,429.0103,203.6137,438.852,203.988" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="265.645,119.011,271.9622,126.567,270.1336,121.2139,275.4867,119.3853,265.645,119.011" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="90" x="317.5" y="140.5669">not registered</text><!--MD5=[3a34bb0f8d4f5c7be1ea07d84cb4b9a8]
+link login to 2fa--><path d="M553,320.106 C553,366.784 553,413.462 553,460.139 " fill="none" id="login-2fa" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="553,465.428,557,456.428,553,460.428,549,456.428,553,465.428" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="553,315.004,549,324.004,553,320.004,557,324.004,553,315.004" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[0b1f31dfd3d1bd3d45187ebb0edcb232]
+link login to recovery--><path d="M683.523,245.109 C721.062,240.938 762.464,236.337 801.514,231.998 " fill="none" id="login-recovery" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="806.759,231.416,797.3727,228.4332,801.7895,231.9675,798.2551,236.3843,806.759,231.416" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="678.266,245.693,687.6522,248.6761,683.2355,245.1416,686.77,240.7249,678.266,245.693" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="102" x="691.5" y="229.5669">wrong password</text><!--MD5=[25d92c692f90f3a87a7734c9cd5ea05e]
+link login to wallet--><path d="M646.778,317.916 C712.647,359.389 800.704,414.832 866.508,456.264 " fill="none" id="login-wallet" style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#A80036" points="870.81,458.973,865.3252,450.7927,866.5789,456.3089,861.0627,457.5625,870.81,458.973" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="642.379,315.146,647.8638,323.3263,646.6101,317.8101,652.1263,316.5565,642.379,315.146" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="111" x="687" y="345.5669">no 2fa configured</text><!--MD5=[aeac9d23c973901482428b29be8d0b0b]
+link recovery to wallet--><path d="M960,278.512 C960,330.283 960,402.689 960,453.607 " fill="none" id="recovery-&gt;wallet" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="960,458.775,964,449.775,960,453.775,956,449.775,960,458.775" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="64" x="916.5" y="373.3169">recovered</text><!--MD5=[2d03324c740baf0b45a31520cac298ca]
+link 2fa to wallet--><path d="M659.531,535.595 C668.482,535.961 677.397,536.272 686,536.5 C736.205,537.83 748.895,539.929 799,536.5 C810.504,535.713 822.441,534.611 834.375,533.315 " fill="none" id="2fa-&gt;wallet" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="839.488,532.749,830.1018,529.7659,834.5185,533.3004,830.984,537.7171,839.488,532.749" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="73" x="706" y="532.5669">normal flow</text><!--MD5=[b67fc6457634f0f93d52fa81e7668834]
+link wallet to settings--><path d="M1086,514.5 C1098.88,514.5 1111.97,514.5 1124.83,514.5 " fill="none" id="wallet-settings" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="1129.94,514.5,1120.94,510.5,1124.94,514.5,1120.94,518.5,1129.94,514.5" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="1080.64,514.5,1089.64,518.5,1085.64,514.5,1089.64,510.5,1080.64,514.5" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[4b33b12803e59195066a1533b642eeef]
+link wallet to signtx--><path d="M960,575.349 C960,621.791 960,668.232 960,714.674 " fill="none" id="wallet-signtx" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="960,719.936,964,710.936,960,714.936,956,710.936,960,719.936" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="960,570.273,956,579.273,960,575.273,964,579.273,960,570.273" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[ee7fc7bad61c806f967cc43963f72ee2]
+@startuml
+component login [
+Route: /login
+
+Description: Login screen
+ 
+ * Email / Password Input Fields
+]
+
+component signup #lightgrey [
+Route: /signup
+
+Description: Signup Screen
+ 
+ * Password Strengh Display
+]
+
+
+component unlock [
+Route: /unlock
+
+Description: Unlock screen
+ 
+ * Password Input Field only
+ * EncryptedKeystore in LocalStorage
+]
+
+component 2fa #white [
+Route: /2fa
+
+Description: 2FA Screen
+ 
+ * Input Email-2FA
+ * Input Authenticator 2FA
+] 
+
+
+component recovery #white [
+Route: /recovery
+
+Description: Account Recovery Screen
+ 
+ * Recovery Options for 
+ Facebook, Google, VKontakte
+]
+
+component wallet #lightgreen [
+Route: /
+
+Description: Wallet Screen
+
+ * Displays Ethereum Account
+]
+
+component settings #white [
+Route: /settings
+
+Description: Settings Screen
+
+ * Change Password
+ * Export Seed Phrase
+ * Change Email
+]
+component signtx #white [
+Route: /sign
+
+Description: Sign Transaction Screen
+
+ * Confirm/Cancel
+]
+left to right direction
+skinparam nodesep 150
+skinparam ranksep 10
+:User: -> login 
+:User: -> unlock
+unlock -d->login:clear localstorage
+unlock -d->wallet:password correct
+login <-u-> signup:not registered
+login <-r-> 2fa
+login <-d-> recovery: wrong password
+login <..> wallet: no 2fa configured
+recovery -r-> wallet: recovered
+2fa -d-> wallet: normal flow
+wallet <-d-> settings
+wallet <-> signtx
+@enduml
+
+PlantUML version 1.2019.11(Sun Sep 22 12:02:15 CEST 2019)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 1.8.0_275-8u275-b01-0ubuntu1~16.04-b01
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
