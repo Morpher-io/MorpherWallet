@@ -65,8 +65,13 @@ router.beforeEach((to, from, next) => {
 			next('/2fa');
 			return;
 		}
+		
 		if (store.getters.isLoggedIn) {
 			next();
+			return;
+		}
+		if(store.getters.hasEncryptedKeystore) {
+			next('/unlock');
 			return;
 		}
 		next('/login');

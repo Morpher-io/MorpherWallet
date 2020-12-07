@@ -62,7 +62,13 @@ export type TypeUnlockWithPassword = {
 
 
 export type TypeUserFoundData = {
-  __typename?: "TypeFetchUser";
+  __typename?: "TypeUserFoundData";
   email: string;
   hashedPassword: string;
 };
+
+export type TypePayloadData = {
+  __typename?: "TypePayloadData";
+  email: boolean;
+  authenticator: boolean;
+}

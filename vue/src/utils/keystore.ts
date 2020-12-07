@@ -13,6 +13,7 @@ export function getKeystore(password: string, encryptedWalletObject: []) {
 				console.log('Creating new Wallet');
 				resolve(account.wallet.create(1));
 			} else {
+				console.log(password);
 				console.log('Trying to unlock wallet');
 				resolve(account.wallet.decrypt(encryptedWalletObject, password));
 			}

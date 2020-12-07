@@ -24,7 +24,7 @@ services:
             - /usr/src/app/node_modules
         ports:
             - "8080:80"
-        command: "npm run start:watch"
+        command: "npx nodemon --legacy-watch --exec ts-node ./src/index.ts"
         environment: 
             PORT: 80
             ENVIRONMENT: 'development'
