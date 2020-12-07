@@ -80,7 +80,7 @@ export class Authenticated extends Global {
 			const storeAccounts = this.store.accounts;
 
 			this.connection = connectToParent({
-				parentOrigin: 'http://localhost:3000',
+				parentOrigin: 'http://localhost:8081',
 				// Methods child is exposing to parent
 				methods: {
 					async getAccounts() {

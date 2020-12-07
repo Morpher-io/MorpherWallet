@@ -1,18 +1,18 @@
 let loaded = false;
 
-module.exports = function onWindowLoad() {
-  return new Promise(resolve => {
+export function onWindowLoad() {
+  return new Promise((resolve) => {
     if (loaded) {
-      resolve();
+      resolve(true);
     } else if (['loaded', 'interactive', 'complete'].indexOf(document.readyState) > -1) {
       loaded = true;
-      resolve();
+      resolve(true);
     } else {
       window.addEventListener(
         'load',
         () => {
           loaded = true;
-          resolve();
+          resolve(true);
         },
         false,
       );

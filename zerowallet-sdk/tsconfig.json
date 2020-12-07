@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "outDir": "./lib",
+		"target": "esnext",
+    "module": "esnext",
+    "strict": true,
+    "jsx": "preserve",
+    "importHelpers": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+  },
+	"include": ["src",
+		"./node_modules/types-web3-provider-engine/index.d.ts",
+	],
+	
+  "exclude": ["node_modules", "**/__tests__/*"]
+}
