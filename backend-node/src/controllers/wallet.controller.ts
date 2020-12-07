@@ -97,38 +97,36 @@ export async function saveEmailPassword(req: Request, res: Response) {
         let userId;
 
         // Attempt to get user from database.
-        const [, user] = await to(User.findOne({ where: { email }, raw: true, transaction }));
+        const user = await User.findOne({ where: { email }, raw: true, transaction });
 
-        if (user) {
+        if (user == null) {
             // If it exists, set the userId and delete the associated recovery method.
-            userId = user.id;
-
-            await Recovery.destroy({ where: { user_id: user.id, [Op.and]: { recovery_type_id: recoveryTypeId } }, transaction });
-        } else {
             // If it doesnt exist create a new one.
             const payload = { email: true, authenticator: false, authenticatorConfirmed: false };
             userId = (await User.create({ email, payload }, { transaction })).dataValues.id;
+
+            // Create a new recovery method.
+            const recoveryId = (
+                await Recovery.create(
+                    {
+                        recovery_type_id: recoveryTypeId,
+                        user_id: userId,
+                        encrypted_seed: JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT)),
+                        key
+                    },
+                    { transaction }
+                )
+            ).dataValues.id;
+            // Commit changes to database and return successfully.
+            await transaction.commit();
+
+            return successResponse(res, {
+                recovery_id: recoveryId
+            });
         }
 
-        // Create a new recovery method.
-        const recoveryId = (
-            await Recovery.create(
-                {
-                    recovery_type_id: recoveryTypeId,
-                    user_id: userId,
-                    encrypted_seed: JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT)),
-                    key
-                },
-                { transaction }
-            )
-        ).dataValues.id;
+        return errorResponse(res, "Error: User already exists!");
 
-        // Commit changes to database and return successfully.
-        await transaction.commit();
-
-        return successResponse(res, {
-            recovery_id: recoveryId
-        });
     } catch (error) {
         // If an error happened anywhere along the way, rollback all the changes.
         await transaction.rollback();
@@ -269,18 +267,24 @@ export async function getVKontakteEncryptedSeed(req, res) {
 export async function getPayload(req, res) {
     const key = req.body.key;
     const recovery = await Recovery.findOne({ where: { key } });
+    if (recovery == null) {
+        return errorResponse(res, 'User not found');
+    }
     const user = await User.findOne({ where: { id: recovery.user_id }, raw: true });
 
     const payload = {};
-    if (user['payload'] !== null) {
+    if (user != null && user['payload'] !== null) {
         if (user['payload'].email !== undefined) { payload['email'] = user.payload.email };
         if (user['payload'].authenticator !== undefined) { payload['authenticator'] = user.payload.authenticator };
         if (user['payload'].emailVerificationCode !== undefined) { payload['emailVerificationCode'] = user.payload.emailVerificationCode };
         if (user['payload'].authenticatorConfirmed !== undefined) { payload['authenticatorConfirmed'] = user.payload.authenticatorConfirmed };
     }
 
-    if (user) { return successResponse(res, payload); }
-    else { return errorResponse(res, '2FA methods could not be found'); }
+    if (user) {
+        return successResponse(res, payload);
+    } else {
+        return errorResponse(res, '2FA methods could not be found');
+    }
 }
 
 // Function to change 2FA methods from the database.
@@ -415,7 +419,7 @@ export async function verifyEmailCode(req, res) {
     const code = req.body.code;
     const key = req.body.key;
     const recovery = await Recovery.findOne({ where: { key } });
-    
+
     if (verifyEmail2FA(recovery.user_id, code)) {
         return successResponse(res, true)
     } else {

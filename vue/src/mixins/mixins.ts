@@ -16,6 +16,7 @@ import { RootState } from '../store'
 	},
 	computed: {
 		...mapState({
+			
 			status: (state: any) => state.status,
 			twoFaRequired: (state: any) => state.twoFaRequired
 		})
@@ -57,6 +58,7 @@ export class Global extends Vue {
 @Component({
 	computed: {
 		...mapState({
+			
 			walletEmail: (state: any) => state.email,
 			keystore: (state: any) => state.keystore,
 			accounts: (state: any) => state.accounts

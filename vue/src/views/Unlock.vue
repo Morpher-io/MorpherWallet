@@ -5,7 +5,7 @@
 		<h2 class="title">Login</h2>
 		<h4 class="subtitle">Unlock your Morpher Wallet</h4>
 		<form v-on:submit.prevent="login">
-			<h5>Hi {{ email }}!</h5>
+			<h5>Hi {{ walletEmail }}!</h5>
 			Enter the password to unlock your wallet!<br />
 			Not you? <a v-on:click="logout()">Logout</a>
 
@@ -51,11 +51,13 @@
 <script lang="ts">
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
+import { sha256 } from '../utils/cryptoFunctions';
 
 @Component
 export default class Unlock extends mixins(Global) {
 	// Component properties
 	walletPassword = '';
+	walletEmail = this.$store.getters.walletEmail;
 	showRecovery = false;
 
 	/**
@@ -77,11 +79,11 @@ export default class Unlock extends mixins(Global) {
 	/**
 	 * Execute the logon
 	 */
-	login() {
-		const password = this.walletPassword;
+	async login() {
+		const password = await sha256(this.walletPassword);
 
 		// Call the fetchUser store action to process the wallet logon
-		this.unlockWithPassword({ password })
+		this.unlockWithPassword({password})
 			.then(() => {
 				// open root page after logon success
 				this.$router.push('/');
