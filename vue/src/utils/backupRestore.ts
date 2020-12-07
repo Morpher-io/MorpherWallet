@@ -370,7 +370,7 @@ const changeEmail = async (oldEmail: string, newEmail: string, encryptedSeed: st
 };
 
 const getPayload = (email: string) =>
-	new Promise(async (resolve, reject) => {
+	new Promise<TypePayloadData>(async (resolve, reject) => {
 		const key = await sha256(email.toLowerCase());
 		const options: RequestInit = {
 			method: 'POST',
