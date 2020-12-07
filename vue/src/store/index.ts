@@ -14,7 +14,11 @@ import {
 import { getAccountsFromKeystore } from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
 import { Type2FARequired, TypeSeedFoundData, TypeSeedCreatedData, TypeFetchUser, TypeUnlock2fa, TypeUserFoundData } from '../types/global-types';
-import { WalletBase } from 'web3-core';
+
+import isIframe from '../utils/isIframe';
+import { connectToParent } from 'penpal';
+import { WalletBase, SignedTransaction } from 'web3-core';
+import { CallSender, Connection } from 'penpal/lib/types';
 
 Vue.use(Vuex);
 
@@ -33,12 +37,14 @@ export interface RootState {
 	accounts: Array<string>;
 	token: string;
 	twoFaRequired: Type2FARequired;
+	connection: Connection<CallSender> | null;
 }
 
 /**
  * initialize the store
  */
 function initialState(): RootState {
+
 	return {
 		loading: false,
 		status: '',
@@ -53,7 +59,8 @@ function initialState(): RootState {
 			email: false,
 			authenticator: false
 		},
-		token: ''
+		token: '',
+		connection: null
 	};
 }
 
@@ -62,6 +69,7 @@ function initialState(): RootState {
  */
 const store: Store<RootState> = new Vuex.Store({
 	state: initialState(),
+
 	modules: {},
 	mutations: {
 		authRequested(state: RootState) {
@@ -282,5 +290,62 @@ const store: Store<RootState> = new Vuex.Store({
 		authStatus: state => state.status
 	}
 });
+
+/*
+initialize the iframe parent connection
+*/
+if (isIframe()) {
+
+	store.state.connection = connectToParent({
+		//parentOrigin: 'http://localhost:8081',
+		// Methods child is exposing to parent
+		methods: {
+			async getAccounts() {
+				if (store.state.keystore != null) {
+					return store.state.accounts;
+				} else {
+					return [];
+				}
+			},
+			async signTransaction(txObj: any) {
+				if (txObj.nonce == undefined) {
+					console.error('No nonce defined, aborting tx signing');
+				}
+
+				const signedTx = await new Promise((resolve, reject) => {
+					//see if we are logged in?!
+					try {
+						if (store.state.keystore !== null) {
+							store.state.keystore[0].signTransaction(txObj, function (signTransaction: SignedTransaction) {
+
+								resolve(signTransaction.rawTransaction);
+							});
+						}
+					} catch (e) {
+						reject(e);
+					}
+
+				});
+				console.log(signedTx);
+				return signedTx;
+			},
+			isLoggedIn() {
+				//return "ok"
+				if (store.state.keystore)
+					return {
+						isLoggedIn: true,
+						unlockedWallet: store.state.keystore,
+						walletEmail: store.state.email,
+						accounts: store.state.accounts
+					};
+				else return { isLoggedIn: false };
+			},
+			logout() {
+				//maybe confirm?!
+				//call onLogout callback to parent
+			}
+		}
+	});
+}
 
 export default store;

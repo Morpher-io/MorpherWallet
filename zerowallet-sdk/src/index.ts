@@ -92,10 +92,8 @@ export default class ZeroWallet {
 	}
 	
 	async loginWallet() {
-		console.log('zero, loginWallet')
-		const isLoggedIn = false; // await this.isLoggedIn();
-		console.log('is logged in', isLoggedIn)
-		if (isLoggedIn) {
+		const loggedInResult = await this.isLoggedIn();
+		if (loggedInResult && loggedInResult.isLoggedIn) {
 			const widgetCommunication = (await this.widget).communication;
 			const result = await widgetCommunication.getAccounts();
 			return result
@@ -131,12 +129,9 @@ export default class ZeroWallet {
 
 		await this.iframeLoaded();
 
-		console.group('isLoggedIn 1')
 		const widget = await this.widget;
 
-		console.group('isLoggedIn 2')
-		const widgetCommunication = widget.communication;
-		console.group('isLoggedIn 3')
+		const widgetCommunication = (await this.widget).communication;
     return widgetCommunication.isLoggedIn();
   }
 
@@ -161,7 +156,6 @@ export default class ZeroWallet {
 		};
     
     await onWindowLoad();
-    console.log("init widget loaded");
     const style = document.createElement('style');
     style.innerHTML = styles;
 
@@ -309,6 +303,7 @@ export default class ZeroWallet {
   }
 
   _onLogin(walletAddress: any, email: any) {
+		console.log('_onLogin callbasck!!')
 		this.hideWallet();
     if (this._onLoginCallback) {
       this._onLoginCallback(walletAddress, email);

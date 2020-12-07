@@ -370,6 +370,12 @@ const changeEmail = async (oldEmail: string, newEmail: string, encryptedSeed: st
 	return response;
 };
 
+export type TypePayloadData = {
+  __typename?: "TypePayloadData";
+  email: string;
+  authenticator: boolean;
+}
+
 const getPayload = async (email: string) => {
 	const key = await sha256(email);
 	const options: RequestInit = {
@@ -386,7 +392,7 @@ const getPayload = async (email: string) => {
 	};
 	const result = await fetch(config.BACKEND_ENDPOINT + '/v1/getPayload', options);
 
-	const response = await result.json();
+	const response: TypePayloadData = await result.json();
 	return response;
 };
 

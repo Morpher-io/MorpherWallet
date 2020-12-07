@@ -1,0 +1,19 @@
+/* define variables for the primary colors */
+$primary_1: #a2b9bc;
+$primary_2: #b2ad7f;
+$primary_3: #878f99;
+$font1: Avenir, Helvetica, Arial, sans-serif;
+$font2: Avenir, Helvetica, Arial, sans-serif;
+
+
+.container {
+	display: block;
+	max-width: 450px;
+	width: 80%;
+	border: 1px solid red;
+}
+/* use the variables */
+.header {
+	background-color: $primary_1; // here you can put an inline comment
+	height: 50px;
+}
