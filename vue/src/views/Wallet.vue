@@ -1,6 +1,9 @@
 <template>
-	<section class="section">
+	<div class="container">
 		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
+
+		<h1 class="title">Morpher Wallet</h1>
+
 		<div class="container">
 			<div class="container">
 				<div class="card">
@@ -11,16 +14,14 @@
 						</div>
 					</div>
 					<footer class="card-footer">
-						<router-link to="/settings" tag="a" class="card-footer-item">
-						Settings
-						</router-link>
-						
+						<router-link to="/settings" tag="a" class="card-footer-item"> Settings </router-link>
+
 						<a class="card-footer-item" v-on:click="logout()">Logout</a>
 					</footer>
 				</div>
 			</div>
 		</div>
-	</section>
+	</div>
 </template>
 
 <script lang="ts">

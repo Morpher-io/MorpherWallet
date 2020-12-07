@@ -22,7 +22,7 @@ const routes: Array<RouteConfig> = [
 		component: Signup
 	},
 	{
-		path: '/settings/:setting',
+		path: '/settings',
 		name: 'Settings',
 		component: Settings,
 		meta: {
