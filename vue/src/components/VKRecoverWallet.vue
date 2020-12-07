@@ -1,31 +1,36 @@
 <template>
   <div class="control is-expanded">
-    <button type="button" class="button  is-fullwidth" @click="doLogin">VKontakte</button>
+    <button type="button" class="button  is-fullwidth" @click="doLogin">
+      VKontakte
+    </button>
   </div>
 </template>
 <script>
-const { sha256 } = require("../utils/cryptoFunctions");
+import { sha256 } from "../utils/cryptoFunctions";
 
-const {
+import {
   changePasswordEncryptedSeed,
   recoverVKSeed,
-  saveWalletEmailPassword,
-} = require("../utils/backupRestore");
+  saveWalletEmailPassword
+} from "../utils/backupRestore";
 
 export default {
   name: "VKRecoverWallet",
   components: {},
-  data: function () {
+  data: function() {
     return {
-      isLogined: false,
+      isLogined: false
     };
   },
   props: {
-    walletEmail: "",
+    walletEmail: {
+      type: String,
+      default: ""
+    }
   },
   methods: {
-    vk_popup: function (options) {
-      var screenX =
+    vkPopup: function(options) {
+      const screenX =
           typeof window.screenX != "undefined"
             ? window.screenX
             : window.screenLeft,
@@ -58,46 +63,44 @@ export default {
     },
 
     doLogin() {
-      var win;
-      var redirect_uri = "http://localhost:3001";
-      var uri_regex = new RegExp(redirect_uri);
-      var url =
+      const redirectUri = "http://localhost:3001";
+      const uriRegex = new RegExp(redirectUri);
+      const url =
         "http://oauth.vk.com/authorize?client_id=7548057&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=" +
-        redirect_uri;
-      win = this.vk_popup({
+        redirectUri;
+      const win = this.vkPopup({
         width: 620,
         height: 370,
-        url: url,
+        url: url
       });
 
-      var self = this;
-      var watch_timer = setInterval(async function () {
+      const watchTimer = setInterval(async function() {
         try {
           console.log(win.location.href);
-          if (uri_regex.test(win.location)) {
-            clearInterval(watch_timer);
+          if (uriRegex.test(win.location)) {
+            clearInterval(watchTimer);
 
-            var hash = win.location.hash.substr(1);
-            var params = hash.split("&").reduce(function (result, item) {
-              var parts = item.split("=");
+            const hash = win.location.hash.substr(1);
+            const params = hash.split("&").reduce(function(result, item) {
+              const parts = item.split("=");
               result[parts[0]] = parts[1];
               return result;
             }, {});
             //console.log(params)
             //console.log("Access token: " + params.access_token)
             //console.log("UserID: " + params.user_id)
-            setTimeout(function () {
+            setTimeout(function() {
               win.close();
               //document.location.reload();
             }, 500);
 
             try {
-              let encryptedSeedVK = await recoverVKSeed(
+              const encryptedSeedVK = await recoverVKSeed(
                 params.access_token,
-                self.walletEmail
+                this.walletEmail
               );
 
-              var newPasswordForLocalStorage = prompt(
+              let newPasswordForLocalStorage = prompt(
                 "Enter a new password for you local vault",
                 "Super Strong Pass0wrd!"
               );
@@ -105,12 +108,12 @@ export default {
               newPasswordForLocalStorage = await sha256(
                 newPasswordForLocalStorage
               );
-              let encryptedSeedPassword = await changePasswordEncryptedSeed(
+              const encryptedSeedPassword = await changePasswordEncryptedSeed(
                 encryptedSeedVK,
                 params.user_id,
                 newPasswordForLocalStorage
               );
-              saveWalletEmailPassword(self.walletEmail, encryptedSeedPassword);
+              saveWalletEmailPassword(this.walletEmail, encryptedSeedPassword);
               window.localStorage.setItem(
                 "encryptedSeed",
                 JSON.stringify(encryptedSeedPassword)
@@ -129,12 +132,10 @@ export default {
           console.log(e);
         }
       }, 100);
-    },
-  },
-  mounted() {},
+    }
+  }
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-</style>
+<style scoped></style>

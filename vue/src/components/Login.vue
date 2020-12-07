@@ -70,16 +70,13 @@
             </button>
           </div>
           <div class="control">
-            <button
-              type="button"
-              class="button is-light"
-              v-on:click="$emit('create-wallet')"
-            >
+            <router-link to="/signup" tag="button" class="button is-light">
               <span class="icon is-small">
                 <i class="far fa-file"></i>
               </span>
+
               <span> Create new Wallet </span>
-            </button>
+            </router-link>
           </div>
         </div>
       </form>
@@ -93,18 +90,18 @@ import FBRecoverWallet from "../components/FBRecoverWallet";
 import GoogleRecoverWallet from "../components/GoogleRecoverWallet";
 
 import VKRecoverWallet from "../components/VKRecoverWallet";
-const { sha256 } = require("../utils/cryptoFunctions");
+import { sha256 } from "../utils/cryptoFunctions";
 
 import { getKeystore } from "../utils/keystore";
-import {getPayload} from "../utils/backupRestore";
-const {
+import { getPayload } from "../utils/backupRestore";
+import {
   getEncryptedSeed,
   saveWalletEmailPassword,
   getKeystoreFromEncryptedSeed,
   getEncryptedSeedFromMail,
   validateInput,
-        send2FAEmail
-} = require("../utils/backupRestore");
+  send2FAEmail
+} from "../utils/backupRestore";
 
 export default {
   name: "Login",
@@ -112,24 +109,24 @@ export default {
     Spinner,
     FBRecoverWallet,
     GoogleRecoverWallet,
-    VKRecoverWallet,
+    VKRecoverWallet
   },
-  data: function () {
+  data: function() {
     return {
       walletEmail: "",
       walletPassword: "",
       showSpinner: false,
-      status: "",
+      status: ""
     };
   },
   props: {
     showRecovery: {
       type: Boolean,
-      default: false,
-    },
+      default: false
+    }
   },
   methods: {
-    fetchUser: async function (e) {
+    fetchUser: async function(e) {
       try {
         e.preventDefault();
 
@@ -138,16 +135,18 @@ export default {
         /**
          * First try to fetch the wallet from the server, in case the browser-cache was cleared
          */
-        let keystore = null;
-        let created = false;
+        const keystore = null;
+        const created = false;
         //double hashed passwords for recovery
-        let password = await sha256(this.walletPassword);
+        const password = await sha256(this.walletPassword);
         try {
           console.log("trying to find keystore from mail");
           this.status = "Looking up User from Database";
-          let encryptedSeed = await getEncryptedSeedFromMail(this.walletEmail);
+          const encryptedSeed = await getEncryptedSeedFromMail(
+            this.walletEmail
+          );
 
-          console.log(encryptedSeed)
+          console.log(encryptedSeed);
 
           window.localStorage.setItem(
             "encryptedSeed",
@@ -159,13 +158,18 @@ export default {
           this.status = "Found User, Trying to Unlock Wallet";
 
           getPayload(this.walletEmail).then(twoFAMethods => {
-            let twoFA = false
-            if(twoFAMethods.email || twoFAMethods.authenticator) twoFA = true
-            if(twoFAMethods.email) {
-              send2FAEmail(this.walletEmail)
+            let twoFA = false;
+            if (twoFAMethods.email || twoFAMethods.authenticator) twoFA = true;
+            if (twoFAMethods.email) {
+              send2FAEmail(this.walletEmail);
             }
-            this.$emit("update-twofa", twoFAMethods.email, twoFAMethods.authenticator, twoFA);
-          })
+            this.$emit(
+              "update-twofa",
+              twoFAMethods.email,
+              twoFAMethods.authenticator,
+              twoFA
+            );
+          });
 
           this.$emit("unlock-wallet", encryptedSeed, password);
           this.showSpinner = false;
@@ -177,22 +181,22 @@ export default {
            */
 
           this.status = "The user wasn't found: Signup first!";
-          let self = this;
-          setTimeout(function () {
-            self.showSpinner = false;
-            self.$emit("create-wallet");
+
+          setTimeout(() => {
+            this.showSpinner = false;
+            this.$emit("create-wallet");
           }, 1500);
         }
       } catch (e) {
         console.log(e);
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
 <style scoped>
-/deep/ .Password__strength-meter {
+.Password__strength-meter {
   margin: 5px auto !important;
 }
 </style>

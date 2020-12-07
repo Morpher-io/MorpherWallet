@@ -5,46 +5,56 @@
  * @date 2020
  */
 
-
 import Web3ProviderEngine from "web3-provider-engine";
-import HookedWalletSubprovider from "web3-provider-engine/subproviders/hooked-wallet";
-import WebsockerSubprovider from 'web3-provider-engine/subproviders/websocket';
+
+const HookedWalletSubprovider = require("web3-provider-engine/subproviders/hooked-wallet.js");
+const WebsocketSubprovider = require("web3-provider-engine/subproviders/websocket");
+
 //import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
 //import Web3Subprovider from 'web3-provider-engine/subproviders/web3';
-import styles from "./styles";
-import onWindowLoad from "./onWindowLoad";
+import { styles } from "./styles";
+import { onWindowLoad } from "./onWindowLoad";
 import { connectToChild } from 'penpal';
 
 
 const WIDGET_URL = 'http://localhost:3001';
-const ZEROWALLET_IFRAME_CLASS = 'zerowallet-iframe';
+const ZEROWALLET_IFRAME_CLASS = 'zerowallet-widget-frame';
 const ZEROWALLET_CONTAINER_CLASS = 'zerowallet-container';
+let zeroWalletIframe: HTMLIFrameElement;
+let zeroWalletContainer: HTMLDivElement;
 
-const tempCachingIFrame = document.createElement('iframe');
-tempCachingIFrame.className = ZEROWALLET_IFRAME_CLASS;
-tempCachingIFrame.style.width = '0';
-tempCachingIFrame.style.height = '0';
-tempCachingIFrame.style.border = 'none';
-tempCachingIFrame.style.position = 'absolute';
-tempCachingIFrame.style.top = '-999px';
-tempCachingIFrame.style.left = '-999px';
-//tempCachingIFrame.src = "about:blank"; //WIDGET_URL;
-onWindowLoad().then(() => {
-  if (document.getElementsByClassName(ZEROWALLET_IFRAME_CLASS).length) {
-    console.warn('Zerowallet script was already loaded. This might cause unexpected behavior. If loading with a <script> tag, please make sure that you only load it once.');
-  }
-  document.body.appendChild(tempCachingIFrame);
-});
+if (document.getElementById('zero_wallet_sdk_iframe')) {
+	zeroWalletIframe = (document.getElementById('zero_wallet_sdk_iframe') as HTMLIFrameElement);
+} else {
+	zeroWalletIframe = document.createElement('iframe');
+	zeroWalletIframe.id= 'zero_wallet_sdk_iframe';
+	zeroWalletIframe.className = ZEROWALLET_IFRAME_CLASS;
+	zeroWalletIframe.scrolling="no";
+	zeroWalletIframe.style.overflow="hidden";
+}
+
 let iframeLoadedFired = false;
 
 export default class ZeroWallet {
+
+	wsRPCEndpointUrl: string;
+	chainId: number;
+	widget: any;
+	provider: Web3ProviderEngine;
+	_onLoginCallback: any;
+	_onLogoutCallback: any;
+	_onActiveWalletChangedCallback: any;
+	_onErrorCallback: any;
+	config: any;
+	_selectedAddress: any;
   
-  constructor(wsRPCEndpointUrl, chainId) {
+  constructor(wsRPCEndpointUrl: string, chainId: number) {
     this.wsRPCEndpointUrl = wsRPCEndpointUrl;
     this.chainId = chainId;
     this.widget = this._initWidget();
-    this.provider = this._initProvider();
-    window.zerowallet = this;
+		this.provider = this._initProvider();
+		
+    //window.zerowallet = this;
   }
 
   getProvider() {
@@ -65,62 +75,118 @@ export default class ZeroWallet {
     return widgetCommunication.logout();
   }
 
-  onLogin(callback) {
+  onLogin(callback: any) {
     this._onLoginCallback = callback;
   }
 
-  onLogout(callback) {
+  onLogout(callback: any) {
     this._onLogoutCallback = callback;
   }
 
-  onActiveWalletChanged(callback) {
+  onActiveWalletChanged(callback: any) {
     this._onActiveWalletChangedCallback = callback;
   }
 
-  onError(callback) {
+  onError(callback: any) {
     this._onErrorCallback = callback;
-  }
+	}
+	
+	async loginWallet() {
+		console.log('zero, loginWallet')
+		const isLoggedIn = false; // await this.isLoggedIn();
+		console.log('is logged in', isLoggedIn)
+		if (isLoggedIn) {
+			const widgetCommunication = (await this.widget).communication;
+			const result = await widgetCommunication.getAccounts();
+			return result
+		} else {
+			this.showWallet();
+		}
+
+	}
+
+	async showWallet() {
+		
+    zeroWalletContainer.style.position = 'absolute';
+    zeroWalletContainer.style.height = '100%';
+    zeroWalletContainer.style.width = '100%';
+    zeroWalletContainer.style.top='0';
+    zeroWalletContainer.style.left='0';
+		zeroWalletContainer.style.display = 'inline';
+		zeroWalletContainer.style.visibility = 'visible';
+	
+	}
+
+	async hideWallet() {
+		zeroWalletContainer.style.position = 'absolute';
+		zeroWalletContainer.style.width = '0';
+		zeroWalletContainer.style.height = '0';
+		zeroWalletContainer.style.display = 'none';
+		zeroWalletContainer.style.visibility = 'invisible';
+		zeroWalletContainer.style.top = '-999px';
+		zeroWalletContainer.style.left = '-999px';		
+	}
 
   async isLoggedIn() {
-    await this.iframeLoaded();
-    const widgetCommunication = (await this.widget).communication;
+
+		await this.iframeLoaded();
+
+		console.group('isLoggedIn 1')
+		const widget = await this.widget;
+
+		console.group('isLoggedIn 2')
+		const widgetCommunication = widget.communication;
+		console.group('isLoggedIn 3')
     return widgetCommunication.isLoggedIn();
   }
 
   async iframeLoaded() {
-    return new Promise((resolve) => {
+    return new Promise((resolve): void => {
       if(iframeLoadedFired) {
-        resolve();
+        resolve(true);
       }
 
-      tempCachingIFrame.onload = () => {
+      zeroWalletIframe.onload = () => {
         iframeLoadedFired = true;
-        resolve();
+        resolve(true);
       };
     });
   }
 
   async _initWidget() {
-    tempCachingIFrame.src = WIDGET_URL;
+		zeroWalletIframe.src = WIDGET_URL;
+		
+		zeroWalletIframe.onload = () => {
+			iframeLoadedFired = true;
+		};
     
     await onWindowLoad();
     console.log("init widget loaded");
     const style = document.createElement('style');
     style.innerHTML = styles;
 
-    const container = document.createElement('div');
-    container.className = ZEROWALLET_CONTAINER_CLASS;
-
-    const widgetFrame = document.createElement('div');
-    widgetFrame.id = ZEROWALLET_CONTAINER_CLASS+`-${Date.now()}`;
-    widgetFrame.className = ZEROWALLET_IFRAME_CLASS;
-
-    container.appendChild(widgetFrame);
-    document.body.appendChild(container);
-    document.head.appendChild(style);
+		if (document.getElementById('zero_wallet_sdk_container')) {
+			zeroWalletContainer = (document.getElementById('zero_wallet_sdk_container') as HTMLDivElement);
+		} else {
+			zeroWalletContainer = document.createElement('div');
+			zeroWalletContainer.id= 'zero_wallet_sdk_container';
+			zeroWalletContainer.className = ZEROWALLET_CONTAINER_CLASS;
+			zeroWalletContainer.style.width = '0';
+			zeroWalletContainer.style.height = '0';
+			zeroWalletContainer.style.border = 'none';
+			zeroWalletContainer.style.display = 'none';
+			zeroWalletContainer.style.visibility = 'invisible';
+			zeroWalletContainer.style.position = 'absolute';
+			zeroWalletContainer.style.top = '-999px';
+			zeroWalletContainer.style.left = '-999px';
+			zeroWalletContainer.appendChild(zeroWalletIframe);
+			document.body.appendChild(zeroWalletContainer);
+			document.head.appendChild(style);
+	
+		}
 
     const connection = connectToChild({
-      iframe: tempCachingIFrame,
+      iframe: zeroWalletIframe,
       methods: {
         setHeight: this._setHeight.bind(this),
         getWindowSize: this._getWindowSize.bind(this),
@@ -131,23 +197,10 @@ export default class ZeroWallet {
       },
     });
 
-
-    tempCachingIFrame.style.position = 'absolute';
-    tempCachingIFrame.style.height = '600px';
-    tempCachingIFrame.style.width = '300px';
-    tempCachingIFrame.style.right=0;
-    tempCachingIFrame.style.left=0;
-    tempCachingIFrame.style.top=0;
-    tempCachingIFrame.style.background = "white";
-    tempCachingIFrame.style.border = '0 transparent';
-
-    
-
-
     const communication = await connection.promise;
     //communication.retrieveSession();
 
-    return { communication, iframe: connection.iframe, widgetFrame };
+    return { communication: (communication as any), iframe: zeroWalletIframe };
   }
 
   _initProvider() {
@@ -163,53 +216,57 @@ export default class ZeroWallet {
    
     engine.addProvider(
       new HookedWalletSubprovider({
-        getAccounts: async cb => {
+        getAccounts: async (cb: any) => {
           const widgetCommunication = (await this.widget).communication;
           const result = await widgetCommunication.getAccounts();
           console.log(result);
           cb(null, result);
         },
-        signTransaction: async (txParams, cb) => {
+        signTransaction: async (txParams: any, cb: any) => {
           const widgetCommunication = (await this.widget).communication;
          
           txParams.chainId = self.getChainId();
           
-          const result = await widgetCommunication.signTransaction(txParams);
+					const result = await widgetCommunication.signTransaction(txParams);
+					if(cb) {
+						cb(null, result);
+					}
           return result;
         },
-        /*
-        signMessage: async (msgParams, cb) => {
+        
+        signMessage: async (msgParams: any, cb: any) => {
           const widgetCommunication = (await this.widget).communication;
           const params = Object.assign({}, msgParams, { messageStandard: 'signMessage' });
           const { error, result } = await widgetCommunication.signMessage(params, this.config);
           cb(error, result);
         },
-        signPersonalMessage: async (msgParams, cb) => {
+        signPersonalMessage: async (msgParams: any, cb: any) => {
           const widgetCommunication = (await this.widget).communication;
           const params = Object.assign({}, msgParams, { messageStandard: 'signPersonalMessage' });
           const { error, result } = await widgetCommunication.signMessage(params, this.config);
           cb(error, result);
         },
-        signTypedMessage: async (msgParams, cb) => {
+        signTypedMessage: async (msgParams: any, cb: any) => {
           const widgetCommunication = (await this.widget).communication;
           const params = Object.assign({}, msgParams, { messageStandard: 'signTypedMessage' });
           const { error, result } = await widgetCommunication.signMessage(params, this.config);
           cb(error, result);
         },
-        signTypedMessageV3: async (msgParams, cb) => {
+        signTypedMessageV3: async (msgParams: any, cb: any) => {
           const widgetCommunication = (await this.widget).communication;
           const params = Object.assign({}, msgParams, { messageStandard: 'signTypedMessageV3' });
           const { error, result } = await widgetCommunication.signMessage(params, this.config);
           cb(error, result);
         },
-        estimateGas: async (txParams, cb) => {
-          const gas = await getTxGas(query, txParams);
+        estimateGas: async (txParams: any, cb: any) => {
+					//const gas = await getTxGas(query, txParams);
+					const gas = 0;
           cb(null, gas);
         },
-        getGasPrice: async cb => {
+        getGasPrice: async (cb: any) => {
           cb(null, '');
         },
-        */
+        
       }),
     );
 
@@ -218,28 +275,28 @@ export default class ZeroWallet {
       //  new RpcSubprovider({
       //    rpcUrl: "http://127.0.0.1:7545",
       //  })
-        new WebsockerSubprovider({
+        new WebsocketSubprovider({
           rpcUrl: this.wsRPCEndpointUrl
         })
       );
 
-   
+			
 
-    engine.isZeroWallet = true;
-
-    engine.on('error', error => {
+    //engine.isZeroWallet = true;
+/*
+    engine.on('error', () => {
       if (error && error.message && error.message.includes('PollingBlockTracker')) {
         console.warn('If you see this warning constantly, there might be an error with your RPC node.');
       } else {
         console.error(error);
       }
     });
-
+*/
     engine.start();
     return engine;
   }
 
-  async _setHeight(height) {
+  async _setHeight(height: any) {
     const widgetFrame = (await this.widget).widgetFrame;
     widgetFrame.style.height = `${height}px`;
   }
@@ -251,7 +308,8 @@ export default class ZeroWallet {
     return { width, height };
   }
 
-  _onLogin(walletAddress, email) {
+  _onLogin(walletAddress: any, email: any) {
+		this.hideWallet();
     if (this._onLoginCallback) {
       this._onLoginCallback(walletAddress, email);
     }
@@ -264,21 +322,22 @@ export default class ZeroWallet {
     }
   }
 
-  _onActiveWalletChanged(walletAddress) {
+  _onActiveWalletChanged(walletAddress: any) {
     if (this._onActiveWalletChangedCallback) {
       this._onActiveWalletChangedCallback(walletAddress);
     }
   }
 
-  _onError(error) {
+  _onError(error: any) {
     if (this._onErrorCallback) {
       this._onErrorCallback(error);
     }
   }
 
-  clearSubprovider(subproviderType) {
-    const subprovider = this.provider._providers.find(subprovider => subprovider instanceof subproviderType);
-    this.provider.removeProvider(subprovider);
-    this.provider.addProvider(new subproviderType());
+  clearSubprovider(subproviderType: any) {
+		console.log('clearSubprovider')
+    //const subprovider = this.provider._providers.find((subprovider: any) => subprovider instanceof subproviderType);
+    //this.provider.removeProvider(subprovider);
+    //this.provider.addProvider(new subproviderType());
   }
 }

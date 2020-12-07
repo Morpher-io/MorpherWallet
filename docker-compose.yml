@@ -41,6 +41,8 @@ services:
             TWITTER_APP_SECRET: 'neGkY4nvHhzw8QBNXYQzB0zwXte6WNSzNMf1C6evSjuDXdYF6U'
             VK_APP_ID: '7548057'
             DB_BACKEND_SALT: 'kjdfkjdfkjdfkjdfkjdfkjdfkjdkfjdkkjdfkjdfkjdfkjdfkjdfkjdfkjdkfjdk'
+            ACCESS_KEY_ID: 'AKIAY5N7CSQUEJWG4RFO'
+            ACCESS_KEY_SECRET: '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'
     vue:
         build:
             context: ./vue

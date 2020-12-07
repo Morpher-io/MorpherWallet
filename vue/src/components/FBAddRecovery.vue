@@ -11,31 +11,33 @@
   </div>
 </template>
 
-
 <script>
-const {
+import {
   backupFacebookSeed,
-  changePasswordEncryptedSeed,
-} = require("../utils/backupRestore");
+  changePasswordEncryptedSeed
+} from "../utils/backupRestore";
 import VFacebookLogin from "vue-facebook-login-component";
 
 export default {
   name: "FBAddRecovery",
   components: {
-    VFacebookLogin,
+    VFacebookLogin
   },
-  data: function () {
+  data: function() {
     return {
       isLogined: false,
       facebook: {
         FB: {},
         model: {},
-        scope: {},
-      },
+        scope: {}
+      }
     };
   },
   props: {
-    walletEmail: "",
+    walletEmail: {
+      type: String,
+      default: ""
+    }
   },
   methods: {
     handleSdkInit({ FB, scope }) {
@@ -43,14 +45,14 @@ export default {
       this.facebook.FB = FB;
     },
     async onLogin(data) {
-      let userID = data.authResponse.userID;
-      let encryptedSeedFromPassword =
+      const userID = data.authResponse.userID;
+      const encryptedSeedFromPassword =
         localStorage.getItem("encryptedSeed") || "";
       if (encryptedSeedFromPassword === "") {
         throw new Error("Keystore not found, aborting");
       }
 
-      let encryptedSeedFromFacebookUserID = await changePasswordEncryptedSeed(
+      const encryptedSeedFromFacebookUserID = await changePasswordEncryptedSeed(
         JSON.parse(encryptedSeedFromPassword),
         window.sessionStorage.getItem("password"),
         userID
@@ -65,12 +67,10 @@ export default {
       } catch {
         this.hasWalletRecovery = false;
       }
-    },
-  },
-  mounted() {},
+    }
+  }
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-</style>
+<style scoped></style>
