@@ -38,17 +38,18 @@
 				</div>
 			</div>
 
-			<div class="field is-grouped">
-				<div class="control is-expanded">
-					<button class="button is-primary is-fullwidth" type="submit">
+			<div class="field">
+				<div class="layout split first">
+
+					<button class="button is-green" type="submit">
 						<span class="icon is-small">
 							<i class="far fa-file"></i>
 						</span>
 						<span> Create new Wallet </span>
 					</button>
 				</div>
-				<div class="control">
-					<router-link to="/login" tag="button" class="button is-light">
+				<div class="layout split second">
+					<router-link to="/login" tag="button" class="button is-grey">
 						<span class="icon is-small">
 							<i class="fas fa-unlock"></i>
 						</span>
@@ -68,14 +69,12 @@ import { validateInput } from '../utils/backupRestore';
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 
-
 @Component({
 	components: {
 		Password
 	}
 })
 export default class Signup extends mixins(Global) {
-
 	// properties
 	walletEmail = '';
 	walletPassword = '';
@@ -83,7 +82,7 @@ export default class Signup extends mixins(Global) {
 	signup = false;
 	invalidEmail = '';
 	invalidPassword = '';
-	
+
 	// Methods
 	async signupExecute(e: any) {
 		//console.log(e);
@@ -119,12 +118,10 @@ export default class Signup extends mixins(Global) {
 		const email = this.walletEmail;
 
 		this.createWallet({ email, password })
-			.then(encryptedKeystore => {
+			.then(() => {
 				this.$router.push('/2fa');
 			})
-			.catch(error => {
-				(err: any) => console.log(err);
-			});
+			.catch(console.log);
 	}
 }
 </script>

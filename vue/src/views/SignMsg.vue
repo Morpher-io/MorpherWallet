@@ -3,13 +3,13 @@
 		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 		<div class="container">
 					<spinner v-model="showSpinner" v-bind:status="status"></spinner>
-		<h2 class="title">Sign Transaction</h2>
-		<h4 class="subtitle">Sign the transaction to continue</h4>
+		<h2 class="title">Sign Message</h2>
+		<h4 class="subtitle">Your signature is being requested</h4>
 		
 			<div class="field">
-				<label class="label">Transaction Details</label>
+				<label class="label">You are signing:</label>
 				<div class="control">
-					{{ store.transactionDetails }}
+					{{ store.messageDetails }}
 				</div>
 			</div>
 
@@ -42,7 +42,7 @@ import Component, { mixins } from 'vue-class-component';
 import { Global, Authenticated } from '../mixins/mixins';
 
 
-export default class SignTx extends mixins(Global, Authenticated) {
+export default class SignMsg extends mixins(Global, Authenticated) {
 
 
 

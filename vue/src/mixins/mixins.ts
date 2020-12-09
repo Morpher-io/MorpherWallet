@@ -5,7 +5,9 @@ import Spinner from '../components/loading-spinner/Spinner.vue';
 import { Action } from 'vuex-class';
 import { TypeFetchUser, TypeUnlock2fa, TypeUnlockWithPassword, TypeChangePassword } from '../types/global-types';
 import { mapState } from 'vuex';
-import { RootState } from '../store'
+import { RootState } from '../store';
+import isIframe from "../utils/isIframe";
+import { Prop, Watch } from 'vue-property-decorator';
 
 /**
  * Mixin used for all components
@@ -16,7 +18,7 @@ import { RootState } from '../store'
 	},
 	computed: {
 		...mapState({
-			
+			connection: (state: any) => state.connection,
 			status: (state: any) => state.status,
 			twoFaRequired: (state: any) => state.twoFaRequired
 		})
@@ -34,7 +36,7 @@ export class Global extends Vue {
 	public unlockWithStoredPassword!: () => Promise<unknown>;
 
 	@Action
-	public unlock2FA!: (params: TypeUnlock2fa) => Promise<unknown>;
+	public unlock2FA!: (params: TypeUnlock2fa) => Promise<string>;
 
 	@Action
 	public createWallet!: (params: TypeFetchUser) => Promise<unknown>;
@@ -42,6 +44,8 @@ export class Global extends Vue {
 	@Action
 	public unlockWithPassword!: (params: TypeUnlockWithPassword) => Promise<unknown>;
 
+	@Action
+	public clearPage!: () => void;
 
 	// Map store actions
 	@Action
@@ -49,6 +53,29 @@ export class Global extends Vue {
 
 	// Map Store Properties
 	store: RootState = this.$store.state;
+	
+	// map libraries
+	isIframe = isIframe;
+	
+
+	@Watch('store.keystore')
+	onPropertyChanged(value: any, oldValue: any) {
+		if (value === null) {
+			this.$router.push('/login');
+		}
+	}
+
+	@Watch('store.openPage')
+	onPageChanged(value: any, oldValue: any) {
+		if (value) {
+			if (value === 'wallet') this.$router.push('/');
+			if (value === 'settings') this.$router.push('/settings');
+			if (value === 'register') this.$router.push('/signup');
+			this.clearPage();
+		}
+	}
+	
+
 
 }
 
@@ -58,12 +85,11 @@ export class Global extends Vue {
 @Component({
 	computed: {
 		...mapState({
-			
 			walletEmail: (state: any) => state.email,
 			keystore: (state: any) => state.keystore,
 			accounts: (state: any) => state.accounts
 		})
-	}
+	}, watch: {}
 })
 export class Authenticated extends Global {
 	@Action

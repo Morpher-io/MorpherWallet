@@ -19,9 +19,12 @@ export const  styles =  `
 	display: block;
 	max-width: 414px;
 	max-height: 800px;
-	height: 80%;
+	height: 90%;
 	width: 80%;
-	margin-top: 20px;
+	position: fixed;
+	left: 50%;
+	transform: translate(-50%, 0);
+	top: 20px;
 
   box-shadow: 0 0 30px rgba(0,0,0,.3);
   border-radius: 14px;

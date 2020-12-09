@@ -1,9 +1,8 @@
 const { getKeystore } = require('./keystore');
-const Accounts = require('web3-eth-accounts');
 const config = require('./../config.json');
 const { cryptoEncrypt, cryptoDecrypt, sha256 } = require('./cryptoFunctions');
 
-import { TypeEncryptedSeed, TypePayloadData } from '../types/global-types';
+import { TypeEncryptedSeed, TypePayloadData, TypeCreatedKeystore } from '../types/global-types';
 
 const changePasswordEncryptedSeed = async (encryptedSeed: TypeEncryptedSeed, oldPassword: string, newPassword: string) => {
 	const seed = await cryptoDecrypt(oldPassword, encryptedSeed.ciphertext, encryptedSeed.iv, encryptedSeed.salt);
@@ -12,44 +11,11 @@ const changePasswordEncryptedSeed = async (encryptedSeed: TypeEncryptedSeed, old
 
 const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: TypeEncryptedSeed, password: string) =>
 	new Promise((resolve, reject) => {
-		getKeystore(password, encryptedWalletObject).then((wallet: any) => {
-			resolve(wallet);
+		getKeystore(password, encryptedWalletObject).then((returnObj: TypeCreatedKeystore) => {
+			resolve(returnObj.keystore);
 		}).catch(reject);
-
-
-		return;
-		/*
-		let seed = await cryptoDecrypt(
-			password,
-			encryptedSeed.ciphertext,
-			encryptedSeed.iv,
-			encryptedSeed.salt
-		);
-		let keystore = await getKeystore(password, seed);
-		resolve(keystore);
-		*/
-
 	});
 
-const getEncryptedSeed = async (keystore: any, password: string) => {
-	return await keystore.encrypt(password);
-	/*
-	let pwDerivedKey = await new Promise((resolve, reject) => {
-		keystore.keyFromPassword(password, (err, key) => {
-			if (err) {
-				reject(err);
-			}
-			resolve(key);
-		});
-	});
-
-	let encryptedSeed = await cryptoEncrypt(
-		password,
-		await keystore.getSeed(pwDerivedKey)
-	);
-	return encryptedSeed;
-	*/
-};
 
 const getEncryptedSeedFromMail = async (email: string, email2fa: string, authenticator2fa: string) =>
 	new Promise((resolve, reject) => {
@@ -67,7 +33,6 @@ const getEncryptedSeedFromMail = async (email: string, email2fa: string, authent
 
 			fetch(config.BACKEND_ENDPOINT + '/v1/getEncryptedSeed', options).then(response => {
 				response.json().then(responseBody => {
-
 					/**
 					 * Login /Create Wallet is in one function
 					 * @todo: Separate Login and Create Wallet into separate functions so that upon failed "login" a recovery can be suggested
@@ -79,13 +44,10 @@ const getEncryptedSeedFromMail = async (email: string, email2fa: string, authent
 						resolve(JSON.parse(responseBody.encryptedSeed));
 					}
 					reject('seed not found');
-				}
-
-				);
+				});
 
 
-			}
-			)
+			})
 
 
 		}
@@ -551,7 +513,6 @@ const verifyEmailCode = async (email: string, code: string) => {
 };
 
 export {
-	getEncryptedSeed,
 	validateInput,
 	saveWalletEmailPassword,
 	getKeystoreFromEncryptedSeed,

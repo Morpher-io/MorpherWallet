@@ -77,3 +77,16 @@ export type TypePayloadData = {
   email: boolean;
   authenticator: boolean;
 }
+
+export type TypeCreatedKeystore = {
+  __typename?: "TypeCreatedKeystore";
+  encryptedSeed: string;
+  keystore: any;
+}
+export type ZeroWalletConfig = {
+  __typename?: "Type2FARequired";
+  show_transaction: boolean;
+	confirm_transaction: boolean;
+	show_message: boolean;
+  confirm_message: boolean;
+} | null;
