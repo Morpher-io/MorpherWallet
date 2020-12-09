@@ -72,3 +72,10 @@ export type TypePayloadData = {
   email: boolean;
   authenticator: boolean;
 }
+
+
+export type TypeCreatedKeystore = {
+  __typename?: "TypeCreatedKeystore";
+  encryptedSeed: string;
+  keystore: any;
+}

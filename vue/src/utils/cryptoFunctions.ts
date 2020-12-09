@@ -1,4 +1,6 @@
-const cryptoEncrypt = (password: string, seedPhrase: string) =>
+import {TypeEncryptedSeed} from '../types/global-types';
+
+const cryptoEncrypt = (password: string, seedPhrase: string): Promise<TypeEncryptedSeed> =>
   new Promise(async (resolve, reject) => {
     const enc = new TextEncoder();
     const keyMaterial = await window.crypto.subtle.importKey(
@@ -59,7 +61,7 @@ const cryptoDecrypt = (
   iv: string,
   salt: string
 ) =>
-  new Promise(async (resolve, reject) => {
+  new Promise<string>(async (resolve, reject) => {
     //https://gist.github.com/chrisveness/43bcda93af9f646d083fad678071b90a
     const ctStr = atob(ciphertext); // decode base64 ciphertext
     const ctUint8 = new Uint8Array(

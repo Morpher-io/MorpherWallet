@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@types/web3-provider-engine": "^14.0.0",
+    "bip39": "^3.0.3",
     "core-js": "^3.6.5",
     "downloadjs": "^1.4.7",
+    "ethereumjs-wallet": "^1.0.1",
     "penpal": "^5.3.0",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3",
