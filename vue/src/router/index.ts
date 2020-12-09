@@ -7,6 +7,8 @@ import TwoFA from '../views/TwoFA.vue';
 import store from '../store/index';
 import Settings from '../views/Settings.vue';
 import Unlock from '../views/Unlock.vue';
+import SignTx from '../views/SignTx.vue';
+import SignMsg from '../views/SignMsg.vue';
 
 Vue.use(VueRouter);
 
@@ -41,6 +43,22 @@ const routes: Array<RouteConfig> = [
 		path: '/unlock',
 		name: 'Unlock',
 		component: Unlock
+	},
+	{
+		path: '/signtx',
+		name: 'SignTx',
+		component: SignTx,
+		meta: {
+			requiresAuth: true
+		}
+	},
+	{
+		path: '/signmsg',
+		name: 'SignMsg',
+		component: SignMsg,
+		meta: {
+			requiresAuth: true
+		}
 	},
 
 	{
