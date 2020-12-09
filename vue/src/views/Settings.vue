@@ -1,49 +1,31 @@
 <template>
+	<div class="container">
+		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 
-   <section class="section">
-		 <spinner v-model="showSpinner" v-bind:status="status"></spinner>
-		<div class="container">
-			<article class="message" v-if="$route.params.setting === 'password'">
-					<div class="message-header">
-						<p>Change the Password</p>
-						<button class="delete" aria-label="delete" v-on:click="$router.push('/')"></button>
-					</div>
-					<div class="message-body">
-						<ChangePassword></ChangePassword>
-					</div>
-				</article>
+		<h1 class="title">Settings</h1>
 
-				<article class="message" v-if="$route.params.setting === 'email'">
-					<div class="message-header">
-						<p>Change Your Email Address</p>
-						<button class="delete" aria-label="delete" v-on:click="$router.push('/')"></button>
-					</div>
-					<div class="message-body">
-						<ChangeEmail :emailChanged="emailChanged"></ChangeEmail>
-					</div>
-				</article>
-
-				<article class="message" v-if="$route.params.setting === '2fa'">
-					<div class="message-header">
-						<p>Change the 2-Factor-Authentication method</p>
-						<button class="delete" aria-label="delete" v-on:click="$router.push('/')"></button>
-					</div>
-					<div class="message-body">
-						<Change2FA></Change2FA>
-					</div>
-				</article>
-
-				<article class="message" v-if="$route.params.setting === '2fa'">
-					<div class="message-header">
-						<p>Export the Wallet Seed Phrase</p>
-						<button class="delete" aria-label="delete" v-on:click="$router.push('/')"></button>
-					</div>
-					<div class="message-body">
-						<ExportWallet></ExportWallet>
-					</div>
-				</article>
+		<div class="container mb-6">
+			<ChangePassword></ChangePassword>
 		</div>
-	</section>
+		<div class="container mb-6">
+			<ChangeEmail :emailChanged="emailChanged"></ChangeEmail>
+		</div>
+		<div class="container mb-6">
+			<Change2FA></Change2FA>
+		</div>
+		<div class="container mb-6">
+			<article class="message">
+				<div class="message-header">
+					<p>Export the Wallet Seed Phrase</p>
+					<button class="delete" aria-label="delete" v-on:click="$router.push('/')"></button>
+				</div>
+				<div class="message-body">
+					<ExportWallet></ExportWallet>
+				</div>
+			</article>
+			<button type="button" class="button is-fullwidth is-primary" v-on:click="$router.push('/')">Back</button>
+		</div>
+	</div>
 </template>
 
 <script lang="ts">
@@ -75,14 +57,9 @@ import ExportWallet from '../components/ExportWallet.vue';
 		})
 	}
 })
-
 export default class Settings extends Vue {
 	dropdownIsActive = false;
 	showSpinner = false;
-
-			
-	
-
 }
 </script>
 
