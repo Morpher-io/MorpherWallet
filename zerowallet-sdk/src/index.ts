@@ -17,7 +17,7 @@ import { onWindowLoad } from "./onWindowLoad";
 import { connectToChild } from 'penpal';
 
 
-const WIDGET_URL = 'http://localhost:3001';
+let WIDGET_URL: string;
 const ZEROWALLET_IFRAME_CLASS = 'zerowallet-widget-frame';
 const ZEROWALLET_CONTAINER_CLASS = 'zerowallet-container';
 let zeroWalletIframe: HTMLIFrameElement;
@@ -35,7 +35,8 @@ if (document.getElementById('zero_wallet_sdk_iframe')) {
 
 
 export type ZeroWalletConfig = {
-  __typename?: "Type2FARequired";
+	__typename?: "Type2FARequired";
+	env: string;
   show_transaction: boolean;
 	confirm_transaction: boolean;
 	show_message: boolean;
@@ -59,19 +60,32 @@ export default class ZeroWallet {
 	_selectedAddress: any;
   
   constructor(wsRPCEndpointUrl: string, chainId: number, config: ZeroWalletConfig = null) {
-    this.wsRPCEndpointUrl = wsRPCEndpointUrl;
-    this.chainId = chainId;
-    this.widget = this._initWidget();
-		this.provider = this._initProvider();
 		if (config === null) {
 			config = {
 				show_transaction: false,
 				confirm_transaction: false,
 				show_message: false,
-				confirm_message: false
+				confirm_message: false,
+				env: 'live'
 			}
 		}
+		
+		if (!config.env) {
+			config.env = 'live';
+		}
+		if (config.env === 'live') {
+			WIDGET_URL = 'https://wallet.morpher.com';			
+		} else if (config.env === 'dev') {
+			WIDGET_URL = 'https://wallet-dev.morpher.com';
+		} else {
+			WIDGET_URL = 'http://localhost:3001';
+		}
 		this.config = config;
+    this.wsRPCEndpointUrl = wsRPCEndpointUrl;
+    this.chainId = chainId;
+    this.widget = this._initWidget();
+		this.provider = this._initProvider();
+
 		
     //window.zerowallet = this;
   }
