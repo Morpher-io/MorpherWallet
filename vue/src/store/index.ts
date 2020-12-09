@@ -289,15 +289,6 @@ const store: Store<RootState> = new Vuex.Store({
 						reject(err);
 					});
 			});
-<<<<<<< Updated upstream
-=======
-		},
-		async changePassword({ commit, state }, params: TypeChangePassword) {
-			console.log(params);
-			//let newEncryptedSeed = changePasswordEncryptedSeed(state.encryptedSeed, params.oldPassword, params.newPassword);
-			//await updateWalletEmailPassword(state.email, state.email, JSON.stringify(newEncryptedSeed));
-			//commit('seedUpdated', {})
->>>>>>> Stashed changes
 		}
 	},
 	getters: {
