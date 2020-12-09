@@ -300,9 +300,10 @@ const store: Store<RootState> = new Vuex.Store({
 		async changePassword({ commit, state }, params: TypeChangePassword) {
 
 			console.log(params);
-			//let newEncryptedSeed = changePasswordEncryptedSeed(state.encryptedSeed, params.oldPassword, params.newPassword);
-			//await updateWalletEmailPassword(state.email, state.email, JSON.stringify(newEncryptedSeed));
-			//commit('seedUpdated', {})
+			let newEncryptedSeed = changePasswordEncryptedSeed(state.encryptedSeed, params.oldPassword, params.newPassword);
+			await updateWalletEmailPassword(state.email, state.email, JSON.stringify(newEncryptedSeed));
+			commit('seedFound', {encryptedSeed: newEncryptedSeed});
+			commit('userFound', {email: state.email, hashedPassword: params.newPassword});
 		}
 	},
 	getters: {
