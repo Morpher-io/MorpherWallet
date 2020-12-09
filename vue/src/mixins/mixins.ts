@@ -36,7 +36,7 @@ export class Global extends Vue {
 	public unlockWithStoredPassword!: () => Promise<unknown>;
 
 	@Action
-	public unlock2FA!: (params: TypeUnlock2fa) => Promise<unknown>;
+	public unlock2FA!: (params: TypeUnlock2fa) => Promise<string>;
 
 	@Action
 	public createWallet!: (params: TypeFetchUser) => Promise<unknown>;

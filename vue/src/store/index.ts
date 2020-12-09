@@ -5,7 +5,6 @@ import {
 	getEncryptedSeedFromMail,
 	verifyAuthenticatorCode,
 	verifyEmailCode,
-	getEncryptedSeed,
 	saveWalletEmailPassword,
 	send2FAEmail,
 	getPayload,
@@ -207,32 +206,25 @@ const store: Store<RootState> = new Vuex.Store({
 						/**
 						 * If no wallet was found, then create a new one (seed = false) otherwise use the decrypted seed from above
 						 */
-						const unlockedKeystore = await getKeystore(params.password, []);
+						const createdKeystoreObj = await getKeystore(params.password, '', 1);
 
-						const encryptedKeystore = await getEncryptedSeed(unlockedKeystore, params.password);
+						//const encryptedKeystore = await getEncryptedSeed(unlockedKeystore, params.password);
 
-						commit('seedCreated', {
-							email: params.email,
-							hashedPassword: params.password,
-							unencryptedKeystore: unlockedKeystore,
-							encryptedSeed: encryptedKeystore
-						});
+						commit('seedCreated', { email: params.email, hashedPassword: params.password, unencryptedKeystore: createdKeystoreObj.keystore, encryptedSeed: createdKeystoreObj.encryptedSeed });
 
-						saveWalletEmailPassword(params.email, encryptedKeystore)
-							.then(() => {
-								getPayload(params.email)
-									.then(payload => {
-										//2FA for signup is hard to do, because the wallet is created client side. We can still 'try' to lure the user into this flow
-										commit('updatePayload', payload);
-										//send2FAEmail(params.email);
+						saveWalletEmailPassword(params.email, createdKeystoreObj.encryptedSeed).then(res => {
+							getPayload(params.email)
+								.then(payload => {
+									//2FA for signup is hard to do, because the wallet is created client side. We can still "try" to lure the user into this flow
+									commit('updatePayload', payload);
+									//send2FAEmail(params.email);
 
-										const accounts = getAccountsFromKeystore(unlockedKeystore);
-										commit('keystoreUnlocked', { unlockedKeystore, accounts });
-										resolve();
-									})
-									.catch(reject);
-							})
-							.catch(reject);
+									const accounts = getAccountsFromKeystore(createdKeystoreObj.keystore);
+									commit('keystoreUnlocked', { keystore: createdKeystoreObj.keystore , accounts });
+									resolve();
+								})
+								.catch(reject);
+							});
 					});
 			});
 		},
@@ -245,7 +237,7 @@ const store: Store<RootState> = new Vuex.Store({
 		/**
 		 * Unlock wallet using 2fa codes
 		 */
-		unlock2FA({ commit, state, rootState }, params: TypeUnlock2fa) {
+		unlock2FA({ commit, dispatch, state, rootState }, params: TypeUnlock2fa) {
 			return new Promise(async (resolve, reject) => {
 				let emailCorrect = false;
 				let authenticatorCorrect = false;
@@ -275,9 +267,17 @@ const store: Store<RootState> = new Vuex.Store({
 					getEncryptedSeedFromMail(rootState.email, params.email2FA, params.authenticator2FA).then(encryptedSeed => {
 						//const encryptedSeed = state.encryptedSeed; //normally that would need decrypting using 2fa codes
 						//commit('updatePayload', { email: false, authenticator: false });
-						commit('seedFound', { encryptedSeed });
-						resolve();
-					});
+						commit('seedFound', { encryptedSeed })
+						if (state.hashedPassword) {
+							//console.log(password found);
+							dispatch("unlockWithStoredPassword").then(() => resolve("/"));
+						} else {
+							//unlock page
+							resolve("/unlock");
+						}
+						
+					})
+
 				} else {
 					console.log('Reached here for wathever reason');
 					reject();
@@ -317,7 +317,7 @@ const store: Store<RootState> = new Vuex.Store({
 					})
 					.catch(err => {
 						console.log('unlockWithPassword error', err);
-						commit('auth_error', "The user wasn't found: Signup first!");
+						commit('authError', "The user wasn't found: Signup first!");
 						localStorage.removeItem('encryptedSeed');
 						localStorage.removeItem('email');
 						sessionStorage.removeItem('password');

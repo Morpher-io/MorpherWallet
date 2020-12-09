@@ -2,7 +2,7 @@ const { getKeystore } = require('./keystore');
 const config = require('./../config.json');
 const { cryptoEncrypt, cryptoDecrypt, sha256 } = require('./cryptoFunctions');
 
-import { TypeEncryptedSeed, TypePayloadData } from '../types/global-types';
+import { TypeEncryptedSeed, TypePayloadData, TypeCreatedKeystore } from '../types/global-types';
 
 const changePasswordEncryptedSeed = async (encryptedSeed: TypeEncryptedSeed, oldPassword: string, newPassword: string) => {
 	const seed = await cryptoDecrypt(oldPassword, encryptedSeed.ciphertext, encryptedSeed.iv, encryptedSeed.salt);
@@ -11,30 +11,11 @@ const changePasswordEncryptedSeed = async (encryptedSeed: TypeEncryptedSeed, old
 
 const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: string, password: string) =>
 	new Promise((resolve, reject) => {
-		getKeystore(password, encryptedWalletObject).then((wallet: any) => {
-			resolve(wallet);
+		getKeystore(password, encryptedWalletObject).then((returnObj: TypeCreatedKeystore) => {
+			resolve(returnObj.keystore);
 		}).catch(reject);
 	});
 
-const getEncryptedSeed = async (keystore: any, password: string) => {
-	return await keystore.encrypt(password);
-	/*
-	let pwDerivedKey = await new Promise((resolve, reject) => {
-		keystore.keyFromPassword(password, (err, key) => {
-			if (err) {
-				reject(err);
-			}
-			resolve(key);
-		});
-	});
-
-	let encryptedSeed = await cryptoEncrypt(
-		password,
-		await keystore.getSeed(pwDerivedKey)
-	);
-	return encryptedSeed;
-	*/
-};
 
 const getEncryptedSeedFromMail = async (email: string, email2fa: string, authenticator2fa: string) =>
 	new Promise((resolve, reject) => {
@@ -507,7 +488,6 @@ const verifyEmailCode = async (email: string, code: string) => {
 };
 
 export {
-	getEncryptedSeed,
 	validateInput,
 	saveWalletEmailPassword,
 	getKeystoreFromEncryptedSeed,
