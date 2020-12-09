@@ -12,13 +12,21 @@ import {
 } from '../utils/backupRestore';
 import { getAccountsFromKeystore } from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
-import { Type2FARequired, TypeSeedFoundData, TypeSeedCreatedData, TypeFetchUser, TypeUnlock2fa, TypeUserFoundData, TypeUnlockWithPassword} from '../types/global-types';
+import {
+	Type2FARequired,
+	TypeSeedFoundData,
+	TypeSeedCreatedData,
+	TypeFetchUser,
+	TypeUnlock2fa,
+	TypeUserFoundData,
+	TypeUnlockWithPassword,
+	ZeroWalletConfig
+} from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
 import { connectToParent } from 'penpal';
 import { WalletBase, SignedTransaction } from 'web3-core';
 import { CallSender, Connection } from 'penpal/lib/types';
-
 
 Vue.use(Vuex);
 
@@ -38,13 +46,15 @@ export interface RootState {
 	token: string;
 	twoFaRequired: Type2FARequired;
 	connection: Connection<CallSender> | null;
+	transactionDetails: any;
+	messageDetails: any;
+	openPage: string;
 }
 
 /**
  * initialize the store
  */
 function initialState(): RootState {
-
 	return {
 		loading: false,
 		status: '',
@@ -60,7 +70,10 @@ function initialState(): RootState {
 			authenticator: false
 		},
 		token: '',
-		connection: null
+		connection: null,
+		transactionDetails: {},
+		messageDetails: {},
+		openPage: ''
 	};
 }
 
@@ -100,6 +113,9 @@ const store: Store<RootState> = new Vuex.Store({
 			localStorage.setItem('email', seedCreatedData.email);
 			sessionStorage.setItem('password', seedCreatedData.hashedPassword);
 		},
+		setPage(state: RootState, page) {
+			state.openPage = page;
+		},
 		authError(state: RootState, message) {
 			(state.status = 'error'), (state.message = message);
 		},
@@ -130,27 +146,34 @@ const store: Store<RootState> = new Vuex.Store({
 			const password: string = params.password;
 			return new Promise((resolve, reject) => {
 				commit('authRequested');
-				sha256(password).then(hashedPassword => {
-					getPayload(email).then(payload => {
-						commit('userFound', { email, hashedPassword });
-						commit('updatePayload', payload);
-						if (payload.email) {
-							send2FAEmail(email).then(resolve).catch(reject);
-						} else {
-							getEncryptedSeedFromMail(email, "", "").then(encryptedSeed => {
-								commit('seedFound', { encryptedSeed });
-								resolve();
-							}).catch(reject);
-						}
-					}).catch(err => {
-						commit('authError', "The user wasn't found: Signup first!");
-						localStorage.removeItem('encryptedSeed');
-						localStorage.removeItem('email');
-						sessionStorage.removeItem('password');
-						reject(err);
-					});
-				}).catch(reject);
-
+				sha256(password)
+					.then(hashedPassword => {
+						getPayload(email)
+							.then(payload => {
+								commit('userFound', { email, hashedPassword });
+								commit('updatePayload', payload);
+								if (payload.email) {
+									send2FAEmail(email)
+										.then(resolve)
+										.catch(reject);
+								} else {
+									getEncryptedSeedFromMail(email, '', '')
+										.then(encryptedSeed => {
+											commit('seedFound', { encryptedSeed });
+											resolve();
+										})
+										.catch(reject);
+								}
+							})
+							.catch(err => {
+								commit('authError', "The user wasn't found: Signup first!");
+								localStorage.removeItem('encryptedSeed');
+								localStorage.removeItem('email');
+								sessionStorage.removeItem('password');
+								reject(err);
+							});
+					})
+					.catch(reject);
 			});
 		},
 		/**
@@ -160,12 +183,12 @@ const store: Store<RootState> = new Vuex.Store({
 			return new Promise((resolve, reject) => {
 				console.log('Does the User exist?');
 				getPayload(params.email)
-					.then(payload => {
-						console.log("payload found, error");
+					.then(() => {
+						console.log('payload found, error');
 						commit('authError', 'The user found: Login instead!');
 						reject('Wallet for this mail already exists.');
 					})
-					.catch(async e => {
+					.catch(async () => {
 						commit('authRequested');
 						console.log('keystore not found in mail, creating a new one');
 						/**
@@ -189,20 +212,21 @@ const store: Store<RootState> = new Vuex.Store({
 									resolve();
 								})
 								.catch(reject);
-
-						}).catch(reject);
-
+							});
 					});
 			});
 		},
 		logoutWallet({ commit }) {
 			commit('logout');
 		},
+		clearPage({ commit }) {
+			commit('setPage', '');
+		},
 		/**
 		 * Unlock wallet using 2fa codes
 		 */
-		unlock2FA({ commit, dispatch, state, rootState }, params: TypeUnlock2fa): Promise<string> {
-			return new Promise<string>(async (resolve, reject) => {
+		unlock2FA({ commit, state, rootState }, params: TypeUnlock2fa) {
+			return new Promise(async (resolve, reject) => {
 				let emailCorrect = false;
 				let authenticatorCorrect = false;
 				if (state.twoFaRequired.email == true) {
@@ -223,13 +247,11 @@ const store: Store<RootState> = new Vuex.Store({
 					} else {
 						authenticatorCorrect = true;
 					}
-
 				} else {
 					authenticatorCorrect = true;
 				}
 
 				if (emailCorrect && authenticatorCorrect) {
-
 					getEncryptedSeedFromMail(rootState.email, params.email2FA, params.authenticator2FA).then(encryptedSeed => {
 						//const encryptedSeed = state.encryptedSeed; //normally that would need decrypting using 2fa codes
 						//commit('updatePayload', { email: false, authenticator: false });
@@ -245,16 +267,15 @@ const store: Store<RootState> = new Vuex.Store({
 					})
 
 				} else {
-					console.log("Reached here for wathever reason");
+					console.log('Reached here for wathever reason');
 					reject();
 				}
 			});
-
 		},
 		/**
 		 * Unlock wallet using the password stored in local state
 		 */
-		unlockWithStoredPassword({ dispatch, commit, state }) {
+		unlockWithStoredPassword({ dispatch, state }) {
 			return new Promise((resolve, reject) => {
 				if (state.hashedPassword && state.encryptedSeed) {
 					dispatch('unlockWithPassword', { password: state.hashedPassword })
@@ -310,7 +331,6 @@ const store: Store<RootState> = new Vuex.Store({
 initialize the iframe parent connection
 */
 if (isIframe()) {
-
 	store.state.connection = connectToParent({
 		//parentOrigin: 'http://localhost:8081',
 		// Methods child is exposing to parent
@@ -331,33 +351,56 @@ if (isIframe()) {
 					//see if we are logged in?!
 					try {
 						if (store.state.keystore !== null) {
-							store.state.keystore[0].signTransaction(txObj, function (signTransaction: SignedTransaction) {
-
-								resolve(signTransaction.rawTransaction);
-							});
+							store.state.keystore[0].signTransaction(txObj)
+								.then((tran: SignedTransaction) => {
+									resolve(tran.rawTransaction);
+								})
+								.catch(reject)
 						}
 					} catch (e) {
 						reject(e);
 					}
 
 				});
-				console.log(signedTx);
 				return signedTx;
 			},
+			async signMessage(txObj: any, config: ZeroWalletConfig) {
+				const signedTx = await new Promise((resolve, reject) => {
+					//see if we are logged in?!
+					try {
+						if (store.state.keystore !== null) {
+							const signedData = store.state.keystore[0].sign(txObj.data); // 
+
+							resolve(signedData.signature);
+							
+						}
+					} catch (e) {
+						reject(e);
+					}
+				});
+				return signedTx;
+
+			},
+			showPage(pageName: string) {
+				if (pageName === 'wallet' || pageName === 'settings' || pageName === 'register') {
+					store.state.openPage = pageName;
+					return true;
+				}
+
+				return false;
+			},
 			isLoggedIn() {
-				//return "ok"
+				//return 'ok'
 				if (store.state.keystore)
 					return {
 						isLoggedIn: true,
-						unlockedWallet: store.state.keystore,
 						walletEmail: store.state.email,
 						accounts: store.state.accounts
 					};
 				else return { isLoggedIn: false };
 			},
 			logout() {
-				//maybe confirm?!
-				//call onLogout callback to parent
+				store.commit('logout');
 			}
 		}
 	});

@@ -2,7 +2,7 @@
 	<div class="container">
 		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 
-		<h2 class="title">Login</h2>
+		<h2 class="title">Wallet Login</h2>
 		<h4 class="subtitle">Unlock your Morpher Wallet</h4>
 		<form v-on:submit.prevent="login">
 			<div class="field">
@@ -27,17 +27,17 @@
 				</div>
 			</div>
 
-			<div class="field is-grouped">
-				<div class="control is-expanded">
-					<button class="button is-primary is-fullwidth" type="submit">
+			<div class="field">
+				<div class="layout split first">
+					<button type="submit" class="button is-green">
 						<span class="icon is-small">
 							<i class="fas fa-unlock"></i>
 						</span>
 						<span> Unlock </span>
 					</button>
 				</div>
-				<div class="control">
-					<router-link to="/signup" tag="button" class="button is-light">
+				<div class="layout split second">
+					<router-link to="/signup" tag="button" class="button is-grey">
 						<span class="icon is-small">
 							<i class="far fa-file"></i>
 						</span>
@@ -47,7 +47,6 @@
 				</div>
 			</div>
 		</form>
-		<br />
 	</div>
 </template>
 
@@ -92,13 +91,14 @@ export default class Login extends mixins(Global) {
 					// open 2fa page if 2fa is required
 					this.$router.push('/2fa');
 				} else {
-					// open root page after logon success
-					this.unlockWithStoredPassword().then(res => {
-
-						this.$router.push('/');
-					}).catch(e => {
-						console.error(e);
-					});
+					this.unlockWithStoredPassword()
+						.then(() => {
+							// open root page after logon success
+							this.$router.push('/');
+						})
+						.catch(e => {
+							console.error(e);
+						});
 				}
 			})
 			.catch(error => {
@@ -108,3 +108,4 @@ export default class Login extends mixins(Global) {
 	}
 }
 </script>
+

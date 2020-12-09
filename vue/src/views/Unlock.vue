@@ -24,17 +24,17 @@
 				</div>
 			</div>
 
-			<div class="field is-grouped">
-				<div class="control is-expanded">
-					<button class="button is-primary is-fullwidth" type="submit">
+			<div class="field">
+				<div class="layout split first">
+					<button class="button is-green" type="submit">
 						<span class="icon is-small">
 							<i class="fas fa-unlock"></i>
 						</span>
 						<span> Unlock </span>
 					</button>
 				</div>
-				<div class="control">
-					<button class="button is-light" v-on:click="logout()">
+				<div class="layout split second">
+					<button class="button is-grey" v-on:click="logout()">
 						<span class="icon is-small">
 							<i class="far fa-file"></i>
 						</span>
@@ -66,12 +66,12 @@ export default class Unlock extends mixins(Global) {
 	mounted() {
 		// Check if the wallet can be unlocked using the local-storage stored password
 		this.unlockWithStoredPassword()
-			.then((result) => {
+			.then(result => {
 				if (result) {
 					this.$router.push('/');
 				}
 			})
-			.catch((error) => {
+			.catch(error => {
 				console.log(error);
 			});
 	}
@@ -83,12 +83,12 @@ export default class Unlock extends mixins(Global) {
 		const password = await sha256(this.walletPassword);
 
 		// Call the fetchUser store action to process the wallet logon
-		this.unlockWithPassword({password})
+		this.unlockWithPassword({ password })
 			.then(() => {
 				// open root page after logon success
 				this.$router.push('/');
 			})
-			.catch((error) => {
+			.catch(error => {
 				// Logon failed
 				console.log(error);
 			});

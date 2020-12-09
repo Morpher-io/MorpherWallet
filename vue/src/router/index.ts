@@ -7,6 +7,8 @@ import TwoFA from '../views/TwoFA.vue';
 import store from '../store/index';
 import Settings from '../views/Settings.vue';
 import Unlock from '../views/Unlock.vue';
+import SignTx from '../views/SignTx.vue';
+import SignMsg from '../views/SignMsg.vue';
 
 Vue.use(VueRouter);
 
@@ -42,6 +44,22 @@ const routes: Array<RouteConfig> = [
 		name: 'Unlock',
 		component: Unlock
 	},
+	{
+		path: '/signtx',
+		name: 'SignTx',
+		component: SignTx,
+		meta: {
+			requiresAuth: true
+		}
+	},
+	{
+		path: '/signmsg',
+		name: 'SignMsg',
+		component: SignMsg,
+		meta: {
+			requiresAuth: true
+		}
+	},
 
 	{
 		path: '/',
@@ -65,28 +83,26 @@ router.beforeEach((to, from, next) => {
 			next('/2fa');
 			return;
 		}
-		
 		if (store.getters.isLoggedIn) {
 			next();
 			return;
 		}
-		if(store.getters.hasEncryptedKeystore) {
+		if (store.getters.hasEncryptedKeystore) {
 			next('/unlock');
 			return;
 		}
 		next('/login');
-	} else if(to.matched.some(record => record.meta.requires2fa)) {
-		if(store.getters.twoFaRequired) {
+	} else if (to.matched.some(record => record.meta.requires2fa)) {
+		if (store.getters.twoFaRequired) {
 			next();
 			return;
 		}
-		
-		if(store.getters.isLoggedIn) {
-			next("/");
+		if (store.getters.isLoggedIn) {
+			next('/');
 			return;
 		}
 
-		next("/login");
+		next('/login');
 	} else {
 		next();
 	}
