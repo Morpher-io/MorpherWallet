@@ -13,11 +13,7 @@ import {
 } from '../utils/backupRestore';
 import { getAccountsFromKeystore } from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
-<<<<<<< Updated upstream
 import { Type2FARequired, TypeSeedFoundData, TypeSeedCreatedData, TypeFetchUser, TypeUnlock2fa, TypeUserFoundData, TypeUnlockWithPassword} from '../types/global-types';
-=======
-import { Type2FARequired, TypeSeedFoundData, TypeSeedCreatedData, TypeFetchUser, TypeUnlock2fa, TypeUserFoundData, TypeUnlockWithPassword, TypeChangePassword, TypeEncryptedSeed } from '../types/global-types';
->>>>>>> Stashed changes
 
 import isIframe from '../utils/isIframe';
 import { connectToParent } from 'penpal';
