@@ -102,8 +102,10 @@ const store: Store<RootState> = new Vuex.Store({
 			state.status = 'created';
 			state.email = seedCreatedData.email;
 			state.encryptedSeed = seedCreatedData.encryptedSeed;
-			state.keystore = seedCreatedData.unencryptedKeystore;
 			state.hashedPassword = seedCreatedData.hashedPassword;
+			localStorage.setItem('encryptedSeed', JSON.stringify(seedCreatedData.encryptedSeed));
+			localStorage.setItem('email', seedCreatedData.email);
+			sessionStorage.setItem('password', seedCreatedData.hashedPassword);
 		},
 		setPage(state: RootState, page) {
 			state.openPage = page;
@@ -182,9 +184,7 @@ const store: Store<RootState> = new Vuex.Store({
 						const unlockedKeystore = await getKeystore(params.password, []);
 
 						const encryptedKeystore = await getEncryptedSeed(unlockedKeystore, params.password);
-						localStorage.setItem('encryptedSeed', JSON.stringify(encryptedKeystore));
-						localStorage.setItem('email', params.email);
-						sessionStorage.setItem('password', params.password);
+
 						commit('seedCreated', { email: params.email, hashedPassword: params.password, unencryptedKeystore: unlockedKeystore, encryptedSeed: encryptedKeystore });
 
 						saveWalletEmailPassword(params.email, encryptedKeystore).then(res => {
@@ -192,7 +192,10 @@ const store: Store<RootState> = new Vuex.Store({
 								.then(payload => {
 									//2FA for signup is hard to do, because the wallet is created client side. We can still "try" to lure the user into this flow
 									commit('updatePayload', payload);
-									send2FAEmail(params.email);
+									//send2FAEmail(params.email);
+
+									const accounts = getAccountsFromKeystore(unlockedKeystore);
+									commit('keystoreUnlocked', { unlockedKeystore, accounts });
 									resolve();
 								})
 								.catch(reject);

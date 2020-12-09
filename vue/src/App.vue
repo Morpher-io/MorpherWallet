@@ -12,6 +12,7 @@
 	</div>
 </template>
 
+
 <script lang="ts">
 	import isIframe from './utils/isIframe';
 	import Vue from 'vue';
@@ -40,4 +41,5 @@
 
 <style lang="scss">
 @import "./assets/stylesheet/wallet.scss";
+
 </style>
