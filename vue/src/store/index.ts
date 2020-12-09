@@ -13,11 +13,11 @@ import {
 } from '../utils/backupRestore';
 import { getAccountsFromKeystore } from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
-import { Type2FARequired, TypeSeedFoundData, TypeSeedCreatedData, TypeFetchUser, TypeUnlock2fa, TypeUserFoundData, TypeUnlockWithPassword} from '../types/global-types';
+import { Type2FARequired, TypeSeedFoundData, TypeSeedCreatedData, TypeFetchUser, TypeUnlock2fa, TypeUserFoundData, TypeUnlockWithPassword, ZeroWalletConfig } from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
 import { connectToParent } from 'penpal';
-import { WalletBase, SignedTransaction } from 'web3-core';
+import { WalletBase, SignedTransaction, TransactionConfig } from 'web3-core';
 import { CallSender, Connection } from 'penpal/lib/types';
 
 
@@ -39,6 +39,9 @@ export interface RootState {
 	token: string;
 	twoFaRequired: Type2FARequired;
 	connection: Connection<CallSender> | null;
+	transactionDetails: any;
+	messageDetails: any;
+	openPage: string;
 }
 
 /**
@@ -61,7 +64,10 @@ function initialState(): RootState {
 			authenticator: false
 		},
 		token: '',
-		connection: null
+		connection: null,
+		transactionDetails: {},
+		messageDetails: {},
+		openPage: ''
 	};
 }
 
@@ -100,6 +106,9 @@ const store: Store<RootState> = new Vuex.Store({
 			localStorage.setItem('encryptedSeed', JSON.stringify(seedCreatedData.encryptedSeed));
 			localStorage.setItem('email', seedCreatedData.email);
 			sessionStorage.setItem('password', seedCreatedData.hashedPassword);
+		},
+		setPage(state: RootState, page) {
+			state.openPage = page;
 		},
 		authError(state: RootState, message) {
 			(state.status = 'error'), (state.message = message);
@@ -197,7 +206,12 @@ const store: Store<RootState> = new Vuex.Store({
 			});
 		},
 		logoutWallet({ commit }) {
+
 			commit('logout');
+		},
+		clearPage({ commit }) {
+
+			commit('setPage', '');
 		},
 		/**
 		 * Unlock wallet using 2fa codes
@@ -316,7 +330,7 @@ if (isIframe()) {
 					return [];
 				}
 			},
-			async signTransaction(txObj: any) {
+			async signTransaction(txObj: any, config: ZeroWalletConfig) {
 				if (txObj.nonce == undefined) {
 					console.error('No nonce defined, aborting tx signing');
 				}
@@ -325,33 +339,58 @@ if (isIframe()) {
 					//see if we are logged in?!
 					try {
 						if (store.state.keystore !== null) {
-							store.state.keystore[0].signTransaction(txObj, function (signTransaction: SignedTransaction) {
-
-								resolve(signTransaction.rawTransaction);
-							});
+								store.state.keystore[0].signTransaction(txObj).then((tran: SignedTransaction) => {
+									resolve(tran.rawTransaction);
+								}).catch(e => {
+									reject(e);
+								})
+							
 						}
 					} catch (e) {
 						reject(e);
 					}
 
 				});
-				console.log(signedTx);
 				return signedTx;
+			},
+			async signMessage(txObj: any, config: ZeroWalletConfig) {
+				const signedTx = await new Promise((resolve, reject) => {
+					//see if we are logged in?!
+					try {
+						if (store.state.keystore !== null) {
+							const signedData = store.state.keystore[0].sign(txObj.data); // 
+
+							resolve(signedData.signature);
+							
+						}
+					} catch (e) {
+						reject(e);
+					}
+
+				});
+				return signedTx;
+
+			},
+			showPage(pageName: string) {
+				if (pageName === 'wallet' || pageName === 'settings' || pageName === 'register') {
+					store.state.openPage = pageName;
+					return true;
+				}
+
+				return false;
 			},
 			isLoggedIn() {
 				//return "ok"
 				if (store.state.keystore)
 					return {
 						isLoggedIn: true,
-						unlockedWallet: store.state.keystore,
 						walletEmail: store.state.email,
 						accounts: store.state.accounts
 					};
 				else return { isLoggedIn: false };
 			},
 			logout() {
-				//maybe confirm?!
-				//call onLogout callback to parent
+				store.commit('logout');
 			}
 		}
 	});

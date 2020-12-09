@@ -1,0 +1,173 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto:400,500,600,700|Rubik:400,500,600,700');
+
+/* define variables for the interface colors */
+$col_green: #00c386;
+$col_green_light: #00d492;
+$col_grey: #b8b8b8;
+$col_grey_light: #D8D8D8;
+$col_orange: #fc6404;
+
+$font1: 'Rubik', sans-serif ;
+$font2: 'Roboto', sans-serif ;
+$spacing_1: 15px;
+$spacing_2: 30px;
+$spacing_3: 60px;
+
+/* style groups */
+%centered_block {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* main layout */
+
+body { 
+	margin: 0;
+	padding: 0;
+	background-color: #FFF;
+
+}
+
+#app {
+	text-align: center;
+	font-family: $font1;
+	height: 100vh;
+	overflow-y: auto;
+	overflow-x: hidden;
+	margin-bottom: $spacing_1;
+}
+
+.main_iframe {
+	width: 100%;
+	float: top;
+}
+
+.main {
+	@extend %centered_block;
+
+	max-width: 450px;
+	min-width: 400px;
+	width: 80%;
+
+	margin-top: $spacing_1;
+	border: 1px solid $col_grey;
+	padding-bottom: $spacing_1;
+	border-radius: 5px;
+}
+
+.header {
+	height: $spacing_3;
+	margin-top: $spacing_2;
+}
+.headerImage {
+	@extend %centered_block;
+	width: $spacing_3;
+}
+
+.container {
+	padding-left: $spacing_1;
+	padding-right: $spacing_1;
+	flex-grow: 1;
+
+}
+
+.layout {
+	&.split {
+		width: 50%;
+		display: inline-block;
+		box-sizing: border-box;
+		&.first {
+			padding-right: $spacing_1;
+		}
+		&.second {
+			padding-left: $spacing_1;
+		}
+	}
+}
+
+/* Navigation elements */
+.closeButton {
+	position: fixed;
+	right: $spacing_1;
+	top: $spacing_1;
+	width: $spacing_1;
+	cursor: pointer;
+	transition: all 0.3s ease-in-out 0s; 
+}
+.closeButton:hover {
+	 transform: rotate(90deg); transition: all 0.3s ease-in-out 0s; 
+}
+
+/* text elements */
+.title {
+	font-weight: 500;
+	font-size: 32px;
+	margin-top: $spacing_2;
+	margin-bottom: 0px;
+}
+.subtitle {
+	font-weight: 400;
+	font-size: 18px;
+	margin-top: $spacing_1;
+	margin-bottom: 0px;	
+}
+.field {
+	text-align: left;
+	margin-top: $spacing_2;
+}
+.label {
+	font-weight: 500;
+	font-size: 16px
+}
+
+/* input elements */
+input {
+	box-shadow: inset 0 0.0625em 0.125em rgba(10,10,10,.05);
+	max-width: 100%;
+	width: 100%;
+	border: 1px solid $col_grey_light;
+	font-size: 12pt;
+	height: 46px;
+	border-radius: 4px;
+	color: #363636;
+	margin-top: $spacing_1;
+	padding-left: 10px;
+	display: inline-block;
+	box-sizing: border-box;
+
+}
+
+.help {
+	font-size: 14px;
+	font-weight: 400;
+}
+.is-danger {
+	color: $col_orange;
+}
+
+/* button elements */
+.button {
+	display: block;
+	height: 50px;
+	width: 100%;
+	box-sizing: border-box;
+	font-size: 12pt;
+	border: 0;
+	border-radius: 8px;
+	cursor: pointer;
+		&.is-green {
+			background-color: $col_green;
+			color: #fff;
+		}
+		&.is-green:hover {
+			background-color: $col_green_light;
+		} 
+		&.is-grey {
+			background-color: $col_grey;
+		}
+		&.is-grey:hover {
+			background-color: $col_grey_light;
+		} 
+}
+

@@ -33,6 +33,15 @@ if (document.getElementById('zero_wallet_sdk_iframe')) {
 	zeroWalletIframe.style.overflow="hidden";
 }
 
+
+export type ZeroWalletConfig = {
+  __typename?: "Type2FARequired";
+  show_transaction: boolean;
+	confirm_transaction: boolean;
+	show_message: boolean;
+  confirm_message: boolean;
+} | null;
+
 let iframeLoadedFired = false;
 
 export default class ZeroWallet {
@@ -43,16 +52,26 @@ export default class ZeroWallet {
 	provider: Web3ProviderEngine;
 	_onLoginCallback: any;
 	_onLogoutCallback: any;
+	_onCloseCallback: any;
 	_onActiveWalletChangedCallback: any;
 	_onErrorCallback: any;
-	config: any;
+	config: ZeroWalletConfig;
 	_selectedAddress: any;
   
-  constructor(wsRPCEndpointUrl: string, chainId: number) {
+  constructor(wsRPCEndpointUrl: string, chainId: number, config: ZeroWalletConfig = null) {
     this.wsRPCEndpointUrl = wsRPCEndpointUrl;
     this.chainId = chainId;
     this.widget = this._initWidget();
 		this.provider = this._initProvider();
+		if (config === null) {
+			config = {
+				show_transaction: false,
+				confirm_transaction: false,
+				show_message: false,
+				confirm_message: false
+			}
+		}
+		this.config = config;
 		
     //window.zerowallet = this;
   }
@@ -66,8 +85,9 @@ export default class ZeroWallet {
   }
 
   async showZeroWallet() {
+		this.showWallet()
     const widgetCommunication = (await this.widget).communication;
-    return widgetCommunication.showZeroWallet();
+    return widgetCommunication.showPage('wallet');
   }
 
   async logout() {
@@ -79,6 +99,10 @@ export default class ZeroWallet {
     this._onLoginCallback = callback;
   }
 
+	onClose(callback: any) {
+    this._onCloseCallback = callback;
+	}
+	
   onLogout(callback: any) {
     this._onLogoutCallback = callback;
   }
@@ -101,6 +125,18 @@ export default class ZeroWallet {
 			this.showWallet();
 		}
 
+	}
+
+	async showWalletSettings() {
+		this.showWallet()
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.showPage('settings');
+	}
+
+	async showWalletRegister() {
+		this.showWallet()
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.showPage('register');
 	}
 
 	async showWallet() {
@@ -184,10 +220,12 @@ export default class ZeroWallet {
       methods: {
         setHeight: this._setHeight.bind(this),
         getWindowSize: this._getWindowSize.bind(this),
-        onLogin: this._onLogin.bind(this),
+				onLogin: this._onLogin.bind(this),
+				onClose: this._onClose.bind(this),
         onLogout: this._onLogout.bind(this),
         onActiveWalletChanged: this._onActiveWalletChanged.bind(this),
-        onError: this._onError.bind(this),
+				onError: this._onError.bind(this),
+				hideWallet: this.hideWallet
       },
     });
 
@@ -213,53 +251,68 @@ export default class ZeroWallet {
         getAccounts: async (cb: any) => {
           const widgetCommunication = (await this.widget).communication;
           const result = await widgetCommunication.getAccounts();
-          console.log(result);
           cb(null, result);
-        },
+				},
         signTransaction: async (txParams: any, cb: any) => {
           const widgetCommunication = (await this.widget).communication;
          
           txParams.chainId = self.getChainId();
           
-					const result = await widgetCommunication.signTransaction(txParams);
+					const result = await widgetCommunication.signTransaction(txParams, this.config);
 					if(cb) {
 						cb(null, result);
 					}
           return result;
-        },
+				},
         
         signMessage: async (msgParams: any, cb: any) => {
           const widgetCommunication = (await this.widget).communication;
           const params = Object.assign({}, msgParams, { messageStandard: 'signMessage' });
-          const { error, result } = await widgetCommunication.signMessage(params, this.config);
-          cb(error, result);
+          const  result  = await widgetCommunication.signMessage(params, this.config);
+          if(cb) {
+						cb(null, result);
+					}
         },
         signPersonalMessage: async (msgParams: any, cb: any) => {
+					
           const widgetCommunication = (await this.widget).communication;
           const params = Object.assign({}, msgParams, { messageStandard: 'signPersonalMessage' });
-          const { error, result } = await widgetCommunication.signMessage(params, this.config);
-          cb(error, result);
+          const result  = await widgetCommunication.signMessage(params, this.config);
+					if(cb) {
+						cb(null, result);
+					}
+					return result;
         },
         signTypedMessage: async (msgParams: any, cb: any) => {
           const widgetCommunication = (await this.widget).communication;
           const params = Object.assign({}, msgParams, { messageStandard: 'signTypedMessage' });
           const { error, result } = await widgetCommunication.signMessage(params, this.config);
-          cb(error, result);
+					if(cb) {
+						cb(null, result);
+					}
+					return result;
         },
         signTypedMessageV3: async (msgParams: any, cb: any) => {
           const widgetCommunication = (await this.widget).communication;
           const params = Object.assign({}, msgParams, { messageStandard: 'signTypedMessageV3' });
           const { error, result } = await widgetCommunication.signMessage(params, this.config);
-          cb(error, result);
-        },
+					if(cb) {
+						cb(null, result);
+					}
+					return result;
+				},
+				/*
         estimateGas: async (txParams: any, cb: any) => {
+					console.log('wallet provider - estimateGas')
 					//const gas = await getTxGas(query, txParams);
 					const gas = 0;
           cb(null, gas);
         },
         getGasPrice: async (cb: any) => {
+					console.log('wallet provider - getGasPrice')
           cb(null, '');
-        },
+				},
+				*/
         
       }),
     );
@@ -275,8 +328,6 @@ export default class ZeroWallet {
       );
 
 			
-
-    //engine.isZeroWallet = true;
 /*
     engine.on('error', () => {
       if (error && error.message && error.message.includes('PollingBlockTracker')) {
@@ -303,10 +354,15 @@ export default class ZeroWallet {
   }
 
   _onLogin(walletAddress: any, email: any) {
-		console.log('_onLogin callbasck!!')
 		this.hideWallet();
     if (this._onLoginCallback) {
       this._onLoginCallback(walletAddress, email);
+    }
+	}
+	
+	_onClose() {
+    if (this._onCloseCallback) {
+      this._onCloseCallback();
     }
   }
 
