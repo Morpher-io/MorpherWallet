@@ -9,11 +9,13 @@ import {
 	saveWalletEmailPassword,
 	send2FAEmail,
 	getPayload,
-	getKeystoreFromEncryptedSeed
+	getKeystoreFromEncryptedSeed,
+	changePasswordEncryptedSeed,
+	updateWalletEmailPassword
 } from '../utils/backupRestore';
 import { getAccountsFromKeystore } from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
-import { Type2FARequired, TypeSeedFoundData, TypeSeedCreatedData, TypeFetchUser, TypeUnlock2fa, TypeUserFoundData, TypeUnlockWithPassword} from '../types/global-types';
+import { Type2FARequired, TypeSeedFoundData, TypeSeedCreatedData, TypeFetchUser, TypeUnlock2fa, TypeUserFoundData, TypeUnlockWithPassword, TypeChangePassword, TypeEncryptedSeed} from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
 import { connectToParent } from 'penpal';
@@ -32,7 +34,7 @@ export interface RootState {
 	message: string;
 	email: string;
 	hashedPassword: string;
-	encryptedSeed: string;
+	encryptedSeed: TypeEncryptedSeed;
 	encryptedWallet: string;
 	keystore: WalletBase | null;
 	accounts: Array<string>;
@@ -109,7 +111,7 @@ const store: Store<RootState> = new Vuex.Store({
 
 			state.email = '';
 			state.hashedPassword = '';
-			state.encryptedSeed = '';
+			state.encryptedSeed = {};
 			state.keystore = null;
 
 			state.status = '';
@@ -282,6 +284,12 @@ const store: Store<RootState> = new Vuex.Store({
 						reject(err);
 					});
 			});
+		},
+		async changePassword({commit, state}, params: TypeChangePassword) {
+			console.log(params);
+			//let newEncryptedSeed = changePasswordEncryptedSeed(state.encryptedSeed, params.oldPassword, params.newPassword);
+			//await updateWalletEmailPassword(state.email, state.email, JSON.stringify(newEncryptedSeed));
+			//commit('seedUpdated', {})
 		}
 	},
 	getters: {

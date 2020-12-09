@@ -123,6 +123,8 @@ export async function saveEmailPassword(req: Request, res: Response) {
             return successResponse(res, {
                 recovery_id: recoveryId
             });
+        } else {
+            //@TODO update recovery method here potentially, or 
         }
 
         return errorResponse(res, "Error: User already exists!");
@@ -130,6 +132,50 @@ export async function saveEmailPassword(req: Request, res: Response) {
     } catch (error) {
         // If an error happened anywhere along the way, rollback all the changes.
         await transaction.rollback();
+        return errorResponse(res, error.message);
+    }
+}
+
+
+// Function to save new email/password to the database.
+//only works if passed through a middleware that checks the signature!
+export async function updateEmailPassword(req: Request, res: Response) {
+    // Get sequelize transactions to rollback changes in case of failure.
+    const [err, transaction] = await to(getTransaction());
+    if (err) return errorResponse(res, err.message);
+
+    try {
+        // Get variables from request body.
+        const newEmail = req.body.newEmail;
+        const oldEmail = req.body.oldEmail;
+        const oldKey = req.body.oldKey;
+        const newKey = req.body.newKey;
+        const encryptedSeed = req.body.encryptedSeed;
+        const recoveryTypeId = req.body.recoveryTypeId || 1;
+
+
+        // Attempt to get user from database.
+        const user = await User.findOne({ where: { email: oldEmail } });
+
+        if (user != null) {
+            user.email = newEmail;
+            user.save();
+            
+            // Create a new recovery method.
+            const recovery = await Recovery.findOne({where: {key: oldKey, user_id: user.id, recovery_type_id: recoveryTypeId}});
+            if(recovery != null) {
+                recovery.encrypted_seed = JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT));
+                recovery.key = newKey;
+                recovery.save();
+            }
+
+            return successResponse(res, "updated");
+        }
+
+        return errorResponse(res, "Error: User doesn't exists!");
+
+    } catch (error) {
+        // If an error happened anywhere along the way, rollback all the changes.
         return errorResponse(res, error.message);
     }
 }

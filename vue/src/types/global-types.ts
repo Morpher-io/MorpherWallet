@@ -17,14 +17,14 @@ export type Type2FARequired = {
 export type TypeSeedFoundData = {
   __typename?: "TypeSeedFoundData";
   email: string;
-  encryptedSeed: string;
+  encryptedSeed: TypeEncryptedSeed;
   hashedPassword: string;
 };
 
 export type TypeSeedCreatedData = {
   __typename?: "TypeSeedCreatedData";
   email: string;
-  encryptedSeed: string;
+  encryptedSeed: TypeEncryptedSeed;
   hashedPassword: string;
   unencryptedKeystore: any;
 };
@@ -60,6 +60,11 @@ export type TypeUnlockWithPassword = {
   password: string;
 };
 
+export type TypeChangePassword = {
+  __typename?: "TypeChangePassword";
+  oldPassword: string;
+  newPassword: string;
+};
 
 export type TypeUserFoundData = {
   __typename?: "TypeUserFoundData";

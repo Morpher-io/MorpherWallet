@@ -13,7 +13,7 @@
 		<div class="container mb-6">
 			<Change2FA></Change2FA>
 		</div>
-		<div class="container mb-6">
+		<div class="container mb-6" v-if="false">
 			<article class="message">
 				<div class="message-header">
 					<p>Export the Wallet Seed Phrase</p>
@@ -23,8 +23,9 @@
 					<ExportWallet></ExportWallet>
 				</div>
 			</article>
-			<button type="button" class="button is-fullwidth is-primary" v-on:click="$router.push('/')">Back</button>
+			
 		</div>
+		<button type="button" class="button is-fullwidth is-primary" v-on:click="$router.push('/')">Back</button>
 	</div>
 </template>
 

@@ -10,7 +10,7 @@ const changePasswordEncryptedSeed = async (encryptedSeed: TypeEncryptedSeed, old
 	return await cryptoEncrypt(newPassword, seed);
 };
 
-const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: string, password: string) =>
+const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: TypeEncryptedSeed, password: string) =>
 	new Promise((resolve, reject) => {
 		getKeystore(password, encryptedWalletObject).then((wallet: any) => {
 			resolve(wallet);
@@ -150,6 +150,31 @@ const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: string)
 		cache: 'default'
 	};
 	const result = await fetch(config.BACKEND_ENDPOINT + '/v1/saveEmailPassword', options);
+
+	const response = await result.json();
+	return response;
+};
+
+const updateWalletEmailPassword = async (oldEmail: string, newEmail: string, encryptedSeed: string) => {
+	const oldKey = await sha256(oldEmail.toLowerCase());
+	const newKey = await sha256(newEmail.toLowerCase());
+	const options: RequestInit = {
+		method: 'POST',
+		headers: {
+			Accept: 'application/json',
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			oldKey,
+			newKey,
+			oldEmail,
+			newEmail,
+			encryptedSeed
+		}),
+		mode: 'cors',
+		cache: 'default'
+	};
+	const result = await fetch(config.BACKEND_ENDPOINT + '/v1/auth/updateEmailPassword', options);
 
 	const response = await result.json();
 	return response;
@@ -545,5 +570,6 @@ export {
 	generateQRCode,
 	getQRCode,
 	verifyAuthenticatorCode,
-	verifyEmailCode
+	verifyEmailCode,
+	updateWalletEmailPassword
 };
