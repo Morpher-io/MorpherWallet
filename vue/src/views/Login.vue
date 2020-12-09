@@ -91,13 +91,14 @@ export default class Login extends mixins(Global) {
 					// open 2fa page if 2fa is required
 					this.$router.push('/2fa');
 				} else {
-					// open root page after logon success
-					this.unlockWithStoredPassword().then(res => {
-
-						this.$router.push('/');
-					}).catch(e => {
-						console.error(e);
-					});
+					this.unlockWithStoredPassword()
+						.then(() => {
+							// open root page after logon success
+							this.$router.push('/');
+						})
+						.catch(e => {
+							console.error(e);
+						});
 				}
 			})
 			.catch(error => {

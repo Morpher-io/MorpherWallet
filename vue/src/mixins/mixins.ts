@@ -3,9 +3,9 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import Spinner from '../components/loading-spinner/Spinner.vue';
 import { Action } from 'vuex-class';
-import { TypeFetchUser, TypeUnlock2fa, Type2FARequired, TypeUnlockWithPassword } from '../types/global-types';
+import { TypeFetchUser, TypeUnlock2fa, TypeUnlockWithPassword } from '../types/global-types';
 import { mapState } from 'vuex';
-import { RootState } from '../store'
+import { RootState } from '../store';
 import isIframe from "../utils/isIframe";
 import { Prop, Watch } from 'vue-property-decorator';
 
@@ -47,7 +47,6 @@ export class Global extends Vue {
 	@Action
 	public clearPage!: () => void;
 
-
 	// Map store actions
 	@Action
 	public logoutWallet!: () => void;
@@ -86,16 +85,10 @@ export class Global extends Vue {
 @Component({
 	computed: {
 		...mapState({
-			
 			walletEmail: (state: any) => state.email,
 			keystore: (state: any) => state.keystore,
 			accounts: (state: any) => state.accounts
 		})
 	}, watch: {}
 })
-export class Authenticated extends Global {
-
-
-}
-
-
+export class Authenticated extends Global {}

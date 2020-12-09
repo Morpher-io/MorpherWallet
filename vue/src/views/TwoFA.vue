@@ -72,16 +72,15 @@ export default class TwoFA extends mixins(Global) {
 			.then(() => {
 				this.$router.push('/unlock');
 			})
-			.catch((error) => {
-				if(error.indexOf("Mail") !== -1) {
+			.catch(error => {
+				if (error.indexOf('Mail') !== -1) {
 					this.invalidEmail = error;
 					return;
 				}
-				
 				console.log(error);
 			});
 	}
-	
+
 	logout() {
 		this.logoutWallet();
 		this.$router.push('/login');

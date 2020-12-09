@@ -43,13 +43,13 @@ export default class Wallet extends mixins(Global, Authenticated) {
 	selectedAccount = '';
 
 	async mounted() {
-		  if (this.isIframe()) {
-				if (this.store.connection && this.store.connection !== null) {
-					const promise = this.store.connection.promise;
+		if (this.isIframe()) {
+			if (this.store.connection && this.store.connection !== null) {
+				const promise = this.store.connection.promise;
 
-					(await promise).onLogin(this.store.accounts[0], this.store.email);
-				}
-      }
+				(await promise).onLogin(this.store.accounts[0], this.store.email);
+			}
+		}
 	}
 
 	logout() {

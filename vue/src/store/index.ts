@@ -13,13 +13,21 @@ import {
 } from '../utils/backupRestore';
 import { getAccountsFromKeystore } from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
-import { Type2FARequired, TypeSeedFoundData, TypeSeedCreatedData, TypeFetchUser, TypeUnlock2fa, TypeUserFoundData, TypeUnlockWithPassword, ZeroWalletConfig } from '../types/global-types';
+import {
+	Type2FARequired,
+	TypeSeedFoundData,
+	TypeSeedCreatedData,
+	TypeFetchUser,
+	TypeUnlock2fa,
+	TypeUserFoundData,
+	TypeUnlockWithPassword,
+	ZeroWalletConfig
+} from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
 import { connectToParent } from 'penpal';
-import { WalletBase, SignedTransaction, TransactionConfig } from 'web3-core';
+import { WalletBase, SignedTransaction } from 'web3-core';
 import { CallSender, Connection } from 'penpal/lib/types';
-
 
 Vue.use(Vuex);
 
@@ -151,27 +159,34 @@ const store: Store<RootState> = new Vuex.Store({
 			const password: string = params.password;
 			return new Promise((resolve, reject) => {
 				commit('authRequested');
-				sha256(password).then(hashedPassword => {
-					getPayload(email).then(payload => {
-						commit('userFound', { email, hashedPassword });
-						commit('updatePayload', payload);
-						if (payload.email) {
-							send2FAEmail(email).then(resolve).catch(reject);
-						} else {
-							getEncryptedSeedFromMail(email, "", "").then(encryptedSeed => {
-								commit('seedFound', { encryptedSeed });
-								resolve();
-							}).catch(reject);
-						}
-					}).catch(err => {
-						commit('authError', "The user wasn't found: Signup first!");
-						localStorage.removeItem('encryptedSeed');
-						localStorage.removeItem('email');
-						sessionStorage.removeItem('password');
-						reject(err);
-					});
-				}).catch(reject);
-
+				sha256(password)
+					.then(hashedPassword => {
+						getPayload(email)
+							.then(payload => {
+								commit('userFound', { email, hashedPassword });
+								commit('updatePayload', payload);
+								if (payload.email) {
+									send2FAEmail(email)
+										.then(resolve)
+										.catch(reject);
+								} else {
+									getEncryptedSeedFromMail(email, '', '')
+										.then(encryptedSeed => {
+											commit('seedFound', { encryptedSeed });
+											resolve();
+										})
+										.catch(reject);
+								}
+							})
+							.catch(err => {
+								commit('authError', "The user wasn't found: Signup first!");
+								localStorage.removeItem('encryptedSeed');
+								localStorage.removeItem('email');
+								sessionStorage.removeItem('password');
+								reject(err);
+							});
+					})
+					.catch(reject);
 			});
 		},
 		/**
@@ -181,12 +196,12 @@ const store: Store<RootState> = new Vuex.Store({
 			return new Promise((resolve, reject) => {
 				console.log('Does the User exist?');
 				getPayload(params.email)
-					.then(payload => {
-						console.log("payload found, error");
+					.then(() => {
+						console.log('payload found, error');
 						commit('authError', 'The user found: Login instead!');
 						reject('Wallet for this mail already exists.');
 					})
-					.catch(async e => {
+					.catch(async () => {
 						commit('authRequested');
 						console.log('keystore not found in mail, creating a new one');
 						/**
@@ -196,38 +211,41 @@ const store: Store<RootState> = new Vuex.Store({
 
 						const encryptedKeystore = await getEncryptedSeed(unlockedKeystore, params.password);
 
-						commit('seedCreated', { email: params.email, hashedPassword: params.password, unencryptedKeystore: unlockedKeystore, encryptedSeed: encryptedKeystore });
+						commit('seedCreated', {
+							email: params.email,
+							hashedPassword: params.password,
+							unencryptedKeystore: unlockedKeystore,
+							encryptedSeed: encryptedKeystore
+						});
 
-						saveWalletEmailPassword(params.email, encryptedKeystore).then(res => {
-							getPayload(params.email)
-								.then(payload => {
-									//2FA for signup is hard to do, because the wallet is created client side. We can still "try" to lure the user into this flow
-									commit('updatePayload', payload);
-									//send2FAEmail(params.email);
+						saveWalletEmailPassword(params.email, encryptedKeystore)
+							.then(() => {
+								getPayload(params.email)
+									.then(payload => {
+										//2FA for signup is hard to do, because the wallet is created client side. We can still 'try' to lure the user into this flow
+										commit('updatePayload', payload);
+										//send2FAEmail(params.email);
 
-									const accounts = getAccountsFromKeystore(unlockedKeystore);
-									commit('keystoreUnlocked', { unlockedKeystore, accounts });
-									resolve();
-								})
-								.catch(reject);
-
-						}).catch(reject);
-
+										const accounts = getAccountsFromKeystore(unlockedKeystore);
+										commit('keystoreUnlocked', { unlockedKeystore, accounts });
+										resolve();
+									})
+									.catch(reject);
+							})
+							.catch(reject);
 					});
 			});
 		},
 		logoutWallet({ commit }) {
-
 			commit('logout');
 		},
 		clearPage({ commit }) {
-
 			commit('setPage', '');
 		},
 		/**
 		 * Unlock wallet using 2fa codes
 		 */
-		unlock2FA({ commit, dispatch, state, rootState }, params: TypeUnlock2fa) {
+		unlock2FA({ commit, state, rootState }, params: TypeUnlock2fa) {
 			return new Promise(async (resolve, reject) => {
 				let emailCorrect = false;
 				let authenticatorCorrect = false;
@@ -249,31 +267,27 @@ const store: Store<RootState> = new Vuex.Store({
 					} else {
 						authenticatorCorrect = true;
 					}
-
 				} else {
 					authenticatorCorrect = true;
 				}
 
 				if (emailCorrect && authenticatorCorrect) {
-
 					getEncryptedSeedFromMail(rootState.email, params.email2FA, params.authenticator2FA).then(encryptedSeed => {
 						//const encryptedSeed = state.encryptedSeed; //normally that would need decrypting using 2fa codes
 						//commit('updatePayload', { email: false, authenticator: false });
-						commit('seedFound', { encryptedSeed })
+						commit('seedFound', { encryptedSeed });
 						resolve();
-					})
-
+					});
 				} else {
-					console.log("Reached here for wathever reason");
+					console.log('Reached here for wathever reason');
 					reject();
 				}
 			});
-
 		},
 		/**
 		 * Unlock wallet using the password stored in local state
 		 */
-		unlockWithStoredPassword({ dispatch, commit, state }) {
+		unlockWithStoredPassword({ dispatch, state }) {
 			return new Promise((resolve, reject) => {
 				if (state.hashedPassword && state.encryptedSeed) {
 					dispatch('unlockWithPassword', { password: state.hashedPassword })
@@ -329,7 +343,6 @@ const store: Store<RootState> = new Vuex.Store({
 initialize the iframe parent connection
 */
 if (isIframe()) {
-
 	store.state.connection = connectToParent({
 		//parentOrigin: 'http://localhost:8081',
 		// Methods child is exposing to parent
@@ -341,7 +354,7 @@ if (isIframe()) {
 					return [];
 				}
 			},
-			async signTransaction(txObj: any, config: ZeroWalletConfig) {
+			async signTransaction(txObj: any) {
 				if (txObj.nonce == undefined) {
 					console.error('No nonce defined, aborting tx signing');
 				}
@@ -350,12 +363,11 @@ if (isIframe()) {
 					//see if we are logged in?!
 					try {
 						if (store.state.keystore !== null) {
-								store.state.keystore[0].signTransaction(txObj).then((tran: SignedTransaction) => {
+							store.state.keystore[0].signTransaction(txObj)
+								.then((tran: SignedTransaction) => {
 									resolve(tran.rawTransaction);
-								}).catch(e => {
-									reject(e);
 								})
-							
+								.catch(reject)
 						}
 					} catch (e) {
 						reject(e);
@@ -377,7 +389,6 @@ if (isIframe()) {
 					} catch (e) {
 						reject(e);
 					}
-
 				});
 				return signedTx;
 
@@ -391,7 +402,7 @@ if (isIframe()) {
 				return false;
 			},
 			isLoggedIn() {
-				//return "ok"
+				//return 'ok'
 				if (store.state.keystore)
 					return {
 						isLoggedIn: true,
