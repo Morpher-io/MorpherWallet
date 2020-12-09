@@ -14,7 +14,8 @@
 						<router-link to="/settings" tag="a" class="card-footer-item">
 						Settings
 						</router-link>
-						
+
+
 						<a class="card-footer-item" v-on:click="logout()">Logout</a>
 					</footer>
 				</div>
@@ -41,6 +42,16 @@ import VKAddRecovery from '../components/VKAddRecovery.vue';
 export default class Wallet extends mixins(Global, Authenticated) {
 	dropdownIsActive = false;
 	selectedAccount = '';
+
+	async mounted() {
+		  if (this.isIframe()) {
+				if (this.store.connection && this.store.connection !== null) {
+					const promise = this.store.connection.promise;
+
+					(await promise).onLogin(this.store.accounts[0], this.store.email);
+				}
+      }
+	}
 
 	logout() {
 		this.logoutWallet();
