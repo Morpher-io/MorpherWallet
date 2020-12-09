@@ -49,13 +49,24 @@ export interface RootState {
  */
 function initialState(): RootState {
 
-	return {
+	const email = localStorage.getItem('email') || '' ;
+	const hashedPassword = window.sessionStorage.getItem('password') || '';
+	let encryptedSeed = localStorage.getItem('encryptedSeed')
+	if (encryptedSeed) {
+		try {
+			encryptedSeed = JSON.parse(String(encryptedSeed));
+		} catch {
+			encryptedSeed = ''
+		}
+	}
+
+	return  {
 		loading: false,
 		status: '',
 		message: '',
-		email: localStorage.getItem('email') || '',
-		hashedPassword: window.sessionStorage.getItem('password') || '',
-		encryptedSeed: localStorage.getItem('encryptedSeed') !== null ? JSON.parse(String(localStorage.getItem('encryptedSeed'))) : '',
+		email,
+		hashedPassword,
+		encryptedSeed,
 		encryptedWallet: '',
 		keystore: null,
 		accounts: [],
@@ -68,7 +79,7 @@ function initialState(): RootState {
 		transactionDetails: {},
 		messageDetails: {},
 		openPage: ''
-	};
+	} as RootState;
 }
 
 /**
