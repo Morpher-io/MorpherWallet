@@ -14,10 +14,6 @@ const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: string, passw
 		getKeystore(password, encryptedWalletObject).then((returnObj: TypeCreatedKeystore) => {
 			resolve(returnObj.keystore);
 		}).catch(reject);
-<<<<<<< HEAD
-		return;
-=======
->>>>>>> develop
 	});
 
 

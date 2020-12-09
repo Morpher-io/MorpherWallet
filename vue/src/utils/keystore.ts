@@ -1,6 +1,5 @@
 import Accounts from 'web3-eth-accounts';
-<<<<<<< HEAD
-import { AccountsBase, WalletBase } from 'web3-core';
+import { AccountsBase } from 'web3-core';
 import { TypeCreatedKeystore } from '@/types/global-types';
 
 import {generateMnemonic, mnemonicToSeedSync} from 'bip39';
@@ -20,10 +19,6 @@ function getPrivateKeyFromMnemonic(mnemonic: string, index: number) {
 
 	return privateKey;
 }
-
-=======
-import { AccountsBase } from 'web3-core';
->>>>>>> develop
 
 declare module 'web3-eth-accounts' {
 	export default class Accounts extends AccountsBase { }

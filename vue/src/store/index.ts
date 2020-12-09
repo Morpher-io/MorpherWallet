@@ -225,7 +225,7 @@ const store: Store<RootState> = new Vuex.Store({
 		/**
 		 * Unlock wallet using 2fa codes
 		 */
-		unlock2FA({ commit, state, rootState }, params: TypeUnlock2fa) {
+		unlock2FA({ commit, dispatch, state, rootState }, params: TypeUnlock2fa) {
 			return new Promise(async (resolve, reject) => {
 				let emailCorrect = false;
 				let authenticatorCorrect = false;
