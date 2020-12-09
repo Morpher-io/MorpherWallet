@@ -38,17 +38,18 @@
 				</div>
 			</div>
 
-			<div class="field is-grouped">
-				<div class="control is-expanded">
-					<button class="button is-primary is-fullwidth" type="submit">
+			<div class="field">
+				<div class="layout split first">
+
+					<button class="button is-green" type="submit">
 						<span class="icon is-small">
 							<i class="far fa-file"></i>
 						</span>
 						<span> Create new Wallet </span>
 					</button>
 				</div>
-				<div class="control">
-					<router-link to="/login" tag="button" class="button is-light">
+				<div class="layout split second">
+					<router-link to="/login" tag="button" class="button is-grey">
 						<span class="icon is-small">
 							<i class="fas fa-unlock"></i>
 						</span>

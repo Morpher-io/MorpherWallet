@@ -1,10 +1,9 @@
 <template>
 	<div id="app">
-		<section class="section">
-			<div class="container">
-				<figure class="image mb-5">
-					<img src="/img/morpher-solid.svg" style="max-width: 500px" />
-				</figure>
+		<section :class="iFrameDisplay ? 'main_iframe': 'main'">
+			<div class="header">
+				<img src="@/assets/img/logo-nav.png" class="headerImage" />
+				<img v-if="iFrameDisplay" class="closeButton" @click="closeWallet" src="@/assets/img/close.svg" /> 
 			</div>
 			<transition name="fade" mode="out-in">
 				<router-view />
@@ -13,14 +12,34 @@
 	</div>
 </template>
 
-<style lang="scss">
-//@import "./assets/styles.scss";
-#app {
-	font-family: Avenir, Helvetica, Arial, sans-serif;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
 
-	color: #2c3e50;
-}
+<script lang="ts">
+	import isIframe from './utils/isIframe';
+	import Vue from 'vue';
+	import Component from 'vue-class-component';
+
+	@Component
+	export default class App extends Vue {
+		iFrameDisplay = isIframe();
+		connection = this.$store.state.connection;
+
+		async closeWallet() {
+			 if (this.iFrameDisplay) {
+				if (this.connection && this.connection !== null) {
+					const promise = this.connection.promise;
+
+					(await promise).hideWallet();
+					(await promise).onClose();
+					
+					this.$router.push('/');
+				}
+      }
+		}
+
+	}
+</script>
+
+<style lang="scss">
+@import "./assets/stylesheet/wallet.scss";
 
 </style>

@@ -24,17 +24,17 @@
 				</div>
 			</div>
 
-			<div class="field is-grouped">
-				<div class="control is-expanded">
-					<button class="button is-primary is-fullwidth" type="submit">
+			<div class="field">
+				<div class="layout split first">
+					<button class="button is-green" type="submit">
 						<span class="icon is-small">
 							<i class="fas fa-unlock"></i>
 						</span>
 						<span> Unlock </span>
 					</button>
 				</div>
-				<div class="control">
-					<button class="button is-light" v-on:click="logout()">
+				<div class="layout split second">
+					<button class="button is-grey" v-on:click="logout()">
 						<span class="icon is-small">
 							<i class="far fa-file"></i>
 						</span>
