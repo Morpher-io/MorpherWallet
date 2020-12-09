@@ -1,5 +1,4 @@
 const { getKeystore } = require('./keystore');
-const Accounts = require('web3-eth-accounts');
 const config = require('./../config.json');
 const { cryptoEncrypt, cryptoDecrypt, sha256 } = require('./cryptoFunctions');
 
@@ -15,20 +14,6 @@ const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: string, passw
 		getKeystore(password, encryptedWalletObject).then((wallet: any) => {
 			resolve(wallet);
 		}).catch(reject);
-
-
-		return;
-		/*
-		let seed = await cryptoDecrypt(
-			password,
-			encryptedSeed.ciphertext,
-			encryptedSeed.iv,
-			encryptedSeed.salt
-		);
-		let keystore = await getKeystore(password, seed);
-		resolve(keystore);
-		*/
-
 	});
 
 const getEncryptedSeed = async (keystore: any, password: string) => {
@@ -67,7 +52,6 @@ const getEncryptedSeedFromMail = async (email: string, email2fa: string, authent
 
 			fetch(config.BACKEND_ENDPOINT + '/v1/getEncryptedSeed', options).then(response => {
 				response.json().then(responseBody => {
-
 					/**
 					 * Login /Create Wallet is in one function
 					 * @todo: Separate Login and Create Wallet into separate functions so that upon failed "login" a recovery can be suggested
@@ -79,13 +63,10 @@ const getEncryptedSeedFromMail = async (email: string, email2fa: string, authent
 						resolve(JSON.parse(responseBody.encryptedSeed));
 					}
 					reject('seed not found');
-				}
-
-				);
+				});
 
 
-			}
-			)
+			})
 
 
 		}

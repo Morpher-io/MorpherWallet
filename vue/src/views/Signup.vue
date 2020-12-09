@@ -68,14 +68,12 @@ import { validateInput } from '../utils/backupRestore';
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 
-
 @Component({
 	components: {
 		Password
 	}
 })
 export default class Signup extends mixins(Global) {
-
 	// properties
 	walletEmail = '';
 	walletPassword = '';
@@ -83,7 +81,7 @@ export default class Signup extends mixins(Global) {
 	signup = false;
 	invalidEmail = '';
 	invalidPassword = '';
-	
+
 	// Methods
 	async signupExecute(e: any) {
 		//console.log(e);
@@ -119,12 +117,10 @@ export default class Signup extends mixins(Global) {
 		const email = this.walletEmail;
 
 		this.createWallet({ email, password })
-			.then(encryptedKeystore => {
+			.then(() => {
 				this.$router.push('/2fa');
 			})
-			.catch(error => {
-				(err: any) => console.log(err);
-			});
+			.catch(console.log);
 	}
 }
 </script>

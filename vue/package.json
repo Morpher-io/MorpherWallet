@@ -10,7 +10,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@types/web3-provider-engine": "^14.0.0",
+    "@types/downloadjs": "^1.4.2",
     "core-js": "^3.6.5",
     "downloadjs": "^1.4.7",
     "penpal": "^5.3.0",
@@ -47,7 +47,6 @@
     "prettier": "^1.19.1",
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
-    "types-web3-provider-engine": "0.0.2",
     "typescript": "~3.9.3",
     "vue-template-compiler": "^2.6.11",
     "web3-typescript-typings": "^0.10.2"

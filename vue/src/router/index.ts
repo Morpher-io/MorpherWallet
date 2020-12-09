@@ -65,28 +65,26 @@ router.beforeEach((to, from, next) => {
 			next('/2fa');
 			return;
 		}
-		
 		if (store.getters.isLoggedIn) {
 			next();
 			return;
 		}
-		if(store.getters.hasEncryptedKeystore) {
+		if (store.getters.hasEncryptedKeystore) {
 			next('/unlock');
 			return;
 		}
 		next('/login');
-	} else if(to.matched.some(record => record.meta.requires2fa)) {
-		if(store.getters.twoFaRequired) {
+	} else if (to.matched.some(record => record.meta.requires2fa)) {
+		if (store.getters.twoFaRequired) {
 			next();
 			return;
 		}
-		
-		if(store.getters.isLoggedIn) {
-			next("/");
+		if (store.getters.isLoggedIn) {
+			next('/');
 			return;
 		}
 
-		next("/login");
+		next('/login');
 	} else {
 		next();
 	}

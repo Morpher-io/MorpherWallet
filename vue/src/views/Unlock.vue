@@ -66,12 +66,12 @@ export default class Unlock extends mixins(Global) {
 	mounted() {
 		// Check if the wallet can be unlocked using the local-storage stored password
 		this.unlockWithStoredPassword()
-			.then((result) => {
+			.then(result => {
 				if (result) {
 					this.$router.push('/');
 				}
 			})
-			.catch((error) => {
+			.catch(error => {
 				console.log(error);
 			});
 	}
@@ -83,12 +83,12 @@ export default class Unlock extends mixins(Global) {
 		const password = await sha256(this.walletPassword);
 
 		// Call the fetchUser store action to process the wallet logon
-		this.unlockWithPassword({password})
+		this.unlockWithPassword({ password })
 			.then(() => {
 				// open root page after logon success
 				this.$router.push('/');
 			})
-			.catch((error) => {
+			.catch(error => {
 				// Logon failed
 				console.log(error);
 			});

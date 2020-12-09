@@ -1,5 +1,5 @@
 import Accounts from 'web3-eth-accounts';
-import { AccountsBase, WalletBase } from 'web3-core';
+import { AccountsBase } from 'web3-core';
 
 declare module 'web3-eth-accounts' {
 	export default class Accounts extends AccountsBase {}
