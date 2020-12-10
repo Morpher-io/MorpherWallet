@@ -81,6 +81,7 @@ export default class Login extends mixins(Global) {
 	 * Execute the logon
 	 */
 	login() {
+		this.store.loginComplete = false;
 		const email = this.walletEmail;
 		const password = this.walletPassword;
 

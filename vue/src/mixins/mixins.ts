@@ -51,6 +51,7 @@ export class Global extends Vue {
 	@Action
 	public logoutWallet!: () => void;
 
+
 	// Map Store Properties
 	store: RootState = this.$store.state;
 	
