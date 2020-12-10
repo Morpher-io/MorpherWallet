@@ -1,47 +1,47 @@
 export type Maybe<T> = T | null;
-
+import { WalletBase } from 'web3-core';
 
 export type TypeEncryptedSeed = {
-  __typename?: "TypeEncryptedSeed";
-  ciphertext?: Maybe<string>;
-  iv?: Maybe<string>;
-  salt?: Maybe<string>;
+	__typename?: 'TypeEncryptedSeed';
+	ciphertext?: Maybe<string>;
+	iv?: Maybe<string>;
+	salt?: Maybe<string>;
 };
 
 export type Type2FARequired = {
-  __typename?: "Type2FARequired";
-  email: Maybe<boolean>;
-  authenticator: Maybe<boolean>;
+	__typename?: 'Type2FARequired';
+	email: Maybe<boolean>;
+	authenticator: Maybe<boolean>;
 };
 
 export type TypeSeedFoundData = {
-  __typename?: "TypeSeedFoundData";
-  email: string;
-  encryptedSeed: string;
-  hashedPassword: string;
+	__typename?: 'TypeSeedFoundData';
+	email: string;
+	encryptedSeed: string;
+	hashedPassword: string;
 };
 
 export type TypeSeedCreatedData = {
-  __typename?: "TypeSeedCreatedData";
-  email: string;
-  encryptedSeed: string;
-  hashedPassword: string;
+	__typename?: 'TypeSeedCreatedData';
+	email: string;
+	encryptedSeed: string;
+	hashedPassword: string;
 };
 
 export type TypeFetchUser = {
-  __typename?: "TypeFetchUser";
-  email: string;
-  password: string;
+	__typename?: 'TypeFetchUser';
+	email: string;
+	password: string;
 };
 
 export type TypeUnlock2fa = {
-  __typename?: "TypeUnlock2fa";
-  email2FA: string;
-  authenticator2FA: string;
+	__typename?: 'TypeUnlock2fa';
+	email2FA: string;
+	authenticator2FA: string;
 };
 
 export type TypeState = {
-  __typename?: "TypeState";
+	__typename?: 'TypeState';
 	loading: boolean;
 	status: string;
 	message: string;
@@ -49,45 +49,43 @@ export type TypeState = {
 	hashedPassword: string;
 	encryptedSeed: string;
 	encryptedWallet: string;
-	keystore: any;
+	keystore: WalletBase;
 	token: string;
 	twoFaRequired: Type2FARequired;
 };
 
 export type TypeUnlockWithPassword = {
-  __typename?: "TypeUnlockWithPassword";
-  password: string;
+	__typename?: 'TypeUnlockWithPassword';
+	password: string;
 };
 
-
 export type TypeUserFoundData = {
-  __typename?: "TypeUserFoundData";
-  email: string;
-  hashedPassword: string;
+	__typename?: 'TypeUserFoundData';
+	email: string;
+	hashedPassword: string;
 };
 
 export type TypePayloadData = {
-  __typename?: "TypePayloadData";
-  email: boolean;
-  authenticator: boolean;
-}
+	__typename?: 'TypePayloadData';
+	email: boolean;
+	authenticator: boolean;
+};
 
 export type TypeCreatedKeystore = {
-  __typename?: "TypeCreatedKeystore";
-  encryptedSeed: string;
-  keystore: any;
-}
+	__typename?: 'TypeCreatedKeystore';
+	encryptedSeed: string;
+	keystore: WalletBase;
+};
 export type ZeroWalletConfig = {
-  __typename?: "Type2FARequired";
-  show_transaction: boolean;
+	__typename?: 'Type2FARequired';
+	show_transaction: boolean;
 	confirm_transaction: boolean;
 	show_message: boolean;
-  confirm_message: boolean;
+	confirm_message: boolean;
 } | null;
 
-
 export type TypeKeystoreUnlocked = {
-  __typename?: "TypeKeystoreUnlocked";
-  accounts: [string];
-  keystore: any;
-}
+	__typename?: 'TypeKeystoreUnlocked';
+	accounts: [string];
+	keystore: WalletBase;
+};

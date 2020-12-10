@@ -3,19 +3,21 @@ const config = require('./../config.json');
 const { cryptoEncrypt, cryptoDecrypt, sha256 } = require('./cryptoFunctions');
 
 import { TypeEncryptedSeed, TypePayloadData, TypeCreatedKeystore } from '../types/global-types';
+import { WalletBase } from 'web3-core';
 
 const changePasswordEncryptedSeed = async (encryptedSeed: TypeEncryptedSeed, oldPassword: string, newPassword: string) => {
 	const seed = await cryptoDecrypt(oldPassword, encryptedSeed.ciphertext, encryptedSeed.iv, encryptedSeed.salt);
 	return await cryptoEncrypt(newPassword, seed);
 };
 
-const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: string, password: string) =>
+const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: string, password: string): Promise<WalletBase> =>
 	new Promise((resolve, reject) => {
-		getKeystore(password, encryptedWalletObject).then((returnObj: TypeCreatedKeystore) => {
-			resolve(returnObj.keystore);
-		}).catch(reject);
+		getKeystore(password, encryptedWalletObject)
+			.then((returnObj: TypeCreatedKeystore) => {
+				resolve(returnObj.keystore);
+			})
+			.catch(reject);
 	});
-
 
 const getEncryptedSeedFromMail = async (email: string, email2fa: string, authenticator2fa: string) =>
 	new Promise((resolve, reject) => {
@@ -45,15 +47,8 @@ const getEncryptedSeedFromMail = async (email: string, email2fa: string, authent
 					}
 					reject('seed not found');
 				});
-
-
-			})
-
-
-		}
-		);
-
-
+			});
+		});
 	});
 
 const validateInput = async (fieldName: string, inputFieldValue: string) => {
@@ -120,7 +115,6 @@ const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: string)
 const backupGoogleSeed = async (userEmail: string, userid: string, encryptedSeed: string) =>
 	new Promise((resolve, reject) => {
 		sha256(config.GOOGLE_APP_ID + userid).then((key: any) => {
-
 			const options: RequestInit = {
 				method: 'POST',
 				headers: {
@@ -145,19 +139,12 @@ const backupGoogleSeed = async (userEmail: string, userid: string, encryptedSeed
 			} catch (e) {
 				reject(e);
 			}
-		}
-
-		);
-
-
-
-
+		});
 	});
 
 const backupFacebookSeed = async (userEmail: string, userid: string, encryptedSeed: string) =>
 	new Promise((resolve, reject) => {
 		sha256(config.FACEBOOK_APP_ID + userid).then((key: any) => {
-
 			const options: RequestInit = {
 				method: 'POST',
 				headers: {
@@ -182,10 +169,7 @@ const backupFacebookSeed = async (userEmail: string, userid: string, encryptedSe
 			} catch (e) {
 				reject(e);
 			}
-		}
-
-		);
-
+		});
 	});
 
 const recoverFacebookSeed = async (accessToken: string, signupEmail: string) =>
@@ -274,7 +258,6 @@ const recoverVKSeed = async (accessToken: string, signupEmail: string) =>
 const backupVKSeed = async (userEmail: string, userid: string, encryptedSeed: string) =>
 	new Promise((resolve, reject) => {
 		sha256(config.VK_APP_ID + userid).then((key: any) => {
-
 			const options: RequestInit = {
 				method: 'POST',
 				headers: {
@@ -299,11 +282,7 @@ const backupVKSeed = async (userEmail: string, userid: string, encryptedSeed: st
 			} catch (e) {
 				reject(e);
 			}
-		}
-
-		)
-
-
+		});
 	});
 
 const changeEmail = async (oldEmail: string, newEmail: string, encryptedSeed: string) => {
@@ -354,7 +333,6 @@ const getPayload = (email: string) =>
 
 		resolve(response);
 	});
-
 
 const change2FAMethods = async (email: string, signedMessage: string, toggleEmail: string, toggleAuthenticator: string) => {
 	const key = await sha256(email.toLowerCase());

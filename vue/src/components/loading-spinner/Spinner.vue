@@ -30,7 +30,7 @@ export default class Spinner extends Vue {
 	isActive = this.active || false;
 
 	@Watch('active')
-	onPropertyChanged(value: boolean, oldValue: boolean) {
+	onPropertyChanged(value: boolean) {
 		this.isActive = value;
 	}
 }

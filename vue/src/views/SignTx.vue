@@ -2,10 +2,10 @@
 	<section class="section">
 		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 		<div class="container">
-					<spinner v-model="showSpinner" v-bind:status="status"></spinner>
-		<h2 class="title">Sign Transaction</h2>
-		<h4 class="subtitle">Sign the transaction to continue</h4>
-		
+			<spinner v-model="showSpinner" v-bind:status="status"></spinner>
+			<h2 class="title">Sign Transaction</h2>
+			<h4 class="subtitle">Sign the transaction to continue</h4>
+
 			<div class="field">
 				<label class="label">Transaction Details</label>
 				<div class="control">
@@ -15,7 +15,6 @@
 
 			<div class="field">
 				<div class="layout split first">
-
 					<button class="button is-green" @click="sign()">
 						<span class="icon is-small">
 							<i class="far fa-file"></i>
@@ -32,30 +31,22 @@
 					</button>
 				</div>
 			</div>
-		
 		</div>
 	</section>
 </template>
 
 <script lang="ts">
-import Component, { mixins } from 'vue-class-component';
+import { mixins } from 'vue-class-component';
 import { Global, Authenticated } from '../mixins/mixins';
 
-
 export default class SignTx extends mixins(Global, Authenticated) {
-
-
-
 	sign() {
 		this.$router.push('/');
 	}
 	cancel() {
 		this.$router.push('/');
 	}
-
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

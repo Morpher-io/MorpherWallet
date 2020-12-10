@@ -4,30 +4,26 @@
 
 		<h1 class="title">Settings</h1>
 
-		
-			<ChangePassword></ChangePassword>
+		<ChangePassword></ChangePassword>
 
-			<ChangeEmail :emailChanged="emailChanged"></ChangeEmail>
+		<ChangeEmail :emailChanged="emailChanged"></ChangeEmail>
 
-			<Change2FA></Change2FA>
-		
-			<ExportWallet></ExportWallet>
-		
+		<Change2FA></Change2FA>
 
-			<div class="field is-grouped">
-				<div class="layout split first">
-					<router-link to="/" tag="button" class="button is-grey">
-						<span class="icon is-small">
-							<i class="fas fa-chevron-left"></i>
-						</span>
-						<span> Back </span>
-					</router-link>
+		<ExportWallet></ExportWallet>
 
-				</div>
-
-				<div class="layout split second">
-				</div>
+		<div class="field is-grouped">
+			<div class="layout split first">
+				<router-link to="/" tag="button" class="button is-grey">
+					<span class="icon is-small">
+						<i class="fas fa-chevron-left"></i>
+					</span>
+					<span> Back </span>
+				</router-link>
 			</div>
+
+			<div class="layout split second"></div>
+		</div>
 	</div>
 </template>
 
@@ -35,8 +31,6 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import Spinner from '../components/loading-spinner/Spinner.vue';
-import { TypeFetchUser } from '../types/global-types';
-import { Action } from 'vuex-class';
 import { mapState } from 'vuex';
 import ChangePassword from '../components/ChangePassword.vue';
 import ChangeEmail from '../components/ChangeEmail.vue';

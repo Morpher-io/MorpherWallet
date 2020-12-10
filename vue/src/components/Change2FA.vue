@@ -84,8 +84,6 @@ import {
 	getKeystoreFromEncryptedSeed
 } from '../utils/backupRestore';
 
-import { sha256 } from '../utils/cryptoFunctions';
-
 export default {
 	name: 'change2FA',
 	data: function() {
