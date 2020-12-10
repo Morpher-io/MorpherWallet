@@ -2,6 +2,8 @@ const WalletController = require('../../controllers/wallet.controller');
 const ValidationController = require('../../controllers/validation.controller');
 const secureRoutes = require("./secure");
 
+console.log(secureRoutes)
+
 // The index route file which connects all the other files.
 module.exports = function(express) {
     const router = express.Router();
@@ -28,7 +30,7 @@ module.exports = function(express) {
     /**
      * Secure routes checking signature matching eth_address
      */
-    router.use('/auth', secureRoutes);
+    // router.use('/auth', secureRoutes);
     router.post('/auth/updateEmailPassword', secureRoutes, WalletController.updateEmailPassword);
     router.post('/auth/change2FAMethods', WalletController.change2FAMethods);
 

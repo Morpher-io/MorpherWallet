@@ -51,9 +51,6 @@ export default class Wallet extends mixins(Global, Authenticated) {
 			}
 		}
 
-
-		// @ts-ignore
-		console.log(this.store.keystore[0].sign('test'))
 	}
 
 	logout() {

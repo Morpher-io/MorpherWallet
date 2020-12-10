@@ -382,7 +382,11 @@ const getNonce = async (key: string) => {
 async function createSignature(key: string, body: any, keystore: WalletSign){
 	const nonce = (await getNonce(key)).nonce;
 
-	return keystore.sign(JSON.stringify(body) + '_' + nonce)
+	const signMessage = JSON.stringify(body) + '_' + nonce;
+
+	console.log(signMessage)
+
+	return keystore.sign(signMessage)
 }
 
 const updateWalletEmailPassword = async (oldEmail: string, newEmail: string, encryptedSeed: string, keystore: WalletSign) => {

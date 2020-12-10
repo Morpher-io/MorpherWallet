@@ -1,6 +1,8 @@
 import { Recovery, User } from "../../database/models";
 import {errorResponse, randomFixedInteger, sortObject} from "../../helpers/functions/util";
 const Util = require('ethereumjs-util');
+const Web3 = require('web3');
+const web3 = new Web3('https://sidechain.morpher.com');
 
 module.exports = async function (req, res, next) {
     const signature = JSON.parse(req.header('Signature'));
@@ -17,16 +19,18 @@ module.exports = async function (req, res, next) {
         const recovery = await Recovery.findOne({ where: { key } });
         const user = await User.findOne({ where: { id: recovery.user_id } });
 
-        const msgHash = Util.keccak(JSON.stringify(sortObject(req.body) + '_' + user.nonce));
+        const signMessage = JSON.stringify(sortObject(req.body)) + '_' + user.nonce
+
+        const result = await web3.eth.personal.ecRecover(signMessage, signature.signature)
+
+        console.log(signMessage, result)
 
         try{
-            const eth_address = '0x' + (Util.pubToAddress(Util.ecrecover(signature.msgHash, Buffer.from(signature.v), Buffer.from(signature.r), Buffer.from(signature.s)))).toString('hex');
-
-            console.log(eth_address)
-            if (user.eth_address === eth_address) {
+            if (user.eth_address.toLowerCase() === result) {
+                console.log('user found')
                 user.nonce = user.nonce + 1;
                 await user.save();
-                next();
+                return next();
             }
         }catch (e) {
             return errorResponse(res,  'User not authenticated.')

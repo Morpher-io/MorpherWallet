@@ -215,18 +215,17 @@ const store: Store<RootState> = new Vuex.Store({
 						 */
 						const createdKeystoreObj = await getKeystore(params.password, '', 1);
 
-						//const encryptedKeystore = await getEncryptedSeed(unlockedKeystore, params.password);
+						const accounts = getAccountsFromKeystore(createdKeystoreObj.keystore);
 
 						commit('seedCreated', { email: params.email, hashedPassword: params.password, unencryptedKeystore: createdKeystoreObj.keystore, encryptedSeed: createdKeystoreObj.encryptedSeed });
 
-						saveWalletEmailPassword(params.email, createdKeystoreObj.encryptedSeed, this.state.accounts[0]).then(res => {
+						saveWalletEmailPassword(params.email, createdKeystoreObj.encryptedSeed, accounts[0]).then(res => {
 							getPayload(params.email)
 								.then(payload => {
 									//2FA for signup is hard to do, because the wallet is created client side. We can still "try" to lure the user into this flow
 									commit('updatePayload', payload);
 									//send2FAEmail(params.email);
 
-									const accounts = getAccountsFromKeystore(createdKeystoreObj.keystore);
 									commit('keystoreUnlocked', { keystore: createdKeystoreObj.keystore , accounts });
 									resolve();
 								})
@@ -337,10 +336,26 @@ const store: Store<RootState> = new Vuex.Store({
 			// @ts-ignore
 			const keystore = this.state.keystore[0];
 
-			const newEncryptedSeed = changePasswordEncryptedSeed(state.encryptedSeed, params.oldPassword, params.newPassword);
-			await updateWalletEmailPassword(state.email, state.email, JSON.stringify(newEncryptedSeed), keystore);
-			commit('seedFound', {encryptedSeed: newEncryptedSeed});
-			commit('userFound', {email: state.email, hashedPassword: params.newPassword});
+			console.log(state.encryptedSeed)
+
+			try{
+				// @ts-ignore
+				const newEncryptedSeed = await changePasswordEncryptedSeed(JSON.parse(state.encryptedSeed), params.oldPassword, params.newPassword);
+				console.log(newEncryptedSeed)
+				if(Object.keys(newEncryptedSeed).length > 0){
+
+					await updateWalletEmailPassword(state.email, state.email, newEncryptedSeed, keystore);
+					console.log(newEncryptedSeed, params.newPassword)
+					commit('seedFound', {encryptedSeed: newEncryptedSeed});
+					commit('userFound', {email: state.email, hashedPassword: params.newPassword});
+
+					alert('Password changed successfully.')
+				}
+			}
+			catch (e) {
+				alert('Error in change password')
+			}
+
 		}
 	},
 	getters: {
