@@ -3,28 +3,28 @@ import { WalletBase } from 'web3-core';
 
 export type TypeEncryptedSeed = {
 	__typename?: 'TypeEncryptedSeed';
-	ciphertext?: Maybe<string>;
-	iv?: Maybe<string>;
-	salt?: Maybe<string>;
+  ciphertext?: string,
+	iv?: string,
+	salt?: string
 };
 
 export type Type2FARequired = {
 	__typename?: 'Type2FARequired';
-	email: Maybe<boolean>;
-	authenticator: Maybe<boolean>;
+	email: boolean;
+	authenticator: boolean;
 };
 
 export type TypeSeedFoundData = {
 	__typename?: 'TypeSeedFoundData';
 	email: string;
-	encryptedSeed: string;
+	encryptedSeed: TypeEncryptedSeed;
 	hashedPassword: string;
 };
 
 export type TypeSeedCreatedData = {
 	__typename?: 'TypeSeedCreatedData';
 	email: string;
-	encryptedSeed: string;
+	encryptedSeed: TypeEncryptedSeed;
 	hashedPassword: string;
 };
 
@@ -59,6 +59,12 @@ export type TypeUnlockWithPassword = {
 	password: string;
 };
 
+export type TypeChangePassword = {
+  __typename?: "TypeChangePassword";
+  oldPassword: string;
+  newPassword: string;
+};
+
 export type TypeUserFoundData = {
 	__typename?: 'TypeUserFoundData';
 	email: string;
@@ -72,10 +78,17 @@ export type TypePayloadData = {
 };
 
 export type TypeCreatedKeystore = {
-	__typename?: 'TypeCreatedKeystore';
-	encryptedSeed: string;
-	keystore: WalletBase;
-};
+  __typename?: "TypeCreatedKeystore";
+  encryptedSeed: TypeEncryptedSeed;
+  keystore: WalletBase;
+}
+
+export type WalletSign = {
+    __typename?: "WalletSign";
+    sign: any;
+}
+
+
 export type ZeroWalletConfig = {
 	__typename?: 'Type2FARequired';
 	show_transaction: boolean;

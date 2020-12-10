@@ -1,0 +1,22 @@
+@startuml
+start
+if(EncryptedSeed in Local Storage) then (no)
+    :LoginFlow;
+    end;
+else (yes)
+	:Ask User to Enter Password;
+    :Hash Password with SHA256;
+    :Decrypt Seed Phrase with Hashed Password;
+    if(Unlock With Password) then (password incorrect)
+        #pink:show recovery options;
+        end;
+    else (success)
+
+        :* Save hashed password in session store
+        * Init vuex datastore: address etc.;
+        #lightgreen:show wallet;
+        kill;
+    endif
+
+endif
+@enduml

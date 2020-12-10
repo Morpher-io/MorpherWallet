@@ -1,6 +1,6 @@
 import Accounts from 'web3-eth-accounts';
 import { AccountsBase } from 'web3-core';
-import { TypeCreatedKeystore } from '@/types/global-types';
+import { TypeCreatedKeystore, TypeEncryptedSeed } from '@/types/global-types';
 
 import { generateMnemonic, mnemonicToSeedSync } from 'bip39';
 import { hdkey } from 'ethereumjs-wallet';
@@ -22,18 +22,19 @@ declare module 'web3-eth-accounts' {
 	export default class Accounts extends AccountsBase {}
 }
 
-export function getKeystore(password: string, encryptedSeedPhrase: string, accountIndex: number): Promise<TypeCreatedKeystore> {
+export function getKeystore(password: string, encryptedSeedObject: TypeEncryptedSeed, accountIndex: number): Promise<TypeCreatedKeystore> {
 	return new Promise(async (resolve, reject) => {
 		try {
 			const account = new Accounts();
 			let mnemonic: string;
-			if (encryptedSeedPhrase.length == 0) {
+			if (encryptedSeedObject.ciphertext == undefined || encryptedSeedObject.iv == undefined || encryptedSeedObject.salt == undefined) {
 				console.log('Creating new Wallet');
 				mnemonic = generateMnemonic();
-				encryptedSeedPhrase = JSON.stringify(await cryptoEncrypt(password, mnemonic));
+				encryptedSeedObject = await cryptoEncrypt(password, mnemonic);
 			} else {
 				console.log('trying to unlock keystore');
-				const encryptedSeedObject = JSON.parse(encryptedSeedPhrase);
+				//const encryptedSeedObject = JSON.parse(encryptedSeedPhrase);
+				
 				mnemonic = await cryptoDecrypt(password, encryptedSeedObject.ciphertext, encryptedSeedObject.iv, encryptedSeedObject.salt);
 			}
 
@@ -43,7 +44,7 @@ export function getKeystore(password: string, encryptedSeedPhrase: string, accou
 
 			const privateKey = getPrivateKeyFromMnemonic(mnemonic, accountIndex);
 			account.wallet.add(privateKey);
-			resolve({ encryptedSeed: encryptedSeedPhrase, keystore: account.wallet });
+			resolve({ encryptedSeed: encryptedSeedObject, keystore: account.wallet });
 		} catch (err) {
 			console.log('getKeystore error', err);
 			reject(err);

@@ -8,7 +8,7 @@ import * as morgan from 'morgan';
 import * as helmet from 'helmet';
 import * as bodyParser from 'body-parser';
 import { sequelize, User } from './database/models';
-import {decrypt, encrypt, sha256, successResponse} from './helpers/functions/util';
+import {decrypt, encrypt, errorResponse, randomFixedInteger, sha256, successResponse} from './helpers/functions/util';
 import { Logger } from './helpers/functions/winston';
 
 // Import v1 routes instance for REST endpoint.
@@ -63,6 +63,7 @@ const httpServer = http.createServer(app);
 process.on('unhandledRejection', (error: any, promise) => {
     Logger.info(error.stack || error);
 });
+
 
 // Listen to the server ports.
 httpServer.listen(process.env.PORT, async () => {
