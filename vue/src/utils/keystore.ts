@@ -34,7 +34,7 @@ export function getKeystore(password: string, encryptedSeedObject: TypeEncrypted
 			} else {
 				console.log('trying to unlock keystore');
 				//const encryptedSeedObject = JSON.parse(encryptedSeedPhrase);
-				
+
 				mnemonic = await cryptoDecrypt(password, encryptedSeedObject.ciphertext, encryptedSeedObject.iv, encryptedSeedObject.salt);
 			}
 

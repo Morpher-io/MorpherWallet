@@ -91,7 +91,4 @@ export class Global extends Vue {
 export class Authenticated extends Global {
 	@Action
 	public changePassword!: (params: TypeChangePassword) => Promise<unknown>;
-
 }
-
-

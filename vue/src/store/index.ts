@@ -2,7 +2,6 @@ import Vue from 'vue';
 import Vuex, { Store } from 'vuex';
 import { sha256 } from '../utils/cryptoFunctions';
 import {
-	createSignature,
 	getEncryptedSeedFromMail,
 	verifyAuthenticatorCode,
 	verifyEmailCode,
@@ -11,7 +10,7 @@ import {
 	getPayload,
 	getKeystoreFromEncryptedSeed,
 	changePasswordEncryptedSeed,
-	updateWalletEmailPassword, change2FAMethods
+	updateWalletEmailPassword
 } from '../utils/backupRestore';
 import { getAccountsFromKeystore } from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
@@ -29,7 +28,6 @@ import {
 	TypeEncryptedSeed,
 	TypeKeystoreUnlocked
 } from '../types/global-types';
-
 
 import isIframe from '../utils/isIframe';
 import { connectToParent } from 'penpal';
@@ -230,7 +228,6 @@ const store: Store<RootState> = new Vuex.Store({
 							 */
 							const createdKeystoreObj = await getKeystore(hashedPassword, {}, 1);
 
-
 							// commit('seedCreated', {
 							// 	email: params.email,
 							// 	hashedPassword: hashedPassword,
@@ -323,7 +320,7 @@ const store: Store<RootState> = new Vuex.Store({
 		 */
 		unlockWithStoredPassword({ dispatch, state }) {
 			return new Promise((resolve, reject) => {
-				if (state.hashedPassword && state.encryptedSeed.ciphertext !== undefined ) {
+				if (state.hashedPassword && state.encryptedSeed.ciphertext !== undefined) {
 					dispatch('unlockWithPassword', { password: state.hashedPassword })
 						.then(() => {
 							resolve(true);
@@ -358,30 +355,24 @@ const store: Store<RootState> = new Vuex.Store({
 						reject(err);
 					});
 			});
-
 		},
 		async changePassword({ commit, state }, params: TypeChangePassword) {
-
 			try {
-
 				if (state.keystore !== undefined && state.keystore !== null) {
 					const newEncryptedSeed = await changePasswordEncryptedSeed(state.encryptedSeed, params.oldPassword, params.newPassword);
-					console.log(newEncryptedSeed)
+					console.log(newEncryptedSeed);
 					if (Object.keys(newEncryptedSeed).length > 0) {
-
 						await updateWalletEmailPassword(state.email, state.email, newEncryptedSeed, state.keystore[0]);
-						console.log(newEncryptedSeed, params.newPassword)
+						console.log(newEncryptedSeed, params.newPassword);
 						commit('seedFound', { encryptedSeed: newEncryptedSeed });
 						commit('userFound', { email: state.email, hashedPassword: params.newPassword });
 
-						alert('Password changed successfully.')
+						alert('Password changed successfully.');
 					}
 				}
+			} catch (e) {
+				alert('Error in change password');
 			}
-			catch (e) {
-				alert('Error in change password')
-			}
-
 		}
 	},
 	getters: {

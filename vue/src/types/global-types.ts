@@ -3,9 +3,9 @@ import { WalletBase } from 'web3-core';
 
 export type TypeEncryptedSeed = {
 	__typename?: 'TypeEncryptedSeed';
-  ciphertext?: string,
-	iv?: string,
-	salt?: string
+	ciphertext?: string;
+	iv?: string;
+	salt?: string;
 };
 
 export type Type2FARequired = {
@@ -60,9 +60,9 @@ export type TypeUnlockWithPassword = {
 };
 
 export type TypeChangePassword = {
-  __typename?: "TypeChangePassword";
-  oldPassword: string;
-  newPassword: string;
+	__typename?: 'TypeChangePassword';
+	oldPassword: string;
+	newPassword: string;
 };
 
 export type TypeUserFoundData = {
@@ -78,16 +78,15 @@ export type TypePayloadData = {
 };
 
 export type TypeCreatedKeystore = {
-  __typename?: "TypeCreatedKeystore";
-  encryptedSeed: TypeEncryptedSeed;
-  keystore: WalletBase;
-}
+	__typename?: 'TypeCreatedKeystore';
+	encryptedSeed: TypeEncryptedSeed;
+	keystore: WalletBase;
+};
 
 export type WalletSign = {
-    __typename?: "WalletSign";
-    sign: any;
-}
-
+	__typename?: 'WalletSign';
+	sign: any;
+};
 
 export type ZeroWalletConfig = {
 	__typename?: 'Type2FARequired';

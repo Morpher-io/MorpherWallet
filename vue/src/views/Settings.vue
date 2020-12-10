@@ -24,7 +24,6 @@
 
 			<div class="layout split second"></div>
 		</div>
-		<button type="button" class="button is-fullwidth is-primary" v-on:click="$router.push('/')">Back</button>
 	</div>
 </template>
 

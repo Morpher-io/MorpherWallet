@@ -1,9 +1,8 @@
-import {sortObject} from "@/utils/utils";
+import { sortObject } from '@/utils/utils';
 
 const { getKeystore } = require('./keystore');
 const config = require('./../config.json');
 const { cryptoEncrypt, cryptoDecrypt, sha256 } = require('./cryptoFunctions');
-
 
 import { TypeEncryptedSeed, TypePayloadData, TypeCreatedKeystore, WalletSign } from '../types/global-types';
 import { WalletBase } from 'web3-core';
@@ -13,7 +12,6 @@ const changePasswordEncryptedSeed = async (encryptedSeed: TypeEncryptedSeed, old
 	const seed = await cryptoDecrypt(oldPassword, encryptedSeed.ciphertext, encryptedSeed.iv, encryptedSeed.salt);
 	return await cryptoEncrypt(newPassword, seed);
 };
-
 
 const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: TypeEncryptedSeed, password: string): Promise<WalletBase> =>
 	new Promise((resolve, reject) => {
@@ -117,7 +115,6 @@ const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEnc
 	const response = await result.json();
 	return response;
 };
-
 
 const backupGoogleSeed = async (userEmail: string, userid: string, encryptedSeed: string) =>
 	new Promise((resolve, reject) => {
@@ -349,7 +346,7 @@ const getNonce = async (key: string) => {
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
-			key,
+			key
 		}),
 		mode: 'cors',
 		cache: 'default'
@@ -360,13 +357,13 @@ const getNonce = async (key: string) => {
 	return response;
 };
 
-async function createSignature(key: string, body: any, keystore: WalletSign){
-	body.nonce =  (await getNonce(key)).nonce;
+async function createSignature(key: string, body: any, keystore: WalletSign) {
+	body.nonce = (await getNonce(key)).nonce;
 	const signMessage = JSON.stringify(body);
 
-	console.log(signMessage)
+	console.log(signMessage);
 
-	return await keystore.sign(signMessage)
+	return await keystore.sign(signMessage);
 }
 
 const updateWalletEmailPassword = async (oldEmail: string, newEmail: string, encryptedSeed: string, keystore: WalletSign) => {
