@@ -277,18 +277,33 @@ const store: Store<RootState> = new Vuex.Store({
 				}
 
 				if (emailCorrect && authenticatorCorrect) {
-					getEncryptedSeedFromMail(rootState.email, params.email2FA, params.authenticator2FA).then(encryptedSeed => {
-						//const encryptedSeed = state.encryptedSeed; //normally that would need decrypting using 2fa codes
-						//commit('updatePayload', { email: false, authenticator: false });
-						commit('seedFound', { encryptedSeed });
-						if (state.hashedPassword) {
-							//console.log(password found);
-							dispatch('unlockWithStoredPassword').then(() => resolve('/'));
-						} else {
-							//unlock page
-							resolve('/unlock');
-						}
-					});
+					getEncryptedSeedFromMail(rootState.email, params.email2FA, params.authenticator2FA)
+						.then(encryptedSeed => {
+							//const encryptedSeed = state.encryptedSeed; //normally that would need decrypting using 2fa codes
+							//commit('updatePayload', { email: false, authenticator: false });
+							commit('seedFound', { encryptedSeed });
+							if (state.hashedPassword) {
+								//console.log(password found);
+								dispatch('unlockWithStoredPassword')
+									.then(() => resolve('/'))
+									.catch(() => {
+										commit('logout');
+										reject('invalid password');
+									});
+							} else {
+								//unlock page
+								resolve('/unlock');
+							}
+						})
+						.catch(err => {
+							if (err.toString() === 'seed not found') {
+								commit('authError', '2FA Authentication code not correct');
+								reject('2FA Authentication not correct');
+							} else {
+								console.log(err);
+								reject('error');
+							}
+						});
 				} else {
 					console.log('Reached here for wathever reason');
 					reject();
