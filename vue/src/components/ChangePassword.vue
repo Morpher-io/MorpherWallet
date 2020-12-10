@@ -1,37 +1,53 @@
 <template>
 	<div class="card">
 		<form v-on:submit.prevent="formSubmitChangePassword">
-			<header class="card-header">
-				<p class="card-header-title">Password Change</p>
-			</header>
-			<div class="card-content">
-        
-				<div class="field">
-           <label class="label">Old Password</label>
-					<div class="control">
-						<input type="password" name="oldPassword" class="input is-primary" placeholder="Current Password" v-model="oldPassword" />
+			<div class="collapse">
+				<span v-show="collapsed" class="icon collapseIcon header" @click="collapsed = !collapsed">
+					<i class="fas fa-chevron-right"></i>
+				</span>
+				<span v-show="!collapsed" class="icon collapseIcon header" @click="collapsed = !collapsed">
+					<i class="fas fa-chevron-down"></i>
+				</span>
+
+				<span class="header" @click="collapsed = !collapsed"> Change Password </span>
+				<div :class="collapsed ? 'hidden' : 'visible'">
+					<div class="field">
+						<label class="label">Old Password</label>
+						<div class="control">
+							<input type="password" name="oldPassword" class="input is-primary" placeholder="Current Password" v-model="oldPassword" />
+						</div>
 					</div>
-				</div>
-				<div class="field">
-					<div class="control">
-						<input type="password" name="newPassword" class="input is-primary" placeholder="New Password" v-model="newPassword" />
+					<div class="field">
+						<label class="label">New Password</label>
+						<div class="control">
+							<input type="password" name="newPassword" class="input is-primary" placeholder="New Password" v-model="newPassword" />
+						</div>
 					</div>
-				</div>
-				<div class="field">
-					<div class="control">
-						<input
-							type="password"
-							class="input is-primary"
-							name="newPasswordRepeat"
-							placeholder="Repeat New Password"
-							v-model="newPasswordRepeat"
-						/>
+					<div class="field">
+						<label class="label">Repeat Password</label>
+						<div class="control">
+							<input
+								type="password"
+								class="input is-primary"
+								name="newPasswordRepeat"
+								placeholder="Repeat New Password"
+								v-model="newPasswordRepeat"
+							/>
+						</div>
+					</div>
+
+					<div class="field is-grouped">
+						<div class="layout split">
+							<button class="button is-green" type="submit">
+								<span class="icon is-small">
+									<i class="fas fa-save"></i>
+								</span>
+								<span> Update Password </span>
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
-			<footer class="card-footer">
-				<a href="#" class="card-footer-item">Save</a>
-			</footer>
 		</form>
 	</div>
 </template>
@@ -42,11 +58,12 @@ import { getKeystoreFromEncryptedSeed, changePasswordEncryptedSeed, saveWalletEm
 
 export default {
 	name: 'ChangePassword',
-	data: function () {
+	data: function() {
 		return {
 			oldPassword: '',
 			newPassword: '',
-			newPasswordRepeat: ''
+			newPasswordRepeat: '',
+			collapsed: true
 		};
 	},
 	methods: {
@@ -82,6 +99,7 @@ export default {
 					this.oldPassword = '';
 					this.newPassword = '';
 					this.newPasswordRepeat = '';
+					this.collapsed = true;
 				}
 			} else alert('New passwords do not match.');
 		}

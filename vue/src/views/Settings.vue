@@ -4,27 +4,30 @@
 
 		<h1 class="title">Settings</h1>
 
-		<div class="container mb-6">
+		
 			<ChangePassword></ChangePassword>
-		</div>
-		<div class="container mb-6">
+
 			<ChangeEmail :emailChanged="emailChanged"></ChangeEmail>
-		</div>
-		<div class="container mb-6">
+
 			<Change2FA></Change2FA>
-		</div>
-		<div class="container mb-6">
-			<article class="message">
-				<div class="message-header">
-					<p>Export the Wallet Seed Phrase</p>
-					<button class="delete" aria-label="delete" v-on:click="$router.push('/')"></button>
+		
+			<ExportWallet></ExportWallet>
+		
+
+			<div class="field is-grouped">
+				<div class="layout split first">
+					<router-link to="/" tag="button" class="button is-grey">
+						<span class="icon is-small">
+							<i class="fas fa-chevron-left"></i>
+						</span>
+						<span> Back </span>
+					</router-link>
+
 				</div>
-				<div class="message-body">
-					<ExportWallet></ExportWallet>
+
+				<div class="layout split second">
 				</div>
-			</article>
-			<button type="button" class="button is-fullwidth is-primary" v-on:click="$router.push('/')">Back</button>
-		</div>
+			</div>
 	</div>
 </template>
 

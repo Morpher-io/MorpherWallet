@@ -49,6 +49,7 @@ export interface RootState {
 	transactionDetails: any;
 	messageDetails: any;
 	openPage: string;
+	loginComplete: boolean;
 }
 
 /**
@@ -85,7 +86,8 @@ function initialState(): RootState {
 		connection: null,
 		transactionDetails: {},
 		messageDetails: {},
-		openPage: ''
+		openPage: '',
+		loginComplete: false
 	} as RootState;
 }
 
