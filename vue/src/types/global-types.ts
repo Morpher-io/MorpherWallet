@@ -26,7 +26,6 @@ export type TypeSeedCreatedData = {
   email: string;
   encryptedSeed: string;
   hashedPassword: string;
-  unencryptedKeystore: any;
 };
 
 export type TypeFetchUser = {
@@ -85,3 +84,10 @@ export type ZeroWalletConfig = {
 	show_message: boolean;
   confirm_message: boolean;
 } | null;
+
+
+export type TypeKeystoreUnlocked = {
+  __typename?: "TypeKeystoreUnlocked";
+  accounts: [string];
+  keystore: any;
+}

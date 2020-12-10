@@ -20,7 +20,8 @@ import {
 	TypeUnlock2fa,
 	TypeUserFoundData,
 	TypeUnlockWithPassword,
-	ZeroWalletConfig
+	ZeroWalletConfig,
+	TypeKeystoreUnlocked
 } from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
@@ -144,7 +145,7 @@ const store: Store<RootState> = new Vuex.Store({
 			state.status = '';
 			state.token = '';
 		},
-		keystoreUnlocked(state: RootState, payload) {
+		keystoreUnlocked(state: RootState, payload: TypeKeystoreUnlocked) {
 			state.keystore = payload.keystore;
 			state.accounts = payload.accounts;
 		}
@@ -210,7 +211,7 @@ const store: Store<RootState> = new Vuex.Store({
 
 						//const encryptedKeystore = await getEncryptedSeed(unlockedKeystore, params.password);
 
-						commit('seedCreated', { email: params.email, hashedPassword: params.password, unencryptedKeystore: createdKeystoreObj.keystore, encryptedSeed: createdKeystoreObj.encryptedSeed });
+						commit('seedCreated', { email: params.email, hashedPassword: params.password, encryptedSeed: createdKeystoreObj.encryptedSeed });
 
 						saveWalletEmailPassword(params.email, createdKeystoreObj.encryptedSeed).then(res => {
 							getPayload(params.email)
