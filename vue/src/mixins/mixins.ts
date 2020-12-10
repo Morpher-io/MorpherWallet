@@ -3,7 +3,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import Spinner from '../components/loading-spinner/Spinner.vue';
 import { Action } from 'vuex-class';
-import { TypeFetchUser, TypeUnlock2fa, TypeUnlockWithPassword } from '../types/global-types';
+import { TypeFetchUser, TypeUnlock2fa, TypeUnlockWithPassword, TypeChangePassword } from '../types/global-types';
 import { mapState } from 'vuex';
 import { RootState } from '../store';
 import isIframe from '../utils/isIframe';
@@ -88,4 +88,10 @@ export class Global extends Vue {
 	},
 	watch: {}
 })
-export class Authenticated extends Global {}
+export class Authenticated extends Global {
+	@Action
+	public changePassword!: (params: TypeChangePassword) => Promise<unknown>;
+
+}
+
+

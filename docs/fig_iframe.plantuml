@@ -1,0 +1,25 @@
+@startuml
+actor User
+participant MainApp
+participant iFrame
+participant Keystore
+participant Backend
+database DB
+
+User->MainApp: Opens morpher.com
+MainApp->iFrame: Initializes Iframe through SDK
+iFrame->Keystore: Loads keystore into iFrame and opens it as overlay over MainApp
+Keystore->User: Show Interface is ready
+User->Keystore: Signup with Email and Password
+Keystore->Backend: Check if User Exists
+Keystore->Keystore: Generate new Seed-Phrase
+Keystore->Keystore: Encrypt Seed-Phrase with Password
+note right: Encryption and Decryption is done using crypto.subtle
+Keystore->Backend: Store Encrypted Seed-Phrase with Email
+Backend->DB: Check if User already exists
+Backend->DB: Save new User
+Backend->DB: Save new Recovery-Method "email"
+Keystore->Keystore: Save Decrypted Keystore in Vuex Store
+Keystore->MainApp: Fire "onLogin" Event
+MainApp->User: Show logged in Application
+@enduml

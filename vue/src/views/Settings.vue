@@ -10,7 +10,7 @@
 
 		<Change2FA></Change2FA>
 
-		<ExportWallet></ExportWallet>
+		<ExportWallet v-if="false"></ExportWallet>
 
 		<div class="field is-grouped">
 			<div class="layout split first">
@@ -24,6 +24,7 @@
 
 			<div class="layout split second"></div>
 		</div>
+		<button type="button" class="button is-fullwidth is-primary" v-on:click="$router.push('/')">Back</button>
 	</div>
 </template>
 
