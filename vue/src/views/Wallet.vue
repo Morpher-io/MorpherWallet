@@ -4,20 +4,35 @@
 
 		<h1 class="title">Morpher Wallet</h1>
 
-		<div class="container">
-			<div class="container">
-				<div class="card">
-					<div class="card-content">
-						<div class="content">
-							<h4 class="subtitle mb-0">Hello {{ walletEmail }}</h4>
-							Account: {{ accounts[0] }}
-						</div>
+		<h2 class="subtitle">Hello {{ walletEmail }}</h2>
+
+		<div class="field">
+			<div class="card-content">
+				<div class="content">
+					<label class="label">Account:</label>
+					<div class="data">
+						{{ accounts[0] }}
 					</div>
-					<footer class="card-footer">
-						<router-link to="/settings" tag="a" class="card-footer-item"> Settings </router-link>
-						<a class="card-footer-item" v-on:click="logout()">Logout</a>
-					</footer>
 				</div>
+			</div>
+		</div>
+		<div class="field is-grouped">
+			<div class="layout split first">
+				<button class="button is-green" @click="logout" type="submit">
+					<span class="icon is-small">
+						<i class="fas fa-lock"></i>
+					</span>
+					<span> Logout </span>
+				</button>
+			</div>
+
+			<div class="layout split second">
+				<router-link to="/settings" tag="button" class="button is-grey">
+					<span class="icon is-small">
+						<i class="fas fa-cog"></i>
+					</span>
+					<span> Settings </span>
+				</router-link>
 			</div>
 		</div>
 	</div>
@@ -43,14 +58,14 @@ export default class Wallet extends mixins(Global, Authenticated) {
 	selectedAccount = '';
 
 	async mounted() {
-		if (this.isIframe()) {
+		if (this.isIframe() && !this.store.loginComplete) {
 			if (this.store.connection && this.store.connection !== null) {
 				const promise = this.store.connection.promise;
 
 				(await promise).onLogin(this.store.accounts[0], this.store.email);
 			}
 		}
-
+		this.store.loginComplete = true;
 	}
 
 	logout() {

@@ -10,14 +10,11 @@
 </template>
 
 <script>
-import {
-	backupGoogleSeed,
-	changePasswordEncryptedSeed
-} from "../utils/backupRestore";
-import GoogleLogin from "vue-google-login";
+import { backupGoogleSeed, changePasswordEncryptedSeed } from '../utils/backupRestore';
+import GoogleLogin from 'vue-google-login';
 
 export default {
-	name: "GoogleAddRecovery",
+	name: 'GoogleAddRecovery',
 	components: {
 		GoogleLogin
 	},
@@ -29,29 +26,24 @@ export default {
 	props: {
 		walletEmail: {
 			type: String,
-			default: ""
+			default: ''
 		}
 	},
 	methods: {
 		async onLogin(data) {
 			const userID = data.Da;
-			const encryptedSeedFromPassword =
-				localStorage.getItem("encryptedSeed") || "";
-			if (encryptedSeedFromPassword === "") {
-				throw new Error("Keystore not found, aborting");
+			const encryptedSeedFromPassword = localStorage.getItem('encryptedSeed') || '';
+			if (encryptedSeedFromPassword === '') {
+				throw new Error('Keystore not found, aborting');
 			}
 
 			const encryptedSeedFromFacebookUserID = await changePasswordEncryptedSeed(
 				JSON.parse(encryptedSeedFromPassword),
-				window.sessionStorage.getItem("password"),
+				window.sessionStorage.getItem('password'),
 				userID
 			);
 			try {
-				await backupGoogleSeed(
-					this.walletEmail,
-					userID,
-					encryptedSeedFromFacebookUserID
-				);
+				await backupGoogleSeed(this.walletEmail, userID, encryptedSeedFromFacebookUserID);
 				this.hasWalletRecovery = true;
 			} catch (e) {
 				console.log(e);
@@ -63,6 +55,4 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-
-</style>
+<style scoped></style>

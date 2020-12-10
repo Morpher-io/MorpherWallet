@@ -1,58 +1,74 @@
 <template>
 	<div class="card">
 		<form v-on:submit.prevent="formSubmitChange2FA">
-			<header class="card-header">
-				<p class="card-header-title">Change 2-Factor authentication (2FA)</p>
-			</header>
-			<div class="card-content">
-				<div class="field">
-					<div class="control">
-						<label class="checkbox">
-							<input type="checkbox" id="email" v-model="email" />
-							2FA with Email Codes enabled
-						</label>
+			<div class="collapse">
+				<span v-show="collapsed" class="icon collapseIcon collapseIcon" @click="collapsed = !collapsed">
+					<i class="fas fa-chevron-right"></i>
+				</span>
+				<span v-show="!collapsed" class="icon collapseIcon collapseIcon" @click="collapsed = !collapsed">
+					<i class="fas fa-chevron-down"></i>
+				</span>
+
+				<span class="header" @click="collapsed = !collapsed"> Change 2-Factor authentication (2FA) </span>
+				<div :class="collapsed ? 'hidden' : 'visible'">
+					<div class="card-content">
+						<div class="field">
+							<input type="checkbox" class="checkbox" id="email" v-model="email" />
+							<label class="label">
+								2FA with Email Codes enabled
+							</label>
+						</div>
+
+						<div class="field">
+							<input type="checkbox" class="checkbox" id="authenticator" v-model="authenticator" />
+							<label class="label">
+								2FA with Authenticator Codes enabled
+							</label>
+						</div>
+
+						<img
+							v-if="this.authenticator && (this.qrCode !== '' || this.qrCode !== undefined)"
+							style="height: 400px; margin: 10px"
+							v-bind:src="this.qrCode"
+						/>
+
+						<input
+							v-if="this.authenticator"
+							type="submit"
+							style="margin: 10px; display: block"
+							value="Generate QR Code"
+							v-on:click="generateQR"
+						/>
+
+						<input
+							v-if="this.authenticator && !this.authenticatorConfirmed"
+							type="text"
+							style="margin: 10px"
+							placeholder="Authenticator Code"
+							class="textbox"
+							v-model="authenticatorCode"
+						/>
+
+						<input
+							v-if="this.authenticator && !this.authenticatorConfirmed"
+							style="margin: 10px; display: block"
+							type="submit"
+							value="Confirm Authenticator"
+							v-on:click="confirmAuthenticator"
+						/>
+					</div>
+
+					<div class="field is-grouped">
+						<div class="layout split">
+							<button class="button is-green" type="submit">
+								<span class="icon is-small">
+									<i class="fas fa-save"></i>
+								</span>
+								<span> Save 2FA Settings </span>
+							</button>
+						</div>
 					</div>
 				</div>
-
-				<div class="field">
-					<div class="control">
-						<label class="checkbox">
-							<input type="checkbox" id="authenticator" v-model="authenticator" />
-							2FA with Authenticator Codes enabled
-						</label>
-					</div>
-				</div>
-
-				<img
-					v-if="this.authenticator && (this.qrCode !== '' || this.qrCode !== undefined)"
-					style="height: 400px; margin: 10px"
-					v-bind:src="this.qrCode"
-				/>
-
-				<input
-					v-if="this.authenticator"
-					type="submit"
-					style="margin: 10px; display: block"
-					value="Generate QR Code"
-					v-on:click="generateQR"
-				/>
-
-				<input
-					v-if="this.authenticator && !this.authenticatorConfirmed"
-					type="text"
-					style="margin: 10px"
-					placeholder="Authenticator Code"
-					class="textbox"
-					v-model="authenticatorCode"
-				/>
-
-				<input
-					v-if="this.authenticator && !this.authenticatorConfirmed"
-					style="margin: 10px; display: block"
-					type="submit"
-					value="Confirm Authenticator"
-					v-on:click="confirmAuthenticator"
-				/>
 			</div>
 			<footer class="card-footer">
 				<button data-v-53cc84dd="" type="button" class="button is-fullwidth is-primary">Save 2FA Settings</button>
@@ -72,17 +88,16 @@ import {
 	getKeystoreFromEncryptedSeed
 } from '../utils/backupRestore';
 
-import { sha256 } from '../utils/cryptoFunctions';
-
 export default {
 	name: 'change2FA',
-	data: function () {
+	data: function() {
 		return {
 			email: false,
 			authenticator: false,
 			authenticatorConfirmed: false,
 			authenticatorCode: '',
-			qrCode: ''
+			qrCode: '',
+			collapsed: true
 		};
 	},
 	props: [''],

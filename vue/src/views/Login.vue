@@ -73,7 +73,9 @@ export default class Login extends mixins(Global) {
 				}
 			})
 			.catch(error => {
-				console.log(error);
+				if (error !== true && error !== false) {
+					console.log('Error in unlock', error);
+				}
 			});
 	}
 
@@ -81,13 +83,14 @@ export default class Login extends mixins(Global) {
 	 * Execute the logon
 	 */
 	login() {
+		this.store.loginComplete = false;
 		const email = this.walletEmail;
 		const password = this.walletPassword;
 
 		// Call the fetchUser store action to process the wallet logon
 		this.fetchUser({ email, password })
 			.then(() => {
-				if (this.store.twoFaRequired) {
+				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator) {
 					// open 2fa page if 2fa is required
 					this.$router.push('/2fa');
 				} else {
@@ -103,9 +106,10 @@ export default class Login extends mixins(Global) {
 			})
 			.catch(error => {
 				// Logon failed
-				console.log(error);
+				if (error !== true && error !== false) {
+					console.log('Error in login', error);
+				}
 			});
 	}
 }
 </script>
-

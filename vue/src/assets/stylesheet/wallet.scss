@@ -120,6 +120,10 @@ body {
 	font-weight: 500;
 	font-size: 16px
 }
+.data {
+	font-weight: 400;
+	font-size: 15px
+}
 
 /* input elements */
 input {
@@ -137,6 +141,20 @@ input {
 	box-sizing: border-box;
 
 }
+input::placeholder {
+  color: $col_grey_light;
+}
+
+input[type=checkbox] {
+	width: 20px;
+	height: 20px;
+}
+
+input[type=checkbox]:checked  {
+	background-color: palegreen !important;
+} 
+
+
 
 .help {
 	font-size: 14px;
@@ -170,4 +188,32 @@ input {
 			background-color: $col_grey_light;
 		} 
 }
+.button:focus{border: 0}
 
+
+.collapse {
+	text-align: left;
+	font-weight: 400;
+	font-size: 18px;
+	margin-top: $spacing_1;
+	margin-bottom: 0px;	
+	border-bottom: 1px solid $col_grey;
+	padding-bottom: $spacing_1;
+	.header {
+		cursor: pointer;
+	}
+	.hidden {
+		 display: none;
+		 transition: all 0.3s ease-in-out 0s;
+	}
+	.visible {
+		display: inline;
+		transition: all 0.3s ease-in-out 0s;
+	}
+	.collapseIcon {
+		font-size: 11pt;
+		line-height: 14pt;;
+		font-weight: 400;
+		margin-right: 4px;
+	}
+}

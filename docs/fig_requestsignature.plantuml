@@ -1,0 +1,24 @@
+@startuml
+
+object "unsorted reqest.body" as unsorted {
+  payload.email2fa = true
+  payload.authenticator2fa = false
+  email = "thomas@morpher"
+}
+
+object "sorted reqest.body" as sorted {
+  email = "thomas@morpher"
+  payload.authenticator2fa = false
+  payload.email2fa = true
+}
+
+object header { 
+signature 
+}
+
+
+unsorted -> sorted :"Object.sortByKey"
+sorted -> "keystore.sign()" :"JSON.stringify"
+"keystore.sign()" -> header :"Add to request header"
+
+@enduml

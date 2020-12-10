@@ -1,6 +1,12 @@
 # Login Flow for the Wallet
 
-![alt text](./images/loginflow.svg "Login Flow for the Wallet")
+This section describes the login and unlock-Flow for the wallet.
+
+The login and unlock flow are different only by the contents of the localStorage. If the encryptedSeed is already stored in localStorage, then we don't need to fetch it from the backend.
+
+## Login Flow
+
+:[LoginflowUml](fig_login.plantuml)
 
 When the user logs into the wallet the first time, then the browsers localstore and sessionstore is empty.
 
@@ -17,3 +23,9 @@ When the user logs into the wallet the first time, then the browsers localstore 
 4. If decryption with 2FA and password was successful then the _password-encrypted_ keystore (after decrypt with 2fa) is stored in localstorage. This lets the user "unlock" the keystore with the password only in sub-sequent uses of the wallet
 
 5. The wallet is initialized: The keystore is used to generate an account. The account is stored in the JavaScript-Storage-Backend. The frontend shows the Address and UI
+
+
+## Unlock Flow
+
+
+:[UnlockFlowUML](fig_unlock.plantuml)

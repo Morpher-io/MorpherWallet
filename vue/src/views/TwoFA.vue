@@ -68,8 +68,8 @@ export default class TwoFA extends mixins(Global) {
 	 * Process email 2fa authentication
 	 */
 	async validateCode() {
-		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.emailCode })
-			.then((nextroute) => {
+		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.authenticatorCode })
+			.then(nextroute => {
 				this.$router.push(nextroute);
 			})
 			.catch(error => {
