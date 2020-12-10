@@ -19,6 +19,7 @@ module.exports = {
 		"no-async-promise-executor": "off", // turn this off later
 		"@typescript-eslint/no-explicit-any": 0, // turn this off later
 		'@typescript-eslint/no-var-requires': 0, // turn this off later
+    "@typescript-eslint/ban-ts-ignore": "off"
   },
   overrides: [
     {

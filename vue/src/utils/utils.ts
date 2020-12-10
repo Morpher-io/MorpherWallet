@@ -12,4 +12,17 @@ function downloadEncryptedKeystore(keystore: any) {
 	download(JSON.stringify(keystore), now.toISOString() + '--' + keystore.address);
 }
 
-export { getAccountsFromKeystore, downloadEncryptedKeystore };
+function sortObject(object: any){
+	if (typeof object != "object" || object instanceof Array) // Not to sort the array
+		return object;
+	const keys = Object.keys(object);
+	keys.sort();
+	const newObject = {};
+	for (let i = 0; i < keys.length; i++){
+		// @ts-ignore
+		newObject[keys[i]] = sort(object[keys[i]])
+	}
+	return newObject;
+}
+
+export { getAccountsFromKeystore, downloadEncryptedKeystore, sortObject };

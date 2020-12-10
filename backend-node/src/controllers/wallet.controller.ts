@@ -93,6 +93,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
         const key = req.body.key;
         const encryptedSeed = req.body.encryptedSeed;
         const recoveryTypeId = req.body.recoveryTypeId || 1;
+        const eth_address = req.body.ethAddress;
 
         let userId;
 
@@ -103,7 +104,10 @@ export async function saveEmailPassword(req: Request, res: Response) {
             // If it exists, set the userId and delete the associated recovery method.
             // If it doesnt exist create a new one.
             const payload = { email: true, authenticator: false, authenticatorConfirmed: false };
-            userId = (await User.create({ email, payload }, { transaction })).dataValues.id;
+
+            const nonce = randomFixedInteger(6);
+
+            userId = (await User.create({ email, payload, nonce, eth_address }, { transaction })).dataValues.id;
 
             // Create a new recovery method.
             const recoveryId = (
@@ -330,6 +334,21 @@ export async function getPayload(req, res) {
         return successResponse(res, payload);
     } else {
         return errorResponse(res, '2FA methods could not be found');
+    }
+}
+
+export async function getNonce(req, res) {
+    const key = req.body.key;
+    const recovery = await Recovery.findOne({ where: { key } });
+    if (recovery == null) {
+        return errorResponse(res, 'User not found');
+    }
+    const user = await User.findOne({ where: { id: recovery.user_id }, raw: true });
+
+    if (user) {
+        return successResponse(res, { nonce: user.nonce });
+    } else {
+        return errorResponse(res, 'Nonce could not be found');
     }
 }
 

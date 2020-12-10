@@ -83,6 +83,13 @@ export type TypeCreatedKeystore = {
   encryptedSeed: string;
   keystore: any;
 }
+
+export type WalletSign = {
+    __typename?: "WalletSign";
+    sign: any;
+}
+
+
 export type ZeroWalletConfig = {
   __typename?: "Type2FARequired";
   show_transaction: boolean;

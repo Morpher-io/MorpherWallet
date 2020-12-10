@@ -94,4 +94,17 @@ const randomFixedInteger = function (length) {
     return Math.floor(Math.pow(10, length-1) + Math.random() * (Math.pow(10, length) - Math.pow(10, length-1) - 1));
 }
 
-export { errorResponse, successResponse, asyncForEach, formatMarketId, seedDatabase, encrypt, decrypt, sha256, randomFixedInteger };
+function sortObject(object: any){
+    if (typeof object != "object" || object instanceof Array) // Not to sort the array
+        return object;
+    const keys = Object.keys(object);
+    keys.sort();
+    const newObject = {};
+    for (let i = 0; i < keys.length; i++){
+        // @ts-ignore
+        newObject[keys[i]] = sort(object[keys[i]])
+    }
+    return newObject;
+}
+
+export { errorResponse, successResponse, asyncForEach, formatMarketId, seedDatabase, encrypt, decrypt, sha256, randomFixedInteger, sortObject };

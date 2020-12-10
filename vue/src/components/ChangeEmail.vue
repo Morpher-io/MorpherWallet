@@ -18,8 +18,9 @@
 					</div>
 				</div>
 			</div>
+			<br>
 			<footer class="card-footer">
-				<a href="#" class="card-footer-item">Update Email</a>
+				<button data-v-53cc84dd="" type="button" class="button is-fullwidth is-primary">Update Email</button>
 			</footer>
 		</form>
 	</div>

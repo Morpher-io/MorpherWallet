@@ -50,6 +50,10 @@ export default class Wallet extends mixins(Global, Authenticated) {
 				(await promise).onLogin(this.store.accounts[0], this.store.email);
 			}
 		}
+
+
+		// @ts-ignore
+		console.log(this.store.keystore[0].sign('test'))
 	}
 
 	logout() {

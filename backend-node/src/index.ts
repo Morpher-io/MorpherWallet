@@ -8,7 +8,7 @@ import * as morgan from 'morgan';
 import * as helmet from 'helmet';
 import * as bodyParser from 'body-parser';
 import { sequelize, User } from './database/models';
-import {decrypt, encrypt, sha256, successResponse} from './helpers/functions/util';
+import {decrypt, encrypt, errorResponse, randomFixedInteger, sha256, successResponse} from './helpers/functions/util';
 import { Logger } from './helpers/functions/winston';
 
 // Import v1 routes instance for REST endpoint.
@@ -64,6 +64,8 @@ process.on('unhandledRejection', (error: any, promise) => {
     Logger.info(error.stack || error);
 });
 
+const Util = require('ethereumjs-util');
+
 // Listen to the server ports.
 httpServer.listen(process.env.PORT, async () => {
     console.log(`🚀Express Server ready at http://localhost:${process.env.PORT}`);
@@ -71,6 +73,31 @@ httpServer.listen(process.env.PORT, async () => {
     // Database initialization.
     await sequelize.sync();
     Logger.info('Connected to database');
+
+
+//     const signature = {
+//     messageHash: "0xc206bbd6cebc3a8505d0811125796ac556510961739cf00b96f5acf27cd1646e",
+//     r: "0x808d381d260a99b3aa73416e91174f6dc03c4fdb242224fa9f92a7e6b5ed3cbf",
+//     s: "0x0d2396746a00777d31226c79654b76de82d1dc3364e6b8593114722048806f53",
+//     signature: "0x808d381d260a99b3aa73416e91174f6dc03c4fdb242224fa9f92a7e6b5ed3cbf0d2396746a00777d31226c79654b76de82d1dc3364e6b8593114722048806f531c",
+//     v: "0x1c"
+// }
+
+    const signature = {message: "test",
+        messageHash: "0x4a5c5d454721bbbb25540c3317521e71c373ae36458f960d2ad46ef088110e95",
+        v: "0x1c", r: "0xada7c1d6f805da920bac5abdb9ee8edb73730a6c59dff9e8ff47c2be3e6a4a86",
+        signature: "0xada7c1d6f805da920bac5abdb9ee8edb73730a6c59dff9e8ff47c2be3e6a4a86778e1b80b83a43d2106e78b8ef32e788c81dcdd7e3c289714d9fe379d0373f6a1c",
+        s: "0x778e1b80b83a43d2106e78b8ef32e788c81dcdd7e3c289714d9fe379d0373f6a"}
+    const signObject = 'test';
+
+    const msgHash = Util.keccak('test');
+
+    console.log(msgHash.toString('hex'))
+
+    const eth_address = '0x' + (Util.pubToAddress(Util.ecrecover(Buffer.from(signature.messageHash), Buffer.from(signature.v), Buffer.from(signature.r), Buffer.from(signature.s)))).toString('hex');
+
+    console.log(eth_address)
+
 });
 
 // Export server for testing purposes

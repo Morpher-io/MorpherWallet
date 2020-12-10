@@ -37,8 +37,9 @@
 					</div>
 				</div>
 			</div>
+			<br>
 			<footer class="card-footer">
-				<button type="submit" class="card-footer-item" v-on:click="changePasswordExecute()">Save Password</button>
+				<button data-v-53cc84dd="" type="submit" class="button is-fullwidth is-primary">Save Password</button>
 			</footer>
 		</form>
 	</div>

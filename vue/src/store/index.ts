@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuex, { Store } from 'vuex';
 import { sha256 } from '../utils/cryptoFunctions';
 import {
+	createSignature,
 	getEncryptedSeedFromMail,
 	verifyAuthenticatorCode,
 	verifyEmailCode,
@@ -10,7 +11,7 @@ import {
 	getPayload,
 	getKeystoreFromEncryptedSeed,
 	changePasswordEncryptedSeed,
-	updateWalletEmailPassword
+	updateWalletEmailPassword, change2FAMethods
 } from '../utils/backupRestore';
 import { getAccountsFromKeystore } from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
@@ -23,7 +24,7 @@ import {
 	TypeUnlock2fa,
 	TypeUserFoundData,
 	TypeUnlockWithPassword,
-	ZeroWalletConfig
+	ZeroWalletConfig,
 	TypeChangePassword,
 	TypeEncryptedSeed
 } from '../types/global-types';
@@ -218,7 +219,7 @@ const store: Store<RootState> = new Vuex.Store({
 
 						commit('seedCreated', { email: params.email, hashedPassword: params.password, unencryptedKeystore: createdKeystoreObj.keystore, encryptedSeed: createdKeystoreObj.encryptedSeed });
 
-						saveWalletEmailPassword(params.email, createdKeystoreObj.encryptedSeed).then(res => {
+						saveWalletEmailPassword(params.email, createdKeystoreObj.encryptedSeed, this.state.accounts[0]).then(res => {
 							getPayload(params.email)
 								.then(payload => {
 									//2FA for signup is hard to do, because the wallet is created client side. We can still "try" to lure the user into this flow
@@ -333,10 +334,11 @@ const store: Store<RootState> = new Vuex.Store({
 
 		},
 		async changePassword({ commit, state }, params: TypeChangePassword) {
+			// @ts-ignore
+			const keystore = this.state.keystore[0];
 
-			console.log(params);
-			let newEncryptedSeed = changePasswordEncryptedSeed(state.encryptedSeed, params.oldPassword, params.newPassword);
-			await updateWalletEmailPassword(state.email, state.email, JSON.stringify(newEncryptedSeed));
+			const newEncryptedSeed = changePasswordEncryptedSeed(state.encryptedSeed, params.oldPassword, params.newPassword);
+			await updateWalletEmailPassword(state.email, state.email, JSON.stringify(newEncryptedSeed), keystore);
 			commit('seedFound', {encryptedSeed: newEncryptedSeed});
 			commit('userFound', {email: state.email, hashedPassword: params.newPassword});
 		}

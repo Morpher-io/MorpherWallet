@@ -16,6 +16,7 @@ module.exports = function(express) {
     router.post('/getVKontakteEncryptedSeed', WalletController.getVKontakteEncryptedSeed);
 
     router.post('/getPayload', WalletController.getPayload);
+    router.post('/getNonce', WalletController.getNonce);
     router.post('/send2FAEmail', WalletController.send2FAEmail);
     router.post('/generateAuthenticatorQR', WalletController.generateAuthenticatorQR);
     router.post('/verifyAuthenticatorCode', WalletController.verifyAuthenticatorCode);
@@ -28,7 +29,7 @@ module.exports = function(express) {
      * Secure routes checking signature matching eth_address
      */
     router.use('/auth', secureRoutes);
-    router.post('/auth/updateEmailPassword', WalletController.updateEmailPassword);
+    router.post('/auth/updateEmailPassword', secureRoutes, WalletController.updateEmailPassword);
     router.post('/auth/change2FAMethods', WalletController.change2FAMethods);
 
     return router;

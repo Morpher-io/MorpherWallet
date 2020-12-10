@@ -55,9 +55,10 @@
 				/>
 			</div>
 			<footer class="card-footer">
-				<a href="#" class="card-footer-item">Save 2FA Settings</a>
+				<button data-v-53cc84dd="" type="button" class="button is-fullwidth is-primary">Save 2FA Settings</button>
 			</footer>
 		</form>
+		<br>
 	</div>
 </template>
 
