@@ -19,9 +19,8 @@ function sortObject(object: any){
 		return object;
 	const keys = Object.keys(object);
 	keys.sort();
-	const newObject = {};
+	const newObject:any = {};
 	for (let i = 0; i < keys.length; i++){
-		// @ts-ignore
 		newObject[keys[i]] = sortObject(object[keys[i]])
 	}
 	return newObject;

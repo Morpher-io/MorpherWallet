@@ -3,28 +3,28 @@ import { WalletBase } from 'web3-core';
 
 export type TypeEncryptedSeed = {
 	__typename?: 'TypeEncryptedSeed';
-	ciphertext?: Maybe<string>;
-	iv?: Maybe<string>;
-	salt?: Maybe<string>;
+  ciphertext?: string,
+	iv?: string,
+	salt?: string
 };
 
 export type Type2FARequired = {
 	__typename?: 'Type2FARequired';
-	email: Maybe<boolean>;
-	authenticator: Maybe<boolean>;
+	email: boolean;
+	authenticator: boolean;
 };
 
 export type TypeSeedFoundData = {
 	__typename?: 'TypeSeedFoundData';
 	email: string;
-	encryptedSeed: string;
+	encryptedSeed: TypeEncryptedSeed;
 	hashedPassword: string;
 };
 
 export type TypeSeedCreatedData = {
 	__typename?: 'TypeSeedCreatedData';
 	email: string;
-	encryptedSeed: string;
+	encryptedSeed: TypeEncryptedSeed;
 	hashedPassword: string;
 };
 
@@ -79,7 +79,7 @@ export type TypePayloadData = {
 
 export type TypeCreatedKeystore = {
   __typename?: "TypeCreatedKeystore";
-  encryptedSeed: string;
+  encryptedSeed: TypeEncryptedSeed;
   keystore: WalletBase;
 }
 

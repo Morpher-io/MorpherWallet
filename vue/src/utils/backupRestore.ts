@@ -9,6 +9,7 @@ import { TypeEncryptedSeed, TypePayloadData, TypeCreatedKeystore, WalletSign } f
 import { WalletBase } from 'web3-core';
 
 const changePasswordEncryptedSeed = async (encryptedSeed: TypeEncryptedSeed, oldPassword: string, newPassword: string) => {
+	console.log(encryptedSeed);
 	const seed = await cryptoDecrypt(oldPassword, encryptedSeed.ciphertext, encryptedSeed.iv, encryptedSeed.salt);
 	return await cryptoEncrypt(newPassword, seed);
 };
@@ -24,7 +25,7 @@ const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: TypeEncrypted
 	});
 
 const getEncryptedSeedFromMail = async (email: string, email2fa: string, authenticator2fa: string) =>
-	new Promise((resolve, reject) => {
+	new Promise<TypeEncryptedSeed>((resolve, reject) => {
 		sha256(email.toLowerCase()).then((key: string) => {
 			const options: RequestInit = {
 				method: 'POST',
@@ -94,7 +95,7 @@ const validateInput = async (fieldName: string, inputFieldValue: string) => {
 	}
 };
 
-const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: string, ethAddress: string) => {
+const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEncryptedSeed, ethAddress: string) => {
 	const key = await sha256(userEmail.toLowerCase());
 	const options: RequestInit = {
 		method: 'POST',
@@ -360,13 +361,12 @@ const getNonce = async (key: string) => {
 };
 
 async function createSignature(key: string, body: any, keystore: WalletSign){
-	const nonce = (await getNonce(key)).nonce;
-
-	const signMessage = JSON.stringify(body) + '_' + nonce;
+	body.nonce =  (await getNonce(key)).nonce;
+	const signMessage = JSON.stringify(body);
 
 	console.log(signMessage)
 
-	return keystore.sign(signMessage)
+	return await keystore.sign(signMessage)
 }
 
 const updateWalletEmailPassword = async (oldEmail: string, newEmail: string, encryptedSeed: string, keystore: WalletSign) => {
@@ -381,7 +381,8 @@ const updateWalletEmailPassword = async (oldEmail: string, newEmail: string, enc
 		encryptedSeed
 	});
 
-	const signature = await createSignature(oldKey, body, keystore)
+	const signature = await createSignature(oldKey, body, keystore);
+	console.log(signature);
 
 	const options: RequestInit = {
 		method: 'POST',
