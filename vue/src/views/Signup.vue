@@ -40,7 +40,6 @@
 
 			<div class="field">
 				<div class="layout split first">
-
 					<button class="button is-green" type="submit">
 						<span class="icon is-small">
 							<i class="far fa-file"></i>
@@ -63,7 +62,6 @@
 
 <script lang="ts">
 import Password from 'vue-password-strength-meter';
-import { sha256 } from '../utils/cryptoFunctions';
 import { validateInput } from '../utils/backupRestore';
 
 import Component, { mixins } from 'vue-class-component';
@@ -114,12 +112,17 @@ export default class Signup extends mixins(Global) {
 			this.invalidPassword = passwordMessage;
 			return;
 		}
-		const password = await sha256(this.walletPassword);
+
 		const email = this.walletEmail;
 
-		this.createWallet({ email, password })
+		this.createWallet({ email, password: this.walletPassword })
 			.then(() => {
-				this.$router.push('/2fa');
+				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator) {
+					// open 2fa page if 2fa is required
+					this.$router.push('/2fa');
+				} else {
+					this.$router.push('/');
+				}
 			})
 			.catch(console.log);
 	}

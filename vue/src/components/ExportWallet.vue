@@ -37,7 +37,7 @@
 </template>
 
 <script>
-import { sha256, cryptoDecrypt } from '../utils/cryptoFunctions';
+import { sha256 } from '../utils/cryptoFunctions';
 import { getKeystoreFromEncryptedSeed } from '../utils/backupRestore';
 import { downloadEncryptedKeystore, getAccountsFromKeystore } from '../utils/utils';
 

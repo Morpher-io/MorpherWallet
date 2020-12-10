@@ -6,8 +6,8 @@ import { Action } from 'vuex-class';
 import { TypeFetchUser, TypeUnlock2fa, TypeUnlockWithPassword } from '../types/global-types';
 import { mapState } from 'vuex';
 import { RootState } from '../store';
-import isIframe from "../utils/isIframe";
-import { Prop, Watch } from 'vue-property-decorator';
+import isIframe from '../utils/isIframe';
+import { Watch } from 'vue-property-decorator';
 
 /**
  * Mixin used for all components
@@ -51,23 +51,21 @@ export class Global extends Vue {
 	@Action
 	public logoutWallet!: () => void;
 
-
 	// Map Store Properties
 	store: RootState = this.$store.state;
-	
+
 	// map libraries
 	isIframe = isIframe;
-	
 
 	@Watch('store.keystore')
-	onPropertyChanged(value: any, oldValue: any) {
+	onPropertyChanged(value: any) {
 		if (value === null) {
 			this.$router.push('/login');
 		}
 	}
 
 	@Watch('store.openPage')
-	onPageChanged(value: any, oldValue: any) {
+	onPageChanged(value: any) {
 		if (value) {
 			if (value === 'wallet') this.$router.push('/');
 			if (value === 'settings') this.$router.push('/settings');
@@ -75,9 +73,6 @@ export class Global extends Vue {
 			this.clearPage();
 		}
 	}
-	
-
-
 }
 
 /**
@@ -90,6 +85,7 @@ export class Global extends Vue {
 			keystore: (state: any) => state.keystore,
 			accounts: (state: any) => state.accounts
 		})
-	}, watch: {}
+	},
+	watch: {}
 })
 export class Authenticated extends Global {}

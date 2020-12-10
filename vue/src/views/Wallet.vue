@@ -4,39 +4,37 @@
 
 		<h1 class="title">Morpher Wallet</h1>
 
-				<h2 class="subtitle">Hello {{ walletEmail }}</h2>
-			
-				<div class="field">
-					<div class="card-content">
-						<div class="content">
-							<label class="label">Account:</label>
-								<div class="data">
-									{{ accounts[0] }}
-								</div>
-						</div>
+		<h2 class="subtitle">Hello {{ walletEmail }}</h2>
+
+		<div class="field">
+			<div class="card-content">
+				<div class="content">
+					<label class="label">Account:</label>
+					<div class="data">
+						{{ accounts[0] }}
 					</div>
+				</div>
+			</div>
+		</div>
+		<div class="field is-grouped">
+			<div class="layout split first">
+				<button class="button is-green" @click="logout" type="submit">
+					<span class="icon is-small">
+						<i class="fas fa-lock"></i>
+					</span>
+					<span> Logout </span>
+				</button>
+			</div>
 
-				</div>
-			<div class="field is-grouped">
-				<div class="layout split first">
-					<button class="button is-green" type="submit">
-						<span class="icon is-small">
-							<i class="fas fa-lock"></i>
-						</span>
-						<span> Logout </span>
-					</button>
-				</div>
-
-				<div class="layout split second">
-					<router-link to="/settings" tag="button" class="button is-grey">
-						<span class="icon is-small">
-							<i class="fas fa-cog"></i>
-						</span>
-						<span> Settings </span>
-					</router-link>
-				</div>
-			</div>			
-		
+			<div class="layout split second">
+				<router-link to="/settings" tag="button" class="button is-grey">
+					<span class="icon is-small">
+						<i class="fas fa-cog"></i>
+					</span>
+					<span> Settings </span>
+				</router-link>
+			</div>
+		</div>
 	</div>
 </template>
 
