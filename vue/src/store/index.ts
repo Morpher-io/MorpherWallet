@@ -359,17 +359,12 @@ const store: Store<RootState> = new Vuex.Store({
 			try {
 				if (state.keystore !== undefined && state.keystore !== null) {
 					const newEncryptedSeed = await changePasswordEncryptedSeed(state.encryptedSeed, params.oldPassword, params.newPassword);
-					console.log(newEncryptedSeed);
-					if (Object.keys(newEncryptedSeed).length > 0) {
-						await updateWalletEmailPassword(state.email, state.email, newEncryptedSeed, state.keystore[0]);
-						console.log(newEncryptedSeed, params.newPassword);
-						commit('seedFound', { encryptedSeed: newEncryptedSeed });
-						commit('userFound', { email: state.email, hashedPassword: params.newPassword });
-
-						alert('Password changed successfully.');
-					}
+					await updateWalletEmailPassword(state.email, state.email, newEncryptedSeed, state.keystore[0]);
+					commit('seedFound', { encryptedSeed: newEncryptedSeed });
+					commit('userFound', { email: state.email, hashedPassword: params.newPassword });
 				}
 			} catch (e) {
+				console.error(e);
 				alert('Error in change password');
 			}
 		}

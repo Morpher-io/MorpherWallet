@@ -362,9 +362,7 @@ const getNonce = async (key: string) => {
 
 async function createSignature(key: string, body: any, keystore: WalletSign) {
 	body.nonce = (await getNonce(key)).nonce;
-	const signMessage = JSON.stringify(body);
-
-	console.log(signMessage);
+	const signMessage = JSON.stringify(sortObject(body));
 
 	return await keystore.sign(signMessage);
 }
@@ -373,15 +371,16 @@ const updateWalletEmailPassword = async (oldEmail: string, newEmail: string, enc
 	const oldKey = await sha256(oldEmail.toLowerCase());
 	const newKey = await sha256(newEmail.toLowerCase());
 
-	const body = sortObject({
+	const body = {
 		oldKey,
 		newKey,
 		oldEmail,
 		newEmail,
 		encryptedSeed
-	});
+	};
 
 	const signature = await createSignature(oldKey, body, keystore);
+	delete signature.message;
 	console.log(signature);
 
 	const options: RequestInit = {
