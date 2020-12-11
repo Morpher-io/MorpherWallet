@@ -8,7 +8,16 @@
 			<div class="field" v-if="twoFaRequired.email">
 				<label class="label">Email 2FA</label>
 				<div class="control">
-					<input type="number" min="100000" max="999999" class="input" name="emailCode" id="emailCode" placeholder="123456" v-model="emailCode" />
+					<input
+						type="number"
+						min="100000"
+						max="999999"
+						class="input"
+						name="emailCode"
+						id="emailCode"
+						placeholder="123456"
+						v-model="emailCode"
+					/>
 				</div>
 
 				<p class="help">Enter here the Code that we sent you to your inbox!</p>
@@ -19,7 +28,14 @@
 			<div class="field" v-if="twoFaRequired.authenticator">
 				<label class="label">Authenticator 2FA</label>
 				<div class="control">
-					<input type="number" class="input" name="authenticatorCode" id="authenticatorCode" placeholder="123456" v-model="authenticatorCode" />
+					<input
+						type="number"
+						class="input"
+						name="authenticatorCode"
+						id="authenticatorCode"
+						placeholder="123456"
+						v-model="authenticatorCode"
+					/>
 				</div>
 
 				<p class="help">Enter here the Code from Google Authenticator!</p>
@@ -82,13 +98,13 @@ export default class TwoFA extends mixins(Global) {
 		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.authenticatorCode })
 			.then(nextroute => {
 				this.showSpinner = false;
-				this.$router.push(nextroute);
+				this.router.push(nextroute);
 			})
 			.catch(error => {
 				this.showSpinner = false;
 				if (error.toString() === 'invalid password') {
 					this.store.status = 'invalid password';
-					this.$router.push('/login');
+					this.router.push('/login');
 				}
 				this.showSpinner = false;
 				this.showError = true;
@@ -103,7 +119,7 @@ export default class TwoFA extends mixins(Global) {
 
 	logout() {
 		this.logoutWallet();
-		this.$router.push('/login');
+		this.router.push('/login');
 	}
 }
 </script>

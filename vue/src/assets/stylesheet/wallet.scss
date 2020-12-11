@@ -154,15 +154,17 @@ input[type=checkbox]:checked  {
 	background-color: palegreen !important;
 } 
 
-
-
 .help {
 	font-size: 14px;
 	font-weight: 400;
+	&.is-danger {
+		color: $col_orange;
+	}
+	&.is-success {
+		color: $col_orange;
+	}
 }
-.is-danger {
-	color: $col_orange;
-}
+
 
 /* button elements */
 .button {

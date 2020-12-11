@@ -291,7 +291,9 @@ const store: Store<RootState> = new Vuex.Store({
 								dispatch('unlockWithStoredPassword')
 									.then(() => resolve('/'))
 									.catch(() => {
+										const email = rootState.email;
 										commit('logout');
+										rootState.email = email;
 										reject('invalid password');
 									});
 							} else {

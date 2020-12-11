@@ -6,14 +6,24 @@
 
 		<h2 class="subtitle">Hello {{ walletEmail }}</h2>
 
-		<div class="field">
-			<div class="card-content">
-				<div class="content">
-					<label class="label">Account:</label>
-					<div class="data">
-						{{ accounts[0] }}
+		<div class="collapse">
+			<div class="field">
+				<div class="card-content">
+					<div class="content">
+						<label class="label">Account:</label>
+						<div class="data">
+							{{ accounts[0] }}
+						</div>
 					</div>
 				</div>
+			</div>
+		</div>
+		<div class="collapse">
+			<div v-if="true">
+				<p class="help">
+					You have no wallet recovery options set. You will not be able to recover your wallet if you forget your password.
+				</p>
+				<router-link class="help" to="/addrecovery" tag="a">Set recovery options now?</router-link>
 			</div>
 		</div>
 		<div class="field is-grouped">
@@ -42,17 +52,7 @@
 import Component, { mixins } from 'vue-class-component';
 import { Global, Authenticated } from '../mixins/mixins';
 
-import FBAddRecovery from '../components/FBAddRecovery.vue';
-import GoogleAddRecovery from '../components/GoogleAddRecovery.vue';
-import VKAddRecovery from '../components/VKAddRecovery.vue';
-
-@Component({
-	components: {
-		FBAddRecovery,
-		GoogleAddRecovery,
-		VKAddRecovery
-	}
-})
+@Component
 export default class Wallet extends mixins(Global, Authenticated) {
 	dropdownIsActive = false;
 	selectedAccount = '';
@@ -70,7 +70,7 @@ export default class Wallet extends mixins(Global, Authenticated) {
 
 	logout() {
 		this.logoutWallet();
-		this.$router.push('/login');
+		this.router.push('/login');
 	}
 }
 </script>

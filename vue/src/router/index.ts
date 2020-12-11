@@ -9,6 +9,9 @@ import Settings from '../views/Settings.vue';
 import Unlock from '../views/Unlock.vue';
 import SignTx from '../views/SignTx.vue';
 import SignMsg from '../views/SignMsg.vue';
+import Recovery from '../views/Recovery.vue';
+import RecoveryAdd from '../views/RecoveryAdd.vue';
+
 
 Vue.use(VueRouter);
 
@@ -30,6 +33,19 @@ const routes: Array<RouteConfig> = [
 		meta: {
 			requiresAuth: true
 		}
+	},
+	{
+		path: '/addrecovery',
+		name: 'AddRecovery',
+		component: RecoveryAdd,
+		meta: {
+			requiresAuth: true
+		}
+	},
+	{
+		path: '/recovery',
+		name: 'Recovery',
+		component: Recovery
 	},
 	{
 		path: '/2fa',

@@ -1,7 +1,11 @@
 <template>
 	<div class="control is-expanded">
 		<button class="button is-fullwidth" @click="doLogin">
-			VKontakte
+			
+			<span class="icon google-icon">
+				<i class="fab fa-google"></i>
+			</span>
+			<span> Link to VKontakte</span>
 		</button>
 	</div>
 </template>

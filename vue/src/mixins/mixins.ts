@@ -8,6 +8,7 @@ import { mapState } from 'vuex';
 import { RootState } from '../store';
 import isIframe from '../utils/isIframe';
 import { Watch } from 'vue-property-decorator';
+import VueRouter from 'vue-router';
 
 /**
  * Mixin used for all components
@@ -53,6 +54,8 @@ export class Global extends Vue {
 
 	// Map Store Properties
 	store: RootState = this.$store.state;
+
+	router: VueRouter = this.$router;
 
 	// map libraries
 	isIframe = isIframe;

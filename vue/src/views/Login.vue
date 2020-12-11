@@ -74,6 +74,9 @@ export default class Login extends mixins(Global) {
 	 * Cmponent mounted lifestyle hook
 	 */
 	mounted() {
+		if (this.store.email ) {
+			this.walletEmail = this.store.email;
+		}
 		if (this.store.status !== 'invalid password') {
 			// Check if the wallet can be unlocked using the local-storage stored password
 			this.unlockWithStoredPassword()

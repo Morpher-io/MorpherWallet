@@ -8,7 +8,7 @@
 			@login="onLogin"
 			v-model="facebook.model"
 		>
-			<span slot="login">Facebook</span>
+			<span slot="login">Recover using Facebook</span>
 		</v-facebook-login>
 	</div>
 </template>

@@ -86,7 +86,7 @@ export default class Unlock extends mixins(Global) {
 		this.unlockWithPassword({ password })
 			.then(() => {
 				// open root page after logon success
-				this.$router.push('/');
+				this.router.push('/');
 			})
 			.catch(error => {
 				// Logon failed
@@ -96,7 +96,7 @@ export default class Unlock extends mixins(Global) {
 
 	logout() {
 		this.logoutWallet();
-		this.$router.push('/login');
+		this.router.push('/login');
 	}
 }
 </script>

@@ -6,7 +6,7 @@
 			@sdk-init="handleSdkInit"
 			@login="onLogin"
 			v-model="facebook.model"
-			><span slot="login">Facebook</span>
+			><span slot="login">Link to Facebook</span>
 		</v-facebook-login>
 	</div>
 </template>

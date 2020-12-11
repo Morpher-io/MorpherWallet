@@ -1,7 +1,7 @@
 <template>
 	<div class="control is-expanded">
 		<button type="button" class="button  is-fullwidth" @click="doLogin">
-			VKontakte
+			Recover using VKontakte
 		</button>
 	</div>
 </template>
