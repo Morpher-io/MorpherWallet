@@ -10,9 +10,10 @@ import {
 	getPayload,
 	getKeystoreFromEncryptedSeed,
 	changePasswordEncryptedSeed,
-	updateWalletEmailPassword
+	getBackendEndpoint,
+	getNonce
 } from '../utils/backupRestore';
-import { getAccountsFromKeystore } from '../utils/utils';
+import { getAccountsFromKeystore, sortObject } from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
 
 import {
@@ -26,7 +27,8 @@ import {
 	ZeroWalletConfig,
 	TypeChangePassword,
 	TypeEncryptedSeed,
-	TypeKeystoreUnlocked
+	TypeKeystoreUnlocked,
+	TypeRequestParams
 } from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
@@ -357,23 +359,65 @@ const store: Store<RootState> = new Vuex.Store({
 					});
 			});
 		},
-		async changePassword({ commit, state }, params: TypeChangePassword) {
-			try {
-				if (state.keystore !== undefined && state.keystore !== null) {
-					const newEncryptedSeed = await changePasswordEncryptedSeed(state.encryptedSeed, params.oldPassword, params.newPassword);
-					console.log(newEncryptedSeed);
-					if (Object.keys(newEncryptedSeed).length > 0) {
-						await updateWalletEmailPassword(state.email, state.email, newEncryptedSeed, state.keystore[0]);
-						console.log(newEncryptedSeed, params.newPassword);
+		changePassword({ commit, state, dispatch }, params: TypeChangePassword) {
+			return new Promise(async (resolve, reject) => {
+				try {
+					if (state.keystore !== undefined && state.keystore !== null) {
+						const newEncryptedSeed = await changePasswordEncryptedSeed(state.encryptedSeed, params.oldPassword, params.newPassword);
+						const key = await sha256(state.email.toLowerCase());
+						const body = {
+							oldKey: key,
+							newKey: key,
+							oldEmail: state.email,
+							newEmail: state.email,
+							encryptedSeed: newEncryptedSeed
+						};
+						await dispatch('sendSignedRequest', {
+							body,
+							method: 'POST',
+							url: getBackendEndpoint() + '/v1/auth/updateEmailPassword'
+						});
 						commit('seedFound', { encryptedSeed: newEncryptedSeed });
 						commit('userFound', { email: state.email, hashedPassword: params.newPassword });
-
-						alert('Password changed successfully.');
+						resolve(true);
 					}
+				} catch (e) {
+					console.error(e);
+					reject(e);
 				}
-			} catch (e) {
-				alert('Error in change password');
-			}
+			});
+		},
+		sendSignedRequest({ state }, params: TypeRequestParams) {
+			return new Promise(async (resolve, reject) => {
+				const body = params.body;
+				const key = await sha256(state.email.toLowerCase());
+				body.nonce = (await getNonce(key)).nonce;
+				const signMessage = JSON.stringify(sortObject(body));
+				if (state.keystore != null) {
+					const signature = await state.keystore[0].sign(signMessage);
+					const options: RequestInit = {
+						method: params.method,
+						headers: {
+							Accept: 'application/json',
+							'Content-Type': 'application/json',
+							Signature: JSON.stringify(signature),
+							key: key
+						},
+						body: JSON.stringify(body),
+						mode: 'cors',
+						cache: 'default'
+					};
+					console.log(options);
+					try {
+						const result = await fetch(params.url, options);
+						resolve(await result.json());
+					} catch (e) {
+						reject(e);
+					}
+				} else {
+					reject('Keystore not found, aborting');
+				}
+			});
 		}
 	},
 	getters: {

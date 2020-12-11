@@ -9,8 +9,10 @@
 					<i class="fas fa-chevron-down"></i>
 				</span>
 
-				<span class="header" @click="collapsed = !collapsed"> Password Change </span>
-
+				<span class="header" @click="collapsed = !collapsed">
+					Password Change
+					<span class="help is-success" v-if="success">Saved!</span>
+				</span>
 				<div :class="collapsed ? 'hidden' : 'visible'">
 					<div class="field">
 						<label class="label">Old Password</label>
@@ -84,6 +86,7 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 	walletPasswordRepeat = '';
 	invalidPassword = '';
 	collapsed = true;
+	success = false;
 
 	async changePasswordExecute() {
 		//this.invalidPassword = '';
@@ -102,39 +105,17 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 		const oldPasswordHashed = await sha256(this.oldPassword);
 		const newPasswordHashed = await sha256(this.walletPassword);
 
-		this.changePassword({ oldPassword: oldPasswordHashed, newPassword: newPasswordHashed });
-
-		// if (this.newPassword === this.newPasswordRepeat) {
-		// 	const encryptedSeed = JSON.parse(localStorage.getItem('encryptedSeed'));
-
-		// 	const oldPassword = await sha256(this.oldPassword);
-		// 	const newPassword = await sha256(this.newPassword);
-
-		// 	const passwordMessage = await validateInput('password', this.newPassword);
-
-		// 	if (passwordMessage) alert(passwordMessage);
-		// 	else {
-		// 		try {
-		// 			await getKeystoreFromEncryptedSeed(encryptedSeed, oldPassword);
-		// 		} catch (e) {
-		// 			alert('Old password is not right.');
-		// 		}
-
-		// 		const newEncryptedSeed = await changePasswordEncryptedSeed(encryptedSeed, oldPassword, newPassword);
-
-		// 		await saveWalletEmailPassword(window.localStorage.getItem('email'), newEncryptedSeed);
-
-		// 		window.localStorage.setItem('encryptedSeed', JSON.stringify(newEncryptedSeed));
-
-		// 		window.sessionStorage.setItem('password', newPassword);
-
-		// 		alert('Password changed successfully.');
-
-		// 		this.oldPassword = '';
-		// 		this.newPassword = '';
-		// 		this.newPasswordRepeat = '';
-		// 	}
-		// } else alert('New passwords do not match.');
+		this.changePassword({ oldPassword: oldPasswordHashed, newPassword: newPasswordHashed })
+			.then(() => {
+				this.collapsed = true;
+				this.oldPassword = '';
+				this.walletPassword = '';
+				this.walletPasswordRepeat = '';
+				this.success = true;
+			})
+			.catch(() => {
+				this.invalidPassword = 'Error happened during Update. Aborted.';
+			});
 	}
 }
 </script>
