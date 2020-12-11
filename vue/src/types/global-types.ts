@@ -101,3 +101,11 @@ export type TypeKeystoreUnlocked = {
 	accounts: [string];
 	keystore: WalletBase;
 };
+
+export type TypeRequestParams = {
+	__typename?: 'TypeRequestParams';
+	body: any;
+	url: string;
+	method: string;
+
+};

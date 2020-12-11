@@ -1,15 +1,13 @@
-import { sortObject } from '@/utils/utils';
-
 const { getKeystore } = require('./keystore');
 const config = require('./../config.json');
 const { cryptoEncrypt, cryptoDecrypt, sha256 } = require('./cryptoFunctions');
 
-import { TypeEncryptedSeed, TypePayloadData, TypeCreatedKeystore, WalletSign } from '../types/global-types';
+import { TypeEncryptedSeed, TypePayloadData, TypeCreatedKeystore } from '../types/global-types';
 import { WalletBase } from 'web3-core';
 
 const getBackendEndpoint = () => {
 	return process.env.VUE_APP_BACKEND_ENDPOINT || config.BACKEND_ENDPOINT;
-}
+};
 
 const changePasswordEncryptedSeed = async (encryptedSeed: TypeEncryptedSeed, oldPassword: string, newPassword: string) => {
 	const seed = await cryptoDecrypt(oldPassword, encryptedSeed.ciphertext, encryptedSeed.iv, encryptedSeed.salt);
@@ -360,46 +358,6 @@ const getNonce = async (key: string) => {
 	return response;
 };
 
-async function createSignature(key: string, body: any, keystore: WalletSign) {
-	body.nonce = (await getNonce(key)).nonce;
-	const signMessage = JSON.stringify(sortObject(body));
-
-	return await keystore.sign(signMessage);
-}
-
-const updateWalletEmailPassword = async (oldEmail: string, newEmail: string, encryptedSeed: string, keystore: WalletSign) => {
-	const oldKey = await sha256(oldEmail.toLowerCase());
-	const newKey = await sha256(newEmail.toLowerCase());
-
-	const body = {
-		oldKey,
-		newKey,
-		oldEmail,
-		newEmail,
-		encryptedSeed
-	};
-
-	const signature = await createSignature(oldKey, body, keystore);
-	delete signature.message;
-	console.log(signature);
-
-	const options: RequestInit = {
-		method: 'POST',
-		headers: {
-			Accept: 'application/json',
-			'Content-Type': 'application/json',
-			Signature: JSON.stringify(signature)
-		},
-		body: JSON.stringify(body),
-		mode: 'cors',
-		cache: 'default'
-	};
-	const result = await fetch(getBackendEndpoint() + '/v1/auth/updateEmailPassword', options);
-
-	const response = await result.json();
-	return response;
-};
-
 const change2FAMethods = async (email: string, signedMessage: string, toggleEmail: string, toggleAuthenticator: string) => {
 	const key = await sha256(email.toLowerCase());
 	const options: RequestInit = {
@@ -546,12 +504,11 @@ export {
 	changeEmail,
 	getPayload,
 	getNonce,
-	createSignature,
 	change2FAMethods,
 	send2FAEmail,
 	generateQRCode,
 	getQRCode,
 	verifyAuthenticatorCode,
 	verifyEmailCode,
-	updateWalletEmailPassword
+	getBackendEndpoint
 };

@@ -4,7 +4,7 @@ const ethereumjs = require('ethereumjs-util');
 
 module.exports = async function (req, res, next) {
     const signature = JSON.parse(req.header('Signature'));
-    const key = req.body.oldKey;
+    const key = req.header('key');
 
     if (signature !== null) {
         const recovery = await Recovery.findOne({ where: { key } });
