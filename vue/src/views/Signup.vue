@@ -7,7 +7,7 @@
 			<div class="field">
 				<label class="label">Email</label>
 				<div class="control">
-					<input type="email" class="input" name="walletEmail" placeholder="example@example.com" v-model="walletEmail" />
+					<input type="email" class="input" name="walletEmail" id="walletEmail" placeholder="example@example.com" v-model="walletEmail" />
 				</div>
 
 				<p class="help">Use this Email-Address for Wallet Recovery</p>
@@ -20,7 +20,7 @@
 				<label class="label">Password</label>
 
 				<div class="control">
-					<input type="password" class="input" name="walletPassword" placeholder="Strong Password!" v-model="walletPassword" />
+					<input type="password" class="input" name="walletPassword" id="walletPassword" placeholder="Strong Password!" v-model="walletPassword" />
 					<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial; margin-top: -8px" />
 					<p class="help">
 						Use a strong Password! It encrypts your Wallet and keeps your Funds secure.
@@ -34,7 +34,7 @@
 			<div class="field">
 				<label class="label">Repeat Password</label>
 				<div class="control">
-					<input type="password" class="input" name="walletPasswordRepeat" placeholder="Repeat Password" v-model="walletPasswordRepeat" />
+					<input type="password" class="input" name="walletPasswordRepeat" id="walletPasswordRepeat" placeholder="Repeat Password" v-model="walletPasswordRepeat" />
 				</div>
 			</div>
 

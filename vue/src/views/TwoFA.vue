@@ -8,7 +8,7 @@
 			<div class="field" v-if="twoFaRequired.email">
 				<label class="label">Email 2FA</label>
 				<div class="control">
-					<input type="number" min="100000" max="999999" class="input" name="emailCode" placeholder="123456" v-model="emailCode" />
+					<input type="number" min="100000" max="999999" class="input" name="emailCode" id="emailCode" placeholder="123456" v-model="emailCode" />
 				</div>
 
 				<p class="help">Enter here the Code that we sent you to your inbox!</p>
@@ -19,7 +19,7 @@
 			<div class="field" v-if="twoFaRequired.authenticator">
 				<label class="label">Authenticator 2FA</label>
 				<div class="control">
-					<input type="number" class="input" name="authenticatorCode" placeholder="123456" v-model="authenticatorCode" />
+					<input type="number" class="input" name="authenticatorCode" id="authenticatorCode" placeholder="123456" v-model="authenticatorCode" />
 				</div>
 
 				<p class="help">Enter here the Code from Google Authenticator!</p>
