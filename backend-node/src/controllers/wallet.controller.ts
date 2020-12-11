@@ -128,10 +128,47 @@ export async function saveEmailPassword(req: Request, res: Response) {
                 recovery_id: recoveryId
             });
         } else {
-            //@TODO update recovery method here potentially, or 
+					//@TODO confirm user before updating recovery method or move to a different function
+
+					if (recoveryTypeId === 1) {
+						await transaction.rollback();
+						return errorResponse(res, "Error: User already exists!");
+					}
+					let recoveryId;
+
+					const recovery = await Recovery.findOne({ where: { user_id: user.id, [Op.and]: { recovery_type_id: recoveryTypeId } }, transaction });
+					if (recovery) {
+						recovery.user_id = userId;
+						recovery.encrypted_seed = JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT));
+						recovery.key = key
+
+						recoveryId = recovery.id
+
+					} else {
+
+						recoveryId = (
+							await Recovery.create(
+									{
+											recovery_type_id: recoveryTypeId,
+											user_id: userId,
+											encrypted_seed: JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT)),
+											key
+									},
+									{ transaction }
+							)
+							).dataValues.id;
+					}
+
+					// Commit changes to database and return successfully.
+					await transaction.commit();
+
+					return successResponse(res, {
+							recovery_id: recoveryId
+					});
+
         }
 
-        return errorResponse(res, "Error: User already exists!");
+        
 
     } catch (error) {
         // If an error happened anywhere along the way, rollback all the changes.
