@@ -69,7 +69,6 @@ function initialState(): RootState {
 	if (localStorage.getItem('encryptedSeed')) {
 		try {
 			encryptedSeed = JSON.parse(String(localStorage.getItem('encryptedSeed')));
-			console.log(encryptedSeed);
 		} catch {
 			encryptedSeed = {};
 		}

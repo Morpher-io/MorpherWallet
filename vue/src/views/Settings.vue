@@ -6,7 +6,7 @@
 
 		<ChangePassword></ChangePassword>
 
-		<ChangeEmail :emailChanged="emailChanged"></ChangeEmail>
+		<ChangeEmail></ChangeEmail>
 
 		<Change2FA></Change2FA>
 
