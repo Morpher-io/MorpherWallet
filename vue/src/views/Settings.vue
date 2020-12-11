@@ -10,7 +10,7 @@
 
 		<Change2FA></Change2FA>
 
-		<ExportWallet></ExportWallet>
+		<ExportWallet v-if="false"></ExportWallet>
 
 		<div class="field is-grouped">
 			<div class="layout split first">

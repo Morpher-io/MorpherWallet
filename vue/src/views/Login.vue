@@ -1,6 +1,6 @@
 <template>
 	<div class="container">
-		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
+		<spinner :active="showSpinner" :status="store.status"></spinner>
 
 		<h2 class="title">Wallet Login</h2>
 		<h4 class="subtitle">Unlock your Morpher Wallet</h4>
@@ -18,13 +18,20 @@
 				<div class="control">
 					<input type="password" class="input" name="walletPassword" placeholder="Strong Password!" v-model="walletPassword" />
 
-					<div v-if="showRecovery">
+					<div v-if="store.status === 'invalid password'">
 						<p class="help is-danger">
 							The Password you provided can't be used to de-crypt your wallet.
 							<router-link to="/recovery">Do you want to restore your Account?</router-link>
 						</p>
 					</div>
 				</div>
+			</div>
+
+			<div class="field" v-if="showError">
+				<label class="label is-danger">Login Error</label>
+				<p class="help is-danger">
+					{{ logonError }}
+				</p>
 			</div>
 
 			<div class="field">
@@ -60,29 +67,35 @@ export default class Login extends mixins(Global) {
 	walletEmail = '';
 	walletPassword = '';
 	showRecovery = false;
+	showError = false;
+	logonError = '';
 
 	/**
 	 * Cmponent mounted lifestyle hook
 	 */
 	mounted() {
-		// Check if the wallet can be unlocked using the local-storage stored password
-		this.unlockWithStoredPassword()
-			.then(result => {
-				if (result) {
-					this.$router.push('/');
-				}
-			})
-			.catch(error => {
-				if (error !== true && error !== false) {
-					console.log('Error in unlock', error);
-				}
-			});
+		if (this.store.status !== 'invalid password') {
+			// Check if the wallet can be unlocked using the local-storage stored password
+			this.unlockWithStoredPassword()
+				.then(result => {
+					if (result) {
+						this.$router.push('/');
+					}
+				})
+				.catch(error => {
+					if (error !== true && error !== false) {
+						console.log('Error in unlock', error);
+					}
+				});
+		}
 	}
 
 	/**
 	 * Execute the logon
 	 */
 	login() {
+		this.showError = false;
+		this.showSpinner = true;
 		this.store.loginComplete = false;
 		const email = this.walletEmail;
 		const password = this.walletPassword;
@@ -90,24 +103,32 @@ export default class Login extends mixins(Global) {
 		// Call the fetchUser store action to process the wallet logon
 		this.fetchUser({ email, password })
 			.then(() => {
-				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator) {
+				if (this.store.twoFaRequired) {
 					// open 2fa page if 2fa is required
 					this.$router.push('/2fa');
 				} else {
 					this.unlockWithStoredPassword()
 						.then(() => {
+							this.showSpinner = false;
 							// open root page after logon success
 							this.$router.push('/');
 						})
 						.catch(e => {
+							this.showSpinner = false;
 							console.error(e);
 						});
 				}
 			})
 			.catch(error => {
 				// Logon failed
+				this.showSpinner = false;
 				if (error !== true && error !== false) {
-					console.log('Error in login', error);
+					if (error.success === false) {
+						this.showError = true;
+						this.logonError = error.error;
+					} else {
+						console.log('Error in login', error);
+					}
 				}
 			});
 	}

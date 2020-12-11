@@ -8,10 +8,13 @@ import {
 	saveWalletEmailPassword,
 	send2FAEmail,
 	getPayload,
-	getKeystoreFromEncryptedSeed
+	getKeystoreFromEncryptedSeed,
+	changePasswordEncryptedSeed,
+	updateWalletEmailPassword
 } from '../utils/backupRestore';
 import { getAccountsFromKeystore } from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
+
 import {
 	Type2FARequired,
 	TypeSeedFoundData,
@@ -21,6 +24,8 @@ import {
 	TypeUserFoundData,
 	TypeUnlockWithPassword,
 	ZeroWalletConfig,
+	TypeChangePassword,
+	TypeEncryptedSeed,
 	TypeKeystoreUnlocked
 } from '../types/global-types';
 
@@ -41,7 +46,7 @@ export interface RootState {
 	message: string;
 	email: string;
 	hashedPassword: string;
-	encryptedSeed: string;
+	encryptedSeed: TypeEncryptedSeed;
 	encryptedWallet: string;
 	keystore: WalletBase | null;
 	accounts: Array<string>;
@@ -60,12 +65,13 @@ export interface RootState {
 function initialState(): RootState {
 	const email = localStorage.getItem('email') || '';
 	const hashedPassword = window.sessionStorage.getItem('password') || '';
-	let encryptedSeed = localStorage.getItem('encryptedSeed');
-	if (encryptedSeed) {
+	let encryptedSeed: TypeEncryptedSeed = {};
+	if (localStorage.getItem('encryptedSeed')) {
 		try {
-			encryptedSeed = JSON.parse(String(encryptedSeed));
+			encryptedSeed = JSON.parse(String(localStorage.getItem('encryptedSeed')));
+			console.log(encryptedSeed);
 		} catch {
-			encryptedSeed = '';
+			encryptedSeed = {};
 		}
 	}
 
@@ -108,7 +114,7 @@ const store: Store<RootState> = new Vuex.Store({
 			state.encryptedSeed = seedFoundData.encryptedSeed;
 			localStorage.setItem('encryptedSeed', JSON.stringify(seedFoundData.encryptedSeed));
 		},
-		updatePayload(state: RootState, payload) {
+		updatePayload(state: RootState, payload: Type2FARequired) {
 			state.twoFaRequired.email = payload.email;
 			state.twoFaRequired.authenticator = payload.authenticator;
 		},
@@ -141,7 +147,7 @@ const store: Store<RootState> = new Vuex.Store({
 
 			state.email = '';
 			state.hashedPassword = '';
-			state.encryptedSeed = '';
+			state.encryptedSeed = {};
 			state.keystore = null;
 
 			state.status = '';
@@ -150,7 +156,7 @@ const store: Store<RootState> = new Vuex.Store({
 		clearUser(state: RootState) {
 			state.email = '';
 			state.hashedPassword = '';
-			state.encryptedSeed = '';
+			state.encryptedSeed = {};
 			state.keystore = null;
 
 			state.status = '';
@@ -168,6 +174,7 @@ const store: Store<RootState> = new Vuex.Store({
 		async fetchUser({ commit }, params: TypeFetchUser) {
 			const email: string = params.email;
 			const password: string = params.password;
+			commit('logout');
 			return new Promise((resolve, reject) => {
 				commit('authRequested');
 				sha256(password)
@@ -219,22 +226,20 @@ const store: Store<RootState> = new Vuex.Store({
 							/**
 							 * If no wallet was found, then create a new one (seed = false) otherwise use the decrypted seed from above
 							 */
-							const createdKeystoreObj = await getKeystore(hashedPassword, '', 1);
+							const createdKeystoreObj = await getKeystore(hashedPassword, {}, 1);
 
-							//const encryptedKeystore = await getEncryptedSeed(unlockedKeystore, params.password);
+							// commit('seedCreated', {
+							// 	email: params.email,
+							// 	hashedPassword: hashedPassword,
+							// 	encryptedSeed: createdKeystoreObj.encryptedSeed
+							// });
 
-							commit('seedCreated', {
-								email: params.email,
-								hashedPassword: hashedPassword,
-								encryptedSeed: createdKeystoreObj.encryptedSeed
-							});
+							const accounts = getAccountsFromKeystore(createdKeystoreObj.keystore);
 
-							saveWalletEmailPassword(params.email, createdKeystoreObj.encryptedSeed).then(() => {
+							saveWalletEmailPassword(params.email, createdKeystoreObj.encryptedSeed, accounts[0]).then(() => {
 								commit('clearUser');
 								dispatch('fetchUser', { email: params.email, password: params.password })
-									.then(() => {
-										resolve();
-									})
+									.then(resolve)
 									.catch(reject);
 							});
 						});
@@ -277,18 +282,33 @@ const store: Store<RootState> = new Vuex.Store({
 				}
 
 				if (emailCorrect && authenticatorCorrect) {
-					getEncryptedSeedFromMail(rootState.email, params.email2FA, params.authenticator2FA).then(encryptedSeed => {
-						//const encryptedSeed = state.encryptedSeed; //normally that would need decrypting using 2fa codes
-						//commit('updatePayload', { email: false, authenticator: false });
-						commit('seedFound', { encryptedSeed });
-						if (state.hashedPassword) {
-							//console.log(password found);
-							dispatch('unlockWithStoredPassword').then(() => resolve('/'));
-						} else {
-							//unlock page
-							resolve('/unlock');
-						}
-					});
+					getEncryptedSeedFromMail(rootState.email, params.email2FA, params.authenticator2FA)
+						.then(encryptedSeed => {
+							//const encryptedSeed = state.encryptedSeed; //normally that would need decrypting using 2fa codes
+							//commit('updatePayload', { email: false, authenticator: false });
+							commit('seedFound', { encryptedSeed });
+							if (state.hashedPassword) {
+								//console.log(password found);
+								dispatch('unlockWithStoredPassword')
+									.then(() => resolve('/'))
+									.catch(() => {
+										commit('logout');
+										reject('invalid password');
+									});
+							} else {
+								//unlock page
+								resolve('/unlock');
+							}
+						})
+						.catch(err => {
+							if (err.toString() === 'seed not found') {
+								commit('authError', '2FA Authentication code not correct');
+								reject('2FA Authentication not correct');
+							} else {
+								console.log(err);
+								reject('error');
+							}
+						});
 				} else {
 					console.log('Reached here for wathever reason');
 					reject();
@@ -300,7 +320,7 @@ const store: Store<RootState> = new Vuex.Store({
 		 */
 		unlockWithStoredPassword({ dispatch, state }) {
 			return new Promise((resolve, reject) => {
-				if (state.hashedPassword && state.encryptedSeed) {
+				if (state.hashedPassword && state.encryptedSeed.ciphertext !== undefined) {
 					dispatch('unlockWithPassword', { password: state.hashedPassword })
 						.then(() => {
 							resolve(true);
@@ -335,6 +355,24 @@ const store: Store<RootState> = new Vuex.Store({
 						reject(err);
 					});
 			});
+		},
+		async changePassword({ commit, state }, params: TypeChangePassword) {
+			try {
+				if (state.keystore !== undefined && state.keystore !== null) {
+					const newEncryptedSeed = await changePasswordEncryptedSeed(state.encryptedSeed, params.oldPassword, params.newPassword);
+					console.log(newEncryptedSeed);
+					if (Object.keys(newEncryptedSeed).length > 0) {
+						await updateWalletEmailPassword(state.email, state.email, newEncryptedSeed, state.keystore[0]);
+						console.log(newEncryptedSeed, params.newPassword);
+						commit('seedFound', { encryptedSeed: newEncryptedSeed });
+						commit('userFound', { email: state.email, hashedPassword: params.newPassword });
+
+						alert('Password changed successfully.');
+					}
+				}
+			} catch (e) {
+				alert('Error in change password');
+			}
 		}
 	},
 	getters: {
@@ -342,11 +380,11 @@ const store: Store<RootState> = new Vuex.Store({
 			return state.keystore !== undefined && state.keystore !== null;
 		},
 		twoFaRequired: state => {
-			return (state.twoFaRequired.email || state.twoFaRequired.authenticator) && !state.encryptedSeed;
+			return (state.twoFaRequired.email || state.twoFaRequired.authenticator) && state.encryptedSeed.ciphertext === undefined;
 		},
 		authStatus: state => state.status,
 		walletEmail: state => state.email,
-		hasEncryptedKeystore: state => state.encryptedSeed
+		hasEncryptedKeystore: state => state.encryptedSeed.ciphertext !== undefined
 	}
 });
 

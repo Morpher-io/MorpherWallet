@@ -1,16 +1,19 @@
+import { sortObject } from '@/utils/utils';
+
 const { getKeystore } = require('./keystore');
 const config = require('./../config.json');
 const { cryptoEncrypt, cryptoDecrypt, sha256 } = require('./cryptoFunctions');
 
-import { TypeEncryptedSeed, TypePayloadData, TypeCreatedKeystore } from '../types/global-types';
+import { TypeEncryptedSeed, TypePayloadData, TypeCreatedKeystore, WalletSign } from '../types/global-types';
 import { WalletBase } from 'web3-core';
 
 const changePasswordEncryptedSeed = async (encryptedSeed: TypeEncryptedSeed, oldPassword: string, newPassword: string) => {
+	console.log(encryptedSeed);
 	const seed = await cryptoDecrypt(oldPassword, encryptedSeed.ciphertext, encryptedSeed.iv, encryptedSeed.salt);
 	return await cryptoEncrypt(newPassword, seed);
 };
 
-const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: string, password: string): Promise<WalletBase> =>
+const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: TypeEncryptedSeed, password: string): Promise<WalletBase> =>
 	new Promise((resolve, reject) => {
 		getKeystore(password, encryptedWalletObject)
 			.then((returnObj: TypeCreatedKeystore) => {
@@ -20,7 +23,7 @@ const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: string, passw
 	});
 
 const getEncryptedSeedFromMail = async (email: string, email2fa: string, authenticator2fa: string) =>
-	new Promise((resolve, reject) => {
+	new Promise<TypeEncryptedSeed>((resolve, reject) => {
 		sha256(email.toLowerCase()).then((key: string) => {
 			const options: RequestInit = {
 				method: 'POST',
@@ -90,7 +93,7 @@ const validateInput = async (fieldName: string, inputFieldValue: string) => {
 	}
 };
 
-const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: string) => {
+const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEncryptedSeed, ethAddress: string) => {
 	const key = await sha256(userEmail.toLowerCase());
 	const options: RequestInit = {
 		method: 'POST',
@@ -101,7 +104,8 @@ const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: string)
 		body: JSON.stringify({
 			key,
 			encryptedSeed,
-			email: userEmail.toLowerCase()
+			email: userEmail.toLowerCase(),
+			ethAddress
 		}),
 		mode: 'cors',
 		cache: 'default'
@@ -334,6 +338,66 @@ const getPayload = (email: string) =>
 		resolve(response);
 	});
 
+const getNonce = async (key: string) => {
+	const options: RequestInit = {
+		method: 'POST',
+		headers: {
+			Accept: 'application/json',
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			key
+		}),
+		mode: 'cors',
+		cache: 'default'
+	};
+	const result = await fetch(config.BACKEND_ENDPOINT + '/v1/getNonce', options);
+
+	const response = await result.json();
+	return response;
+};
+
+async function createSignature(key: string, body: any, keystore: WalletSign) {
+	body.nonce = (await getNonce(key)).nonce;
+	const signMessage = JSON.stringify(body);
+
+	console.log(signMessage);
+
+	return await keystore.sign(signMessage);
+}
+
+const updateWalletEmailPassword = async (oldEmail: string, newEmail: string, encryptedSeed: string, keystore: WalletSign) => {
+	const oldKey = await sha256(oldEmail.toLowerCase());
+	const newKey = await sha256(newEmail.toLowerCase());
+
+	const body = sortObject({
+		oldKey,
+		newKey,
+		oldEmail,
+		newEmail,
+		encryptedSeed
+	});
+
+	const signature = await createSignature(oldKey, body, keystore);
+	console.log(signature);
+
+	const options: RequestInit = {
+		method: 'POST',
+		headers: {
+			Accept: 'application/json',
+			'Content-Type': 'application/json',
+			Signature: JSON.stringify(signature)
+		},
+		body: JSON.stringify(body),
+		mode: 'cors',
+		cache: 'default'
+	};
+	const result = await fetch(config.BACKEND_ENDPOINT + '/v1/auth/updateEmailPassword', options);
+
+	const response = await result.json();
+	return response;
+};
+
 const change2FAMethods = async (email: string, signedMessage: string, toggleEmail: string, toggleAuthenticator: string) => {
 	const key = await sha256(email.toLowerCase());
 	const options: RequestInit = {
@@ -479,10 +543,13 @@ export {
 	recoverVKSeed,
 	changeEmail,
 	getPayload,
+	getNonce,
+	createSignature,
 	change2FAMethods,
 	send2FAEmail,
 	generateQRCode,
 	getQRCode,
 	verifyAuthenticatorCode,
-	verifyEmailCode
+	verifyEmailCode,
+	updateWalletEmailPassword
 };

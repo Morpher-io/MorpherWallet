@@ -1,6 +1,6 @@
 <template>
 	<div class="container">
-		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
+		<spinner :active="showSpinner" :status="store.status"></spinner>
 
 		<h2 class="title">Authenticator Unlock</h2>
 		<h4 class="subtitle">Please input two FA Authenticator code</h4>
@@ -25,6 +25,13 @@
 				<p class="help">Enter here the Code from Google Authenticator!</p>
 				<p class="help is-danger" v-if="invalidAuthenticator">
 					{{ invalidAuthenticator }}
+				</p>
+			</div>
+
+			<div class="field" v-if="showError">
+				<label class="label is-danger">Login Error</label>
+				<p class="help is-danger">
+					{{ logonError }}
 				</p>
 			</div>
 			<div class="field is-grouped">
@@ -61,6 +68,8 @@ export default class TwoFA extends mixins(Global) {
 	emailCode = '';
 	authenticatorCode = '';
 	showRecovery = false;
+	showError = false;
+	logonError = '';
 	invalidEmail = false;
 	invalidAuthenticator = false;
 
@@ -68,16 +77,27 @@ export default class TwoFA extends mixins(Global) {
 	 * Process email 2fa authentication
 	 */
 	async validateCode() {
+		this.showSpinner = true;
+		this.showError = false;
 		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.authenticatorCode })
 			.then(nextroute => {
+				this.showSpinner = false;
 				this.$router.push(nextroute);
 			})
 			.catch(error => {
+				this.showSpinner = false;
+				if (error.toString() === 'invalid password') {
+					this.store.status = 'invalid password';
+					this.$router.push('/login');
+				}
+				this.showSpinner = false;
+				this.showError = true;
+				this.logonError = error.toString();
+
 				if (error.indexOf('Mail') !== -1) {
 					this.invalidEmail = error;
 					return;
 				}
-				console.log(error);
 			});
 	}
 
