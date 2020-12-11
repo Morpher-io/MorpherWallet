@@ -7,8 +7,11 @@ const { cryptoEncrypt, cryptoDecrypt, sha256 } = require('./cryptoFunctions');
 import { TypeEncryptedSeed, TypePayloadData, TypeCreatedKeystore, WalletSign } from '../types/global-types';
 import { WalletBase } from 'web3-core';
 
+const getBackendEndpoint = () => {
+	return process.env.VUE_APP_BACKEND_ENDPOINT || config.BACKEND_ENDPOINT;
+}
+
 const changePasswordEncryptedSeed = async (encryptedSeed: TypeEncryptedSeed, oldPassword: string, newPassword: string) => {
-	console.log(encryptedSeed);
 	const seed = await cryptoDecrypt(oldPassword, encryptedSeed.ciphertext, encryptedSeed.iv, encryptedSeed.salt);
 	return await cryptoEncrypt(newPassword, seed);
 };
@@ -36,7 +39,7 @@ const getEncryptedSeedFromMail = async (email: string, email2fa: string, authent
 				cache: 'default'
 			};
 
-			fetch(config.BACKEND_ENDPOINT + '/v1/getEncryptedSeed', options).then(response => {
+			fetch(getBackendEndpoint() + '/v1/getEncryptedSeed', options).then(response => {
 				response.json().then(responseBody => {
 					/**
 					 * Login /Create Wallet is in one function
@@ -68,7 +71,7 @@ const validateInput = async (fieldName: string, inputFieldValue: string) => {
 		mode: 'cors',
 		cache: 'default'
 	};
-	const result = await fetch(config.BACKEND_ENDPOINT + '/v1/validateInput', options);
+	const result = await fetch(getBackendEndpoint() + '/v1/validateInput', options);
 
 	const response = await result.json();
 
@@ -110,7 +113,7 @@ const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEnc
 		mode: 'cors',
 		cache: 'default'
 	};
-	const result = await fetch(config.BACKEND_ENDPOINT + '/v1/saveEmailPassword', options);
+	const result = await fetch(getBackendEndpoint() + '/v1/saveEmailPassword', options);
 
 	const response = await result.json();
 	return response;
@@ -135,7 +138,7 @@ const backupGoogleSeed = async (userEmail: string, userid: string, encryptedSeed
 				cache: 'default'
 			};
 			try {
-				fetch(config.BACKEND_ENDPOINT + '/v1/saveEmailPassword', options).then(r => {
+				fetch(getBackendEndpoint() + '/v1/saveEmailPassword', options).then(r => {
 					r.json().then(response => {
 						resolve(response);
 					});
@@ -165,7 +168,7 @@ const backupFacebookSeed = async (userEmail: string, userid: string, encryptedSe
 				cache: 'default'
 			};
 			try {
-				fetch(config.BACKEND_ENDPOINT + '/v1/saveEmailPassword', options).then(r => {
+				fetch(getBackendEndpoint() + '/v1/saveEmailPassword', options).then(r => {
 					r.json().then(response => {
 						resolve(response);
 					});
@@ -191,7 +194,7 @@ const recoverFacebookSeed = async (accessToken: string, signupEmail: string) =>
 			mode: 'cors',
 			cache: 'default'
 		};
-		fetch(config.BACKEND_ENDPOINT + '/v1/getFacebookEncryptedSeed', options).then(r => {
+		fetch(getBackendEndpoint() + '/v1/getFacebookEncryptedSeed', options).then(r => {
 			r.json().then(async responseBody => {
 				if (responseBody.success) {
 					//initiate recovery
@@ -218,7 +221,7 @@ const recoverGoogleSeed = async (accessToken: string, signupEmail: string) =>
 			mode: 'cors',
 			cache: 'default'
 		};
-		fetch(config.BACKEND_ENDPOINT + '/v1/getGoogleEncryptedSeed', options).then(r => {
+		fetch(getBackendEndpoint() + '/v1/getGoogleEncryptedSeed', options).then(r => {
 			r.json().then(async responseBody => {
 				if (responseBody.success) {
 					//initiate recovery
@@ -246,7 +249,7 @@ const recoverVKSeed = async (accessToken: string, signupEmail: string) =>
 			mode: 'cors',
 			cache: 'default'
 		};
-		fetch(config.BACKEND_ENDPOINT + '/v1/getVKontakteEncryptedSeed', options).then(r => {
+		fetch(getBackendEndpoint() + '/v1/getVKontakteEncryptedSeed', options).then(r => {
 			r.json().then(async responseBody => {
 				if (responseBody.success) {
 					//initiate recovery
@@ -278,7 +281,7 @@ const backupVKSeed = async (userEmail: string, userid: string, encryptedSeed: st
 				cache: 'default'
 			};
 			try {
-				fetch(config.BACKEND_ENDPOINT + '/v1/saveEmailPassword', options).then(r => {
+				fetch(getBackendEndpoint() + '/v1/saveEmailPassword', options).then(r => {
 					r.json().then(response => {
 						resolve(response);
 					});
@@ -308,7 +311,7 @@ const changeEmail = async (oldEmail: string, newEmail: string, encryptedSeed: st
 		mode: 'cors',
 		cache: 'default'
 	};
-	const result = await fetch(config.BACKEND_ENDPOINT + '/v1/changeEmail', options);
+	const result = await fetch(getBackendEndpoint() + '/v1/changeEmail', options);
 
 	const response = await result.json();
 	return response;
@@ -329,7 +332,7 @@ const getPayload = (email: string) =>
 			mode: 'cors',
 			cache: 'default'
 		};
-		const result = await fetch(config.BACKEND_ENDPOINT + '/v1/getPayload', options);
+		const result = await fetch(getBackendEndpoint() + '/v1/getPayload', options);
 		const response: TypePayloadData = await result.json();
 		if (result.status != 200) {
 			reject(response);
@@ -351,7 +354,7 @@ const getNonce = async (key: string) => {
 		mode: 'cors',
 		cache: 'default'
 	};
-	const result = await fetch(config.BACKEND_ENDPOINT + '/v1/getNonce', options);
+	const result = await fetch(getBackendEndpoint() + '/v1/getNonce', options);
 
 	const response = await result.json();
 	return response;
@@ -392,7 +395,7 @@ const updateWalletEmailPassword = async (oldEmail: string, newEmail: string, enc
 		mode: 'cors',
 		cache: 'default'
 	};
-	const result = await fetch(config.BACKEND_ENDPOINT + '/v1/auth/updateEmailPassword', options);
+	const result = await fetch(getBackendEndpoint() + '/v1/auth/updateEmailPassword', options);
 
 	const response = await result.json();
 	return response;
@@ -415,7 +418,7 @@ const change2FAMethods = async (email: string, signedMessage: string, toggleEmai
 		mode: 'cors',
 		cache: 'default'
 	};
-	const result = await fetch(config.BACKEND_ENDPOINT + '/v1/change2FAMethods', options);
+	const result = await fetch(getBackendEndpoint() + '/v1/change2FAMethods', options);
 
 	const response = await result.json();
 	return response;
@@ -435,7 +438,7 @@ const send2FAEmail = async (email: string) => {
 		mode: 'cors',
 		cache: 'default'
 	};
-	const result = await fetch(config.BACKEND_ENDPOINT + '/v1/send2FAEmail', options);
+	const result = await fetch(getBackendEndpoint() + '/v1/send2FAEmail', options);
 
 	const response = await result.json();
 	return response;
@@ -455,7 +458,7 @@ const generateQRCode = async (email: string) => {
 		mode: 'cors',
 		cache: 'default'
 	};
-	const result = await fetch(config.BACKEND_ENDPOINT + '/v1/generateAuthenticatorQR', options);
+	const result = await fetch(getBackendEndpoint() + '/v1/generateAuthenticatorQR', options);
 
 	const response = await result.json();
 	return response;
@@ -475,7 +478,7 @@ const getQRCode = async (email: string) => {
 		mode: 'cors',
 		cache: 'default'
 	};
-	const result = await fetch(config.BACKEND_ENDPOINT + '/v1/getQRCode', options);
+	const result = await fetch(getBackendEndpoint() + '/v1/getQRCode', options);
 
 	const response = await result.json();
 	return response;
@@ -497,7 +500,7 @@ const verifyAuthenticatorCode = async (email: string, code: string) => {
 		cache: 'default'
 	};
 	try {
-		await fetch(config.BACKEND_ENDPOINT + '/v1/verifyAuthenticatorCode', options);
+		await fetch(getBackendEndpoint() + '/v1/verifyAuthenticatorCode', options);
 		//it will throw an exception if it fails
 		return true;
 	} catch (e) {
@@ -521,7 +524,7 @@ const verifyEmailCode = async (email: string, code: string) => {
 		cache: 'default'
 	};
 	try {
-		const result = await fetch(config.BACKEND_ENDPOINT + '/v1/verifyEmailCode', options);
+		const result = await fetch(getBackendEndpoint() + '/v1/verifyEmailCode', options);
 		const body = await result.json();
 		return body.success;
 	} catch (e) {
