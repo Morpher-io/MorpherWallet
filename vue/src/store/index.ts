@@ -393,7 +393,7 @@ const store: Store<RootState> = new Vuex.Store({
 				try {
 					if (state.keystore !== undefined && state.keystore !== null) {
 						if (params.password == state.hashedPassword) {
-							if (params.twoFa != undefined) {
+							if (params.twoFa != undefined && params.twoFa > 0) {
 								//twoFA was sent
 								if (await verifyEmailCode(state.email, params.twoFa.toString())) {
 									const body = {

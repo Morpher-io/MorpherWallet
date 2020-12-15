@@ -9,7 +9,10 @@
 					<i class="fas fa-chevron-down"></i>
 				</span>
 
-				<span class="header" @click="collapsed = !collapsed"> Change Email Address </span>
+				<span class="header" @click="collapsed = !collapsed">
+					Change Email Address
+					<span class="help is-success" v-if="success">Saved!</span>
+				</span>
 				<div :class="collapsed ? 'hidden' : 'visible'">
 					<div class="card-content">
 						<div class="content">
@@ -86,6 +89,7 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 	invalidEmail = false;
 	collapsed = true;
 	invalid2FA = false;
+	success = false;
 
 	async formSubmitChangeEmail() {
 		if (!this.newEmail) {
@@ -129,6 +133,7 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 				this.twoFaSent = false;
 				this.invalid2FA = false;
 				this.invalidEmail = false;
+				this.success = true;
 			}
 		} catch (e) {
 			console.log(e);
