@@ -19,68 +19,6 @@ const Google = require('googleapis').google;
 const OAuth2 = Google.auth.OAuth2;
 const oauth2Client = new OAuth2();
 
-// Function to change email for current existing user.
-export async function changeEmail(req, res) {
-    const oldEmail = req.body.oldEmail;
-    const newEmail = req.body.newEmail;
-    const key = req.body.key;
-    const encryptedSeed = req.body.encryptedSeed;
-
-    // Get sequelize transactions to rollback changes in case of failure.
-    const [err, transaction] = await to(getTransaction());
-    if (err) return errorResponse(res, err.message);
-
-    let userId;
-
-    try {
-        // Attempt to get user from database.
-        const [, user] = await to(User.findOne({ where: { email: oldEmail }, transaction }));
-
-        if (user) {
-            // If it exists, update the new email and add a new Recovery entry.
-            userId = user.id;
-
-            user.email = newEmail;
-            await user.save({ transaction });
-
-            await Recovery.destroy({ where: { user_id: user.id, [Op.and]: { recovery_type_id: 1 } }, transaction });
-
-            const recoveryId = (
-                await Recovery.create(
-                    {
-                        recovery_type_id: 1,
-                        user_id: userId,
-                        encrypted_seed: JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT)),
-                        key
-                    },
-                    { transaction }
-                )
-            ).dataValues.id;
-
-            // Commit changes to database and return successfully.
-            await transaction.commit();
-
-            user.payload.email = true;
-            user.payload.authenticator = false;
-            user.payload.authenticatorConfirmed = false;
-            user.payload.authenticator_qr = null;
-            user.changed('payload', true);
-            await user.save();
-
-
-            return successResponse(res, {
-                recovery_id: recoveryId
-            });
-        } else {
-            return errorResponse(res, 'User not found.');
-        }
-    } catch (error) {
-        // If an error happened anywhere along the way, rollback all the changes.
-        await transaction.rollback();
-        return errorResponse(res, error.message);
-    }
-}
-
 // Function to save new signups to the database.
 export async function saveEmailPassword(req: Request, res: Response) {
     // Get sequelize transactions to rollback changes in case of failure.
@@ -128,48 +66,44 @@ export async function saveEmailPassword(req: Request, res: Response) {
                 recovery_id: recoveryId
             });
         } else {
-					//@TODO confirm user before updating recovery method or move to a different function
+            //@TODO confirm user before updating recovery method or move to a different function
 
-					if (recoveryTypeId === 1) {
-						await transaction.rollback();
-						return errorResponse(res, "Error: User already exists!");
-					}
-					let recoveryId;
+            if (recoveryTypeId === 1) {
+                await transaction.rollback();
+                return errorResponse(res, "Error: User already exists!");
+            }
+            let recoveryId;
 
-					const recovery = await Recovery.findOne({ where: { user_id: user.id, [Op.and]: { recovery_type_id: recoveryTypeId } }, transaction });
-					if (recovery) {
-						recovery.user_id = userId;
-						recovery.encrypted_seed = JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT));
-						recovery.key = key
+            const recovery = await Recovery.findOne({ where: { user_id: user.id, [Op.and]: { recovery_type_id: recoveryTypeId } }, transaction });
+            if (recovery) {
+                recovery.user_id = userId;
+                recovery.encrypted_seed = JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT));
+                recovery.key = key
 
-						recoveryId = recovery.id
+                recoveryId = recovery.id
 
-					} else {
+            } else {
 
-						recoveryId = (
-							await Recovery.create(
-									{
-											recovery_type_id: recoveryTypeId,
-											user_id: userId,
-											encrypted_seed: JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT)),
-											key
-									},
-									{ transaction }
-							)
-							).dataValues.id;
-					}
+                recoveryId = (
+                    await Recovery.create(
+                        {
+                            recovery_type_id: recoveryTypeId,
+                            user_id: userId,
+                            encrypted_seed: JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT)),
+                            key
+                        },
+                        { transaction }
+                    )
+                ).dataValues.id;
+            }
 
-					// Commit changes to database and return successfully.
-					await transaction.commit();
+            // Commit changes to database and return successfully.
+            await transaction.commit();
 
-					return successResponse(res, {
-							recovery_id: recoveryId
-					});
-
+            return successResponse(res, {
+                recovery_id: recoveryId
+            });
         }
-
-        
-
     } catch (error) {
         // If an error happened anywhere along the way, rollback all the changes.
         await transaction.rollback();
@@ -186,36 +120,17 @@ export async function updatePassword(req: Request, res: Response) {
     if (err) return errorResponse(res, err.message);
 
     try {
-        // Get variables from request body.
-        // const newEmail = req.body.newEmail;
-        // const oldEmail = req.body.oldEmail;
-        // const oldKey = req.body.oldKey;
-        // const newKey = req.body.newKey;
         const key = req.header('key');
         const encryptedSeed = req.body.encryptedSeed;
-        //const recoveryTypeId = req.body.recoveryTypeId || 1;
-
-
-        // Attempt to get user from database.
-        //const user = await User.findOne({ where: { email: email } });
-
-        //if (user != null) {
-        // user.email = newEmail;
-        // user.save();
 
         // Create a new recovery method.
         const recovery = await Recovery.findOne({ where: { key: key, recovery_type_id: 1 } });
         if (recovery != null) {
             recovery.encrypted_seed = JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT));
-            //recovery.key = newKey;
             recovery.save();
         }
 
         return successResponse(res, "updated");
-        //}
-
-        //return errorResponse(res, "Error: User doesn't exists!");
-
     } catch (error) {
         // If an error happened anywhere along the way, rollback all the changes.
         return errorResponse(res, error.message);
@@ -497,65 +412,58 @@ export async function change2FAMethods(req, res) {
 
 
 export async function generateAuthenticatorQR(req, res) {
-    const key = req.body.key;
+    const key = req.header('key');
     const recovery = await Recovery.findOne({ where: { key } });
-    const user = await User.findOne({ where: { id: recovery.user_id } });
+    if (recovery != null) {
+        const user = await User.findOne({ where: { id: recovery.user_id } });
+        if (user != null) {
 
-    user.authenticator_secret = authenticator.generateSecret();
+            user.authenticator_secret = authenticator.generateSecret();
 
-    const otp = authenticator.keyuri(user.email, "Morpher Wallet", user.authenticator_secret);
+            const otp = authenticator.keyuri(user.email, "Morpher Wallet", user.authenticator_secret);
 
-    try {
-        const result = await QRCode.toDataURL(otp);
+            try {
+                const result = await QRCode.toDataURL(otp);
 
-        user.authenticator_qr = result;
-        user.payload.authenticator = false;
-        user.payload.authenticatorConfirmed = false;
-        user.changed('payload', true);
-        await user.save();
-        return successResponse(res, {
-            image: result
-        })
-    }
-    catch (e) {
-        return errorResponse(res, 'Could not generate QR code.')
-    }
-
-}
-
-export async function getQRCode(req, res) {
-    const key = req.body.key;
-    const recovery = await Recovery.findOne({ where: { key } });
-    const user = await User.findOne({ where: { id: recovery.user_id } });
-
-    try {
-        const result = user.authenticator_qr || '';
-        return successResponse(res, {
-            image: result
-        })
-    }
-    catch (e) {
-        return errorResponse(res, 'Could not generate QR code.')
+                user.authenticator_qr = result;
+                user.payload.authenticator = true;
+                user.payload.authenticatorConfirmed = false;
+                user.changed('payload', true);
+                await user.save();
+                return successResponse(res, {
+                    image: result
+                });
+            }
+            catch (e) {
+                return errorResponse(res, 'Could not generate QR code.')
+            }
+        }
     }
 
+    return errorResponse(res, 'User not found', 404);
 }
 
 export async function verifyAuthenticatorCode(req, res) {
     const code = req.body.code;
     const key = req.body.key;
     const recovery = await Recovery.findOne({ where: { key } });
-    const user = await User.findOne({ where: { id: recovery.user_id } });
+    if (recovery != null) {
+        const user = await User.findOne({ where: { id: recovery.user_id } });
 
-
-    if (verifyGoogle2FA(recovery.user_id, code)) {
-        user.payload.authenticatorConfirmed = true;
-        user.changed('payload', true);
-        await user.save();
-        return successResponse(res, true)
-    } else {
-        return errorResponse(res, 'Could not verify authenticator code.')
+        if (user != null) {
+            if (verifyGoogle2FA(user.id.toString(), code)) {
+                if (user.payload.authenticatorConfirmed == false) {
+                    user.payload.authenticatorConfirmed = true;
+                    user.changed('payload', true);
+                    await user.save();
+                }
+                return successResponse(res, true)
+            } else {
+                return errorResponse(res, 'Could not verify authenticator code.', 500)
+            }
+        }
     }
-
+    return errorResponse(res, 'User not found, aborting');
 }
 
 async function updateEmail2fa(user_id) {

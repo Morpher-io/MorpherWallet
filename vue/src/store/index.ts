@@ -89,7 +89,8 @@ function initialState(): RootState {
 		accounts: [],
 		twoFaRequired: {
 			email: false,
-			authenticator: false
+			authenticator: false,
+			authenticatorConfirmed: false
 		},
 		token: '',
 		connection: null,
@@ -119,6 +120,7 @@ const store: Store<RootState> = new Vuex.Store({
 		updatePayload(state: RootState, payload: Type2FARequired) {
 			state.twoFaRequired.email = payload.email;
 			state.twoFaRequired.authenticator = payload.authenticator;
+			state.twoFaRequired.authenticatorConfirmed = payload.authenticatorConfirmed;
 		},
 		userFound(state: RootState, userData: TypeUserFoundData) {
 			state.email = userData.email;
@@ -232,12 +234,6 @@ const store: Store<RootState> = new Vuex.Store({
 							 */
 							const createdKeystoreObj = await getKeystore(hashedPassword, {}, 1);
 
-							// commit('seedCreated', {
-							// 	email: params.email,
-							// 	hashedPassword: hashedPassword,
-							// 	encryptedSeed: createdKeystoreObj.encryptedSeed
-							// });
-
 							const accounts = getAccountsFromKeystore(createdKeystoreObj.keystore);
 
 							saveWalletEmailPassword(params.email, createdKeystoreObj.encryptedSeed, accounts[0]).then(() => {
@@ -350,7 +346,10 @@ const store: Store<RootState> = new Vuex.Store({
 						const accounts = getAccountsFromKeystore(keystore);
 
 						commit('keystoreUnlocked', { keystore, accounts, hashedPassword: params.password });
-						resolve(true);
+						getPayload(state.email).then(payload => {
+							commit('updatePayload', payload);
+							resolve(true);
+						});
 					})
 					.catch(err => {
 						console.log('unlockWithPassword error', err);
@@ -438,6 +437,17 @@ const store: Store<RootState> = new Vuex.Store({
 					console.error(e);
 					reject(e);
 				}
+			});
+		},
+		generateQRCode({ dispatch }) {
+			return new Promise((resolve, reject) => {
+				dispatch('sendSignedRequest', {
+					body: {},
+					method: 'POST',
+					url: getBackendEndpoint() + '/v1/auth/generateAuthenticatorQR'
+				})
+					.then(resolve)
+					.catch(reject);
 			});
 		},
 		sendSignedRequest({ state }, params: TypeRequestParams) {

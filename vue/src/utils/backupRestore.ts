@@ -401,46 +401,6 @@ const send2FAEmail = async (email: string) => {
 	return response;
 };
 
-const generateQRCode = async (email: string) => {
-	const key = await sha256(email);
-	const options: RequestInit = {
-		method: 'POST',
-		headers: {
-			Accept: 'application/json',
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			key
-		}),
-		mode: 'cors',
-		cache: 'default'
-	};
-	const result = await fetch(getBackendEndpoint() + '/v1/generateAuthenticatorQR', options);
-
-	const response = await result.json();
-	return response;
-};
-
-const getQRCode = async (email: string) => {
-	const key = await sha256(email.toLowerCase());
-	const options: RequestInit = {
-		method: 'POST',
-		headers: {
-			Accept: 'application/json',
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			key
-		}),
-		mode: 'cors',
-		cache: 'default'
-	};
-	const result = await fetch(getBackendEndpoint() + '/v1/getQRCode', options);
-
-	const response = await result.json();
-	return response;
-};
-
 const verifyAuthenticatorCode = async (email: string, code: string) => {
 	const key = await sha256(email.toLowerCase());
 	const options: RequestInit = {
@@ -457,8 +417,11 @@ const verifyAuthenticatorCode = async (email: string, code: string) => {
 		cache: 'default'
 	};
 	try {
-		await fetch(getBackendEndpoint() + '/v1/verifyAuthenticatorCode', options);
+		const response = await fetch(getBackendEndpoint() + '/v1/verifyAuthenticatorCode', options);
 		//it will throw an exception if it fails
+		if (!response.ok) {
+			return false;
+		}
 		return true;
 	} catch (e) {
 		return false;
@@ -509,8 +472,6 @@ export {
 	getNonce,
 	change2FAMethods,
 	send2FAEmail,
-	generateQRCode,
-	getQRCode,
 	verifyAuthenticatorCode,
 	verifyEmailCode,
 	getBackendEndpoint

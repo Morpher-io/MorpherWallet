@@ -12,6 +12,7 @@ export type Type2FARequired = {
 	__typename?: 'Type2FARequired';
 	email: boolean;
 	authenticator: boolean;
+	authenticatorConfirmed: boolean;
 };
 
 export type TypeSeedFoundData = {
@@ -116,5 +117,4 @@ export type TypeRequestParams = {
 	body: any;
 	url: string;
 	method: string;
-
 };

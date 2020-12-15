@@ -19,11 +19,8 @@ module.exports = function(express) {
     router.post('/getPayload', WalletController.getPayload);
     router.post('/getNonce', WalletController.getNonce);
     router.post('/send2FAEmail', WalletController.send2FAEmail);
-    router.post('/generateAuthenticatorQR', WalletController.generateAuthenticatorQR);
-    router.post('/verifyAuthenticatorCode', WalletController.verifyAuthenticatorCode);
     router.post('/verifyEmailCode', WalletController.verifyEmailCode);
-    router.post('/getQRCode', WalletController.getQRCode);
-
+    router.post('/verifyAuthenticatorCode', WalletController.verifyAuthenticatorCode);
     router.post('/validateInput', ValidationController.validateInput);
 
     /**
@@ -33,6 +30,7 @@ module.exports = function(express) {
     router.post('/auth/updatePassword', WalletController.updatePassword);
     router.post('/auth/updateEmail', WalletController.updateEmail);
     router.post('/auth/change2FAMethods', WalletController.change2FAMethods);
+    router.post('/auth/generateAuthenticatorQR', WalletController.generateAuthenticatorQR);
 
     return router;
 };

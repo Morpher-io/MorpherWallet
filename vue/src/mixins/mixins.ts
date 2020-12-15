@@ -97,4 +97,7 @@ export class Authenticated extends Global {
 
 	@Action
 	public changeEmail!: (params: TypeChangeEmail) => Promise<unknown>;
+
+	@Action
+	public generateQRCode!: () => Promise<unknown>;
 }
