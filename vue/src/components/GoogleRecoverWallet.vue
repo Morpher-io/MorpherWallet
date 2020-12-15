@@ -1,10 +1,10 @@
 <template>
 	<div class="control is-expanded">
-			<GoogleLogin
+		<GoogleLogin
 			class="button is-fullwidth is-google"
 			:params="{ client_id: '376509986959-k6tstmq30f4spbp9vd1u94tvt8dg714b.apps.googleusercontent.com' }"
 			:onSuccess="onLogin"
-			>
+		>
 			<span class="icon google-icon">
 				<i class="fab fa-google"></i>
 			</span>
@@ -58,12 +58,10 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .is-google {
-	background-color: #34A853 ;
-
+	background-color: #34a853;
 }
 .google-icon {
 	font-size: 18px;
 	margin-right: 10px;
-
 }
 </style>

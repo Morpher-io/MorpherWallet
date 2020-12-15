@@ -30,21 +30,18 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
 import Component, { mixins } from 'vue-class-component';
-import Spinner from '../components/loading-spinner/Spinner.vue';
 import { mapState } from 'vuex';
 import VKRecoverWallet from '../components/VKRecoverWallet.vue';
 import GoogleRecoverWallet from '../components/GoogleRecoverWallet.vue';
 import FBRecoverWallet from '../components/FBRecoverWallet.vue';
 import { Global, Authenticated } from '../mixins/mixins';
 
-
 @Component({
 	components: {
 		VKRecoverWallet,
 		FBRecoverWallet,
-		GoogleRecoverWallet,
+		GoogleRecoverWallet
 	},
 	computed: {
 		...mapState({

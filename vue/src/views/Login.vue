@@ -74,7 +74,7 @@ export default class Login extends mixins(Global) {
 	 * Cmponent mounted lifestyle hook
 	 */
 	mounted() {
-		if (this.store.email ) {
+		if (this.store.email) {
 			this.walletEmail = this.store.email;
 		}
 		if (this.store.status !== 'invalid password') {

@@ -11,7 +11,7 @@
 			<FBAddRecovery :walletEmail="store.email"></FBAddRecovery>
 		</div>
 		<div class="field is-grouped">
-		<VKAddRecovery :walletEmail="store.email"></VKAddRecovery>
+			<VKAddRecovery :walletEmail="store.email"></VKAddRecovery>
 		</div>
 
 		<div class="field is-grouped">
@@ -30,21 +30,18 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
 import Component, { mixins } from 'vue-class-component';
-import Spinner from '../components/loading-spinner/Spinner.vue';
 import { mapState } from 'vuex';
 import FBAddRecovery from '../components/FBAddRecovery.vue';
 import GoogleAddRecovery from '../components/GoogleAddRecovery.vue';
 import VKAddRecovery from '../components/VKAddRecovery.vue';
 import { Global, Authenticated } from '../mixins/mixins';
 
-
 @Component({
 	components: {
 		FBAddRecovery,
 		VKAddRecovery,
-		GoogleAddRecovery,
+		GoogleAddRecovery
 	},
 	computed: {
 		...mapState({

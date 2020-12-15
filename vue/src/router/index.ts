@@ -12,7 +12,6 @@ import SignMsg from '../views/SignMsg.vue';
 import Recovery from '../views/Recovery.vue';
 import RecoveryAdd from '../views/RecoveryAdd.vue';
 
-
 Vue.use(VueRouter);
 
 const routes: Array<RouteConfig> = [
