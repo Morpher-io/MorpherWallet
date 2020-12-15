@@ -8,7 +8,6 @@ console.log(secureRoutes)
 module.exports = function(express) {
     const router = express.Router();
 
-    //router.post('/changeEmail', WalletController.changeEmail);
     router.post('/saveEmailPassword', WalletController.saveEmailPassword);
     router.post('/getEncryptedSeed', WalletController.getEncryptedSeed);
     router.get('/getRecoveryTypes', WalletController.getRecoveryTypes);
@@ -30,8 +29,9 @@ module.exports = function(express) {
     /**
      * Secure routes checking signature matching eth_address
      */
-    // router.use('/auth', secureRoutes);
-    router.post('/auth/updateEmailPassword', secureRoutes, WalletController.updateEmailPassword);
+    router.use('/auth', secureRoutes);
+    router.post('/auth/updatePassword', WalletController.updatePassword);
+    router.post('/auth/updateEmail', WalletController.updateEmail);
     router.post('/auth/change2FAMethods', WalletController.change2FAMethods);
 
     return router;

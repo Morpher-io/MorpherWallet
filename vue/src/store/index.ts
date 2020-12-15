@@ -28,7 +28,8 @@ import {
 	TypeChangePassword,
 	TypeEncryptedSeed,
 	TypeKeystoreUnlocked,
-	TypeRequestParams
+	TypeRequestParams,
+	TypeChangeEmail
 } from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
@@ -166,6 +167,8 @@ const store: Store<RootState> = new Vuex.Store({
 		keystoreUnlocked(state: RootState, payload: TypeKeystoreUnlocked) {
 			state.keystore = payload.keystore;
 			state.accounts = payload.accounts;
+			state.hashedPassword = payload.hashedPassword;
+			sessionStorage.setItem('password', payload.hashedPassword);
 		}
 	},
 	actions: {
@@ -192,7 +195,7 @@ const store: Store<RootState> = new Vuex.Store({
 									getEncryptedSeedFromMail(email, '', '')
 										.then(encryptedSeed => {
 											commit('seedFound', { encryptedSeed });
-											resolve();
+											resolve(true);
 										})
 										.catch(reject);
 								}
@@ -344,8 +347,8 @@ const store: Store<RootState> = new Vuex.Store({
 					.then((keystore: WalletBase) => {
 						const accounts = getAccountsFromKeystore(keystore);
 
-						commit('keystoreUnlocked', { keystore, accounts });
-						resolve();
+						commit('keystoreUnlocked', { keystore, accounts, hashedPassword: params.password });
+						resolve(true);
 					})
 					.catch(err => {
 						console.log('unlockWithPassword error', err);
@@ -373,11 +376,61 @@ const store: Store<RootState> = new Vuex.Store({
 						await dispatch('sendSignedRequest', {
 							body,
 							method: 'POST',
-							url: getBackendEndpoint() + '/v1/auth/updateEmailPassword'
+							url: getBackendEndpoint() + '/v1/auth/updatePassword'
 						});
 						commit('seedFound', { encryptedSeed: newEncryptedSeed });
 						commit('userFound', { email: state.email, hashedPassword: params.newPassword });
 						resolve(true);
+					}
+				} catch (e) {
+					console.error(e);
+					reject(e);
+				}
+			});
+		},
+		changeEmail({ commit, state, dispatch }, params: TypeChangeEmail) {
+			return new Promise(async (resolve, reject) => {
+				try {
+					if (state.keystore !== undefined && state.keystore !== null) {
+						if (params.password == state.hashedPassword) {
+							if (params.twoFa != undefined) {
+								//twoFA was sent
+								if (await verifyEmailCode(state.email, params.twoFa.toString())) {
+									const body = {
+										oldEmail: state.email,
+										newEmail: params.newEmail,
+										email2faVerification: params.twoFa
+									};
+									dispatch('sendSignedRequest', {
+										body,
+										method: 'POST',
+										url: getBackendEndpoint() + '/v1/auth/updateEmail'
+									})
+										.then(() => {
+											commit('userFound', { email: params.newEmail, hashedPassword: state.hashedPassword });
+											resolve(true);
+										})
+										.catch(reject);
+								} else {
+									reject('Two FA Code is incorrect!');
+								}
+							} else {
+								//twoFA wasn't sent yet, send it with the first request to the new email address
+								const body = {
+									oldEmail: state.email,
+									newEmail: params.newEmail
+								};
+								dispatch('sendSignedRequest', {
+									body,
+									method: 'POST',
+									url: getBackendEndpoint() + '/v1/auth/updateEmail'
+								})
+									.then(resolve)
+									.catch(reject);
+							}
+						} else {
+							reject('Password is not correct!');
+						}
 					}
 				} catch (e) {
 					console.error(e);
@@ -405,10 +458,13 @@ const store: Store<RootState> = new Vuex.Store({
 						mode: 'cors',
 						cache: 'default'
 					};
-					console.log(options);
+
 					try {
-						const result = await fetch(params.url, options);
-						resolve(await result.json());
+						const response = await fetch(params.url, options);
+						if (!response.ok) {
+							reject((await response.json()).error);
+						}
+						resolve(await response.json());
 					} catch (e) {
 						reject(e);
 					}

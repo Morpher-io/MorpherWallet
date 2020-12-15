@@ -466,6 +466,9 @@ const verifyAuthenticatorCode = async (email: string, code: string) => {
 };
 
 const verifyEmailCode = async (email: string, code: string) => {
+	if (email == '' || code == '') {
+		return false;
+	}
 	const key = await sha256(email.toLowerCase());
 	const options: RequestInit = {
 		method: 'POST',

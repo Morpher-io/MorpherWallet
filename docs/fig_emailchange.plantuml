@@ -1,0 +1,12 @@
+@startuml
+start
+:Call to /updateEmail;
+if(2fa send along) then (no)
+    :send 2FA code;
+    end;
+else (yes)
+	:Check if 2FA code is correct;
+    :Update Email in Database;
+    end;
+endif
+@enduml
