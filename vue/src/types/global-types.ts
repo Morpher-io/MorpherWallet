@@ -65,6 +65,14 @@ export type TypeChangePassword = {
 	newPassword: string;
 };
 
+
+export type TypeChangeEmail = {
+	__typename?: 'TypeChangePassword';
+	password: string;
+	newEmail: string;
+	twoFa: number;
+};
+
 export type TypeUserFoundData = {
 	__typename?: 'TypeUserFoundData';
 	email: string;
@@ -100,6 +108,7 @@ export type TypeKeystoreUnlocked = {
 	__typename?: 'TypeKeystoreUnlocked';
 	accounts: [string];
 	keystore: WalletBase;
+	hashedPassword: string;
 };
 
 export type TypeRequestParams = {

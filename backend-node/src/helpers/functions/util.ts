@@ -11,7 +11,6 @@ const crypto = require('crypto');
 const errorResponse = function(res, err, code = 404) {
     if (typeof err === 'object' && typeof err.message !== 'undefined') err = err.message;
     if (code !== null) res.statusCode = code;
-    console.log(err);
     return res.json({ success: false, error: err });
 };
 

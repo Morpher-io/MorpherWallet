@@ -38,3 +38,4 @@ export { getTransaction };
 export { Recovery } from './recovery.model';
 export { Recovery_Type } from './recovery_type.model';
 export { User } from './user.model';
+export { Userhistory } from './userhistory.model';

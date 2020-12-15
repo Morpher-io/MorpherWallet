@@ -1,4 +1,4 @@
-import { getTransaction, Op, Recovery, Recovery_Type, User } from '../database/models';
+import { getTransaction, Op, Recovery, Recovery_Type, User, Userhistory } from '../database/models';
 import { decrypt, encrypt, errorResponse, successResponse, sha256, randomFixedInteger } from '../helpers/functions/util';
 const { to } = require('await-to-js');
 import { Request, Response } from 'express';
@@ -6,7 +6,7 @@ const Util = require('ethereumjs-util');
 
 import { VK } from 'vk-io';
 import { Facebook } from 'fb';
-import { sendEmail2FA } from "../helpers/functions/email";
+import { sendEmail2FA, sendEmailChanged } from "../helpers/functions/email";
 import { authenticator } from "otplib";
 const QRCode = require('qrcode')
 const options = {
@@ -180,46 +180,113 @@ export async function saveEmailPassword(req: Request, res: Response) {
 
 // Function to save new email/password to the database.
 //only works if passed through a middleware that checks the signature!
-export async function updateEmailPassword(req: Request, res: Response) {
+export async function updatePassword(req: Request, res: Response) {
     // Get sequelize transactions to rollback changes in case of failure.
     const [err, transaction] = await to(getTransaction());
     if (err) return errorResponse(res, err.message);
 
     try {
         // Get variables from request body.
-        const newEmail = req.body.newEmail;
-        const oldEmail = req.body.oldEmail;
-        const oldKey = req.body.oldKey;
-        const newKey = req.body.newKey;
+        // const newEmail = req.body.newEmail;
+        // const oldEmail = req.body.oldEmail;
+        // const oldKey = req.body.oldKey;
+        // const newKey = req.body.newKey;
+        const key = req.header('key');
         const encryptedSeed = req.body.encryptedSeed;
-        const recoveryTypeId = req.body.recoveryTypeId || 1;
+        //const recoveryTypeId = req.body.recoveryTypeId || 1;
 
 
         // Attempt to get user from database.
-        const user = await User.findOne({ where: { email: oldEmail } });
+        //const user = await User.findOne({ where: { email: email } });
 
-        if (user != null) {
-            user.email = newEmail;
-            user.save();
-            
-            // Create a new recovery method.
-            const recovery = await Recovery.findOne({where: {key: oldKey, user_id: user.id, recovery_type_id: recoveryTypeId}});
-            if(recovery != null) {
-                recovery.encrypted_seed = JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT));
-                recovery.key = newKey;
-                recovery.save();
-            }
+        //if (user != null) {
+        // user.email = newEmail;
+        // user.save();
 
-            return successResponse(res, "updated");
+        // Create a new recovery method.
+        const recovery = await Recovery.findOne({ where: { key: key, recovery_type_id: 1 } });
+        if (recovery != null) {
+            recovery.encrypted_seed = JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT));
+            //recovery.key = newKey;
+            recovery.save();
         }
 
-        return errorResponse(res, "Error: User doesn't exists!");
+        return successResponse(res, "updated");
+        //}
+
+        //return errorResponse(res, "Error: User doesn't exists!");
 
     } catch (error) {
         // If an error happened anywhere along the way, rollback all the changes.
         return errorResponse(res, error.message);
     }
 }
+
+
+// Function to save new email/password to the database.
+//only works if passed through a middleware that checks the signature!
+export async function updateEmail(req: Request, res: Response) {
+    // Get sequelize transactions to rollback changes in case of failure.
+    let transaction = await getTransaction();
+
+    try {
+        // Get variables from request body.
+        const newEmail = req.body.newEmail;
+        const email2faVerification = req.body.email2faVerification;
+        const key = req.header('key');
+        const recoveryTypeId = 1;
+
+        const recovery = await Recovery.findOne({ where: { key: key, recovery_type_id: recoveryTypeId }, transaction });
+        if (recovery != null) {
+            const user = await User.findOne({ where: { id: recovery.user_id }, transaction });
+            const user_should_not_exist = await User.findOne({ where: { email: newEmail, [Op.not]: { id: user.id } } });
+            //the user doesn't exist yet
+            if (user_should_not_exist == null) {
+                //email 2FA alredy sent out to verify new email address exists?
+                if (email2faVerification == undefined) {
+                    let verificationCode = await updateEmail2fa(user.id);
+                    await sendEmail2FA(verificationCode, newEmail);
+                    transaction.commit(); //close the transaction after the 2fa was sent
+                    return successResponse(res, "sent 2fa code to new email address");
+                } else {
+                    // 2FA tokens in query params
+                    // Attempt to get user from database.
+                    if (verifyEmail2FA(user.id.toString(), email2faVerification)) {
+                        //2fa passed here
+                        Userhistory.create({ user_id: user.id, old_value: user.email, new_value: newEmail, change_type: 'updateEmail' });
+                        sendEmailChanged(newEmail, user.email); //send the old user an info-mail that his email address got updated.
+
+                        //save the new user email
+                        user.email = newEmail;
+                        await user.save({ transaction });
+
+                        //save the new recovery key for the recovery option email
+                        recovery.key = await sha256(newEmail);
+                        await recovery.save({ transaction });
+
+                        // Commit changes to database and return successfully.
+                        await transaction.commit();
+                        return successResponse(res, { updated: true });
+                    }
+                }
+            } else {
+                //user exists error
+                await transaction.rollback();
+                return errorResponse(res, "Error: User with this Email address already exists.", 409);
+            }
+        }
+        //any other error case
+        await transaction.rollback();
+        return errorResponse(res, "Error: Update Operation aborted.", 500);
+
+
+    } catch (error) {
+        // If an error happened anywhere along the way, rollback all the changes.
+        return errorResponse(res, error.message);
+    }
+}
+
+
 
 // Function to get an encrypted seed from the database using a key.
 export async function getEncryptedSeed(req, res) {
@@ -509,7 +576,7 @@ export async function send2FAEmail(req, res) {
 
         await sendEmail2FA(verificationCode, user.email);
 
-        return successResponse(res, { verificationCode });
+        return successResponse(res, { sent: true });
     }
     catch (e) {
         console.log(e)

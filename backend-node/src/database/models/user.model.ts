@@ -1,8 +1,9 @@
 import { AutoIncrement, Column, DataType, HasMany, Model, PrimaryKey, Table, Unique } from 'sequelize-typescript';
 import { Recovery } from './recovery.model';
+import { Userhistory } from './userhistory.model';
 import * as moment from 'moment';
 
-@Table({ timestamps: false })
+@Table({ timestamps: true })
 export class User extends Model<User> {
     @PrimaryKey
     @AutoIncrement
@@ -45,12 +46,15 @@ export class User extends Model<User> {
     })
     payload;
 
-    @Column({
-        type: DataType.BIGINT,
-        defaultValue: () => moment.utc().valueOf()
-    })
-    created_at;
+    // @Column({
+    //     type: DataType.BIGINT,
+    //     defaultValue: () => moment.utc().valueOf()
+    // })
+    // created_at;
 
     @HasMany(() => Recovery)
     recovery: Recovery[];
+
+    @HasMany(() => Userhistory)
+    history: Userhistory[];
 }

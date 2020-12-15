@@ -22,3 +22,7 @@ This is the guideline for a security review of the Morpher Wallet
 
 
 :[Packages](packages.md)
+<div style='page-break-after: always;'></div>
+
+
+:[Packages](settings.md)

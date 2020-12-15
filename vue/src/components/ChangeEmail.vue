@@ -9,20 +9,48 @@
 					<i class="fas fa-chevron-down"></i>
 				</span>
 
-				<span class="header" @click="collapsed = !collapsed"> Change Email Address </span>
+				<span class="header" @click="collapsed = !collapsed">
+					Change Email Address
+					<span class="help is-success" v-if="success">Saved!</span>
+				</span>
 				<div :class="collapsed ? 'hidden' : 'visible'">
 					<div class="card-content">
 						<div class="content">
 							<div class="field">
 								<label class="label">New Email</label>
 								<div class="control">
-									<input class="input is-primary" name="newEmail" placeholder="New Email Address" v-model="newEmail" />
+									<input
+										class="input is-primary"
+										name="newEmail"
+										placeholder="New Email Address"
+										v-model="newEmail"
+										:disabled="twoFaSent"
+									/>
+									<p class="help is-danger" v-if="invalidEmail">
+										{{ invalidEmail }}
+									</p>
 								</div>
 							</div>
 							<div class="field">
 								<label class="label">Password</label>
 								<div class="control">
-									<input type="password" class="input is-primary" name="password" placeholder="Enter password" v-model="password" />
+									<input
+										type="password"
+										class="input is-primary"
+										name="password"
+										placeholder="Enter password"
+										v-model="password"
+										:disabled="twoFaSent"
+									/>
+								</div>
+							</div>
+							<div class="field" v-if="twoFaSent">
+								<label class="label">2FA Code</label>
+								<div class="control">
+									<input type="number" class="input is-primary" name="twoFa" placeholder="Enter 2FA" v-model="twoFa" />
+									<p class="help is-danger" v-if="invalid2FA">
+										{{ invalid2FA }}
+									</p>
 								</div>
 							</div>
 						</div>
@@ -45,60 +73,74 @@
 </template>
 
 <script>
-import isIframe from '../utils/isIframe';
-
+import { validateInput } from '../utils/backupRestore';
 import { sha256 } from '../utils/cryptoFunctions';
-import { changeEmail, validateInput } from '../utils/backupRestore';
 
-export default {
-	name: 'ChangeEmail',
-	data: function() {
-		return {
-			newEmail: '',
-			password: '',
-			showSpinner: false,
-			status: '',
-			collapsed: true
-		};
-	},
-	props: ['emailChanged'],
-	methods: {
-		async formSubmitChangeEmail(e) {
-			e.preventDefault();
-			if (!this.newEmail) return;
+import Component, { mixins } from 'vue-class-component';
+import { Authenticated, Global } from '../mixins/mixins';
 
-			const emailMessage = await validateInput('email', this.newEmail);
-			if (emailMessage) alert(emailMessage);
-			else {
-				const storedPassword = window.sessionStorage.getItem('password');
-				const password = await sha256(this.password);
-				if (storedPassword === password) {
-					const encryptedSeed = JSON.parse(localStorage.getItem('encryptedSeed'));
-					const oldEmail = localStorage.getItem('email');
-					await changeEmail(oldEmail, this.newEmail, encryptedSeed);
-					window.localStorage.setItem('email', this.newEmail);
-					alert('Email changed successfully.');
+@Component({})
+export default class ChangeEmail extends mixins(Global, Authenticated) {
+	newEmail = '';
+	password = '';
+	error = '';
+	twoFaSent = false;
+	twoFa = null;
+	invalidEmail = false;
+	collapsed = true;
+	invalid2FA = false;
+	success = false;
 
-					this.newEmail = '';
-					this.password = '';
-					this.emailChanged();
-					this.collapsed = true;
-					await this.logout();
-				} else alert('Password is not right!');
+	async formSubmitChangeEmail() {
+		if (!this.newEmail) {
+			return;
+		}
+
+		const emailMessage = await validateInput('email', this.newEmail);
+		if (emailMessage) {
+			this.invalidEmail = emailMessage;
+			return;
+		}
+
+		const password = await sha256(this.password);
+
+		if (this.store.hashedPassword !== password) {
+			this.invalidEmail = 'The password you entered is not correct!';
+			return;
+		}
+
+		if (this.store.email === this.newEmail) {
+			this.invalidEmail = 'The Email Address you entered is the same as you already use.';
+			return;
+		}
+
+		if (this.twoFaSent == true && this.twoFa == '') {
+			this.invalid2FA = 'Two FA cannot be empty!';
+		}
+
+		try {
+			this.invalid2FA = false;
+			this.invalidEmail = false;
+			await this.changeEmail({ newEmail: this.newEmail, password: password, twoFa: this.twoFa });
+			if (!this.twoFaSent) {
+				//we show the 2FA fields now
+				this.twoFaSent = true;
+			} else {
+				this.newEmail = '';
+				this.password = '';
+				this.collapsed = true;
+				this.twoFa = '';
+				this.twoFaSent = false;
+				this.invalid2FA = false;
+				this.invalidEmail = false;
+				this.success = true;
 			}
-		},
-
-		async logout() {
-			this.showSpinner = true;
-			this.status = 'Logging out...';
-			if (isIframe()) {
-				(await this.connection.promise).onLogout();
-			}
-			localStorage.clear();
-			window.location.reload();
+		} catch (e) {
+			console.log(e);
+			this.invalidEmail = e.toString();
 		}
 	}
-};
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
