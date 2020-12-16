@@ -95,6 +95,16 @@ export async function saveEmailPassword(req: Request, res: Response) {
         const recoveryTypeId = req.body.recoveryTypeId || 1;
         const eth_address = req.body.ethAddress;
 
+        try{
+            const parsedSeed = JSON.parse(encryptedSeed);
+            if(key.length !== 64 || parsedSeed.ciphertext === undefined ||
+                parsedSeed.iv === undefined || parsedSeed.salt === undefined){
+                return errorResponse(res, "Bad body data.");
+            }
+        }catch (e) {
+            return errorResponse(res, "Bad body data.");
+        }
+
         let userId;
 
         // Attempt to get user from database.
@@ -483,10 +493,7 @@ export async function change2FAMethods(req, res) {
         const eth_address = '0x' + (Util.pubToAddress(Util.ecrecover(msgHash, signedMessage.v, Buffer.from(signedMessage.r), Buffer.from(signedMessage.s)))).toString('hex');
 
         if (user.eth_address === eth_address) {
-            user.payload.email = toggleEmail;
-            user.payload.authenticator = toggleAuthenticator;
-            user.nonce = randomFixedInteger(6);
-            user.changed('payload', true);
+
             await user.save();
             return successResponse(res, { message: 'User payload updated successfully.' });
         }
