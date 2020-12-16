@@ -396,6 +396,7 @@ export async function change2FAMethods(req, res) {
     if (recovery != null) {
         const user = await User.findOne({ where: { id: recovery.user_id } });
 
+        Userhistory.create({ user_id: user.id, new_value: JSON.stringify(req.body), old_value: JSON.stringify(user.payload), change_type: 'update2fa', stringified_headers: JSON.stringify(req.headers) });
         user.payload.email = toggleEmail;
         user.payload.authenticator = toggleAuthenticator;
         if (toggleAuthenticator == false) {
