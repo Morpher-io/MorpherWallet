@@ -67,11 +67,11 @@ process.on('unhandledRejection', (error: any, promise) => {
 
 // Listen to the server ports.
 httpServer.listen(process.env.PORT, async () => {
-    console.log(`🚀Express Server ready at http://localhost:${process.env.PORT}`);
+    Logger.info({status: `🚀Express Server ready at http://localhost:${process.env.PORT}`});
 
     // Database initialization.
     await sequelize.sync();
-    Logger.info('Connected to database');
+    Logger.info({status: 'Connected to database'});
 });
 
 // Export server for testing purposes

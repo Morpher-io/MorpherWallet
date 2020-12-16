@@ -9,7 +9,10 @@
 					<i class="fas fa-chevron-down"></i>
 				</span>
 
-				<span class="header" @click="collapsed = !collapsed"> Change 2-Factor authentication (2FA) </span>
+				<span class="header" @click="collapsed = !collapsed">
+					Change 2-Factor authentication (2FA)
+					<span class="help is-success" v-if="success">Saved!</span>
+				</span>
 				<div :class="collapsed ? 'hidden' : 'visible'">
 					<div class="card-content">
 						<div class="field">
@@ -25,11 +28,14 @@
 								2FA with Authenticator Codes enabled
 							</label>
 						</div>
-						<figure class="image" v-if="this.authenticator && (this.qrCode !== '' || this.qrCode !== undefined)">
+						<figure
+							class="image"
+							v-if="!this.authenticatorConfirmed && this.authenticator && (this.qrCode !== '' || this.qrCode !== undefined)"
+						>
 							<img v-bind:src="this.qrCode" />
 						</figure>
 
-						<div class="field" v-if="this.authenticator && !this.qrCode">
+						<div class="field" v-if="this.authenticator && !this.qrCode && !this.authenticatorConfirmed">
 							<div class="control">
 								<button type="button" class="button is-light" value="Generate QR Code" v-on:click="generateQR">
 									Generate QR Code for Authenticator
@@ -41,6 +47,9 @@
 							<label class="label">Enter the Authenticator Code to Verify Successful Setup!</label>
 							<div class="control">
 								<input type="text" placeholder="Authenticator Code" class="textbox" v-model="authenticatorCode" />
+								<p class="help is-danger" v-if="invalidAuthenticator">
+									{{ invalidAuthenticator }}
+								</p>
 							</div>
 						</div>
 
@@ -59,14 +68,12 @@
 					</div>
 
 					<div class="field is-grouped">
-						<div class="layout split">
-							<button class="button is-green" type="submit">
-								<span class="icon is-small">
-									<i class="fas fa-save"></i>
-								</span>
-								<span> Save 2FA Settings </span>
-							</button>
-						</div>
+						<button class="button is-green" type="submit">
+							<span class="icon is-small">
+								<i class="fas fa-save"></i>
+							</span>
+							<span> Save 2FA Settings </span>
+						</button>
 					</div>
 				</div>
 			</div>
@@ -86,30 +93,47 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 	authenticator = false;
 	authenticatorConfirmed = false;
 	authenticatorCode = '';
+	invalidAuthenticator = '';
 	qrCode = '';
 	collapsed = true;
-	success = true;
+	success = false;
 
 	async formSubmitChange2FA() {
 		if (this.authenticator && !this.authenticatorConfirmed) {
-			alert('Please confirm Authenticator first.');
+			this.invalidAuthenticator = 'Please click Confirm Authenticator first before saving 2FA settings.';
 			return;
 		}
+
+		//user unselected authenticator
+		if (!this.authenticator && this.authenticatorConfirmed) {
+			this.authenticatorConfirmed = false;
+		}
+
 		try {
-			await this.updatePayload(this.email, this.authenticator, this.authenticatorCode);
+			this.showSpinner = true;
+			await this.change2FAMethods({
+				email: this.email,
+				authenticator: this.authenticator,
+				authenticatorConfirmed: this.authenticatorConfirmed
+			});
 			this.success = true;
+			this.collapsed = true;
 		} catch (e) {
 			console.log(e);
 		}
+
+		this.showSpinner = false;
 	}
 
 	async confirmAuthenticator() {
 		this.authenticatorConfirmed = await verifyAuthenticatorCode(this.store.email, this.authenticatorCode);
 
 		if (this.authenticatorConfirmed) {
-			alert('Authenticator confirmed.');
+			this.success = true;
+			this.collapsed = true;
+			this.invalidAuthenticator = '';
 		} else {
-			alert('Authenticator code is not right.');
+			this.invalidAuthenticator = 'Authenticator code seems to be incorrect.';
 		}
 	}
 

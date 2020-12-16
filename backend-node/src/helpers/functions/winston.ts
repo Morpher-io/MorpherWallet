@@ -25,7 +25,8 @@ export const Logger = createLogger({
     transports: [
         new transports.Console({
             level: 'debug',
-            handleExceptions: false
+            handleExceptions: false,
+            format: format.json(),
         }),
         new CloudWatchTransport({
             logGroupName: 'morpher-wallet-' + process.env.ENVIRONMENT, // REQUIRED

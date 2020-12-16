@@ -1,7 +1,5 @@
 <template>
 	<div class="container">
-		<spinner :active="showSpinner" :status="store.status"></spinner>
-
 		<h2 class="title">Authenticator Unlock</h2>
 		<h4 class="subtitle">Please input two FA Authenticator code</h4>
 		<form v-on:submit.prevent="validateCode">
@@ -93,20 +91,19 @@ export default class TwoFA extends mixins(Global) {
 	 * Process email 2fa authentication
 	 */
 	async validateCode() {
-		this.showSpinner = true;
+		this.$store.commit('loading', 'Validating 2FA codes...');
 		this.showError = false;
 		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.authenticatorCode })
 			.then(nextroute => {
-				this.showSpinner = false;
+				this.$store.commit('loading', '');
 				this.router.push(nextroute);
 			})
 			.catch(error => {
-				this.showSpinner = false;
+				this.$store.commit('loading', '');
 				if (error.toString() === 'invalid password') {
 					this.store.status = 'invalid password';
 					this.router.push('/login');
 				}
-				this.showSpinner = false;
 				this.showError = true;
 				this.logonError = error.toString();
 

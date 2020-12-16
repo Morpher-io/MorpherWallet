@@ -29,7 +29,8 @@ import {
 	TypeEncryptedSeed,
 	TypeKeystoreUnlocked,
 	TypeRequestParams,
-	TypeChangeEmail
+	TypeChangeEmail,
+	TypePayloadData
 } from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
@@ -46,6 +47,7 @@ Vue.use(Vuex);
 export interface RootState {
 	loading: boolean;
 	status: string;
+	spinnerStatusText: string;
 	message: string;
 	email: string;
 	hashedPassword: string;
@@ -80,6 +82,7 @@ function initialState(): RootState {
 	return {
 		loading: false,
 		status: '',
+		spinnerStatusText: '',
 		message: '',
 		email,
 		hashedPassword,
@@ -111,6 +114,21 @@ const store: Store<RootState> = new Vuex.Store({
 	mutations: {
 		authRequested(state: RootState) {
 			state.status = 'loading';
+		},
+		loading(state: RootState, statusMessage: string) {
+			if (statusMessage != '') {
+				state.loading = true;
+				state.spinnerStatusText = statusMessage;
+			} else {
+				state.spinnerStatusText = '';
+				state.loading = false;
+			}
+		},
+		delayedSpinnerMessage(state: RootState, statusMessage: string) {
+			state.spinnerStatusText = statusMessage;
+			setTimeout(() => {
+				state.loading = false;
+			}, 1500);
 		},
 		seedFound(state: RootState, seedFoundData: TypeSeedFoundData) {
 			state.status = 'success';
@@ -218,17 +236,15 @@ const store: Store<RootState> = new Vuex.Store({
 		 */
 		createWallet({ commit, dispatch }, params: TypeFetchUser) {
 			return new Promise((resolve, reject) => {
-				console.log('Does the User exist?');
 				sha256(params.password).then(hashedPassword => {
 					getPayload(params.email)
 						.then(() => {
-							console.log('payload found, error');
-							commit('authError', 'The user found: Login instead!');
+							commit('delayedSpinnerMessage', 'The user already exists.');
 							reject('Wallet for this mail already exists.');
 						})
 						.catch(async () => {
 							commit('authRequested');
-							console.log('keystore not found in mail, creating a new one');
+							commit('loading', 'Creating new Keystore...');
 							/**
 							 * If no wallet was found, then create a new one (seed = false) otherwise use the decrypted seed from above
 							 */
@@ -240,7 +256,10 @@ const store: Store<RootState> = new Vuex.Store({
 								commit('clearUser');
 								dispatch('fetchUser', { email: params.email, password: params.password })
 									.then(resolve)
-									.catch(reject);
+									.catch(e => {
+										commit('delayedSpinnerMessage', 'Unknown Error occurred during saving.');
+										reject(e);
+									});
 							});
 						});
 				});
@@ -447,6 +466,20 @@ const store: Store<RootState> = new Vuex.Store({
 					url: getBackendEndpoint() + '/v1/auth/generateAuthenticatorQR'
 				})
 					.then(resolve)
+					.catch(reject);
+			});
+		},
+		change2FAMethods({ dispatch, commit }, params: TypePayloadData) {
+			return new Promise((resolve, reject) => {
+				dispatch('sendSignedRequest', {
+					body: params,
+					method: 'POST',
+					url: getBackendEndpoint() + '/v1/auth/change2FAMethods'
+				})
+					.then(response => {
+						commit('updatePayload', params);
+						resolve(response);
+					})
 					.catch(reject);
 			});
 		},

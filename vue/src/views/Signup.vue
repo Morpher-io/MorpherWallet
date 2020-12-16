@@ -1,6 +1,5 @@
 <template>
 	<div class="container">
-		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 		<h2 class="title">Signup</h2>
 		<h4 class="subtitle">Create a new Wallet</h4>
 		<form v-on:submit.prevent="signupExecute">
@@ -30,7 +29,8 @@
 					/>
 					<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial; margin-top: -8px" />
 					<p class="help">
-						Use a strong Password! It encrypts your Wallet and keeps your Funds secure.
+						Use a strong Password! It encrypts your Wallet and keeps your Funds secure. It must be at least 8 characters long and include
+						one lower-case, one upper-case character and a number.
 					</p>
 
 					<p class="help is-danger" v-if="invalidPassword">
@@ -110,7 +110,7 @@ export default class Signup extends mixins(Global) {
 		/**
 		 * Validating Email
 		 */
-		this.showSpinner = true;
+		this.$store.commit('loading', 'Validating Email ...');
 		const emailMessage = await validateInput('email', this.walletEmail);
 		if (emailMessage) {
 			this.invalidEmail = emailMessage;
@@ -120,8 +120,9 @@ export default class Signup extends mixins(Global) {
 		/**
 		 * Validating Password
 		 */
-		const passwordMessage = await validateInput('password', this.walletPassword);
 
+		this.$store.commit('loading', 'Validating Password ...');
+		const passwordMessage = await validateInput('password', this.walletPassword);
 		if (passwordMessage) {
 			this.invalidPassword = passwordMessage;
 			return;
@@ -129,8 +130,10 @@ export default class Signup extends mixins(Global) {
 
 		const email = this.walletEmail;
 
+		this.$store.commit('loading', 'Creating Wallet ...');
 		this.createWallet({ email, password: this.walletPassword })
 			.then(() => {
+				this.$store.commit('loading', '');
 				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator) {
 					// open 2fa page if 2fa is required
 					this.$router.push('/2fa');
@@ -138,7 +141,10 @@ export default class Signup extends mixins(Global) {
 					this.$router.push('/');
 				}
 			})
-			.catch(console.log);
+			.catch(e => {
+				this.invalidEmail = e.toString();
+				console.log(e);
+			});
 	}
 }
 </script>
