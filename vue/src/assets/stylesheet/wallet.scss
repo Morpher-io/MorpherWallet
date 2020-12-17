@@ -45,7 +45,7 @@ $fullhd-enabled: false;
 // Update some of Bulma's component variables
 $body-background-color: $col_white;
 $control-border-width: 2px;
-$input-border-color: transparent;
+$input-border-color: $grey-light;
 $input-shadow: none;
 
 // Import from Bulma
@@ -54,6 +54,7 @@ $input-shadow: none;
 @import '../../../node_modules/bulma/sass/elements/button.sass';
 @import '../../../node_modules/bulma/sass/elements/container.sass';
 @import '../../../node_modules/bulma/sass/elements/title.sass';
+@import '../../../node_modules/bulma/sass/elements/image.sass';
 @import '../../../node_modules/bulma/sass/form/_all.sass';
 @import '../../../node_modules/bulma/sass/components/navbar.sass';
 @import '../../../node_modules/bulma/sass/layout/hero.sass';

@@ -13,16 +13,12 @@
 		<ExportWallet v-if="false"></ExportWallet>
 
 		<div class="field is-grouped">
-			<div class="layout split first">
-				<router-link to="/" tag="button" class="button is-grey">
-					<span class="icon is-small">
-						<i class="fas fa-chevron-left"></i>
-					</span>
-					<span> Back </span>
-				</router-link>
-			</div>
-
-			<div class="layout split second"></div>
+			<router-link to="/" tag="button" class="button is-grey">
+				<span class="icon is-small">
+					<i class="fas fa-chevron-left"></i>
+				</span>
+				<span> Back </span>
+			</router-link>
 		</div>
 	</div>
 </template>

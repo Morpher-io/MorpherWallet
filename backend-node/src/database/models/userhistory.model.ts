@@ -35,4 +35,9 @@ export class Userhistory extends Model<Userhistory> {
     })
     change_type;
 
+    @Column({
+        type: DataType.TEXT
+    })
+    stringified_headers;
+
 }
