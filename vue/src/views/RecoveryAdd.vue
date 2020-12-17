@@ -4,15 +4,11 @@
 
 		<h1 class="title">Add Recovery Options</h1>
 
-		<div class="field is-grouped">
-			<GoogleAddRecovery :walletEmail="store.email"></GoogleAddRecovery>
-		</div>
-		<div class="field is-grouped">
-			<FBAddRecovery :walletEmail="store.email"></FBAddRecovery>
-		</div>
-		<div class="field is-grouped">
-			<VKAddRecovery :walletEmail="store.email"></VKAddRecovery>
-		</div>
+		<GoogleAddRecovery></GoogleAddRecovery>
+
+		<FBAddRecovery :walletEmail="store.email"></FBAddRecovery>
+
+		<VKAddRecovery :walletEmail="store.email"></VKAddRecovery>
 
 		<div class="field is-grouped">
 			<div class="layout split first">

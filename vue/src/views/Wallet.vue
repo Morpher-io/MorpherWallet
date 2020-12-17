@@ -18,8 +18,8 @@
 				</div>
 			</div>
 		</div>
-		<div class="collapse">
-			<div v-if="true">
+		<div class="collapse" v-if="noRecoveryMethods">
+			<div>
 				<p class="help">
 					You have no wallet recovery options set. You will not be able to recover your wallet if you forget your password.
 				</p>
@@ -56,6 +56,7 @@ import { Global, Authenticated } from '../mixins/mixins';
 export default class Wallet extends mixins(Global, Authenticated) {
 	dropdownIsActive = false;
 	selectedAccount = '';
+	noRecoveryMethods = false;
 
 	async mounted() {
 		if (this.isIframe() && !this.store.loginComplete) {
@@ -64,6 +65,9 @@ export default class Wallet extends mixins(Global, Authenticated) {
 
 				(await promise).onLogin(this.store.accounts[0], this.store.email);
 			}
+		}
+		if (this.store.recoveryMethods.length == 1) {
+			this.noRecoveryMethods = true;
 		}
 		this.store.loginComplete = true;
 	}

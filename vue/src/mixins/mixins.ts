@@ -9,7 +9,9 @@ import {
 	TypeUnlockWithPassword,
 	TypeChangePassword,
 	TypeChangeEmail,
-	TypePayloadData
+	TypePayloadData,
+	TypeRecoveryParams,
+	TypeAddRecoveryParams
 } from '../types/global-types';
 import { mapState } from 'vuex';
 import { RootState } from '../store';
@@ -58,6 +60,10 @@ export class Global extends Vue {
 	// Map store actions
 	@Action
 	public logoutWallet!: () => void;
+
+	// Map store actions
+	@Action
+	public fetchWalletFromRecovery!: (params: TypeRecoveryParams) => Promise<unknown>;
 
 	// Map Store Properties
 	store: RootState = this.$store.state;
@@ -110,4 +116,10 @@ export class Authenticated extends Global {
 
 	@Action
 	public change2FAMethods!: (params: TypePayloadData) => Promise<unknown>;
+
+	@Action
+	public addRecoveryMethod!: (params: TypeAddRecoveryParams) => Promise<unknown>;
+
+	@Action
+	public hasRecovery!: (id: number) => boolean;
 }

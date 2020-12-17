@@ -1,61 +1,56 @@
 <template>
-	<div class="control is-expanded">
-		<GoogleLogin
-			class="button is-fullwidth is-google"
-			:params="{ client_id: '376509986959-k6tstmq30f4spbp9vd1u94tvt8dg714b.apps.googleusercontent.com' }"
-			:onSuccess="onLogin"
-		>
-			<span class="icon google-icon">
-				<i class="fab fa-google"></i>
-			</span>
-			<span> Link to Google</span>
-		</GoogleLogin>
+	<div class="field">
+		<div class="control is-expanded" v-if="!successfullySaved && showRecoveryMethod">
+			<GoogleLogin
+				class="button is-fullwidth is-google"
+				:params="{ client_id: '376509986959-k6tstmq30f4spbp9vd1u94tvt8dg714b.apps.googleusercontent.com' }"
+				:onSuccess="onLogin"
+			>
+				<span class="icon google-icon">
+					<i class="fab fa-google"></i>
+				</span>
+				<span> Link to Google</span>
+			</GoogleLogin>
+		</div>
+		<div v-if="successfullySaved">Saved Successfully</div>
+		<div v-if="error">{{ error }}</div>
 	</div>
 </template>
 
 <script>
-import { backupGoogleSeed, changePasswordEncryptedSeed } from '../utils/backupRestore';
 import GoogleLogin from 'vue-google-login';
+import { sha256 } from './../utils/cryptoFunctions';
 
-export default {
-	name: 'GoogleAddRecovery',
+import Component, { mixins } from 'vue-class-component';
+import { Authenticated, Global } from '../mixins/mixins';
+
+@Component({
 	components: {
 		GoogleLogin
-	},
-	data: function() {
-		return {
-			isLogined: false
-		};
-	},
-	props: {
-		walletEmail: {
-			type: String,
-			default: ''
-		}
-	},
-	methods: {
-		async onLogin(data) {
-			const userID = data.Da;
-			const encryptedSeedFromPassword = localStorage.getItem('encryptedSeed') || '';
-			if (encryptedSeedFromPassword === '') {
-				throw new Error('Keystore not found, aborting');
-			}
-
-			const encryptedSeedFromFacebookUserID = await changePasswordEncryptedSeed(
-				JSON.parse(encryptedSeedFromPassword),
-				window.sessionStorage.getItem('password'),
-				userID
-			);
-			try {
-				await backupGoogleSeed(this.walletEmail, userID, encryptedSeedFromFacebookUserID);
-				this.hasWalletRecovery = true;
-			} catch (e) {
-				console.log(e);
-				this.hasWalletRecovery = false;
-			}
-		}
 	}
-};
+})
+export default class GoogleAddRecovery extends mixins(Global, Authenticated) {
+	successfullySaved = false;
+	error = '';
+	showRecoveryMethod = false;
+
+	async mounted() {
+		this.showRecoveryMethod = !(await this.hasRecovery(3));
+	}
+
+	async onLogin(data) {
+		const userID = data.Da;
+		const key = await sha256(process.env.VUE_APP_GOOGLE_APP_ID + userID);
+		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: 3 })
+			.then(() => {
+				this.successfullySaved = true;
+			})
+			.catch(e => {
+				console.log(e);
+				this.error = e.toString();
+			});
+	}
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

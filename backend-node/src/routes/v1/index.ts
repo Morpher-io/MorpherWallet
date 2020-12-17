@@ -10,7 +10,6 @@ module.exports = function(express) {
 
     router.post('/saveEmailPassword', WalletController.saveEmailPassword);
     router.post('/getEncryptedSeed', WalletController.getEncryptedSeed);
-    router.get('/getRecoveryTypes', WalletController.getRecoveryTypes);
 
     router.post('/getFacebookEncryptedSeed', WalletController.getFacebookEncryptedSeed);
     router.post('/getGoogleEncryptedSeed', WalletController.getGoogleEncryptedSeed);
@@ -31,6 +30,8 @@ module.exports = function(express) {
     router.post('/auth/updateEmail', WalletController.updateEmail);
     router.post('/auth/change2FAMethods', WalletController.change2FAMethods);
     router.post('/auth/generateAuthenticatorQR', WalletController.generateAuthenticatorQR);
+    router.post('/auth/addRecoveryMethod', WalletController.addRecoveryMethod);
+    router.post('/auth/getRecoveryMethods', WalletController.getRecoveryMethods);
 
     return router;
 };

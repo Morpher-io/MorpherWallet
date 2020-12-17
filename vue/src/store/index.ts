@@ -11,7 +11,8 @@ import {
 	getKeystoreFromEncryptedSeed,
 	changePasswordEncryptedSeed,
 	getBackendEndpoint,
-	getNonce
+	getNonce,
+	recoverGoogleSeed
 } from '../utils/backupRestore';
 import { getAccountsFromKeystore, sortObject } from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
@@ -30,7 +31,9 @@ import {
 	TypeKeystoreUnlocked,
 	TypeRequestParams,
 	TypeChangeEmail,
-	TypePayloadData
+	TypePayloadData,
+	TypeRecoveryParams,
+	TypeAddRecoveryParams
 } from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
@@ -62,6 +65,7 @@ export interface RootState {
 	messageDetails: any;
 	openPage: string;
 	loginComplete: boolean;
+	recoveryMethods: Array<any>;
 }
 
 /**
@@ -100,7 +104,8 @@ function initialState(): RootState {
 		transactionDetails: {},
 		messageDetails: {},
 		openPage: '',
-		loginComplete: false
+		loginComplete: false,
+		recoveryMethods: []
 	} as RootState;
 }
 
@@ -134,6 +139,9 @@ const store: Store<RootState> = new Vuex.Store({
 			state.status = 'success';
 			state.encryptedSeed = seedFoundData.encryptedSeed;
 			localStorage.setItem('encryptedSeed', JSON.stringify(seedFoundData.encryptedSeed));
+		},
+		recoveryMethodsFound(state: RootState, recoveryMethodsData: Array<any>) {
+			state.recoveryMethods = recoveryMethodsData;
 		},
 		updatePayload(state: RootState, payload: Type2FARequired) {
 			state.twoFaRequired.email = payload.email;
@@ -230,6 +238,47 @@ const store: Store<RootState> = new Vuex.Store({
 					})
 					.catch(reject);
 			});
+		},
+		fetchWalletFromRecovery({ state, commit }, params: TypeRecoveryParams) {
+			return new Promise((resolve, reject) => {
+				recoverGoogleSeed(params.accessToken, state.email)
+					.then(encryptedSeed => {
+						commit('seedFound', { encryptedSeed });
+						resolve(encryptedSeed);
+					})
+					.catch(reject);
+			});
+		},
+		addRecoveryMethod({ state, dispatch }, params: TypeAddRecoveryParams) {
+			return new Promise(async (resolve, reject) => {
+				const encryptedSeed = await changePasswordEncryptedSeed(state.encryptedSeed, state.hashedPassword, params.password);
+				dispatch('sendSignedRequest', {
+					body: {
+						encryptedSeed,
+						recoveryTypeId: params.recoveryTypeId,
+						key: params.key
+					},
+					method: 'POST',
+					url: getBackendEndpoint() + '/v1/auth/addRecoveryMethod'
+				})
+					.then(() => {
+						//commit('updatePayload', params);
+						//TODO get the already added recovery methods!
+						dispatch('updateRecoveryMethods').then(() => {
+							resolve(true);
+						});
+					})
+					.catch(reject);
+			});
+		},
+		hasRecovery({ state }, id: number) {
+			return (
+				state.recoveryMethods
+					.map(function(obj) {
+						return obj.id;
+					})
+					.indexOf(id) !== -1
+			);
 		},
 		/**
 		 * Fetch the user data from the database and attempt to unlock the wallet using the mail encrypted seed
@@ -358,7 +407,7 @@ const store: Store<RootState> = new Vuex.Store({
 		/**
 		 * Unlock wallet using the password entered on the logon form
 		 */
-		unlockWithPassword({ commit, state }, params: TypeUnlockWithPassword) {
+		unlockWithPassword({ commit, state, dispatch }, params: TypeUnlockWithPassword) {
 			return new Promise((resolve, reject) => {
 				getKeystoreFromEncryptedSeed(state.encryptedSeed, params.password)
 					.then((keystore: WalletBase) => {
@@ -367,7 +416,9 @@ const store: Store<RootState> = new Vuex.Store({
 						commit('keystoreUnlocked', { keystore, accounts, hashedPassword: params.password });
 						getPayload(state.email).then(payload => {
 							commit('updatePayload', payload);
-							resolve(true);
+							dispatch('updateRecoveryMethods').then(() => {
+								resolve(true);
+							});
 						});
 					})
 					.catch(err => {
@@ -378,6 +429,20 @@ const store: Store<RootState> = new Vuex.Store({
 						sessionStorage.removeItem('password');
 						reject(err);
 					});
+			});
+		},
+		updateRecoveryMethods({ commit, dispatch }) {
+			return new Promise((resolve, reject) => {
+				dispatch('sendSignedRequest', {
+					body: {},
+					method: 'POST',
+					url: getBackendEndpoint() + '/v1/auth/getRecoveryMethods'
+				})
+					.then(methods => {
+						commit('recoveryMethodsFound', methods);
+						resolve(true);
+					})
+					.catch(reject);
 			});
 		},
 		changePassword({ commit, state, dispatch }, params: TypeChangePassword) {

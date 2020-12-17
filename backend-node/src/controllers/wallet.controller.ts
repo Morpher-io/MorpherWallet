@@ -63,47 +63,8 @@ export async function saveEmailPassword(req: Request, res: Response) {
             // Commit changes to database and return successfully.
             await transaction.commit();
 
-            Logger.info({ type: 'New Wallet', user_id: userId, headers: req.headers, body: req.body });
+            Logger.info({ method: arguments.callee.name, type: 'New Wallet', user_id: userId, headers: req.headers, body: req.body });
 
-            return successResponse(res, {
-                recovery_id: recoveryId
-            });
-        } else {
-            //@TODO confirm user before updating recovery method or move to a different function
-
-            if (recoveryTypeId === 1) {
-                await transaction.rollback();
-                return errorResponse(res, "Error: User already exists!");
-            }
-            let recoveryId;
-
-            const recovery = await Recovery.findOne({ where: { user_id: user.id, [Op.and]: { recovery_type_id: recoveryTypeId } }, transaction });
-            if (recovery) {
-                recovery.user_id = userId;
-                recovery.encrypted_seed = JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT));
-                recovery.key = key
-
-                recoveryId = recovery.id
-
-            } else {
-
-                recoveryId = (
-                    await Recovery.create(
-                        {
-                            recovery_type_id: recoveryTypeId,
-                            user_id: userId,
-                            encrypted_seed: JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT)),
-                            key
-                        },
-                        { transaction }
-                    )
-                ).dataValues.id;
-            }
-
-            // Commit changes to database and return successfully.
-            await transaction.commit();
-
-            Logger.info({ type: 'Updated Recovery Method', user_id: user.id, recovery_id: recoveryId, user, headers: req.headers, body: req.body });
             return successResponse(res, {
                 recovery_id: recoveryId
             });
@@ -114,6 +75,49 @@ export async function saveEmailPassword(req: Request, res: Response) {
         await transaction.rollback();
         return errorResponse(res, error.message);
     }
+
+    return errorResponse(res, "User not found", 404);
+}
+
+export async function getRecoveryMethods(req: Request, res: Response) {
+    const key = req.header('key');
+    const recoveryEmail = await Recovery.findOne({ where: { key, recovery_type_id: 1 } });
+    const recovery = await Recovery.findAll({ where: { user_id: recoveryEmail.user_id }, include: [Recovery_Type] });
+    const recoveryTypes = [];
+    for (let i = 0; i < recovery.length; i++) {
+        recoveryTypes.push(recovery[i].recovery_type);
+    }
+    return successResponse(res, recoveryTypes);
+}
+
+export async function addRecoveryMethod(req: Request, res: Response) {
+    const key = req.header('key');
+    const keyForSaving = req.body.key;
+    const recoveryTypeId = req.body.recoveryTypeId;
+
+    const emailRecovery = await Recovery.findOne({ where: { key, recovery_type_id: 1 } });
+
+    const recovery = await Recovery.findOne({ where: { user_id: emailRecovery.user_id, recovery_type_id: recoveryTypeId } });
+    if (recovery == null) {
+        const newRecoveryId = (
+            await Recovery.create(
+                {
+                    recovery_type_id: recoveryTypeId,
+                    user_id: emailRecovery.user_id,
+                    encrypted_seed: JSON.stringify(encrypt(JSON.stringify(req.body.encryptedSeed), process.env.DB_BACKEND_SALT)),
+                    key: keyForSaving
+                }
+            )
+        ).dataValues.id;
+
+        Logger.info({ method: arguments.callee.name, type: 'Added new Recovery Method', user_id: emailRecovery.user_id, recovery_id: newRecoveryId, headers: req.headers, body: req.body });
+        return successResponse(res, {
+            recovery_id: newRecoveryId
+        });
+    }
+
+    return errorResponse(res, "Recovery Method already set!",)
+
 }
 
 
@@ -219,16 +223,17 @@ export async function getEncryptedSeed(req, res) {
     const key = req.body.key;
     const email2fa = req.body.email2fa;
     const authenticator2fa = req.body.authenticator2fa;
+    const recovery_type_id = 1;
 
     // Simply get Recovery instance that has this key and return it if its found.
-    const [error, result] = await to(Recovery.findOne({ where: { key }, raw: true }));
+    const recovery = await Recovery.findOne({ where: { key, recovery_type_id }, raw: true });
 
 
-    if (result) {
-        const user = await User.findOne({ where: { id: result.user_id } });
+    if (recovery) {
+        const user = await User.findOne({ where: { id: recovery.user_id } });
 
-        const email2FAVerified = await verifyEmail2FA(result.user_id, email2fa);
-        const googleVerified = await verifyGoogle2FA(result.user_id, authenticator2fa);
+        const email2FAVerified = await verifyEmail2FA(recovery.user_id, email2fa);
+        const googleVerified = await verifyGoogle2FA(recovery.user_id, authenticator2fa);
         if (!email2FAVerified || !googleVerified) {
             Logger.info({ method: arguments.callee.name, type: "Error: Fetch Encrypted Seed Failed", error: "2fa wrong", user_id: user.id, user, headers: req.headers, body: req.body });
             return errorResponse(res, 'Either Email2FA or Authenticator2FA was wrong. Try again.')
@@ -239,20 +244,12 @@ export async function getEncryptedSeed(req, res) {
 
         Logger.info({ method: arguments.callee.name, type: "Fetch Encrypted Seed", user_id: user.id, user, headers: req.headers, body: req.body });
         return successResponse(res, {
-            encryptedSeed: decrypt(JSON.parse(result.encrypted_seed), process.env.DB_BACKEND_SALT)
+            encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT)
         });
     }
 
     // Otherwise return an error.
     return errorResponse(res, 'There is no user with this key.');
-}
-
-// Function to return all recovery types from the database.
-export async function getRecoveryTypes(req, res) {
-    const recoveryMethods = await Recovery_Type.findAll({ raw: true });
-
-    if (recoveryMethods.length > 0) { return successResponse(res, recoveryMethods); }
-    else { return errorResponse(res, 'Recovery methods could not be found'); }
 }
 
 // Function to get encrypted seed from facebook recovery.
