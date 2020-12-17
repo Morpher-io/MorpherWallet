@@ -9,7 +9,6 @@ module.exports = async function (req, res, next) {
     if (signature !== null) {
         const recovery = await Recovery.findOne({ where: { key } });
         const user = await User.findOne({ where: { id: recovery.user_id } });
-
         if (req.body.nonce == user.nonce) {
             const signMessage = Buffer.from(JSON.stringify(sortObject(req.body)));
             const prefix = Buffer.from("\x19Ethereum Signed Message:\n");

@@ -3,7 +3,14 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import Spinner from '../components/loading-spinner/Spinner.vue';
 import { Action } from 'vuex-class';
-import { TypeFetchUser, TypeUnlock2fa, TypeUnlockWithPassword, TypeChangePassword, TypeChangeEmail } from '../types/global-types';
+import {
+	TypeFetchUser,
+	TypeUnlock2fa,
+	TypeUnlockWithPassword,
+	TypeChangePassword,
+	TypeChangeEmail,
+	TypePayloadData
+} from '../types/global-types';
 import { mapState } from 'vuex';
 import { RootState } from '../store';
 import isIframe from '../utils/isIframe';
@@ -97,4 +104,10 @@ export class Authenticated extends Global {
 
 	@Action
 	public changeEmail!: (params: TypeChangeEmail) => Promise<unknown>;
+
+	@Action
+	public generateQRCode!: () => Promise<unknown>;
+
+	@Action
+	public change2FAMethods!: (params: TypePayloadData) => Promise<unknown>;
 }
