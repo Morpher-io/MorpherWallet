@@ -30,9 +30,7 @@
 								:secure-length="8"
 								style="max-width: initial; margin-top: -8px"
 							/>
-							<p class="help">
-								Use a strong Password! It encrypts your Wallet and keeps your Funds secure.
-							</p>
+							<p class="help">Use a strong Password! It encrypts your Wallet and keeps your Funds secure.</p>
 
 							<p class="help is-danger" v-if="invalidPassword">
 								{{ invalidPassword }}
@@ -52,14 +50,12 @@
 					</div>
 
 					<div class="field is-grouped">
-						<div class="layout split">
-							<button class="button is-green" type="submit">
-								<span class="icon is-small">
-									<i class="fas fa-save"></i>
-								</span>
-								<span> Update Password </span>
-							</button>
-						</div>
+						<button class="button is-green" type="submit">
+							<span class="icon is-small">
+								<i class="fas fa-save"></i>
+							</span>
+							<span> Update Password </span>
+						</button>
 					</div>
 				</div>
 			</div>

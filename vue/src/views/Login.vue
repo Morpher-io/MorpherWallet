@@ -1,7 +1,5 @@
 <template>
 	<div class="container">
-		<spinner :active="showSpinner" :status="store.status"></spinner>
-
 		<h2 class="title">Wallet Login</h2>
 		<h4 class="subtitle">Unlock your Morpher Wallet</h4>
 		<form v-on:submit.prevent="login">
@@ -98,7 +96,7 @@ export default class Login extends mixins(Global) {
 	 */
 	login() {
 		this.showError = false;
-		this.showSpinner = true;
+		this.$store.commit('loading', 'Loading user...');
 		this.store.loginComplete = false;
 		const email = this.walletEmail;
 		const password = this.walletPassword;
@@ -108,23 +106,24 @@ export default class Login extends mixins(Global) {
 			.then(() => {
 				if (this.store.twoFaRequired) {
 					// open 2fa page if 2fa is required
+					this.$store.commit('loading', '');
 					this.$router.push('/2fa');
 				} else {
 					this.unlockWithStoredPassword()
 						.then(() => {
-							this.showSpinner = false;
+							this.$store.commit('loading', '');
 							// open root page after logon success
 							this.$router.push('/');
 						})
 						.catch(e => {
-							this.showSpinner = false;
+							this.$store.commit('loading', '');
 							console.error(e);
 						});
 				}
 			})
 			.catch(error => {
 				// Logon failed
-				this.showSpinner = false;
+				this.$store.commit('loading', '');
 				if (error !== true && error !== false) {
 					if (error.success === false) {
 						this.showError = true;

@@ -1,5 +1,6 @@
 <template>
 	<div id="app">
+		<spinner v-bind:active="loading" v-bind:status="spinnerStatusText"></spinner>
 		<section :class="iFrameDisplay ? 'main_iframe' : 'main'">
 			<div class="header">
 				<img src="@/assets/img/logo-nav.png" class="headerImage" />
@@ -15,9 +16,18 @@
 <script lang="ts">
 import isIframe from './utils/isIframe';
 import Vue from 'vue';
+import { mapState } from 'vuex';
 import Component from 'vue-class-component';
+import Spinner from './components/loading-spinner/Spinner.vue';
 
-@Component
+@Component({
+	components: {
+		Spinner
+	},
+	computed: {
+		...mapState(['loading', 'spinnerStatusText'])
+	}
+})
 export default class App extends Vue {
 	iFrameDisplay = isIframe();
 	connection = this.$store.state.connection;

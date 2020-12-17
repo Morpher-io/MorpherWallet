@@ -57,14 +57,12 @@
 					</div>
 
 					<div class="field is-grouped">
-						<div class="layout split">
-							<button class="button is-green" type="submit">
-								<span class="icon is-small">
-									<i class="fas fa-save"></i>
-								</span>
-								<span> Update Email </span>
-							</button>
-						</div>
+						<button class="button is-green" type="submit">
+							<span class="icon is-small">
+								<i class="fas fa-save"></i>
+							</span>
+							<span> Update Email </span>
+						</button>
 					</div>
 				</div>
 			</div>

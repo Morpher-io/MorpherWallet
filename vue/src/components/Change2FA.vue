@@ -9,64 +9,71 @@
 					<i class="fas fa-chevron-down"></i>
 				</span>
 
-				<span class="header" @click="collapsed = !collapsed"> Change 2-Factor authentication (2FA) </span>
+				<span class="header" @click="collapsed = !collapsed">
+					Change 2-Factor authentication (2FA)
+					<span class="help is-success" v-if="success">Saved!</span>
+				</span>
 				<div :class="collapsed ? 'hidden' : 'visible'">
 					<div class="card-content">
 						<div class="field">
-							<input type="checkbox" class="checkbox" id="email" v-model="email" />
 							<label class="label">
+								<input type="checkbox" class="checkbox" id="email" v-model="email" />
 								2FA with Email Codes enabled
 							</label>
 						</div>
 
 						<div class="field">
-							<input type="checkbox" class="checkbox" id="authenticator" v-model="authenticator" />
 							<label class="label">
+								<input type="checkbox" class="checkbox" id="authenticator" v-model="authenticator" />
 								2FA with Authenticator Codes enabled
 							</label>
 						</div>
+						<figure
+							class="image"
+							v-if="!this.authenticatorConfirmed && this.authenticator && (this.qrCode !== '' || this.qrCode !== undefined)"
+						>
+							<img v-bind:src="this.qrCode" />
+						</figure>
 
-						<img
-							v-if="this.authenticator && (this.qrCode !== '' || this.qrCode !== undefined)"
-							style="height: 400px; margin: 10px"
-							v-bind:src="this.qrCode"
-						/>
+						<div class="field" v-if="this.authenticator && !this.qrCode && !this.authenticatorConfirmed">
+							<div class="control">
+								<button type="button" class="button is-light" value="Generate QR Code" v-on:click="generateQR">
+									Generate QR Code for Authenticator
+								</button>
+							</div>
+						</div>
 
-						<input
-							v-if="this.authenticator"
-							type="submit"
-							style="margin: 10px; display: block"
-							value="Generate QR Code"
-							v-on:click="generateQR"
-						/>
+						<div class="field" v-if="this.authenticator && !this.authenticatorConfirmed && this.qrCode">
+							<label class="label">Enter the Authenticator Code to Verify Successful Setup!</label>
+							<div class="control">
+								<input type="text" placeholder="Authenticator Code" class="textbox" v-model="authenticatorCode" />
+								<p class="help is-danger" v-if="invalidAuthenticator">
+									{{ invalidAuthenticator }}
+								</p>
+							</div>
+						</div>
 
-						<input
-							v-if="this.authenticator && !this.authenticatorConfirmed"
-							type="text"
-							style="margin: 10px"
-							placeholder="Authenticator Code"
-							class="textbox"
-							v-model="authenticatorCode"
-						/>
-
-						<input
-							v-if="this.authenticator && !this.authenticatorConfirmed"
-							style="margin: 10px; display: block"
-							type="submit"
-							value="Confirm Authenticator"
-							v-on:click="confirmAuthenticator"
-						/>
+						<div class="field" v-if="this.authenticator && !this.authenticatorConfirmed && this.qrCode">
+							<div class="control">
+								<button
+									v-if="this.authenticator && !this.authenticatorConfirmed && this.qrCode"
+									class="button is-light"
+									type="button"
+									v-on:click="confirmAuthenticator"
+								>
+									Confirm Authenticator Code
+								</button>
+							</div>
+						</div>
 					</div>
 
 					<div class="field is-grouped">
-						<div class="layout split">
-							<button class="button is-green" type="submit">
-								<span class="icon is-small">
-									<i class="fas fa-save"></i>
-								</span>
-								<span> Save 2FA Settings </span>
-							</button>
-						</div>
+						<button class="button is-green" type="submit">
+							<span class="icon is-small">
+								<i class="fas fa-save"></i>
+							</span>
+							<span> Save 2FA Settings </span>
+						</button>
 					</div>
 				</div>
 			</div>
@@ -76,95 +83,74 @@
 </template>
 
 <script>
-import {
-	getPayload,
-	change2FAMethods,
-	getQRCode,
-	generateQRCode,
-	verifyAuthenticatorCode,
-	getKeystoreFromEncryptedSeed
-} from '../utils/backupRestore';
+import Component, { mixins } from 'vue-class-component';
+import { Authenticated, Global } from '../mixins/mixins';
+import { verifyAuthenticatorCode } from '../utils/backupRestore';
 
-export default {
-	name: 'change2FA',
-	data: function() {
-		return {
-			email: false,
-			authenticator: false,
-			authenticatorConfirmed: false,
-			authenticatorCode: '',
-			qrCode: '',
-			collapsed: true
-		};
-	},
-	props: [''],
-	methods: {
-		async formSubmitChange2FA(e) {
-			e.preventDefault();
+@Component({})
+export default class ChangeEmail extends mixins(Global, Authenticated) {
+	email = false;
+	authenticator = false;
+	authenticatorConfirmed = false;
+	authenticatorCode = '';
+	invalidAuthenticator = '';
+	qrCode = '';
+	collapsed = true;
+	success = false;
 
-			const email = localStorage.getItem('email');
-
-			try {
-				if (!this.email && this.authenticator && !this.authenticatorConfirmed) {
-					alert('Please confirm Authenticator first.');
-				} else {
-					const nonce = (await change2FAMethods(email, null, this.email, this.authenticator)).nonce;
-
-					const password = window.sessionStorage.getItem('password');
-					const encryptedSeed = window.localStorage.getItem('encryptedSeed');
-					const keystore = await getKeystoreFromEncryptedSeed(JSON.parse(encryptedSeed), password);
-					await change2FAMethods(email, keystore[0].sign('authentication' + '_' + nonce), this.email, this.authenticator);
-					// const self = this;
-
-					// keystore.keyFromPassword(password, async function (err, pwDerivedKey) {
-					//     let signedMessage = Lightwallet.signing.signMsg(keystore, pwDerivedKey, "authentication" + '_' + nonce, keystore.addresses[0])
-					//     await change2FAMethods(email, signedMessage, self.email, self.authenticator);
-					// })
-					alert('2FA methods changed successfully.');
-				}
-			} catch (e) {
-				console.log(e);
-			}
-		},
-
-		async confirmAuthenticator() {
-			const email = localStorage.getItem('email');
-
-			this.authenticatorConfirmed = (await verifyAuthenticatorCode(email, this.authenticatorCode)).verified;
-
-			if (this.authenticatorConfirmed) {
-				alert('Authenticator confirmed.');
-			} else {
-				alert('Authenticator code is not right.');
-			}
-		},
-
-		async generateQR() {
-			const email = localStorage.getItem('email');
-			this.authenticatorConfirmed = false;
-			this.authenticatorCode = '';
-
-			const qrCode = await generateQRCode(email);
-			this.qrCode = qrCode.image;
+	async formSubmitChange2FA() {
+		if (this.authenticator && !this.authenticatorConfirmed) {
+			this.invalidAuthenticator = 'Please click Confirm Authenticator first before saving 2FA settings.';
+			return;
 		}
-	},
-	async mounted() {
-		const email = localStorage.getItem('email');
+
+		//user unselected authenticator
+		if (!this.authenticator && this.authenticatorConfirmed) {
+			this.authenticatorConfirmed = false;
+		}
 
 		try {
-			const twoFAMethods = await getPayload(email);
-
-			const qrCode = await getQRCode(email);
-			this.qrCode = qrCode.image;
-
-			if (twoFAMethods.email !== undefined) this.email = twoFAMethods.email;
-			if (twoFAMethods.authenticator !== undefined) this.authenticator = twoFAMethods.authenticator;
-			if (twoFAMethods.authenticatorConfirmed !== undefined) this.authenticatorConfirmed = twoFAMethods.authenticatorConfirmed;
+			this.showSpinner = true;
+			await this.change2FAMethods({
+				email: this.email,
+				authenticator: this.authenticator,
+				authenticatorConfirmed: this.authenticatorConfirmed
+			});
+			this.success = true;
+			this.collapsed = true;
 		} catch (e) {
-			alert('Email is not right.');
+			console.log(e);
+		}
+
+		this.showSpinner = false;
+	}
+
+	async confirmAuthenticator() {
+		this.authenticatorConfirmed = await verifyAuthenticatorCode(this.store.email, this.authenticatorCode);
+
+		if (this.authenticatorConfirmed) {
+			this.success = true;
+			this.collapsed = true;
+			this.invalidAuthenticator = '';
+		} else {
+			this.invalidAuthenticator = 'Authenticator code seems to be incorrect.';
 		}
 	}
-};
+
+	async generateQR() {
+		this.authenticatorConfirmed = false;
+		this.authenticatorCode = '';
+
+		this.qrCode = (await this.generateQRCode()).image;
+		return false;
+	}
+
+	async mounted() {
+		this.email = this.store.twoFaRequired.email;
+		this.authenticator = this.store.twoFaRequired.authenticator;
+		this.authenticatorConfirmed = this.store.twoFaRequired.authenticatorConfirmed;
+	}
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
