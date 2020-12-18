@@ -64,15 +64,16 @@ process.on('unhandledRejection', (error: any, promise) => {
     Logger.info(error.stack || error);
 });
 
+if(!module.parent){
+    // Listen to the server ports.
+    httpServer.listen(process.env.PORT, async () => {
+        Logger.info({status: `🚀Express Server ready at http://localhost:${process.env.PORT}`});
 
-// Listen to the server ports.
-httpServer.listen(process.env.PORT, async () => {
-    Logger.info({status: `🚀Express Server ready at http://localhost:${process.env.PORT}`});
-
-    // Database initialization.
-    await sequelize.sync();
-    Logger.info({status: 'Connected to database'});
-});
+        // Database initialization.
+        await sequelize.sync();
+        Logger.info({status: 'Connected to database'});
+    });
+}
 
 // Export server for testing purposes
 module.exports.app = app;

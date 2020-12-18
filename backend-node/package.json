@@ -4,11 +4,12 @@
   "description": "Morpher Wallet Backend",
   "main": "index.ts",
   "scripts": {
-    "test": "mocha -r ts-node/register src/tests/wallet.test.ts --exit",
+    "test": "mocha -r ts-node/register src/tests/*.test.ts --exit",
     "start": "ts-node ./src/index.ts",
     "start:production": "./node_modules/pm2/bin/pm2-runtime index.js --max-memory-restart 2G",
     "start:watch": "nodemon --exec ts-node ./src/index.ts",
     "start:debug": "nodemon --inspect ts-node ./src/index.ts",
+    "db:seed": "ts-node ./src/database/seed/index.ts",
     "env:dev": "ts-node src/helpers/functions/aws.ts dev",
     "env:production": "ts-node src/helpers/functions/aws.ts production",
     "env:staging": "ts-node src/helpers/functions/aws.ts staging",

@@ -14,57 +14,31 @@ const Account = new Web3EthAccounts('https://sidechain.morpher.com');
 async function clearDatabase() {
     await Recovery.destroy({where: {}});
     await User.destroy({where: {}});
-    // Run function if database is new to create recovery types.
-    // await Recovery_Type.bulkCreate(recoveryTypes);
 }
 
-const recoveryTypes = [
-    {
-        id: 1,
-        name: 'Password'
-    },
-    {
-        id: 2,
-        name: 'Facebook'
-    },
-    {
-        id: 3,
-        name: 'Google'
-    },
-    {
-        id: 4,
-        name: 'Twitter'
-    },
-    {
-        id: 5,
-        name: 'VKontakte'
-    },
-
-]
-
 const bodyData = {
-    email: 'arjet@morpher.com',
+    email: 'test@morpher.com',
     key: '5eb8f7d40f8b67dec627deeb9f18620c40014e1346994b567a27374001c337ad',
     encryptedSeed: {"ciphertext":"yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==","iv":"TljpH9fl8eUC/6M3","salt":"zAdVIXo4K+QJvSbjeqFVug=="},
     ethAddress: '0xCb4DB6D3554B3F6439847f3559c41501967192fE'
 };
 
 const newBodyData = {
-    email: 'arjet@morpher.com',
+    email: 'test@morpher.com',
     key: '5eb8f7d40f8b67dec627deeb9f18620c40014e1346994b567a27374001c337ad',
     encryptedSeed: {"ciphertext":"EzT86NIuZD88pe7jd=gsGgaNSCGIS8I/Yu4kxF/CcC3HLCmSOpwaDZxcSmXCyHSH4IvaRj7UFz+QauXI5Ea+ISju7mscxUCwXC/eahu2eCe8keYINEue/H=CSC=/dxR2","iv":"GgddR6jdlyQF/4R1","salt":"sSJvJXeVzqg+4eVbIAQb4S=="},
     ethAddress: '0xCb4DB6D3554B3F6439847f3559c41501967192fE'
 };
 
 const badBodyKey = {
-    email: 'arjet@morpher.com',
+    email: 'test@morpher.com',
     key: 'secureKeyBad',
     encryptedSeed: {"ciphertext":"yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==","iv":"TljpH9fl8eUC/6M3","salt":"zAdVIXo4K+QJvSbjeqFVug=="},
     ethAddress: '0xCb4DB6D3554B3F6439847f3559c41501967192fE'
 };
 
 const badBodyEncryptedSeed = {
-    email: 'arjet@morpher.com',
+    email: 'test@morpher.com',
     key: '5eb8f7d40f8b67dec627deeb9f18620c40014e1346994b567a27374001c337ad',
     encryptedSeed: 'badBodySeed'
 };
@@ -76,7 +50,7 @@ const encryptedSeedData = {
 }
 
 const facebookData = {
-    email: 'arjet@morpher.com',
+    email: 'test@morpher.com',
     key: sha256(process.env.FACEBOOK_APP_ID + '.' + '1212'), // simulating facebook id
     encryptedSeed: {"ciphertext":"yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==","iv":"TljpH9fl8eUC/6M3","salt":"zAdVIXo4K+QJvSbjeqFVug=="},
     recoveryTypeId: 2
@@ -84,7 +58,7 @@ const facebookData = {
 
 const facebookRecovery = {
     accessToken: 'longAccessToken',
-    originalSignupEmail: 'arjet@morpher.com'
+    originalSignupEmail: 'test@morpher.com'
 };
 
 const secureAccount = {
@@ -152,7 +126,7 @@ describe('Wallet controller test cases', async () => {
         // Simulate sending an email by changing only user payload.
         const emailData = {
             key: bodyData.key,
-            sendEmail: false
+            sendEmail: 'false'
         }
 
         await request(app)
@@ -329,7 +303,7 @@ describe('Wallet controller test cases', async () => {
         // Simulate sending an email by changing only user payload.
         const emailData = {
             key: bodyData.key,
-            sendEmail: false
+            sendEmail: 'false'
         }
 
         await request(app)
@@ -343,8 +317,8 @@ describe('Wallet controller test cases', async () => {
 
         const newEmailData = {
             email2faVerification: user.email_verification_code,
-            newEmail: 'arjet@morpher.io',
-            sendEmail: false
+            newEmail: 'test@morpher.io',
+            sendEmail: 'false'
         }
 
         newEmailData['nonce'] = user.nonce;
@@ -466,7 +440,7 @@ describe('Wallet controller test cases', async () => {
         // Simulate sending an email by changing only user payload.
         const emailData = {
             key: bodyData.key,
-            sendEmail: false
+            sendEmail: 'false'
         }
 
         await request(app)
@@ -498,7 +472,7 @@ describe('Wallet controller test cases', async () => {
         // Simulate sending an email by changing only user payload.
         const emailData = {
             key: bodyData.key,
-            sendEmail: false
+            sendEmail: 'false'
         }
 
         await request(app)
