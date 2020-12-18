@@ -121,7 +121,7 @@ export type TypeRequestParams = {
 export type TypeRecoveryParams = {
 	__typename?: 'TypeRecoveryParams';
 	accessToken: string;
-	userId: string;
+	password: string;
 	recoveryTypeId: number;
 };
 export type TypeAddRecoveryParams = {

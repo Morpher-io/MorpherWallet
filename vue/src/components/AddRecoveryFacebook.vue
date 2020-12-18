@@ -16,7 +16,7 @@ import { backupFacebookSeed, changePasswordEncryptedSeed } from '../utils/backup
 import VFacebookLogin from 'vue-facebook-login-component';
 
 export default {
-	name: 'FBAddRecovery',
+	name: 'AddRecoveryFacebook',
 	components: {
 		VFacebookLogin
 	},

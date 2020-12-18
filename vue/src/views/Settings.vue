@@ -56,7 +56,6 @@ import ExportWallet from '../components/ExportWallet.vue';
 })
 export default class Settings extends Vue {
 	dropdownIsActive = false;
-	showSpinner = false;
 }
 </script>
 

@@ -19,7 +19,7 @@ import { recoverFacebookSeed, changePasswordEncryptedSeed, saveWalletEmailPasswo
 import VFacebookLogin from 'vue-facebook-login-component';
 
 export default {
-	name: 'FBAddRecovery',
+	name: 'RecoverWalletFacebook',
 	components: {
 		VFacebookLogin
 	},

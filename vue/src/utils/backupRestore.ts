@@ -204,6 +204,7 @@ const recoverFacebookSeed = async (accessToken: string, signupEmail: string) =>
 			});
 		});
 	});
+
 const recoverGoogleSeed = async (accessToken: string, signupEmail: string) =>
 	new Promise((resolve, reject) => {
 		const options: RequestInit = {
@@ -213,8 +214,8 @@ const recoverGoogleSeed = async (accessToken: string, signupEmail: string) =>
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
-				accessToken: accessToken,
-				signupEmail: signupEmail.toLowerCase()
+				accessToken,
+				signupEmail
 			}),
 			mode: 'cors',
 			cache: 'default'

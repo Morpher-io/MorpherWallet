@@ -169,6 +169,9 @@ const store: Store<RootState> = new Vuex.Store({
 		},
 		authError(state: RootState, message) {
 			(state.status = 'error'), (state.message = message);
+			localStorage.removeItem('encryptedSeed');
+			localStorage.removeItem('email');
+			sessionStorage.removeItem('password');
 		},
 		logout(state: RootState) {
 			localStorage.removeItem('email');
@@ -200,6 +203,15 @@ const store: Store<RootState> = new Vuex.Store({
 		}
 	},
 	actions: {
+		showSpinner({ commit }, message: string) {
+			commit('loading', message);
+		},
+		hideSpinner({ commit }) {
+			commit('loading', '');
+		},
+		showSpinnerThenAutohide({ commit }, message: string) {
+			commit('delayedSpinnerMessage', message);
+		},
 		/**
 		 * Fetch the user data from the database and attempt to unlock the wallet using the mail encrypted seed
 		 */
@@ -230,9 +242,6 @@ const store: Store<RootState> = new Vuex.Store({
 							})
 							.catch(err => {
 								commit('authError', "The user wasn't found: Signup first!");
-								localStorage.removeItem('encryptedSeed');
-								localStorage.removeItem('email');
-								sessionStorage.removeItem('password');
 								reject(err);
 							});
 					})
@@ -241,12 +250,29 @@ const store: Store<RootState> = new Vuex.Store({
 		},
 		fetchWalletFromRecovery({ state, commit }, params: TypeRecoveryParams) {
 			return new Promise((resolve, reject) => {
-				recoverGoogleSeed(params.accessToken, state.email)
-					.then(encryptedSeed => {
-						commit('seedFound', { encryptedSeed });
-						resolve(encryptedSeed);
-					})
-					.catch(reject);
+				switch (params.recoveryTypeId) {
+					case 3:
+						recoverGoogleSeed(params.accessToken, state.email)
+							.then(encryptedSeed => {
+								commit('seedFound', { encryptedSeed });
+								getKeystoreFromEncryptedSeed(state.encryptedSeed, params.password)
+									.then((keystore: WalletBase) => {
+										const accounts = getAccountsFromKeystore(keystore);
+										//not setting any password here, this is simply for the password change mechanism
+										commit('keystoreUnlocked', { keystore, accounts, hashedPassword: '' });
+										resolve(true);
+									})
+									.catch(() => {
+										commit('authError', 'Cannot unlock the Keystore, wrong ID');
+										reject(false);
+									});
+							})
+							.catch(reject);
+						break;
+					default:
+						reject('Unknown Recovery Type');
+						break;
+				}
 			});
 		},
 		addRecoveryMethod({ state, dispatch }, params: TypeAddRecoveryParams) {
@@ -262,8 +288,6 @@ const store: Store<RootState> = new Vuex.Store({
 					url: getBackendEndpoint() + '/v1/auth/addRecoveryMethod'
 				})
 					.then(() => {
-						//commit('updatePayload', params);
-						//TODO get the already added recovery methods!
 						dispatch('updateRecoveryMethods').then(() => {
 							resolve(true);
 						});
@@ -274,7 +298,7 @@ const store: Store<RootState> = new Vuex.Store({
 		hasRecovery({ state }, id: number) {
 			return (
 				state.recoveryMethods
-					.map(function(obj) {
+					.map(function (obj) {
 						return obj.id;
 					})
 					.indexOf(id) !== -1
@@ -396,7 +420,7 @@ const store: Store<RootState> = new Vuex.Store({
 							resolve(true);
 						})
 						.catch(err => {
-							console.log('unlockWithStoredPassword error', err);
+							// console.log('unlockWithStoredPassword error', err);
 							reject(false);
 						});
 				} else {
@@ -422,11 +446,8 @@ const store: Store<RootState> = new Vuex.Store({
 						});
 					})
 					.catch(err => {
-						console.log('unlockWithPassword error', err);
+						// console.log('unlockWithPassword error', err);
 						commit('authError', "The user wasn't found: Signup first!");
-						localStorage.removeItem('encryptedSeed');
-						localStorage.removeItem('email');
-						sessionStorage.removeItem('password');
 						reject(err);
 					});
 			});

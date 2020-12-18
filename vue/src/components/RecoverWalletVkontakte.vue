@@ -11,7 +11,7 @@ import { sha256 } from '../utils/cryptoFunctions';
 import { changePasswordEncryptedSeed, recoverVKSeed, saveWalletEmailPassword } from '../utils/backupRestore';
 
 export default {
-	name: 'VKRecoverWallet',
+	name: 'RecoverWalletVK',
 	components: {},
 	data: function() {
 		return {

@@ -35,10 +35,16 @@ import VueRouter from 'vue-router';
 	}
 })
 export class Global extends Vue {
-	// Global component properties
-	showSpinner = false;
-
 	// Map store actions
+	@Action
+	public showSpinner!: (message: string) => void;
+
+	@Action
+	public showSpinnerThenAutohide!: (message: string) => void;
+
+	@Action
+	public hideSpinner!: () => void;
+
 	@Action
 	public fetchUser!: (params: TypeFetchUser) => Promise<unknown>;
 

@@ -1,18 +1,19 @@
 <template>
 	<div class="field">
-		<div class="control is-expanded" v-if="!successfullySaved && showRecoveryMethod">
-			<GoogleLogin
-				class="button is-fullwidth is-google"
-				:params="{ client_id: '376509986959-k6tstmq30f4spbp9vd1u94tvt8dg714b.apps.googleusercontent.com' }"
-				:onSuccess="onLogin"
-			>
+		<div class="control is-expanded" v-if="!hasRecoveryMethod">
+			<GoogleLogin class="button is-fullwidth is-google" :params="{ clientId }" :onSuccess="onLogin">
 				<span class="icon google-icon">
 					<i class="fab fa-google"></i>
 				</span>
 				<span> Link to Google</span>
 			</GoogleLogin>
 		</div>
-		<div v-if="successfullySaved">Saved Successfully</div>
+		<div v-if="hasRecoveryMethod" class="has-text-centered">
+			<span class="icon google-icon">
+				<i class="fas fa-check-circle"></i>
+			</span>
+			Google Recovery Added
+		</div>
 		<div v-if="error">{{ error }}</div>
 	</div>
 </template>
@@ -29,21 +30,22 @@ import { Authenticated, Global } from '../mixins/mixins';
 		GoogleLogin
 	}
 })
-export default class GoogleAddRecovery extends mixins(Global, Authenticated) {
-	successfullySaved = false;
+export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 	error = '';
-	showRecoveryMethod = false;
+	hasRecoveryMethod = false;
+	clientId = process.env.VUE_APP_GOOGLE_APP_ID;
 
 	async mounted() {
-		this.showRecoveryMethod = !(await this.hasRecovery(3));
+		this.hasRecoveryMethod = await this.hasRecovery(3);
 	}
 
-	async onLogin(data) {
-		const userID = data.Da;
-		const key = await sha256(process.env.VUE_APP_GOOGLE_APP_ID + userID);
+	async onLogin(googleUser) {
+		const userID = googleUser.getBasicProfile().getId();
+		const key = await sha256(this.clientId + userID);
+		console.log(this.clientId + userID, key);
 		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: 3 })
-			.then(() => {
-				this.successfullySaved = true;
+			.then(async () => {
+				this.hasRecoveryMethod = await this.hasRecovery(3);
 			})
 			.catch(e => {
 				console.log(e);

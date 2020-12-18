@@ -271,7 +271,7 @@ export async function getFacebookEncryptedSeed(req, res) {
     if (user) {
         // If user exists return the decrypted seed.
         const recovery = await Recovery.findOne({ where: { key, [Op.and]: { recovery_type_id: 2 } }, raw: true });
-        if (recovery)
+        if (recovery) 
             return successResponse(res, { encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
     }
 
@@ -294,16 +294,21 @@ export async function getGoogleEncryptedSeed(req, res) {
     const result = await oauth2.userinfo.get();
 
     // Hash the facebook id with user id to get the database key.
-    const key = sha256(process.env.GOOGLE_APP_ID + result.data.id);
+    const key = await sha256(process.env.GOOGLE_APP_ID + result.data.id);
 
+    // If user exists return the decrypted seed.
     // Attempt to get user from database with the given email address.
     const user = await User.findOne({ where: { email: signupEmail } });
 
-    if (user) {
-        // If user exists return the decrypted seed.
-        const recovery = await Recovery.findOne({ where: { key, [Op.and]: { recovery_type_id: 3 } }, raw: true });
-        if (recovery)
-            return successResponse(res, { encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
+    if (user != null) {
+        const recovery = await Recovery.findOne({ where: { user_id: user.id, key, recovery_type_id: 3 }, include: [User] });
+        if (recovery != null) {
+            /**
+             * Big question: are we leaking user-data here? No: The access token has only limited validity and will be different next time
+             */
+            Logger.info({ method: arguments.callee.name, type: "Recover Encrypted Seed", user_id: user.id, recovery, headers: req.headers, body: req.body });
+            return successResponse(res, { encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT), email: recovery.user.email });
+        }
     }
 
     // If user does not exist return an error.

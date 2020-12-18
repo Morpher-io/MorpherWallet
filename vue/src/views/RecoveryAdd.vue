@@ -1,56 +1,40 @@
 <template>
 	<div class="container">
-		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
-
 		<h1 class="title">Add Recovery Options</h1>
 
-		<GoogleAddRecovery></GoogleAddRecovery>
+		<AddRecoveryGoogle></AddRecoveryGoogle>
 
-		<FBAddRecovery :walletEmail="store.email"></FBAddRecovery>
+		<AddRecoveryFacebook :walletEmail="store.email"></AddRecoveryFacebook>
 
-		<VKAddRecovery :walletEmail="store.email"></VKAddRecovery>
+		<AddRecoveryVkontakte :walletEmail="store.email"></AddRecoveryVkontakte>
 
 		<div class="field is-grouped">
-			<div class="layout split first">
-				<router-link to="/" tag="button" class="button is-grey">
-					<span class="icon is-small">
-						<i class="fas fa-chevron-left"></i>
-					</span>
-					<span> Back </span>
-				</router-link>
-			</div>
-
-			<div class="layout split second"></div>
+			<router-link to="/" tag="button" class="button is-grey">
+				<span class="icon is-small">
+					<i class="fas fa-chevron-left"></i>
+				</span>
+				<span> Back </span>
+			</router-link>
 		</div>
 	</div>
 </template>
 
 <script lang="ts">
 import Component, { mixins } from 'vue-class-component';
-import { mapState } from 'vuex';
-import FBAddRecovery from '../components/FBAddRecovery.vue';
-import GoogleAddRecovery from '../components/GoogleAddRecovery.vue';
-import VKAddRecovery from '../components/VKAddRecovery.vue';
+import AddRecoveryFacebook from '../components/AddRecoveryFacebook.vue';
+import AddRecoveryGoogle from '../components/AddRecoveryGoogle.vue';
+import AddRecoveryVkontakte from '../components/AddRecoveryVkontakte.vue';
 import { Global, Authenticated } from '../mixins/mixins';
 
 @Component({
 	components: {
-		FBAddRecovery,
-		VKAddRecovery,
-		GoogleAddRecovery
-	},
-	computed: {
-		...mapState({
-			twoFaRequired: (state: any) => state.twoFaRequired,
-			walletEmail: (state: any) => state.email,
-			status: (state: any) => state.status,
-			accounts: (state: any) => state.accounts
-		})
+		AddRecoveryFacebook,
+		AddRecoveryVkontakte,
+		AddRecoveryGoogle
 	}
 })
 export default class RecoveryAdd extends mixins(Global, Authenticated) {
 	dropdownIsActive = false;
-	showSpinner = false;
 }
 </script>
 

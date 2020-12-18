@@ -13,7 +13,7 @@
 import { backupVKSeed, changePasswordEncryptedSeed } from '../utils/backupRestore';
 
 export default {
-	name: 'VKaddRecovery',
+	name: 'AddRecoveryVkontakte',
 	components: {},
 	data: function() {
 		return {

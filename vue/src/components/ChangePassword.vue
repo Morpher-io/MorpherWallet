@@ -92,6 +92,7 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 		if (this.presetOldPassword !== undefined) {
 			this.oldPassword = this.presetOldPassword;
 			this.hideOldPassword = true;
+			this.collapsed = false;
 		}
 	}
 
@@ -109,9 +110,10 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 			this.invalidPassword = passwordMessage;
 			return;
 		}
-		const oldPasswordHashed = await sha256(this.oldPassword);
+		const oldPasswordHashed = this.presetOldPassword || (await sha256(this.oldPassword));
 		const newPasswordHashed = await sha256(this.walletPassword);
 
+		this.showSpinner('Changing Password');
 		this.changePassword({ oldPassword: oldPasswordHashed, newPassword: newPasswordHashed })
 			.then(() => {
 				this.collapsed = true;
@@ -119,8 +121,13 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 				this.walletPassword = '';
 				this.walletPasswordRepeat = '';
 				this.success = true;
+				this.showSpinnerThenAutohide('Password Change Successfully');
+				if (this.presetOldPassword !== undefined) {
+					this.$router.push('/login');
+				}
 			})
 			.catch(() => {
+				this.showSpinnerThenAutohide('Error happened!');
 				this.invalidPassword = 'Error happened during Update. Aborted.';
 			});
 	}
