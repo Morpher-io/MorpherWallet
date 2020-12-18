@@ -121,7 +121,7 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 				this.walletPassword = '';
 				this.walletPasswordRepeat = '';
 				this.success = true;
-				this.showSpinnerThenAutohide('Password Change Successfully');
+				this.showSpinnerThenAutohide('Password Changed Successfully');
 				if (this.presetOldPassword !== undefined) {
 					this.$router.push('/login');
 				}

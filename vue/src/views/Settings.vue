@@ -11,7 +11,7 @@
 		<ExportWallet v-if="false"></ExportWallet>
 
 		<div class="field is-grouped">
-			<router-link to="/addrecovery" tag="button" class="button is-grey">
+			<router-link to="/addrecovery" tag="button" class="button is-danger">
 				<span class="icon is-small">
 					<i class="fas fa-life-ring"></i>
 				</span>

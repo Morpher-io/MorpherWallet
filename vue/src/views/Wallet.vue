@@ -1,12 +1,10 @@
 <template>
 	<div class="container">
-		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
-
 		<h1 class="title">Morpher Wallet</h1>
 
 		<h2 class="subtitle">Hello {{ walletEmail }}</h2>
 
-		<div class="collapse">
+		<div :class="noRecoveryMehods ? 'collapse' : ''">
 			<div class="field">
 				<div class="card-content">
 					<div class="content">

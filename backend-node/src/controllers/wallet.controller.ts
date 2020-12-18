@@ -270,11 +270,13 @@ async function getFacebookEncryptedSeed(req, res) {
 
     if (user) {
         // If user exists return the decrypted seed.
-        const recovery = await Recovery.findOne({ where: { key, [Op.and]: { recovery_type_id: 2 } }, raw: true });
-        if (recovery) 
+        const recovery = await Recovery.findOne({ where: { key, recovery_type_id: 2, user_id: user.id } });
+        if (recovery) {
+            Logger.info({ method: arguments.callee.name, type: "Recover Encrypted Seed", user_id: user.id, recovery, headers: req.headers, body: req.body });
             return successResponse(res, { encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
+        }
     }
-
+    Logger.info({ method: arguments.callee.name, type: "Failed Recover Encrypted Seed", headers: req.headers, body: req.body });
     // If user does not exist return an error.
     return errorResponse(res, 'User not found.');
 }
@@ -311,6 +313,7 @@ async function getGoogleEncryptedSeed(req, res) {
         }
     }
 
+    Logger.info({ method: arguments.callee.name, type: "Failed Recover Encrypted Seed", headers: req.headers, body: req.body });
     // If user does not exist return an error.
     return errorResponse(res, 'User not found.');
 }
@@ -328,25 +331,27 @@ async function getVKontakteEncryptedSeed(req, res) {
     const result = await vk.api.users.get([accessToken]);
 
     // Hash the facebook id with user id to get the database key.
-    const key = sha256(process.env.VKONTAKTE_APP_ID + result[0].id);
+    const key = await sha256((process.env.VK_APP_ID + result[0].id).toString());
 
     // Attempt to get user from database with the given email address.
     const user = await User.findOne({ where: { email: signupEmail } });
 
-    if (user) {
+    if (user != null) {
         // If user exists return the decrypted seed.
-        const recovery = await Recovery.findOne({ where: { key, [Op.and]: { recovery_type_id: 5 } }, raw: true });
-        if (recovery)
+        const recovery = await Recovery.findOne({ where: { key, recovery_type_id: 5, user_id: user.id } });
+        if (recovery != null) {
+            Logger.info({ method: arguments.callee.name, type: "Recover Encrypted Seed", user_id: user.id, recovery, headers: req.headers, body: req.body });
             return successResponse(res, { encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
+        }
     }
-
+    Logger.info({ method: arguments.callee.name, type: "Failed Recover Encrypted Seed", headers: req.headers, body: req.body });
     // If user does not exist return an error.
     return errorResponse(res, 'User not found.');
 }
 
 export async function recoverSeedSocialRecovery(req: Request, res: Response) {
-    switch(req.body.recoveryTypeId) {
-        case 2: 
+    switch (req.body.recoveryTypeId) {
+        case 2:
             return await getFacebookEncryptedSeed(req, res);
         case 3:
             return await getGoogleEncryptedSeed(req, res);

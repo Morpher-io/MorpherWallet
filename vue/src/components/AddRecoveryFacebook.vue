@@ -49,6 +49,10 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 	}
 
 	async onLogin(data) {
+		if (data == undefined) {
+			// this.showSpinnerThenAutohide('Aborted Facebook Recovery');
+			return;
+		}
 		this.showSpinner('Saving Keystore for Recovery');
 		const userID = data.authResponse.userID;
 		const key = await sha256(this.clientId + userID);
