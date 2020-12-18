@@ -1,6 +1,6 @@
 <template>
 	<div class="control is-expanded">
-		<button type="button" class="button is-fullwidth" @click="doLogin">Recover using VKontakte</button>
+		<button type="button" class="button is-fullwidth is-grey" @click="doLogin">Recover using VKontakte</button>
 		<ChangePassword v-if="seedFound" :presetOldPassword="oldPassword"></ChangePassword>
 	</div>
 </template>

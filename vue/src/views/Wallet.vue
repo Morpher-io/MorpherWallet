@@ -4,7 +4,7 @@
 
 		<h2 class="subtitle">Hello {{ walletEmail }}</h2>
 
-		<div :class="noRecoveryMehods ? 'collapse' : ''">
+		<div :class="noRecoveryMethods ? 'collapse' : ''">
 			<div class="field">
 				<div class="card-content">
 					<div class="content">
