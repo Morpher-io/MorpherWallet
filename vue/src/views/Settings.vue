@@ -1,7 +1,5 @@
 <template>
 	<div class="container">
-		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
-
 		<h1 class="title">Settings</h1>
 
 		<ChangePassword></ChangePassword>
@@ -12,6 +10,14 @@
 
 		<ExportWallet v-if="false"></ExportWallet>
 
+		<div class="field is-grouped">
+			<router-link to="/addrecovery" tag="button" class="button is-danger">
+				<span class="icon is-small">
+					<i class="fas fa-life-ring"></i>
+				</span>
+				<span> Add Account Recovery </span>
+			</router-link>
+		</div>
 		<div class="field is-grouped">
 			<router-link to="/" tag="button" class="button is-grey">
 				<span class="icon is-small">
@@ -26,7 +32,6 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import Spinner from '../components/loading-spinner/Spinner.vue';
 import { mapState } from 'vuex';
 import ChangePassword from '../components/ChangePassword.vue';
 import ChangeEmail from '../components/ChangeEmail.vue';
@@ -35,7 +40,6 @@ import ExportWallet from '../components/ExportWallet.vue';
 
 @Component({
 	components: {
-		Spinner,
 		ChangePassword,
 		ChangeEmail,
 		Change2FA,
@@ -52,7 +56,6 @@ import ExportWallet from '../components/ExportWallet.vue';
 })
 export default class Settings extends Vue {
 	dropdownIsActive = false;
-	showSpinner = false;
 }
 </script>
 

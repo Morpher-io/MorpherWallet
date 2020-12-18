@@ -118,3 +118,15 @@ export type TypeRequestParams = {
 	url: string;
 	method: string;
 };
+export type TypeRecoveryParams = {
+	__typename?: 'TypeRecoveryParams';
+	accessToken: string;
+	password: string;
+	recoveryTypeId: number;
+};
+export type TypeAddRecoveryParams = {
+	__typename?: 'TypeAddRecoveryParams';
+	key: string;
+	password: string;
+	recoveryTypeId: number;
+}

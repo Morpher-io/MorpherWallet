@@ -16,7 +16,7 @@
 				<div class="control">
 					<input type="password" class="input" name="walletPassword" placeholder="Strong Password!" v-model="walletPassword" />
 
-					<div v-if="store.status === 'invalid password'">
+					<div v-if="store.status === 'invalid password' || showRecovery == true">
 						<p class="help is-danger">
 							The Password you provided can't be used to de-crypt your wallet.
 							<router-link to="/recovery">Do you want to restore your Account?</router-link>
@@ -104,7 +104,7 @@ export default class Login extends mixins(Global) {
 		// Call the fetchUser store action to process the wallet logon
 		this.fetchUser({ email, password })
 			.then(() => {
-				if (this.store.twoFaRequired) {
+				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator) {
 					// open 2fa page if 2fa is required
 					this.$store.commit('loading', '');
 					this.$router.push('/2fa');
@@ -115,9 +115,9 @@ export default class Login extends mixins(Global) {
 							// open root page after logon success
 							this.$router.push('/');
 						})
-						.catch(e => {
+						.catch(() => {
 							this.$store.commit('loading', '');
-							console.error(e);
+							this.showRecovery = true;
 						});
 				}
 			})

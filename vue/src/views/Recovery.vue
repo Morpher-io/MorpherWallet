@@ -1,17 +1,15 @@
 <template>
 	<div class="container">
-		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
-
 		<h1 class="title">Account Recovery</h1>
 
 		<div class="field is-grouped">
-			<GoogleRecoverWallet :walletEmail="store.email"></GoogleRecoverWallet>
+			<RecoverWalletGoogle></RecoverWalletGoogle>
 		</div>
 		<div class="field is-grouped">
-			<FBRecoverWallet :walletEmail="store.email"></FBRecoverWallet>
+			<RecoverWalletFacebook :walletEmail="store.email"></RecoverWalletFacebook>
 		</div>
 		<div class="field is-grouped">
-			<VKRecoverWallet :walletEmail="store.email"></VKRecoverWallet>
+			<RecoverWalletVkontakte :walletEmail="store.email"></RecoverWalletVkontakte>
 		</div>
 
 		<div class="field is-grouped">
@@ -31,30 +29,20 @@
 
 <script lang="ts">
 import Component, { mixins } from 'vue-class-component';
-import { mapState } from 'vuex';
-import VKRecoverWallet from '../components/VKRecoverWallet.vue';
-import GoogleRecoverWallet from '../components/GoogleRecoverWallet.vue';
-import FBRecoverWallet from '../components/FBRecoverWallet.vue';
-import { Global, Authenticated } from '../mixins/mixins';
+import RecoverWalletVkontakte from '../components/RecoverWalletVkontakte.vue';
+import RecoverWalletGoogle from '../components/RecoverWalletGoogle.vue';
+import RecoverWalletFacebook from '../components/RecoverWalletFacebook.vue';
+import { Global } from '../mixins/mixins';
 
 @Component({
 	components: {
-		VKRecoverWallet,
-		FBRecoverWallet,
-		GoogleRecoverWallet
-	},
-	computed: {
-		...mapState({
-			twoFaRequired: (state: any) => state.twoFaRequired,
-			walletEmail: (state: any) => state.email,
-			status: (state: any) => state.status,
-			accounts: (state: any) => state.accounts
-		})
+		RecoverWalletVkontakte,
+		RecoverWalletFacebook,
+		RecoverWalletGoogle
 	}
 })
-export default class RecoveryAdd extends mixins(Global, Authenticated) {
+export default class RecoveryAdd extends mixins(Global) {
 	dropdownIsActive = false;
-	showSpinner = false;
 }
 </script>
 

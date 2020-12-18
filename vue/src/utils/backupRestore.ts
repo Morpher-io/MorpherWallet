@@ -117,67 +117,7 @@ const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEnc
 	return response;
 };
 
-const backupGoogleSeed = async (userEmail: string, userid: string, encryptedSeed: string) =>
-	new Promise((resolve, reject) => {
-		sha256(config.GOOGLE_APP_ID + userid).then((key: any) => {
-			const options: RequestInit = {
-				method: 'POST',
-				headers: {
-					Accept: 'application/json',
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					encryptedSeed,
-					key,
-					email: userEmail.toLowerCase(),
-					recoveryTypeId: 3
-				}),
-				mode: 'cors',
-				cache: 'default'
-			};
-			try {
-				fetch(getBackendEndpoint() + '/v1/saveEmailPassword', options).then(r => {
-					r.json().then(response => {
-						resolve(response);
-					});
-				});
-			} catch (e) {
-				reject(e);
-			}
-		});
-	});
-
-const backupFacebookSeed = async (userEmail: string, userid: string, encryptedSeed: string) =>
-	new Promise((resolve, reject) => {
-		sha256(config.FACEBOOK_APP_ID + userid).then((key: any) => {
-			const options: RequestInit = {
-				method: 'POST',
-				headers: {
-					Accept: 'application/json',
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					encryptedSeed,
-					key: key,
-					email: userEmail.toLowerCase(),
-					recoveryTypeId: 2
-				}),
-				mode: 'cors',
-				cache: 'default'
-			};
-			try {
-				fetch(getBackendEndpoint() + '/v1/saveEmailPassword', options).then(r => {
-					r.json().then(response => {
-						resolve(response);
-					});
-				});
-			} catch (e) {
-				reject(e);
-			}
-		});
-	});
-
-const recoverFacebookSeed = async (accessToken: string, signupEmail: string) =>
+const recoverSeedSocialRecovery = async (accessToken: string, signupEmail: string, recoveryTypeId: number) =>
 	new Promise((resolve, reject) => {
 		const options: RequestInit = {
 			method: 'POST',
@@ -186,13 +126,14 @@ const recoverFacebookSeed = async (accessToken: string, signupEmail: string) =>
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
-				accessToken: accessToken,
-				signupEmail: signupEmail.toLowerCase()
+				accessToken,
+				signupEmail,
+				recoveryTypeId
 			}),
 			mode: 'cors',
 			cache: 'default'
 		};
-		fetch(getBackendEndpoint() + '/v1/getFacebookEncryptedSeed', options).then(r => {
+		fetch(getBackendEndpoint() + '/v1/recoverSeedSocialRecovery', options).then(r => {
 			r.json().then(async responseBody => {
 				if (responseBody.success) {
 					//initiate recovery
@@ -204,116 +145,6 @@ const recoverFacebookSeed = async (accessToken: string, signupEmail: string) =>
 			});
 		});
 	});
-const recoverGoogleSeed = async (accessToken: string, signupEmail: string) =>
-	new Promise((resolve, reject) => {
-		const options: RequestInit = {
-			method: 'POST',
-			headers: {
-				Accept: 'application/json',
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				accessToken: accessToken,
-				signupEmail: signupEmail.toLowerCase()
-			}),
-			mode: 'cors',
-			cache: 'default'
-		};
-		fetch(getBackendEndpoint() + '/v1/getGoogleEncryptedSeed', options).then(r => {
-			r.json().then(async responseBody => {
-				if (responseBody.success) {
-					//initiate recovery
-					const encryptedSeed = JSON.parse(responseBody.encryptedSeed);
-					resolve(encryptedSeed);
-				} else {
-					reject("Your account wasn't found with Google recovery, create one with username and password first");
-				}
-			});
-		});
-	});
-
-const recoverVKSeed = async (accessToken: string, signupEmail: string) =>
-	new Promise((resolve, reject) => {
-		const options: RequestInit = {
-			method: 'POST',
-			headers: {
-				Accept: 'application/json',
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				accessToken: accessToken,
-				signupEmail: signupEmail.toLowerCase()
-			}),
-			mode: 'cors',
-			cache: 'default'
-		};
-		fetch(getBackendEndpoint() + '/v1/getVKontakteEncryptedSeed', options).then(r => {
-			r.json().then(async responseBody => {
-				if (responseBody.success) {
-					//initiate recovery
-					const encryptedSeed = JSON.parse(responseBody.encryptedSeed);
-					resolve(encryptedSeed);
-				} else {
-					reject("Your account wasn't found with VK recovery, create one with username and password first");
-				}
-			});
-		});
-	});
-
-const backupVKSeed = async (userEmail: string, userid: string, encryptedSeed: string) =>
-	new Promise((resolve, reject) => {
-		sha256(config.VK_APP_ID + userid).then((key: any) => {
-			const options: RequestInit = {
-				method: 'POST',
-				headers: {
-					Accept: 'application/json',
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					encryptedSeed,
-					key,
-					email: userEmail.toLowerCase(),
-					recoveryTypeId: 5
-				}),
-				mode: 'cors',
-				cache: 'default'
-			};
-			try {
-				fetch(getBackendEndpoint() + '/v1/saveEmailPassword', options).then(r => {
-					r.json().then(response => {
-						resolve(response);
-					});
-				});
-			} catch (e) {
-				reject(e);
-			}
-		});
-	});
-
-const changeEmail = async (oldEmail: string, newEmail: string, encryptedSeed: string) => {
-	newEmail = newEmail.toLowerCase();
-	oldEmail = oldEmail.toLowerCase();
-	const key = await sha256(newEmail);
-	const options: RequestInit = {
-		method: 'POST',
-		headers: {
-			Accept: 'application/json',
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			key,
-			encryptedSeed,
-			oldEmail,
-			newEmail
-		}),
-		mode: 'cors',
-		cache: 'default'
-	};
-	const result = await fetch(getBackendEndpoint() + '/v1/changeEmail', options);
-
-	const response = await result.json();
-	return response;
-};
 
 const getPayload = (email: string) =>
 	new Promise<TypePayloadData>(async (resolve, reject) => {
@@ -353,29 +184,6 @@ const getNonce = async (key: string) => {
 		cache: 'default'
 	};
 	const result = await fetch(getBackendEndpoint() + '/v1/getNonce', options);
-
-	const response = await result.json();
-	return response;
-};
-
-const change2FAMethods = async (email: string, signedMessage: string, toggleEmail: string, toggleAuthenticator: string) => {
-	const key = await sha256(email.toLowerCase());
-	const options: RequestInit = {
-		method: 'POST',
-		headers: {
-			Accept: 'application/json',
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			key,
-			signedMessage,
-			toggleEmail,
-			toggleAuthenticator
-		}),
-		mode: 'cors',
-		cache: 'default'
-	};
-	const result = await fetch(getBackendEndpoint() + '/v1/change2FAMethods', options);
 
 	const response = await result.json();
 	return response;
@@ -460,17 +268,10 @@ export {
 	saveWalletEmailPassword,
 	getKeystoreFromEncryptedSeed,
 	changePasswordEncryptedSeed,
-	backupFacebookSeed,
-	recoverFacebookSeed,
+	recoverSeedSocialRecovery,
 	getEncryptedSeedFromMail,
-	backupGoogleSeed,
-	recoverGoogleSeed,
-	backupVKSeed,
-	recoverVKSeed,
-	changeEmail,
 	getPayload,
 	getNonce,
-	change2FAMethods,
 	send2FAEmail,
 	verifyAuthenticatorCode,
 	verifyEmailCode,
