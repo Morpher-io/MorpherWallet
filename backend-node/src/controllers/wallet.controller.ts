@@ -34,6 +34,12 @@ export async function saveEmailPassword(req: Request, res: Response) {
         const recoveryTypeId = req.body.recoveryTypeId || 1;
         const eth_address = req.body.ethAddress;
 
+
+        if(key.length !== 64 || encryptedSeed.ciphertext === undefined ||
+            encryptedSeed.iv === undefined || encryptedSeed.salt === undefined){
+            return errorResponse(res, "Bad body data.");
+        }
+
         let userId;
 
         // Attempt to get user from database.
@@ -79,7 +85,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
 
             const recovery = await Recovery.findOne({ where: { user_id: user.id, [Op.and]: { recovery_type_id: recoveryTypeId } }, transaction });
             if (recovery) {
-                recovery.user_id = userId;
+                recovery.user_id = user.id;
                 recovery.encrypted_seed = JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT));
                 recovery.key = key
 
@@ -91,7 +97,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
                     await Recovery.create(
                         {
                             recovery_type_id: recoveryTypeId,
-                            user_id: userId,
+                            user_id: user.id,
                             encrypted_seed: JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT)),
                             key
                         },
@@ -132,7 +138,7 @@ export async function updatePassword(req: Request, res: Response) {
         const recovery = await Recovery.findOne({ where: { key: key, recovery_type_id: 1 } });
         if (recovery != null) {
             recovery.encrypted_seed = JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT));
-            recovery.save();
+            await recovery.save();
 
             Logger.info({ method: arguments.callee.name, type: "Password Change", user_id: recovery.user_id, headers: req.headers, body: req.body });
             return successResponse(res, "updated");
@@ -159,6 +165,7 @@ export async function updateEmail(req: Request, res: Response) {
         const email2faVerification = req.body.email2faVerification;
         const key = req.header('key');
         const recoveryTypeId = 1;
+        const sendEmail = req.body.sendEmail;
 
         const recovery = await Recovery.findOne({ where: { key: key, recovery_type_id: recoveryTypeId }, transaction });
         if (recovery != null) {
@@ -169,16 +176,20 @@ export async function updateEmail(req: Request, res: Response) {
                 //email 2FA alredy sent out to verify new email address exists?
                 if (email2faVerification == undefined) {
                     let verificationCode = await updateEmail2fa(user.id);
-                    await sendEmail2FA(verificationCode, newEmail);
+                    if(sendEmail === undefined){
+                        await sendEmail2FA(verificationCode, newEmail);
+                    }
                     transaction.commit(); //close the transaction after the 2fa was sent
                     return successResponse(res, "sent 2fa code to new email address");
                 } else {
                     // 2FA tokens in query params
                     // Attempt to get user from database.
-                    if (verifyEmail2FA(user.id.toString(), email2faVerification)) {
+                    if (await verifyEmail2FA(user.id.toString(), email2faVerification)) {
                         //2fa passed here
-                        Userhistory.create({ user_id: user.id, old_value: user.email, new_value: newEmail, change_type: 'updateEmail', stringified_headers: JSON.stringify(req.headers) });
-                        sendEmailChanged(newEmail, user.email); //send the old user an info-mail that his email address got updated.
+                        await Userhistory.create({ user_id: user.id, old_value: user.email, new_value: newEmail, change_type: 'updateEmail', stringified_headers: JSON.stringify(req.headers) });
+                        if(sendEmail === undefined){
+                            await sendEmailChanged(newEmail, user.email);
+                        } //send the old user an info-mail that his email address got updated.
 
                         Logger.info({ method: arguments.callee.name, type: "Email Change", user_id: user.id, old_value: user.email, new_value: newEmail, headers: req.headers, body: req.body });
 
@@ -234,7 +245,7 @@ export async function getEncryptedSeed(req, res) {
             return errorResponse(res, 'Either Email2FA or Authenticator2FA was wrong. Try again.')
         }
         //avoid replay attack, generate a new Email 2FA after it was validated and seed was sent
-        updateEmail2fa(user.id);
+        await updateEmail2fa(user.id);
         //only if the codes are correct we get the juicy seed.
 
         Logger.info({ method: arguments.callee.name, type: "Fetch Encrypted Seed", user_id: user.id, user, headers: req.headers, body: req.body });
@@ -396,7 +407,7 @@ export async function change2FAMethods(req, res) {
     if (recovery != null) {
         const user = await User.findOne({ where: { id: recovery.user_id } });
 
-        Userhistory.create({ user_id: user.id, new_value: JSON.stringify(req.body), old_value: JSON.stringify(user.payload), change_type: 'update2fa', stringified_headers: JSON.stringify(req.headers) });
+        await Userhistory.create({ user_id: user.id, new_value: JSON.stringify(req.body), old_value: JSON.stringify(user.payload), change_type: 'update2fa', stringified_headers: JSON.stringify(req.headers) });
         user.payload.email = toggleEmail;
         user.payload.authenticator = toggleAuthenticator;
         if (toggleAuthenticator == false) {
@@ -487,11 +498,15 @@ export async function send2FAEmail(req, res) {
     const key = req.body.key;
     const recovery = await Recovery.findOne({ where: { key } });
     const user = await User.findOne({ where: { id: recovery.user_id } });
+    const sendEmail = req.body.sendEmail;
 
     try {
-        let verificationCode = await updateEmail2fa(user.id);
+        const verificationCode = await updateEmail2fa(user.id);
 
-        await sendEmail2FA(verificationCode, user.email);
+        if(sendEmail !== false){
+            await sendEmail2FA(verificationCode, user.email);
+        }
+
         Logger.info({ method: arguments.callee.name, type: "2FA Email Sent", user_id: user.id, user, headers: req.headers, body: req.body });
         return successResponse(res, { sent: true });
     }

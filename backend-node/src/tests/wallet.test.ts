@@ -1,15 +1,20 @@
 import * as expect from 'expect';
 import { describe, it, beforeEach } from 'mocha';
-import {Recovery, Recovery_Type, sequelize, User, Userhistory} from '../database/models';
-import {randomFixedInteger, sha256} from '../helpers/functions/util';
+import { Recovery, Recovery_Type, sequelize, User, Userhistory } from '../database/models';
+import {sha256, sortObject} from '../helpers/functions/util';
+import { authenticator } from 'otplib';
 
 const app = require('../index').app;
 const request = require('supertest');
 
+const Web3EthAccounts = require('web3-eth-accounts');
+
+const Account = new Web3EthAccounts('https://sidechain.morpher.com');
+
 async function clearDatabase() {
     await Recovery.destroy({where: {}});
     await User.destroy({where: {}});
-    // await Userhistory.destroy({where: {}});
+    // Run function if database is new to create recovery types.
     // await Recovery_Type.bulkCreate(recoveryTypes);
 }
 
@@ -40,15 +45,22 @@ const recoveryTypes = [
 const bodyData = {
     email: 'arjet@morpher.com',
     key: '5eb8f7d40f8b67dec627deeb9f18620c40014e1346994b567a27374001c337ad',
-    encryptedSeed: '{"ciphertext":"yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==","iv":"TljpH9fl8eUC/6M3","salt":"zAdVIXo4K+QJvSbjeqFVug=="}',
-    eth_address: '0x0Aaa3dB0B463075A327C7f0c586dad80538b8Db0'
+    encryptedSeed: {"ciphertext":"yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==","iv":"TljpH9fl8eUC/6M3","salt":"zAdVIXo4K+QJvSbjeqFVug=="},
+    ethAddress: '0xCb4DB6D3554B3F6439847f3559c41501967192fE'
+};
+
+const newBodyData = {
+    email: 'arjet@morpher.com',
+    key: '5eb8f7d40f8b67dec627deeb9f18620c40014e1346994b567a27374001c337ad',
+    encryptedSeed: {"ciphertext":"EzT86NIuZD88pe7jd=gsGgaNSCGIS8I/Yu4kxF/CcC3HLCmSOpwaDZxcSmXCyHSH4IvaRj7UFz+QauXI5Ea+ISju7mscxUCwXC/eahu2eCe8keYINEue/H=CSC=/dxR2","iv":"GgddR6jdlyQF/4R1","salt":"sSJvJXeVzqg+4eVbIAQb4S=="},
+    ethAddress: '0xCb4DB6D3554B3F6439847f3559c41501967192fE'
 };
 
 const badBodyKey = {
     email: 'arjet@morpher.com',
     key: 'secureKeyBad',
-    encryptedSeed: '{"ciphertext":"yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==","iv":"TljpH9fl8eUC/6M3","salt":"zAdVIXo4K+QJvSbjeqFVug=="}',
-    eth_address: '0x0Aaa3dB0B463075A327C7f0c586dad80538b8Db0'
+    encryptedSeed: {"ciphertext":"yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==","iv":"TljpH9fl8eUC/6M3","salt":"zAdVIXo4K+QJvSbjeqFVug=="},
+    ethAddress: '0xCb4DB6D3554B3F6439847f3559c41501967192fE'
 };
 
 const badBodyEncryptedSeed = {
@@ -65,8 +77,8 @@ const encryptedSeedData = {
 
 const facebookData = {
     email: 'arjet@morpher.com',
-    key: sha256(process.env.FACEBOOK_APP_ID + '.' + '1212'),
-    encryptedSeed: 'encrypted',
+    key: sha256(process.env.FACEBOOK_APP_ID + '.' + '1212'), // simulating facebook id
+    encryptedSeed: {"ciphertext":"yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==","iv":"TljpH9fl8eUC/6M3","salt":"zAdVIXo4K+QJvSbjeqFVug=="},
     recoveryTypeId: 2
 };
 
@@ -75,10 +87,17 @@ const facebookRecovery = {
     originalSignupEmail: 'arjet@morpher.com'
 };
 
-describe('Wallet controller test cases', async () => {
-    it('successfully creates the user and recovery method', async () => {
-        await clearDatabase();
+const secureAccount = {
+    ethAddress: '0xCb4DB6D3554B3F6439847f3559c41501967192fE',
+    privateKey: '7dc0746fd1a3c6180ee0b95462a4a2bd6689a7618981c7adc629326bc5f52825'
+}
 
+describe('Wallet controller test cases', async () => {
+    beforeEach(async () =>  {
+        await clearDatabase();
+    });
+
+    it('successfully creates the user and recovery method', async () => {
         const walletResponse = await request(app)
             .post('/v1/saveEmailPassword')
             .send(bodyData)
@@ -88,9 +107,23 @@ describe('Wallet controller test cases', async () => {
         expect(walletResponse.body).toHaveProperty('recovery_id');
     });
 
-    it('returns error if bad body key', async () => {
-        await clearDatabase();
+    it('returns error if user already exists', async () => {
+        // Attempt to create 2 users with the same data.
+        await request(app)
+            .post('/v1/saveEmailPassword')
+            .send(bodyData)
+            .set('Accept', 'application/json');
 
+        const walletResponse = await request(app)
+            .post('/v1/saveEmailPassword')
+            .send(bodyData)
+            .set('Accept', 'application/json');
+
+        expect(walletResponse.status).toEqual(404);
+        expect(walletResponse.body.error).toEqual('Error: User already exists!');
+    });
+
+    it('returns error if bad body key', async () => {
         const walletResponse = await request(app)
             .post('/v1/saveEmailPassword')
             .send(badBodyKey)
@@ -101,8 +134,6 @@ describe('Wallet controller test cases', async () => {
     });
 
     it('returns error if bad body encryptedSeed', async () => {
-        await clearDatabase();
-
         const walletResponse = await request(app)
             .post('/v1/saveEmailPassword')
             .send(badBodyEncryptedSeed)
@@ -112,20 +143,26 @@ describe('Wallet controller test cases', async () => {
         expect(walletResponse.body.error).toEqual('Bad body data.');
     });
 
-    it('returns encryptedSeed if email2fa is false', async () => {
-        await clearDatabase();
-
+    it('returns encryptedSeed', async () => {
         await request(app)
             .post('/v1/saveEmailPassword')
             .send(bodyData)
             .set('Accept', 'application/json');
 
-        const user = await User.findOne();
+        // Simulate sending an email by changing only user payload.
+        const emailData = {
+            key: bodyData.key,
+            sendEmail: false
+        }
 
-        // Simulating email sent not to spam the email address when running tests.
-        user.payload.email = false;
-        user.changed('payload', true);
-        await user.save()
+        await request(app)
+            .post('/v1/send2FAEmail')
+            .send(emailData)
+            .set('Accept', 'application/json');
+
+        // Get the email verification code from the payload.
+        const user = await User.findOne();
+        encryptedSeedData.email2fa = user.email_verification_code
 
         const walletResponse = await request(app)
             .post('/v1/getEncryptedSeed')
@@ -137,8 +174,6 @@ describe('Wallet controller test cases', async () => {
     });
 
     it('returns error if no email verification code', async () => {
-        await clearDatabase();
-
         await request(app)
             .post('/v1/saveEmailPassword')
             .send(bodyData)
@@ -154,16 +189,15 @@ describe('Wallet controller test cases', async () => {
     });
 
     it('returns user payload', async () => {
-        await clearDatabase();
-
         await request(app)
             .post('/v1/saveEmailPassword')
             .send(bodyData)
             .set('Accept', 'application/json');
 
+        // Get payload with the same key.
         const walletResponse = await request(app)
             .post('/v1/getPayload')
-            .send(bodyData)
+            .send({ key: bodyData.key })
             .set('Accept', 'application/json');
 
         expect(walletResponse.body.email).toEqual(true);
@@ -172,8 +206,6 @@ describe('Wallet controller test cases', async () => {
     });
 
     it('returns error for payload if bad key', async () => {
-        await clearDatabase();
-
         await request(app)
             .post('/v1/saveEmailPassword')
             .send(bodyData)
@@ -193,24 +225,21 @@ describe('Wallet controller test cases', async () => {
     });
 
     it('returns user nonce', async () => {
-        await clearDatabase();
-
         await request(app)
             .post('/v1/saveEmailPassword')
             .send(bodyData)
             .set('Accept', 'application/json');
 
+        // Get nonce with the same key.
         const walletResponse = await request(app)
             .post('/v1/getNonce')
-            .send(bodyData)
+            .send({ key: bodyData.key })
             .set('Accept', 'application/json');
 
         expect(walletResponse.body).toHaveProperty('nonce');
     });
 
     it('returns error for nonce if bad key', async () => {
-        await clearDatabase();
-
         await request(app)
             .post('/v1/saveEmailPassword')
             .send(bodyData)
@@ -229,44 +258,327 @@ describe('Wallet controller test cases', async () => {
         expect(walletResponse.body.error).toEqual('User not found');
     });
 
-    // it('create user with facebook recovery method', async () => {
-    //     const walletResponse = await request(app)
-    //         .post('/v1/saveEmailPassword')
-    //         .send(facebookData)
-    //         .set('Accept', 'application/json');
-    //
-    //     expect(walletResponse.status).toEqual(200);
-    //     expect(walletResponse.body).toHaveProperty('recovery_id');
-    // });
-    //
-    // it('successfully returns the encrypted seed', async () => {
-    //     const walletResponse = await request(app)
-    //         .post('/v1/getEncryptedSeed')
-    //         .send(bodyData)
-    //         .set('Accept', 'application/json');
-    //
-    //     expect(walletResponse.status).toEqual(200);
-    //     expect(walletResponse.body).toHaveProperty('encryptedSeed');
-    //     expect(walletResponse.body.encryptedSeed).toEqual(bodyData.encryptedSeed);
-    // });
-    //
-    // it('returns recovery methods', async () => {
-    //     const walletResponse = await request(app).get('/v1/getRecoveryTypes');
-    //
-    //     expect(walletResponse.status).toEqual(200);
-    //     expect(walletResponse.body.length).toBeGreaterThan(0);
-    // });
-    //
-    // // The third party recovery unit testing is on hold because
-    // // access tokens change frequently and we will need to setup
-    // // proper testing apps and accounts.
-    // it('test facebook recovery', async () => {
-    //     const walletResponse = await request(app)
-    //         .post('/v1/getFacebookEncryptedSeed')
-    //         .send(facebookRecovery)
-    //         .set('Accept', 'application/json');
-    //
-    //     expect(walletResponse.status).toEqual(404);
-    //     expect(walletResponse.body.error).toEqual('Encrypted seed could not be found.');
-    // });
+    // The logic is the same for the other recovery methods,
+    // only the recovery id changes.
+    it('create user with facebook recovery method', async () => {
+        await request(app)
+            .post('/v1/saveEmailPassword')
+            .send(bodyData)
+            .set('Accept', 'application/json');
+
+        const walletResponse = await request(app)
+            .post('/v1/saveEmailPassword')
+            .send(facebookData)
+            .set('Accept', 'application/json');
+
+        const recovery = await Recovery.findOne({ where: { recovery_type_id: facebookData.recoveryTypeId } });
+
+        expect(recovery).toHaveProperty('encrypted_seed');
+        expect(walletResponse.status).toEqual(200);
+        expect(walletResponse.body).toHaveProperty('recovery_id');
+    });
+
+    it('returns recovery methods', async () => {
+        const walletResponse = await request(app).get('/v1/getRecoveryTypes');
+
+        expect(walletResponse.status).toEqual(200);
+        expect(walletResponse.body.length).toBeGreaterThan(0);
+    });
+
+
+    it('tests change password user auth', async () => {
+        // Create account with private key that corresponds to eth wallet in user database.
+        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+
+        await request(app)
+            .post('/v1/saveEmailPassword')
+            .send(bodyData)
+            .set('Accept', 'application/json');
+
+        const encryptedSeedBeforeUpdate = (await Recovery.findOne()).encrypted_seed;
+
+        const user = await User.findOne();
+
+        newBodyData['nonce'] = user.nonce;
+
+        const signature = account.sign(JSON.stringify(sortObject(newBodyData)))
+
+        const response = await request(app)
+            .post('/v1/auth/updatePassword')
+            .send(newBodyData)
+            .set('Accept', 'application/json')
+            .set('Signature', JSON.stringify(signature))
+            .set('key', bodyData.key);
+
+        const encryptedSeedAfterUpdate = (await Recovery.findOne()).encrypted_seed;
+
+        // Password change is reflected in changed encrypted seed.
+        expect(response.status).toEqual(200);
+        expect(encryptedSeedBeforeUpdate).not.toEqual(encryptedSeedAfterUpdate);
+    });
+
+    it('tests change email user auth', async () => {
+        // Create account with private key that corresponds to eth wallet in user database.
+        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+
+        await request(app)
+            .post('/v1/saveEmailPassword')
+            .send(bodyData)
+            .set('Accept', 'application/json');
+
+        // Simulate sending an email by changing only user payload.
+        const emailData = {
+            key: bodyData.key,
+            sendEmail: false
+        }
+
+        await request(app)
+            .post('/v1/send2FAEmail')
+            .send(emailData)
+            .set('Accept', 'application/json');
+
+        // Get the email verification code from the payload.
+        let user = await User.findOne();
+        encryptedSeedData.email2fa = user.email_verification_code
+
+        const newEmailData = {
+            email2faVerification: user.email_verification_code,
+            newEmail: 'arjet@morpher.io',
+            sendEmail: false
+        }
+
+        newEmailData['nonce'] = user.nonce;
+
+        const signature = account.sign(JSON.stringify(sortObject(newEmailData)))
+
+        const response = await request(app)
+            .post('/v1/auth/updateEmail')
+            .send(newEmailData)
+            .set('Accept', 'application/json')
+            .set('Signature', JSON.stringify(signature))
+            .set('key', bodyData.key);
+
+        user = await User.findOne();
+
+
+        expect(response.status).toEqual(200);
+        expect(response.body.updated).toEqual(true);
+        expect(user.email).toEqual(newEmailData.newEmail);
+    });
+
+
+    it('tests change password user auth error if bad body data', async () => {
+        // Create account with private key that corresponds to eth wallet in user database.
+        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+
+        await request(app)
+            .post('/v1/saveEmailPassword')
+            .send(bodyData)
+            .set('Accept', 'application/json');
+
+        newBodyData['nonce'] = '6565';
+
+        const signature = account.sign(JSON.stringify(sortObject(newBodyData)))
+
+        const response = await request(app)
+            .post('/v1/auth/updatePassword')
+            .send(newBodyData)
+            .set('Accept', 'application/json')
+            .set('Signature', JSON.stringify(signature))
+            .set('key', bodyData.key);
+
+        expect(response.status).toEqual(404);
+        expect(response.body).not.toEqual('Auth Error - Aborting!');
+    });
+
+    it('tests change 2fa methods', async () => {
+        // Create account with private key that corresponds to eth wallet in user database.
+        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+
+        await request(app)
+            .post('/v1/saveEmailPassword')
+            .send(bodyData)
+            .set('Accept', 'application/json');
+
+        const data = {
+            email: false,
+            authenticator: false
+        };
+
+        let user = await User.findOne();
+
+        data['nonce'] = user.nonce;
+
+        const signature = account.sign(JSON.stringify(sortObject(data)))
+
+        const response = await request(app)
+            .post('/v1/auth/change2FAMethods')
+            .send(data)
+            .set('Accept', 'application/json')
+            .set('Signature', JSON.stringify(signature))
+            .set('key', bodyData.key);
+
+        user = await User.findOne();
+
+        // By default payload.email is set to true.
+        expect(response.status).toEqual(200);
+        expect(response.body.message).toEqual('User payload updated successfully.');
+        expect(user.payload.email).toEqual(false);
+        expect(user.payload.authenticator).toEqual(false);
+    });
+
+
+    it('tests generate qr code', async () => {
+        // Create account with private key that corresponds to eth wallet in user database.
+        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+
+        await request(app)
+            .post('/v1/saveEmailPassword')
+            .send(bodyData)
+            .set('Accept', 'application/json');
+
+        let user = await User.findOne();
+
+        const signature = account.sign(JSON.stringify(sortObject({ nonce: user.nonce })))
+
+        const response = await request(app)
+            .post('/v1/auth/generateAuthenticatorQR')
+            .send({ nonce: user.nonce })
+            .set('Accept', 'application/json')
+            .set('Signature', JSON.stringify(signature))
+            .set('key', bodyData.key);
+
+        user = await User.findOne();
+
+        expect(response.status).toEqual(200);
+        expect(user.payload.authenticator).toEqual(true);
+        expect(user.payload.authenticatorConfirmed).toEqual(false);
+        expect(user.authenticator_qr).not.toEqual(null);
+    });
+
+    // Create account with private key that corresponds to eth wallet in user database.
+    it('verifies email code', async () => {
+        await request(app)
+            .post('/v1/saveEmailPassword')
+            .send(bodyData)
+            .set('Accept', 'application/json');
+
+        // Simulate sending an email by changing only user payload.
+        const emailData = {
+            key: bodyData.key,
+            sendEmail: false
+        }
+
+        await request(app)
+            .post('/v1/send2FAEmail')
+            .send(emailData)
+            .set('Accept', 'application/json');
+
+        const data = {
+            key: bodyData.key,
+            code: (await User.findOne()).email_verification_code
+        }
+
+        const response = await request(app)
+            .post('/v1/verifyEmailCode')
+            .send(data)
+            .set('Accept', 'application/json');
+
+        expect(response.status).toEqual(200);
+        expect(response.body.success).toEqual(true)
+    });
+
+    // Create account with private key that corresponds to eth wallet in user database.
+    it('returns error if email code not right', async () => {
+        await request(app)
+            .post('/v1/saveEmailPassword')
+            .send(bodyData)
+            .set('Accept', 'application/json');
+
+        // Simulate sending an email by changing only user payload.
+        const emailData = {
+            key: bodyData.key,
+            sendEmail: false
+        }
+
+        await request(app)
+            .post('/v1/send2FAEmail')
+            .send(emailData)
+            .set('Accept', 'application/json');
+
+        const data = {
+            key: bodyData.key,
+            code: 'randomString'
+        }
+
+        const response = await request(app)
+            .post('/v1/verifyEmailCode')
+            .send(data)
+            .set('Accept', 'application/json');
+
+        expect(response.status).toEqual(404);
+        expect(response.body.error).toEqual('Could not verify email code.')
+    });
+
+    // Create account with private key that corresponds to eth wallet in user database.
+    it('tests verify authenticator code', async () => {
+        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+
+        await request(app)
+            .post('/v1/saveEmailPassword')
+            .send(bodyData)
+            .set('Accept', 'application/json');
+
+        let user = await User.findOne();
+
+        const signature = account.sign(JSON.stringify(sortObject({ nonce: user.nonce })))
+
+        await request(app)
+            .post('/v1/auth/generateAuthenticatorQR')
+            .send({ nonce: user.nonce })
+            .set('Accept', 'application/json')
+            .set('Signature', JSON.stringify(signature))
+            .set('key', bodyData.key);
+
+        user = await User.findOne();
+
+        const secret = user.authenticator_secret;
+
+        const token = authenticator.generate(secret);
+
+        const isValid = authenticator.verify({ token, secret });
+
+        expect(isValid).toEqual(true)
+    });
+
+    // Create account with private key that corresponds to eth wallet in user database.
+    it('tests verify authenticator code error', async () => {
+        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+
+        await request(app)
+            .post('/v1/saveEmailPassword')
+            .send(bodyData)
+            .set('Accept', 'application/json');
+
+        let user = await User.findOne();
+
+        const signature = account.sign(JSON.stringify(sortObject({ nonce: user.nonce })))
+
+        await request(app)
+            .post('/v1/auth/generateAuthenticatorQR')
+            .send({ nonce: user.nonce })
+            .set('Accept', 'application/json')
+            .set('Signature', JSON.stringify(signature))
+            .set('key', bodyData.key);
+
+        user = await User.findOne();
+
+        const secret = user.authenticator_secret;
+
+        const token = 'randomString';
+
+        const isValid = authenticator.verify({ token, secret });
+
+        expect(isValid).toEqual(false)
+    });
 });
