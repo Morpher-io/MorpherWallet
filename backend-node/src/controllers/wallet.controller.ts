@@ -253,7 +253,7 @@ export async function getEncryptedSeed(req, res) {
 }
 
 // Function to get encrypted seed from facebook recovery.
-export async function getFacebookEncryptedSeed(req, res) {
+async function getFacebookEncryptedSeed(req, res) {
     // Get access token and email from request body.
     const accessToken = req.body.accessToken;
     const signupEmail = req.body.signupEmail;
@@ -280,7 +280,7 @@ export async function getFacebookEncryptedSeed(req, res) {
 }
 
 // Function to get encrypted seed from google recovery.
-export async function getGoogleEncryptedSeed(req, res) {
+async function getGoogleEncryptedSeed(req, res) {
     // Get access token and email from request body.
     const accessToken = req.body.accessToken;
     const signupEmail = req.body.signupEmail;
@@ -316,7 +316,7 @@ export async function getGoogleEncryptedSeed(req, res) {
 }
 
 // Function to get encrypted seed from vkontakte recovery.
-export async function getVKontakteEncryptedSeed(req, res) {
+async function getVKontakteEncryptedSeed(req, res) {
     // Get access token and email from request body.
     const accessToken = req.body.accessToken;
     const signupEmail = req.body.signupEmail;
@@ -342,6 +342,19 @@ export async function getVKontakteEncryptedSeed(req, res) {
 
     // If user does not exist return an error.
     return errorResponse(res, 'User not found.');
+}
+
+export async function recoverSeedSocialRecovery(req: Request, res: Response) {
+    switch(req.body.recoveryTypeId) {
+        case 2: 
+            return await getFacebookEncryptedSeed(req, res);
+        case 3:
+            return await getGoogleEncryptedSeed(req, res);
+        case 5:
+            return await getVKontakteEncryptedSeed(req, res);
+        default:
+            return errorResponse(res, 'The Recovery Method does not exist.', 500);
+    }
 }
 
 // Function to return all 2FA methods from the database.

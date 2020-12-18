@@ -3,68 +3,70 @@
 		<v-facebook-login
 			type="button"
 			class="button is-fullwidth"
-			app-id="299132904630133"
+			:appId="clientId"
 			@sdk-init="handleSdkInit"
 			@login="onLogin"
 			v-model="facebook.model"
 		>
 			<span slot="login">Recover using Facebook</span>
 		</v-facebook-login>
+		<ChangePassword v-if="seedFound" :presetOldPassword="oldPassword"></ChangePassword>
 	</div>
 </template>
 
 <script>
-import { sha256 } from '../utils/cryptoFunctions';
-import { recoverFacebookSeed, changePasswordEncryptedSeed, saveWalletEmailPassword } from '../utils/backupRestore';
 import VFacebookLogin from 'vue-facebook-login-component';
+import ChangePassword from './ChangePassword.vue';
 
-export default {
-	name: 'RecoverWalletFacebook',
+import Component, { mixins } from 'vue-class-component';
+import { Global } from '../mixins/mixins';
+
+@Component({
 	components: {
-		VFacebookLogin
-	},
-	data: function() {
-		return {
-			isLogined: false,
-			facebook: {
-				FB: {},
-				model: {},
-				scope: {}
-			}
-		};
-	},
-	props: {
-		walletEmail: {
-			type: String,
-			default: ''
-		}
-	},
-	methods: {
-		handleSdkInit({ FB, scope }) {
-			this.facebook.scope = scope;
-			this.facebook.FB = FB;
-		},
-		async onLogin(data) {
-			try {
-				const userID = data.authResponse.userID;
-				const fbToken = data.authResponse.accessToken;
-				const encryptedSeedFacebook = await recoverFacebookSeed(fbToken, this.walletEmail);
-				let newPasswordForLocalStorage = prompt('Enter a new password for you local vault', 'Super Strong Pass0wrd!');
+		VFacebookLogin,
+		ChangePassword
+	}
+})
+export default class RecoverWalletFacebook extends mixins(Global) {
+	isLogined = false;
+	facebook = {
+		FB: {},
+		model: {},
+		scope: {}
+	};
+	clientId = process.env.VUE_APP_FACEBOOK_APP_ID;
+	recoveryTypeId = 2;
+	seedFound = false; //if seed was found, the user can enter a new password
+	oldPassword = '';
 
-				//double hashing the password
-				newPasswordForLocalStorage = await sha256(newPasswordForLocalStorage);
-				const encryptedSeedPassword = await changePasswordEncryptedSeed(encryptedSeedFacebook, userID, newPasswordForLocalStorage);
-				saveWalletEmailPassword(this.walletEmail, encryptedSeedPassword);
-				window.localStorage.setItem('encryptedSeed', JSON.stringify(encryptedSeedPassword));
-				window.localStorage.setItem('email', this.walletEmail);
-				window.sessionStorage.setItem('password', newPasswordForLocalStorage);
-				//this.loginFromRecovery();
-			} catch (e) {
-				alert("Your account wasn't found with Facebook recovery, create one with username and password first");
-			}
+	handleSdkInit({ FB, scope }) {
+		this.facebook.scope = scope;
+		this.facebook.FB = FB;
+	}
+
+	async onLogin(data) {
+		this.showSpinner('Trying to Login...');
+		try {
+			const userID = data.authResponse.userID;
+			const accessToken = data.authResponse.accessToken;
+
+			this.fetchWalletFromRecovery({ accessToken, password: userID, recoveryTypeId: this.recoveryTypeId })
+				.then(() => {
+					this.hideSpinner();
+					this.seedFound = true;
+					this.oldPassword = userID;
+				})
+				.catch((error) => {
+					this.hideSpinner();
+					this.recoveryError = error;
+				});
+		} catch (e) {
+			this.showSpinnerThenAutohide('Your Account was not found');
+			this.recoveryError = 'Your Account was not found.';
+			console.error(e);
 		}
 	}
-};
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

@@ -29,6 +29,7 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 	seedFound = false; //if seed was found, the user can enter a new password
 	oldPassword = '';
 	clientId = process.env.VUE_APP_GOOGLE_APP_ID;
+	recoveryTypeId = 3;
 
 	onLogin(data) {
 		this.showSpinner('Trying to Login...');
@@ -36,7 +37,7 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 			const userID = data.getBasicProfile().getId();
 			const accessToken = data.getAuthResponse(true).access_token;
 
-			this.fetchWalletFromRecovery({ accessToken, password: userID, recoveryTypeId: 3 })
+			this.fetchWalletFromRecovery({ accessToken, password: userID, recoveryTypeId: this.recoveryTypeId })
 				.then(() => {
 					this.hideSpinner();
 					this.seedFound = true;
@@ -47,6 +48,8 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 					this.recoveryError = error;
 				});
 		} catch (e) {
+			this.hideSpinner();
+			this.recoveryError = e.toString();
 			console.error(e);
 		}
 	}

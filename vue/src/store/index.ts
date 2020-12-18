@@ -12,7 +12,7 @@ import {
 	changePasswordEncryptedSeed,
 	getBackendEndpoint,
 	getNonce,
-	recoverGoogleSeed
+	recoverSeedSocialRecovery
 } from '../utils/backupRestore';
 import { getAccountsFromKeystore, sortObject } from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
@@ -250,29 +250,22 @@ const store: Store<RootState> = new Vuex.Store({
 		},
 		fetchWalletFromRecovery({ state, commit }, params: TypeRecoveryParams) {
 			return new Promise((resolve, reject) => {
-				switch (params.recoveryTypeId) {
-					case 3:
-						recoverGoogleSeed(params.accessToken, state.email)
-							.then(encryptedSeed => {
-								commit('seedFound', { encryptedSeed });
-								getKeystoreFromEncryptedSeed(state.encryptedSeed, params.password)
-									.then((keystore: WalletBase) => {
-										const accounts = getAccountsFromKeystore(keystore);
-										//not setting any password here, this is simply for the password change mechanism
-										commit('keystoreUnlocked', { keystore, accounts, hashedPassword: '' });
-										resolve(true);
-									})
-									.catch(() => {
-										commit('authError', 'Cannot unlock the Keystore, wrong ID');
-										reject(false);
-									});
+				recoverSeedSocialRecovery(params.accessToken, state.email, params.recoveryTypeId)
+					.then(encryptedSeed => {
+						commit('seedFound', { encryptedSeed });
+						getKeystoreFromEncryptedSeed(state.encryptedSeed, params.password)
+							.then((keystore: WalletBase) => {
+								const accounts = getAccountsFromKeystore(keystore);
+								//not setting any password here, this is simply for the password change mechanism
+								commit('keystoreUnlocked', { keystore, accounts, hashedPassword: '' });
+								resolve(true);
 							})
-							.catch(reject);
-						break;
-					default:
-						reject('Unknown Recovery Type');
-						break;
-				}
+							.catch(() => {
+								commit('authError', 'Cannot unlock the Keystore, wrong ID');
+								reject(false);
+							});
+					})
+					.catch(reject);
 			});
 		},
 		addRecoveryMethod({ state, dispatch }, params: TypeAddRecoveryParams) {
@@ -298,7 +291,7 @@ const store: Store<RootState> = new Vuex.Store({
 		hasRecovery({ state }, id: number) {
 			return (
 				state.recoveryMethods
-					.map(function (obj) {
+					.map(obj => {
 						return obj.id;
 					})
 					.indexOf(id) !== -1
@@ -419,7 +412,7 @@ const store: Store<RootState> = new Vuex.Store({
 						.then(() => {
 							resolve(true);
 						})
-						.catch(err => {
+						.catch(() => {
 							// console.log('unlockWithStoredPassword error', err);
 							reject(false);
 						});

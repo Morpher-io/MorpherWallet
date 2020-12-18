@@ -34,21 +34,25 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 	error = '';
 	hasRecoveryMethod = false;
 	clientId = process.env.VUE_APP_GOOGLE_APP_ID;
+	recoveryTypeId = 3;
 
 	async mounted() {
-		this.hasRecoveryMethod = await this.hasRecovery(3);
+		this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 	}
 
 	async onLogin(googleUser) {
+		this.showSpinner('Saving Keystore for Recovery');
 		const userID = googleUser.getBasicProfile().getId();
 		const key = await sha256(this.clientId + userID);
 		console.log(this.clientId + userID, key);
-		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: 3 })
+		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
 			.then(async () => {
-				this.hasRecoveryMethod = await this.hasRecovery(3);
+				this.showSpinnerThenAutohide('Saved Successfully');
+				this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 			})
 			.catch(e => {
 				console.log(e);
+				this.showSpinnerThenAutohide('Error');
 				this.error = e.toString();
 			});
 	}

@@ -14,9 +14,7 @@ module.exports = function(express) {
     /**
      * Recovery Methods
      */
-    router.post('/getFacebookEncryptedSeed', WalletController.getFacebookEncryptedSeed);
-    router.post('/getGoogleEncryptedSeed', WalletController.getGoogleEncryptedSeed);
-    router.post('/getVKontakteEncryptedSeed', WalletController.getVKontakteEncryptedSeed);
+    router.post('/recoverSeedSocialRecovery', WalletController.recoverSeedSocialRecovery);
 
     router.post('/getPayload', WalletController.getPayload);
     router.post('/getNonce', WalletController.getNonce);

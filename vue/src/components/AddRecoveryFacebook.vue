@@ -1,67 +1,69 @@
 <template>
-	<div class="control is-expanded">
-		<v-facebook-login
-			class="button is-fullwidth"
-			app-id="299132904630133"
-			@sdk-init="handleSdkInit"
-			@login="onLogin"
-			v-model="facebook.model"
-			><span slot="login">Link to Facebook</span>
-		</v-facebook-login>
+	<div class="field">
+		<div class="control is-expanded" v-if="!hasRecoveryMethod">
+			<v-facebook-login class="button is-fullwidth" :appId="clientId" @sdk-init="handleSdkInit" @login="onLogin" v-model="facebook.model"
+				><span slot="login">Link to Facebook</span>
+			</v-facebook-login>
+		</div>
+		<div v-if="hasRecoveryMethod" class="has-text-centered">
+			<span class="icon google-icon">
+				<i class="fas fa-check-circle"></i>
+			</span>
+			Facebook Recovery Added
+		</div>
+		<div v-if="error">{{ error }}</div>
 	</div>
 </template>
 
 <script>
-import { backupFacebookSeed, changePasswordEncryptedSeed } from '../utils/backupRestore';
 import VFacebookLogin from 'vue-facebook-login-component';
+import { sha256 } from './../utils/cryptoFunctions';
 
-export default {
-	name: 'AddRecoveryFacebook',
+import Component, { mixins } from 'vue-class-component';
+import { Authenticated, Global } from '../mixins/mixins';
+
+@Component({
 	components: {
 		VFacebookLogin
-	},
-	data: function() {
-		return {
-			isLogined: false,
-			facebook: {
-				FB: {},
-				model: {},
-				scope: {}
-			}
-		};
-	},
-	props: {
-		walletEmail: {
-			type: String,
-			default: ''
-		}
-	},
-	methods: {
-		handleSdkInit({ FB, scope }) {
-			this.facebook.scope = scope;
-			this.facebook.FB = FB;
-		},
-		async onLogin(data) {
-			const userID = data.authResponse.userID;
-			const encryptedSeedFromPassword = localStorage.getItem('encryptedSeed') || '';
-			if (encryptedSeedFromPassword === '') {
-				throw new Error('Keystore not found, aborting');
-			}
-
-			const encryptedSeedFromFacebookUserID = await changePasswordEncryptedSeed(
-				JSON.parse(encryptedSeedFromPassword),
-				window.sessionStorage.getItem('password'),
-				userID
-			);
-			try {
-				await backupFacebookSeed(this.walletEmail, userID, encryptedSeedFromFacebookUserID);
-				this.hasWalletRecovery = true;
-			} catch {
-				this.hasWalletRecovery = false;
-			}
-		}
 	}
-};
+})
+export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
+	isLogined = false;
+	facebook = {
+		FB: {},
+		model: {},
+		scope: {}
+	};
+	clientId = process.env.VUE_APP_FACEBOOK_APP_ID;
+	recoveryTypeId = 2;
+	hasRecoveryMethod = false;
+	error = '';
+
+	handleSdkInit({ FB, scope }) {
+		this.facebook.scope = scope;
+		this.facebook.FB = FB;
+	}
+
+	async mounted() {
+		this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
+	}
+
+	async onLogin(data) {
+		this.showSpinner('Saving Keystore for Recovery');
+		const userID = data.authResponse.userID;
+		const key = await sha256(this.clientId + userID);
+		console.log(this.clientId + userID, key);
+		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
+			.then(async () => {
+				this.showSpinnerThenAutohide('Saved Successfully');
+				this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
+			})
+			.catch(() => {
+				this.showSpinnerThenAutohide('Error During Saving');
+				this.error = 'Error during Saving.';
+			});
+	}
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
