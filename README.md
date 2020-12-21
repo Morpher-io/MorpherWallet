@@ -34,7 +34,7 @@ Frontend will be deployed at: `http://127.0.0.1:3001`.
 
 ### Setting up the wallet with Node.js and Npm
 
-####Setting up backend
+#### Setting up backend
  
 * Run `npm install` in the `backend-node` directory.
 
@@ -48,7 +48,7 @@ Frontend will be deployed at: `http://127.0.0.1:3001`.
  
  Backend will be deployed at: `http://127.0.0.1:8080`.
 
-####Setting up frontend
+#### Setting up frontend
 
 * Run `npm install` in the `vue` directory. 
 * Run `npm run serve` to start the frontend process.
