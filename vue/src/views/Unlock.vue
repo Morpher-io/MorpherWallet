@@ -84,6 +84,7 @@ export default class Unlock extends mixins(Global) {
 				}
 			})
 			.catch(error => {
+				this.updateLoading({ message: '' });
 				// error
 			});
 	}

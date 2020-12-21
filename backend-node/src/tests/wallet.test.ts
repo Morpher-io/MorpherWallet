@@ -94,7 +94,7 @@ describe('Wallet controller test cases', async () => {
             .set('Accept', 'application/json');
 
         expect(walletResponse.status).toEqual(404);
-        expect(walletResponse.body.error).toEqual('Error: User already exists!');
+        expect(walletResponse.body.error).toEqual('User not found');
     });
 
     it('returns error if bad body key', async () => {
@@ -235,28 +235,59 @@ describe('Wallet controller test cases', async () => {
     // The logic is the same for the other recovery methods,
     // only the recovery id changes.
     it('create user with facebook recovery method', async () => {
+        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+
         await request(app)
             .post('/v1/saveEmailPassword')
             .send(bodyData)
             .set('Accept', 'application/json');
 
-        const walletResponse = await request(app)
-            .post('/v1/saveEmailPassword')
-            .send(facebookData)
-            .set('Accept', 'application/json');
+        const user = await User.findOne();
+
+        facebookData['nonce'] = user.nonce;
+
+        const body = sortObject(facebookData)
+
+        const signature = account.sign(JSON.stringify(body))
+
+        facebookData['nonce'] = user.nonce;
+
+        const response = await request(app)
+            .post('/v1/auth/addRecoveryMethod')
+            .send(body)
+            .set('Accept', 'application/json')
+            .set('Signature', JSON.stringify(signature))
+            .set('key', bodyData.key);
 
         const recovery = await Recovery.findOne({ where: { recovery_type_id: facebookData.recoveryTypeId } });
 
         expect(recovery).toHaveProperty('encrypted_seed');
-        expect(walletResponse.status).toEqual(200);
-        expect(walletResponse.body).toHaveProperty('recovery_id');
+        expect(response.status).toEqual(200);
+        expect(response.body).toHaveProperty('recovery_id');
     });
 
     it('returns recovery methods', async () => {
-        const walletResponse = await request(app).get('/v1/getRecoveryTypes');
+        const account = Account.privateKeyToAccount(secureAccount.privateKey);
 
-        expect(walletResponse.status).toEqual(200);
-        expect(walletResponse.body.length).toBeGreaterThan(0);
+        await request(app)
+            .post('/v1/saveEmailPassword')
+            .send(bodyData)
+            .set('Accept', 'application/json');
+
+        const user = await User.findOne();
+
+        const signature = account.sign(JSON.stringify(sortObject({ nonce: user.nonce })))
+
+        const response = await request(app)
+            .post('/v1/auth/getRecoveryMethods')
+            .send({ nonce: user.nonce })
+            .set('Accept', 'application/json')
+            .set('Signature', JSON.stringify(signature))
+            .set('key', bodyData.key);
+
+
+        expect(response.status).toEqual(200);
+        expect(response.body.length).toBeGreaterThan(0);
     });
 
 
@@ -361,7 +392,7 @@ describe('Wallet controller test cases', async () => {
             .set('Signature', JSON.stringify(signature))
             .set('key', bodyData.key);
 
-        expect(response.status).toEqual(404);
+        expect(response.status).toEqual(503);
         expect(response.body).not.toEqual('Auth Error - Aborting!');
     });
 
@@ -425,7 +456,7 @@ describe('Wallet controller test cases', async () => {
         user = await User.findOne();
 
         expect(response.status).toEqual(200);
-        expect(user.payload.authenticator).toEqual(true);
+        expect(user.payload.authenticator).toEqual(false);
         expect(user.payload.authenticatorConfirmed).toEqual(false);
         expect(user.authenticator_qr).not.toEqual(null);
     });
