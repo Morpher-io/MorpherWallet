@@ -136,7 +136,7 @@ export async function updatePassword(req: Request, res: Response) {
         const recovery = await Recovery.findOne({ where: { key: key, recovery_type_id: 1 } });
         if (recovery != null) {
             recovery.encrypted_seed = JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT));
-            recovery.save();
+            await recovery.save();
 
             Logger.info({ method: arguments.callee.name, type: "Password Change", user_id: recovery.user_id, headers: req.headers, body: req.body });
             return successResponse(res, "updated");
@@ -234,13 +234,14 @@ export async function getEncryptedSeed(req, res) {
 
         const email2FAVerified = await verifyEmail2FA(recovery.user_id, email2fa);
         const googleVerified = await verifyGoogle2FA(recovery.user_id, authenticator2fa);
-        console.log(email2FAVerified, googleVerified)
         if (!email2FAVerified || !googleVerified) {
             Logger.info({ method: arguments.callee.name, type: "Error: Fetch Encrypted Seed Failed", error: "2fa wrong", user_id: user.id, user, headers: req.headers, body: req.body });
             return errorResponse(res, 'Either Email2FA or Authenticator2FA was wrong. Try again.')
         }
         //avoid replay attack, generate a new Email 2FA after it was validated and seed was sent
-        updateEmail2fa(user.id);
+        if(user.payload.email){
+            updateEmail2fa(user.id);
+        }
         //only if the codes are correct we get the juicy seed.
 
         Logger.info({ method: arguments.callee.name, type: "Fetch Encrypted Seed", user_id: user.id, user, headers: req.headers, body: req.body });
@@ -353,7 +354,6 @@ async function getVKontakteEncryptedSeed(req, res) {
 }
 
 export async function recoverSeedSocialRecovery(req: Request, res: Response) {
-    console.log(req.body)
     switch (req.body.recoveryTypeId) {
         case 2:
             return await getFacebookEncryptedSeed(req, res);
@@ -539,6 +539,25 @@ export async function verifyEmailCode(req, res) {
                 return errorResponse(res, 'Could not verify email code.')
             }
         }
+    }
+
+    return errorResponse(res, "Could not find User!", 404);
+
+}
+
+export async function resetRecovery(req, res) {
+    const recoveryTypeId = req.body.recoveryTypeId;
+    const key = req.header('key');
+    const defaultRecovery = await Recovery.findOne({ where: { key } });
+    if (defaultRecovery != null) {
+        const recovery = await Recovery.findOne({ where: { user_id: defaultRecovery.user_id, recovery_type_id: recoveryTypeId } });
+        if(recovery !== null) {
+            await recovery.destroy();
+            return successResponse(res, true)
+        }
+
+        return errorResponse(res, "Could not find recovery!", 404);
+
     }
 
     return errorResponse(res, "Could not find User!", 404);

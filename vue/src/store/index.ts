@@ -33,7 +33,7 @@ import {
 	TypeChangeEmail,
 	TypePayloadData,
 	TypeRecoveryParams,
-	TypeAddRecoveryParams
+	TypeAddRecoveryParams, TypeLoadingMessage, TypeResetRecovery
 } from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
@@ -595,6 +595,28 @@ const store: Store<RootState> = new Vuex.Store({
 				} else {
 					reject('Keystore not found, aborting');
 				}
+			});
+		},
+		updateLoading({ commit, state, dispatch }, params: TypeLoadingMessage) {
+			commit('loading', params.message)
+		},
+		resetRecoveryMethod({ commit, state, dispatch }, params: TypeResetRecovery) {
+			return new Promise((resolve, reject) => {
+				commit('loading', 'Resetting recovery...')
+				dispatch('sendSignedRequest', {
+					body: { recoveryTypeId: params.recoveryTypeId },
+					method: 'POST',
+					url: getBackendEndpoint() + '/v1/auth/resetRecovery'
+				})
+					.then(() => {
+						dispatch('updateRecoveryMethods').then(() => {
+							commit('loading', '')
+							resolve(true);
+						});
+					})
+					.catch(reject => {
+						commit('loading', '')
+					});
 			});
 		}
 	},

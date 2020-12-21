@@ -25,6 +25,7 @@ module.exports = function(express) {
      * Secure routes checking signature matching eth_address
      */
     router.use('/auth', secureRoutes);
+    router.post('/auth/resetRecovery', WalletController.resetRecovery);
     router.post('/auth/updatePassword', WalletController.updatePassword);
     router.post('/auth/updateEmail', WalletController.updateEmail);
     router.post('/auth/change2FAMethods', WalletController.change2FAMethods);

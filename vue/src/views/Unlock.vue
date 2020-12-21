@@ -74,9 +74,11 @@ export default class Unlock extends mixins(Global) {
 	 * Cmponent mounted lifestyle hook
 	 */
 	mounted() {
+		this.updateLoading({ message: 'Loading user...' });
 		// Check if the wallet can be unlocked using the local-storage stored password
 		this.unlockWithStoredPassword()
 			.then(result => {
+				this.updateLoading({ message: '' });
 				if (result) {
 					this.$router.push('/');
 				}

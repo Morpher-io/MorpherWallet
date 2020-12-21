@@ -11,7 +11,8 @@ import {
 	TypeChangeEmail,
 	TypePayloadData,
 	TypeRecoveryParams,
-	TypeAddRecoveryParams
+	TypeAddRecoveryParams,
+	TypeLoadingMessage, TypeResetRecovery
 } from '../types/global-types';
 import { mapState } from 'vuex';
 import { RootState } from '../store';
@@ -59,6 +60,12 @@ export class Global extends Vue {
 
 	@Action
 	public unlockWithPassword!: (params: TypeUnlockWithPassword) => Promise<unknown>;
+
+	@Action
+	public updateLoading!: (params: TypeLoadingMessage) => Promise<unknown>;
+
+	@Action
+	public resetRecoveryMethod!: (params: TypeResetRecovery) => Promise<unknown>;
 
 	@Action
 	public clearPage!: () => void;

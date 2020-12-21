@@ -106,7 +106,7 @@ export default class Login extends mixins(Global) {
 	 */
 	login() {
 		this.showError = false;
-		this.$store.commit('loading', 'Loading user...');
+		this.updateLoading({ message: 'Loading user...' });
 		this.store.loginComplete = false;
 		const email = this.walletEmail;
 		const password = this.walletPassword;
@@ -116,24 +116,24 @@ export default class Login extends mixins(Global) {
 			.then(() => {
 				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator) {
 					// open 2fa page if 2fa is required
-					this.$store.commit('loading', '');
+					this.updateLoading({ message: '' });
 					this.$router.push('/2fa');
 				} else {
 					this.unlockWithStoredPassword()
 						.then(() => {
-							this.$store.commit('loading', '');
+							this.updateLoading({ message: '' });
 							// open root page after logon success
 							this.$router.push('/');
 						})
 						.catch(() => {
-							this.$store.commit('loading', '');
+							this.updateLoading({ message: '' });
 							this.showRecovery = true;
 						});
 				}
 			})
 			.catch(error => {
 				// Logon failed
-				this.$store.commit('loading', '');
+				this.updateLoading({ message: '' });
 				if (error !== true && error !== false) {
 					if (error.success === false) {
 						this.showError = true;

@@ -1,17 +1,18 @@
 <template>
 	<div class="field">
 		<div class="control is-expanded">
-			<button class="button is-fullwidth is-grey" @click="doLogin" v-if="!hasRecoveryMethod">
+			<button class="button is-fullwidth" style="background-color: #45668e" @click="doLogin" v-if="!hasRecoveryMethod">
 				<span class="icon google-icon">
-					<i class="fab fa-google"></i>
+					<i class="fab fa-vk"></i>
 				</span>
-				<span> Link to VKontakte</span>
+				<span style="color: #fff"> Link to VKontakte</span>
 			</button>
 			<div v-if="hasRecoveryMethod" class="has-text-centered">
 				<span class="icon google-icon">
 					<i class="fas fa-check-circle"></i>
 				</span>
 				VKontakte Recovery Added
+				<button class="button is-danger" @click="resetRecovery">Reset</button>
 			</div>
 			<div v-if="error">{{ error }}</div>
 		</div>
@@ -35,6 +36,13 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 
 	async mounted() {
 		this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
+	}
+
+	async resetRecovery(){
+		const success = await this.resetRecoveryMethod({ recoveryTypeId: this.recoveryTypeId });
+		if(success) {
+			this.hasRecoveryMethod = false;
+		}
 	}
 
 	vkPopup(options) {

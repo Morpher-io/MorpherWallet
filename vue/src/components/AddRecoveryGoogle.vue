@@ -5,7 +5,7 @@
 				<span class="icon google-icon">
 					<i class="fab fa-google"></i>
 				</span>
-				<span> Link to Google</span>
+				<span style="color: #fff"> Link to Google</span>
 			</GoogleLogin>
 		</div>
 		<div v-if="hasRecoveryMethod" class="has-text-centered">
@@ -13,6 +13,7 @@
 				<i class="fas fa-check-circle"></i>
 			</span>
 			Google Recovery Added
+			<button class="button is-danger" @click="resetRecovery">Reset</button>
 		</div>
 		<div v-if="error">{{ error }}</div>
 	</div>
@@ -38,6 +39,13 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 
 	async mounted() {
 		this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
+	}
+
+	async resetRecovery(){
+		const success = await this.resetRecoveryMethod({ recoveryTypeId: this.recoveryTypeId });
+		if(success) {
+			this.hasRecoveryMethod = false;
+		}
 	}
 
 	async onLogin(googleUser) {

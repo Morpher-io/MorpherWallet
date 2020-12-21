@@ -10,6 +10,7 @@
 				<i class="fas fa-check-circle"></i>
 			</span>
 			Facebook Recovery Added
+			<button class="button is-danger" @click="resetRecovery">Reset</button>
 		</div>
 		<div v-if="error">{{ error }}</div>
 	</div>
@@ -46,6 +47,13 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 
 	async mounted() {
 		this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
+	}
+
+	async resetRecovery(){
+		const success = await this.resetRecoveryMethod({ recoveryTypeId: this.recoveryTypeId });
+		if(success) {
+			this.hasRecoveryMethod = false;
+		}
 	}
 
 	async onLogin(data) {
