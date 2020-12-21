@@ -15,8 +15,13 @@
 
 				<div class="control">
 					<input type="password" class="input" name="walletPassword" placeholder="Strong Password!" v-model="walletPassword" />
+					<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial; margin-top: -8px" />
+					<p class="help">
+						Use a strong Password! It encrypts your Wallet and keeps your Funds secure. It must be at least 8 characters long and include
+						one lower-case, one upper-case character and a number.
+					</p>
 
-					<div v-if="store.status === 'invalid password'">
+					<div v-if="store.status === 'invalid password' || showRecovery == true">
 						<p class="help is-danger">
 							The Password you provided can't be used to de-crypt your wallet.
 							<router-link to="/recovery">Do you want to restore your Account?</router-link>
@@ -58,8 +63,13 @@
 <script lang="ts">
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
+import Password from "vue-password-strength-meter";
 
-@Component
+@Component({
+	components: {
+		Password
+	}
+})
 export default class Login extends mixins(Global) {
 	// Component properties
 	walletEmail = '';
@@ -85,7 +95,7 @@ export default class Login extends mixins(Global) {
 				})
 				.catch(error => {
 					if (error !== true && error !== false) {
-						console.log('Error in unlock', error);
+						// console.log('Error in unlock', error);
 					}
 				});
 		}
@@ -96,7 +106,7 @@ export default class Login extends mixins(Global) {
 	 */
 	login() {
 		this.showError = false;
-		this.$store.commit('loading', 'Loading user...');
+		this.updateLoading({ message: 'Loading user...' });
 		this.store.loginComplete = false;
 		const email = this.walletEmail;
 		const password = this.walletPassword;
@@ -104,32 +114,32 @@ export default class Login extends mixins(Global) {
 		// Call the fetchUser store action to process the wallet logon
 		this.fetchUser({ email, password })
 			.then(() => {
-				if (this.store.twoFaRequired) {
+				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator) {
 					// open 2fa page if 2fa is required
-					this.$store.commit('loading', '');
+					this.updateLoading({ message: '' });
 					this.$router.push('/2fa');
 				} else {
 					this.unlockWithStoredPassword()
 						.then(() => {
-							this.$store.commit('loading', '');
+							this.updateLoading({ message: '' });
 							// open root page after logon success
 							this.$router.push('/');
 						})
-						.catch(e => {
-							this.$store.commit('loading', '');
-							console.error(e);
+						.catch(() => {
+							this.updateLoading({ message: '' });
+							this.showRecovery = true;
 						});
 				}
 			})
 			.catch(error => {
 				// Logon failed
-				this.$store.commit('loading', '');
+				this.updateLoading({ message: '' });
 				if (error !== true && error !== false) {
 					if (error.success === false) {
 						this.showError = true;
 						this.logonError = error.error;
 					} else {
-						console.log('Error in login', error);
+						// console.log('Error in login', error);
 					}
 				}
 			});

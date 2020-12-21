@@ -9,7 +9,10 @@ import {
 	TypeUnlockWithPassword,
 	TypeChangePassword,
 	TypeChangeEmail,
-	TypePayloadData
+	TypePayloadData,
+	TypeRecoveryParams,
+	TypeAddRecoveryParams,
+	TypeLoadingMessage, TypeResetRecovery
 } from '../types/global-types';
 import { mapState } from 'vuex';
 import { RootState } from '../store';
@@ -33,10 +36,16 @@ import VueRouter from 'vue-router';
 	}
 })
 export class Global extends Vue {
-	// Global component properties
-	showSpinner = false;
-
 	// Map store actions
+	@Action
+	public showSpinner!: (message: string) => void;
+
+	@Action
+	public showSpinnerThenAutohide!: (message: string) => void;
+
+	@Action
+	public hideSpinner!: () => void;
+
 	@Action
 	public fetchUser!: (params: TypeFetchUser) => Promise<unknown>;
 
@@ -53,11 +62,21 @@ export class Global extends Vue {
 	public unlockWithPassword!: (params: TypeUnlockWithPassword) => Promise<unknown>;
 
 	@Action
+	public updateLoading!: (params: TypeLoadingMessage) => Promise<unknown>;
+
+	@Action
+	public resetRecoveryMethod!: (params: TypeResetRecovery) => Promise<unknown>;
+
+	@Action
 	public clearPage!: () => void;
 
 	// Map store actions
 	@Action
 	public logoutWallet!: () => void;
+
+	// Map store actions
+	@Action
+	public fetchWalletFromRecovery!: (params: TypeRecoveryParams) => Promise<unknown>;
 
 	// Map Store Properties
 	store: RootState = this.$store.state;
@@ -110,4 +129,10 @@ export class Authenticated extends Global {
 
 	@Action
 	public change2FAMethods!: (params: TypePayloadData) => Promise<unknown>;
+
+	@Action
+	public addRecoveryMethod!: (params: TypeAddRecoveryParams) => Promise<unknown>;
+
+	@Action
+	public hasRecovery!: (id: number) => boolean;
 }

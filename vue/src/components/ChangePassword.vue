@@ -2,19 +2,19 @@
 	<div class="card">
 		<form v-on:submit.prevent="changePasswordExecute">
 			<div class="collapse">
-				<span v-show="collapsed" class="icon collapseIcon header" @click="collapsed = !collapsed">
+				<span v-show="collapsed && !hideOldPassword" class="icon collapseIcon header" @click="collapsed = !collapsed">
 					<i class="fas fa-chevron-right"></i>
 				</span>
-				<span v-show="!collapsed" class="icon collapseIcon header" @click="collapsed = !collapsed">
+				<span v-show="!collapsed && !hideOldPassword" class="icon collapseIcon header" @click="collapsed = !collapsed">
 					<i class="fas fa-chevron-down"></i>
 				</span>
 
-				<span class="header" @click="collapsed = !collapsed">
+				<span class="header" @click="collapsed = !collapsed" v-show="!hideOldPassword">
 					Password Change
 					<span class="help is-success" v-if="success">Saved!</span>
 				</span>
 				<div :class="collapsed ? 'hidden' : 'visible'">
-					<div class="field">
+					<div class="field" v-if="!hideOldPassword">
 						<label class="label">Old Password</label>
 						<div class="control">
 							<input type="password" name="oldPassword" class="input is-primary" placeholder="Current Password" v-model="oldPassword" />
@@ -74,15 +74,27 @@ import { Authenticated, Global } from '../mixins/mixins';
 @Component({
 	components: {
 		Password
+	},
+	props: {
+		presetOldPassword: String
 	}
 })
 export default class ChangePassword extends mixins(Global, Authenticated) {
 	oldPassword = '';
+	hideOldPassword = false;
 	walletPassword = '';
 	walletPasswordRepeat = '';
 	invalidPassword = '';
 	collapsed = true;
 	success = false;
+
+	mounted() {
+		if (this.presetOldPassword !== undefined) {
+			this.oldPassword = this.presetOldPassword;
+			this.hideOldPassword = true;
+			this.collapsed = false;
+		}
+	}
 
 	async changePasswordExecute() {
 		//this.invalidPassword = '';
@@ -98,9 +110,10 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 			this.invalidPassword = passwordMessage;
 			return;
 		}
-		const oldPasswordHashed = await sha256(this.oldPassword);
+		const oldPasswordHashed = this.presetOldPassword || (await sha256(this.oldPassword));
 		const newPasswordHashed = await sha256(this.walletPassword);
 
+		this.showSpinner('Changing Password');
 		this.changePassword({ oldPassword: oldPasswordHashed, newPassword: newPasswordHashed })
 			.then(() => {
 				this.collapsed = true;
@@ -108,8 +121,13 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 				this.walletPassword = '';
 				this.walletPasswordRepeat = '';
 				this.success = true;
+				this.showSpinnerThenAutohide('Password Changed Successfully');
+				if (this.presetOldPassword !== undefined) {
+					this.$router.push('/login');
+				}
 			})
 			.catch(() => {
+				this.showSpinnerThenAutohide('Error happened!');
 				this.invalidPassword = 'Error happened during Update. Aborted.';
 			});
 	}

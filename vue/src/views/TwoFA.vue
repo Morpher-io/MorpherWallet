@@ -91,15 +91,15 @@ export default class TwoFA extends mixins(Global) {
 	 * Process email 2fa authentication
 	 */
 	async validateCode() {
-		this.$store.commit('loading', 'Validating 2FA codes...');
+		this.updateLoading({ message: 'Validating 2FA codes...' });
 		this.showError = false;
 		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.authenticatorCode })
 			.then(nextroute => {
-				this.$store.commit('loading', '');
+				this.updateLoading({ message: '' });
 				this.router.push(nextroute);
 			})
 			.catch(error => {
-				this.$store.commit('loading', '');
+				this.updateLoading({ message: '' });
 				if (error.toString() === 'invalid password') {
 					this.store.status = 'invalid password';
 					this.router.push('/login');

@@ -28,11 +28,11 @@ export function getKeystore(password: string, encryptedSeedObject: TypeEncrypted
 			const account = new Accounts();
 			let mnemonic: string;
 			if (encryptedSeedObject.ciphertext == undefined || encryptedSeedObject.iv == undefined || encryptedSeedObject.salt == undefined) {
-				console.log('Creating new Wallet');
+				// console.log('Creating new Wallet');
 				mnemonic = generateMnemonic();
 				encryptedSeedObject = await cryptoEncrypt(password, mnemonic);
 			} else {
-				console.log('trying to unlock keystore');
+				// console.log('trying to unlock keystore');
 				//const encryptedSeedObject = JSON.parse(encryptedSeedPhrase);
 
 				mnemonic = await cryptoDecrypt(password, encryptedSeedObject.ciphertext, encryptedSeedObject.iv, encryptedSeedObject.salt);
@@ -46,7 +46,7 @@ export function getKeystore(password: string, encryptedSeedObject: TypeEncrypted
 			account.wallet.add(privateKey);
 			resolve({ encryptedSeed: encryptedSeedObject, keystore: account.wallet });
 		} catch (err) {
-			console.log('getKeystore error', err);
+			// console.log('getKeystore error', err);
 			reject(err);
 		}
 	});

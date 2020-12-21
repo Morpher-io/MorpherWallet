@@ -66,6 +66,16 @@ export type TypeChangePassword = {
 	newPassword: string;
 };
 
+export type TypeLoadingMessage = {
+	__typename?: 'TypeLoadingMessage';
+	message: string;
+};
+
+export type TypeResetRecovery = {
+	__typename?: 'TypeResetRecovery';
+	recoveryTypeId: string;
+};
+
 
 export type TypeChangeEmail = {
 	__typename?: 'TypeChangePassword';
@@ -118,3 +128,15 @@ export type TypeRequestParams = {
 	url: string;
 	method: string;
 };
+export type TypeRecoveryParams = {
+	__typename?: 'TypeRecoveryParams';
+	accessToken: string;
+	password: string;
+	recoveryTypeId: number;
+};
+export type TypeAddRecoveryParams = {
+	__typename?: 'TypeAddRecoveryParams';
+	key: string;
+	password: string;
+	recoveryTypeId: number;
+}

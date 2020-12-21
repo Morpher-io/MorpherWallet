@@ -110,7 +110,7 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 		}
 
 		try {
-			this.showSpinner = true;
+			this.showSpinner('Loading');
 			await this.change2FAMethods({
 				email: this.email,
 				authenticator: this.authenticator,
@@ -119,10 +119,10 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 			this.success = true;
 			this.collapsed = true;
 		} catch (e) {
-			console.log(e);
+			// console.log(e);
 		}
 
-		this.showSpinner = false;
+		this.hideSpinner();
 	}
 
 	async confirmAuthenticator() {

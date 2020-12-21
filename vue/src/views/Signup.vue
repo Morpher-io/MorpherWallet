@@ -110,7 +110,7 @@ export default class Signup extends mixins(Global) {
 		/**
 		 * Validating Email
 		 */
-		this.$store.commit('loading', 'Validating Email ...');
+		this.updateLoading({ message: 'Validating Email...' });
 		const emailMessage = await validateInput('email', this.walletEmail);
 		if (emailMessage) {
 			this.invalidEmail = emailMessage;
@@ -121,7 +121,7 @@ export default class Signup extends mixins(Global) {
 		 * Validating Password
 		 */
 
-		this.$store.commit('loading', 'Validating Password ...');
+		this.updateLoading({ message: 'Validating Password...' });
 		const passwordMessage = await validateInput('password', this.walletPassword);
 		if (passwordMessage) {
 			this.invalidPassword = passwordMessage;
@@ -130,10 +130,10 @@ export default class Signup extends mixins(Global) {
 
 		const email = this.walletEmail;
 
-		this.$store.commit('loading', 'Creating Wallet ...');
+		this.updateLoading({ message: 'Creating Wallet...' });
 		this.createWallet({ email, password: this.walletPassword })
 			.then(() => {
-				this.$store.commit('loading', '');
+				this.updateLoading({ message: '' });
 				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator) {
 					// open 2fa page if 2fa is required
 					this.$router.push('/2fa');

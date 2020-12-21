@@ -134,7 +134,7 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 				this.success = true;
 			}
 		} catch (e) {
-			console.log(e);
+			// console.log(e);
 			this.invalidEmail = e.toString();
 		}
 	}
