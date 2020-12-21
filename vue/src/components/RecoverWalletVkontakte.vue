@@ -89,7 +89,7 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 					}
 				}
 			} catch (e) {
-				console.log(e);
+				// console.log(e);
 			}
 		}, 100);
 	}

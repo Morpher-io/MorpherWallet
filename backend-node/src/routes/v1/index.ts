@@ -2,8 +2,6 @@ const WalletController = require('../../controllers/wallet.controller');
 const ValidationController = require('../../controllers/validation.controller');
 const secureRoutes = require("./secure");
 
-console.log(secureRoutes)
-
 // The index route file which connects all the other files.
 module.exports = function(express) {
     const router = express.Router();

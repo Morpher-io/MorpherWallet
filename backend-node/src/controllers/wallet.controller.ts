@@ -71,7 +71,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
         }
     } catch (error) {
         // If an error happened anywhere along the way, rollback all the changes.
-        console.log(error);
+        // console.log(error);
         await transaction.rollback();
         return errorResponse(res, error.message);
     }
@@ -234,6 +234,7 @@ export async function getEncryptedSeed(req, res) {
 
         const email2FAVerified = await verifyEmail2FA(recovery.user_id, email2fa);
         const googleVerified = await verifyGoogle2FA(recovery.user_id, authenticator2fa);
+        console.log(email2FAVerified, googleVerified)
         if (!email2FAVerified || !googleVerified) {
             Logger.info({ method: arguments.callee.name, type: "Error: Fetch Encrypted Seed Failed", error: "2fa wrong", user_id: user.id, user, headers: req.headers, body: req.body });
             return errorResponse(res, 'Either Email2FA or Authenticator2FA was wrong. Try again.')
@@ -302,6 +303,8 @@ async function getGoogleEncryptedSeed(req, res) {
     // Attempt to get user from database with the given email address.
     const user = await User.findOne({ where: { email: signupEmail } });
 
+    console.log(key)
+
     if (user != null) {
         const recovery = await Recovery.findOne({ where: { user_id: user.id, key, recovery_type_id: 3 }, include: [User] });
         if (recovery != null) {
@@ -350,6 +353,7 @@ async function getVKontakteEncryptedSeed(req, res) {
 }
 
 export async function recoverSeedSocialRecovery(req: Request, res: Response) {
+    console.log(req.body)
     switch (req.body.recoveryTypeId) {
         case 2:
             return await getFacebookEncryptedSeed(req, res);
@@ -450,9 +454,6 @@ export async function generateAuthenticatorQR(req, res) {
                 const result = await QRCode.toDataURL(otp);
 
                 user.authenticator_qr = result;
-                user.payload.authenticator = true;
-                user.payload.authenticatorConfirmed = false;
-                user.changed('payload', true);
                 await user.save();
 
                 Logger.info({ method: arguments.callee.name, type: "Generated Authenticator QR Code", user_id: user.id, user, headers: req.headers, body: req.body });
@@ -479,7 +480,8 @@ export async function verifyAuthenticatorCode(req, res) {
         if (user != null) {
             if (await verifyGoogle2FA(user.id.toString(), code)) {
                 if (user.payload.authenticatorConfirmed == false) {
-                    user.payload.authenticatorConfirmed = true;
+                    user.payload.authenticator = true;
+                    user.payload.authenticatorConfirmed = false;
                     user.changed('payload', true);
                     await user.save();
                 }
@@ -516,7 +518,7 @@ export async function send2FAEmail(req, res) {
         return successResponse(res, { sent: true });
     }
     catch (e) {
-        console.log(e);
+        // console.log(e);
         Logger.info({ method: arguments.callee.name, type: "Error: Can't send 2FA email", user_id: user.id, user, headers: req.headers, body: req.body });
         return errorResponse(res, 'There was a problem parsing the email');
     }

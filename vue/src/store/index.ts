@@ -392,12 +392,12 @@ const store: Store<RootState> = new Vuex.Store({
 								commit('authError', '2FA Authentication code not correct');
 								reject('2FA Authentication not correct');
 							} else {
-								console.log(err);
+								// console.log(err);
 								reject('error');
 							}
 						});
 				} else {
-					console.log('Reached here for wathever reason');
+					// console.log('Reached here for wathever reason');
 					reject();
 				}
 			});

@@ -56,7 +56,7 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 		this.showSpinner('Saving Keystore for Recovery');
 		const userID = data.authResponse.userID;
 		const key = await sha256(this.clientId + userID);
-		console.log(this.clientId + userID, key);
+		// console.log(this.clientId + userID, key);
 		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
 			.then(async () => {
 				this.showSpinnerThenAutohide('Saved Successfully');

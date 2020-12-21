@@ -119,7 +119,7 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 			this.success = true;
 			this.collapsed = true;
 		} catch (e) {
-			console.log(e);
+			// console.log(e);
 		}
 
 		this.hideSpinner();

@@ -90,14 +90,14 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 							this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 						})
 						.catch(e => {
-							console.log(e);
+							// console.log(e);
 							this.showSpinnerThenAutohide('Error');
 							this.error = e.toString();
 						});
 				}
 			} catch (e) {
 				//win.close()
-				console.log(e);
+				// console.log(e);
 			}
 		}, 100);
 	}

@@ -15,6 +15,11 @@
 
 				<div class="control">
 					<input type="password" class="input" name="walletPassword" placeholder="Strong Password!" v-model="walletPassword" />
+					<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial; margin-top: -8px" />
+					<p class="help">
+						Use a strong Password! It encrypts your Wallet and keeps your Funds secure. It must be at least 8 characters long and include
+						one lower-case, one upper-case character and a number.
+					</p>
 
 					<div v-if="store.status === 'invalid password' || showRecovery == true">
 						<p class="help is-danger">
@@ -58,8 +63,13 @@
 <script lang="ts">
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
+import Password from "vue-password-strength-meter";
 
-@Component
+@Component({
+	components: {
+		Password
+	}
+})
 export default class Login extends mixins(Global) {
 	// Component properties
 	walletEmail = '';
@@ -85,7 +95,7 @@ export default class Login extends mixins(Global) {
 				})
 				.catch(error => {
 					if (error !== true && error !== false) {
-						console.log('Error in unlock', error);
+						// console.log('Error in unlock', error);
 					}
 				});
 		}
@@ -129,7 +139,7 @@ export default class Login extends mixins(Global) {
 						this.showError = true;
 						this.logonError = error.error;
 					} else {
-						console.log('Error in login', error);
+						// console.log('Error in login', error);
 					}
 				}
 			});
