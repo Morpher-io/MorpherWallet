@@ -32,7 +32,7 @@
 							/>
 							<p class="help">Use a strong Password! It encrypts your Wallet and keeps your Funds secure.</p>
 
-							<p class="help is-danger" v-if="invalidPassword">
+							<p class="help is-danger" v-if="invalidPassword" data-cy="invalidMessage">
 								{{ invalidPassword }}
 							</p>
 						</div>

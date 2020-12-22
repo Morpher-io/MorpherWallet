@@ -9,9 +9,9 @@
 					<i class="fas fa-chevron-down"></i>
 				</span>
 
-				<span class="header" @click="collapsed = !collapsed">
+				<span class="header" @click="collapsed = !collapsed" data-cy="openEmailChange">
 					Change Email Address
-					<span class="help is-success" v-if="success">Saved!</span>
+					<span class="help is-success" v-if="success" data-cy="isSuccess">Saved!</span>
 				</span>
 				<div :class="collapsed ? 'hidden' : 'visible'">
 					<div class="card-content">
@@ -22,11 +22,12 @@
 									<input
 										class="input is-primary"
 										name="newEmail"
+										data-cy="newEmail"
 										placeholder="New Email Address"
 										v-model="newEmail"
 										:disabled="twoFaSent"
 									/>
-									<p class="help is-danger" v-if="invalidEmail">
+									<p class="help is-danger" v-if="invalidEmail" data-cy="invalidMessage">
 										{{ invalidEmail }}
 									</p>
 								</div>
@@ -38,6 +39,7 @@
 										type="password"
 										class="input is-primary"
 										name="password"
+										data-cy="password"
 										placeholder="Enter password"
 										v-model="password"
 										:disabled="twoFaSent"
@@ -47,7 +49,7 @@
 							<div class="field" v-if="twoFaSent">
 								<label class="label">2FA Code</label>
 								<div class="control">
-									<input type="number" class="input is-primary" name="twoFa" placeholder="Enter 2FA" v-model="twoFa" />
+									<input type="number" class="input is-primary" data-cy="twoFa" name="twoFa" placeholder="Enter 2FA" v-model="twoFa" />
 									<p class="help is-danger" v-if="invalid2FA">
 										{{ invalid2FA }}
 									</p>
@@ -57,7 +59,7 @@
 					</div>
 
 					<div class="field is-grouped">
-						<button class="button is-green" type="submit">
+						<button class="button is-green" type="submit" data-cy="updateEmail">
 							<span class="icon is-small">
 								<i class="fas fa-save"></i>
 							</span>

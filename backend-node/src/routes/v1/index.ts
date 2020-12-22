@@ -1,5 +1,5 @@
 import {User} from "../../database/models";
-import {successResponse} from "../../helpers/functions/util";
+import {errorResponse, successResponse} from "../../helpers/functions/util";
 
 const WalletController = require('../../controllers/wallet.controller');
 const ValidationController = require('../../controllers/validation.controller');
@@ -13,6 +13,14 @@ module.exports = function(express) {
         router.get('/test/clearDatabase', async (req, res) => {
             await User.destroy({ where: {}});
             return successResponse(res, { success: true });
+        });
+    }
+
+    if(process.env.ENVIRONMENT === 'development'){
+        router.post('/test/getUserSecret', async (req, res) => {
+            const user = await User.findOne({ where: { email: req.body.email } });
+            if(user) return successResponse(res, { authenticator_secret: user.authenticator_secret });
+            else return errorResponse(res, 'User not found');
         });
     }
 
