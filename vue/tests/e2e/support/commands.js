@@ -26,7 +26,7 @@
 
 const { MailSlurp } = require("mailslurp-client");
 
-const apiKey = '665f86b3f8907882f59924e7d000b0aa01678fae0fb173a5ce865b9937c9fc2e';
+const apiKey = 'f178663dd02955300354dd702f5c827363e022f67226106f092adbe0ef4ae527';
 const mailslurp = new MailSlurp({ apiKey });
 
 Cypress.Commands.add("createInbox", () => {

@@ -108,6 +108,8 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 		//user unselected authenticator
 		if (!this.authenticator && this.authenticatorConfirmed) {
 			this.authenticatorConfirmed = false;
+			this.qrCode = '';
+			this.authenticatorCode = '';
 		}
 
 		try {

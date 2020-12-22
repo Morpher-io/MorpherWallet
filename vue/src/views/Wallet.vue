@@ -26,7 +26,7 @@
 		</div>
 		<div class="field is-grouped">
 			<div class="layout split first">
-				<button class="button is-green" @click="logout" type="submit">
+				<button class="button is-green" @click="logout" type="submit" data-cy="logout">
 					<span class="icon is-small">
 						<i class="fas fa-lock"></i>
 					</span>

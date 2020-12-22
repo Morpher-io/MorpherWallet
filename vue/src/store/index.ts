@@ -231,13 +231,17 @@ const store: Store<RootState> = new Vuex.Store({
 									send2FAEmail(email)
 										.then(resolve)
 										.catch(reject);
-								} else {
+								}
+								if(!payload.email && !payload.authenticator){
 									getEncryptedSeedFromMail(email, '', '')
 										.then(encryptedSeed => {
 											commit('seedFound', { encryptedSeed });
 											resolve(true);
 										})
 										.catch(reject);
+								}
+								else {
+									resolve(true);
 								}
 							})
 							.catch(err => {

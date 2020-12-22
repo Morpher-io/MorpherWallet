@@ -170,6 +170,8 @@ export async function updateEmail(req: Request, res: Response) {
         const recoveryTypeId = 1;
         const sendEmail = req.body.sendEmail || 'true';
 
+        console.log('here with stuff')
+
         const recovery = await Recovery.findOne({ where: { key: key, recovery_type_id: recoveryTypeId }, transaction });
         if (recovery != null) {
             const user = await User.findOne({ where: { id: recovery.user_id }, transaction });
@@ -178,6 +180,7 @@ export async function updateEmail(req: Request, res: Response) {
             if (user_should_not_exist == null) {
                 //email 2FA alredy sent out to verify new email address exists?
                 if (email2faVerification == undefined) {
+                    console.log('here without stuff')
                     let verificationCode = await updateEmail2fa(user.id);
                     if(sendEmail === 'true'){
                         await sendEmail2FA(verificationCode, newEmail);
@@ -185,6 +188,7 @@ export async function updateEmail(req: Request, res: Response) {
                     transaction.commit(); //close the transaction after the 2fa was sent
                     return successResponse(res, "sent 2fa code to new email address");
                 } else {
+                    console.log('here hehe')
                     // 2FA tokens in query params
                     // Attempt to get user from database.
                     if (verifyEmail2FA(user.id.toString(), email2faVerification)) {
@@ -486,10 +490,10 @@ export async function verifyAuthenticatorCode(req, res) {
         const user = await User.findOne({ where: { id: recovery.user_id } });
 
         if (user != null) {
-            if (await verifyGoogle2FA(user.id.toString(), code)) {
+            if (await verifyGoogle2FA(user.id.toString(), code, false)) {
                 if (user.payload.authenticatorConfirmed == false) {
                     user.payload.authenticator = true;
-                    user.payload.authenticatorConfirmed = false;
+                    user.payload.authenticatorConfirmed = true;
                     user.changed('payload', true);
                     await user.save();
                 }
@@ -581,7 +585,10 @@ async function verifyEmail2FA(user_id: string, code: string): Promise<boolean> {
     return (user.payload.email == false || user.email_verification_code === Number(code));
 }
 
-async function verifyGoogle2FA(user_id: string, code: string): Promise<boolean> {
+async function verifyGoogle2FA(user_id: string, code: string, getSeed: boolean = true): Promise<boolean> {
     const user = await User.findOne({ where: { id: user_id } });
-    return (user.payload.authenticator == false || authenticator.check(code, user.authenticator_secret));
+    if(getSeed) {
+        return (user.payload.authenticator === false || authenticator.check(code, user.authenticator_secret));
+    }
+    else return authenticator.check(code, user.authenticator_secret)
 }
