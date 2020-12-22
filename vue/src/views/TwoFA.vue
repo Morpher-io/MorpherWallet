@@ -13,6 +13,7 @@
 						class="input"
 						name="emailCode"
 						id="emailCode"
+						data-cy="emailCode"
 						placeholder="123456"
 						v-model="emailCode"
 					/>
@@ -31,6 +32,7 @@
 						class="input"
 						name="authenticatorCode"
 						id="authenticatorCode"
+						data-cy="authenticatorCode"
 						placeholder="123456"
 						v-model="authenticatorCode"
 					/>
@@ -50,7 +52,7 @@
 			</div>
 			<div class="field is-grouped">
 				<div class="layout split first">
-					<button class="button is-green" type="submit">
+					<button class="button is-green" type="submit" data-cy="unlock">
 						<span class="icon is-small">
 							<i class="far fa-file"></i>
 						</span>

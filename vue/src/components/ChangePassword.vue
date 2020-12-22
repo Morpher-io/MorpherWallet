@@ -9,21 +9,21 @@
 					<i class="fas fa-chevron-down"></i>
 				</span>
 
-				<span class="header" @click="collapsed = !collapsed" v-show="!hideOldPassword">
+				<span class="header" data-cy="openPasswordChange" @click="collapsed = !collapsed" v-show="!hideOldPassword">
 					Password Change
-					<span class="help is-success" v-if="success">Saved!</span>
+					<span data-cy="confirmed" class="help is-success" v-if="success">Saved!</span>
 				</span>
 				<div :class="collapsed ? 'hidden' : 'visible'">
 					<div class="field" v-if="!hideOldPassword">
 						<label class="label">Old Password</label>
 						<div class="control">
-							<input type="password" name="oldPassword" class="input is-primary" placeholder="Current Password" v-model="oldPassword" />
+							<input type="password" data-cy="oldPassword" name="oldPassword" class="input is-primary" placeholder="Current Password" v-model="oldPassword" />
 						</div>
 					</div>
 					<div class="field">
 						<label class="label">New Password</label>
 						<div class="control">
-							<input type="password" name="newPassword" class="input is-primary" placeholder="New Password" v-model="walletPassword" />
+							<input type="password" name="newPassword" data-cy="newPassword" class="input is-primary" placeholder="New Password" v-model="walletPassword" />
 							<password
 								v-model="walletPassword"
 								:strength-meter-only="true"
@@ -43,6 +43,7 @@
 								type="password"
 								class="input is-primary"
 								name="newPasswordRepeat"
+								data-cy="newPasswordRepeat"
 								placeholder="Repeat New Password"
 								v-model="walletPasswordRepeat"
 							/>
@@ -50,7 +51,7 @@
 					</div>
 
 					<div class="field is-grouped">
-						<button class="button is-green" type="submit">
+						<button class="button is-green" type="submit" data-cy="passwordSubmit">
 							<span class="icon is-small">
 								<i class="fas fa-save"></i>
 							</span>

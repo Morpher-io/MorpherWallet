@@ -6,7 +6,7 @@
 			<div class="field">
 				<label class="label">Email</label>
 				<div class="control">
-					<input type="email" class="input" name="walletEmail" placeholder="example@example.com" v-model="walletEmail" />
+					<input type="email" class="input" data-cy="walletEmail" name="walletEmail" placeholder="example@example.com" v-model="walletEmail" />
 				</div>
 			</div>
 
@@ -14,7 +14,7 @@
 				<label class="label">Password</label>
 
 				<div class="control">
-					<input type="password" class="input" name="walletPassword" placeholder="Strong Password!" v-model="walletPassword" />
+					<input type="password" class="input" data-cy="walletPassword" name="walletPassword" placeholder="Strong Password!" v-model="walletPassword" />
 					<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial; margin-top: -8px" />
 					<p class="help">
 						Use a strong Password! It encrypts your Wallet and keeps your Funds secure. It must be at least 8 characters long and include
@@ -39,7 +39,7 @@
 
 			<div class="field">
 				<div class="layout split first">
-					<button type="submit" class="button is-green">
+					<button type="submit" data-cy="submit" class="button is-green">
 						<span class="icon is-small">
 							<i class="fas fa-unlock"></i>
 						</span>

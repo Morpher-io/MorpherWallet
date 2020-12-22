@@ -6,7 +6,7 @@
 			<div class="field">
 				<label class="label">Email</label>
 				<div class="control">
-					<input type="email" class="input" name="walletEmail" id="walletEmail" placeholder="example@example.com" v-model="walletEmail" />
+					<input type="email" class="input" name="walletEmail" data-cy="walletEmail" placeholder="example@example.com" v-model="walletEmail" />
 				</div>
 
 				<p class="help">Use this Email-Address for Wallet Recovery</p>
@@ -23,7 +23,7 @@
 						type="password"
 						class="input"
 						name="walletPassword"
-						id="walletPassword"
+						data-cy="walletPassword"
 						placeholder="Strong Password!"
 						v-model="walletPassword"
 					/>
@@ -45,7 +45,7 @@
 						type="password"
 						class="input"
 						name="walletPasswordRepeat"
-						id="walletPasswordRepeat"
+						data-cy="walletPasswordRepeat"
 						placeholder="Repeat Password"
 						v-model="walletPasswordRepeat"
 					/>
@@ -54,7 +54,7 @@
 
 			<div class="field">
 				<div class="layout split first">
-					<button class="button is-green" type="submit">
+					<button class="button is-green" type="submit" data-cy="createNewWallet">
 						<span class="icon is-small">
 							<i class="far fa-file"></i>
 						</span>
@@ -113,6 +113,7 @@ export default class Signup extends mixins(Global) {
 		this.updateLoading({ message: 'Validating Email...' });
 		const emailMessage = await validateInput('email', this.walletEmail);
 		if (emailMessage) {
+			this.updateLoading({ message: '' });
 			this.invalidEmail = emailMessage;
 			return;
 		}
@@ -124,6 +125,7 @@ export default class Signup extends mixins(Global) {
 		this.updateLoading({ message: 'Validating Password...' });
 		const passwordMessage = await validateInput('password', this.walletPassword);
 		if (passwordMessage) {
+			this.updateLoading({ message: '' });
 			this.invalidPassword = passwordMessage;
 			return;
 		}
@@ -142,6 +144,7 @@ export default class Signup extends mixins(Global) {
 				}
 			})
 			.catch(e => {
+				this.updateLoading({ message: '' });
 				this.invalidEmail = e.toString();
 				console.log(e);
 			});
