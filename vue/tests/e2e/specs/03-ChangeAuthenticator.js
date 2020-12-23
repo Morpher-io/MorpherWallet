@@ -1,8 +1,8 @@
 // https://docs.cypress.io/api/introduction/api.html
 
 describe('Change Authenticator', () => {
-	const email = '6b93f9b1-ba8e-42ee-b2ee-0b566a9b0ce8@mailslurp.com';
-	const inbox = '6b93f9b1-ba8e-42ee-b2ee-0b566a9b0ce8';
+	const email = '';
+	const inbox = '';
 
     const password = 'Test123!';
 

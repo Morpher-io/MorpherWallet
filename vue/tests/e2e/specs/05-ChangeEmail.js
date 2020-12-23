@@ -1,11 +1,11 @@
 // https://docs.cypress.io/api/introduction/api.html
 
 describe('Change Email', () => {
-	const email = '6b93f9b1-ba8e-42ee-b2ee-0b566a9b0ce8@mailslurp.com';
-	const inbox = '6b93f9b1-ba8e-42ee-b2ee-0b566a9b0ce8';
+	const email = '';
+	const inbox = '';
 
-	const secondEmail = 'a8a78e8b-5f4a-41e4-b99b-57b945f973a0@mailslurp.com';
-	const secondInbox = 'a8a78e8b-5f4a-41e4-b99b-57b945f973a0';
+	const secondEmail = '';
+	const secondInbox = '';
 
 	const password = 'Test123!';
 
