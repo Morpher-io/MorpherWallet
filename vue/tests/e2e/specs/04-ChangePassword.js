@@ -1,8 +1,8 @@
 // https://docs.cypress.io/api/introduction/api.html
 
 describe('Change Password', () => {
-    const email = 'eb4efc22-f589-4655-86dd-7514982c946a@mailslurp.com';
-    const inbox = 'eb4efc22-f589-4655-86dd-7514982c946a';
+    const email = '6b93f9b1-ba8e-42ee-b2ee-0b566a9b0ce8@mailslurp.com';
+    const inbox = '6b93f9b1-ba8e-42ee-b2ee-0b566a9b0ce8';
 
     const password = 'Test123!';
     const newPassword = 'Test12345!';
@@ -20,7 +20,7 @@ describe('Change Password', () => {
 
         cy.get('[data-cy=submit]').click()
 
-        cy.wait(2000)
+        cy.waitUntil(() => cy.get('h1').contains('Morpher Wallet'));
 
         cy.get('h1').contains('Morpher Wallet')
         cy.get('h2').contains('Hello')
@@ -40,9 +40,7 @@ describe('Change Password', () => {
 
         cy.get('[data-cy=passwordSubmit]').click()
 
-        cy.wait(2000)
-
-        cy.get('[data-cy=invalidMessage]').contains('Error happened during Update. Aborted.')
+        cy.waitUntil(() => cy.get('[data-cy=invalidMessage]').contains('Error happened during Update. Aborted.'));
     });
 
     it('change password', () => {
@@ -58,7 +56,7 @@ describe('Change Password', () => {
 
     	cy.get('[data-cy=submit]').click()
 
-        cy.wait(4000)
+        cy.waitUntil(() => cy.get('h1').contains('Morpher Wallet'));
 
         cy.get('h1').contains('Morpher Wallet')
         cy.get('h2').contains('Hello')
@@ -78,10 +76,8 @@ describe('Change Password', () => {
 
         cy.get('[data-cy=passwordSubmit]').click()
 
-        cy.wait(2000)
-
-        cy.get('[data-cy=confirmed]')
-            .contains('Saved')
+        cy.waitUntil(() => cy.get('[data-cy=confirmed]')
+            .contains('Saved'));
     });
 
     it('login with new password', () => {
@@ -97,7 +93,7 @@ describe('Change Password', () => {
 
         cy.get('[data-cy=submit]').click()
 
-        cy.wait(2000)
+        cy.waitUntil(() => cy.get('h1').contains('Morpher Wallet'));
 
         cy.get('h1').contains('Morpher Wallet')
         cy.get('h2').contains('Hello')
@@ -116,7 +112,7 @@ describe('Change Password', () => {
 
         cy.get('[data-cy=submit]').click()
 
-        cy.wait(2000)
+        cy.waitUntil(() => cy.get('h1').contains('Morpher Wallet'));
 
         cy.get('h1').contains('Morpher Wallet')
         cy.get('h2').contains('Hello')
@@ -136,9 +132,7 @@ describe('Change Password', () => {
 
         cy.get('[data-cy=passwordSubmit]').click()
 
-        cy.wait(2000)
-
-        cy.get('[data-cy=confirmed]')
-            .contains('Saved')
+        cy.waitUntil(() => cy.get('[data-cy=confirmed]')
+            .contains('Saved'));
     });
 });

@@ -1,11 +1,11 @@
 // https://docs.cypress.io/api/introduction/api.html
 
 describe('Change Email', () => {
-	const email = 'eb4efc22-f589-4655-86dd-7514982c946a@mailslurp.com';
-	const inbox = 'eb4efc22-f589-4655-86dd-7514982c946a';
+	const email = '6b93f9b1-ba8e-42ee-b2ee-0b566a9b0ce8@mailslurp.com';
+	const inbox = '6b93f9b1-ba8e-42ee-b2ee-0b566a9b0ce8';
 
-	const secondEmail = 'cceec05b-6f5d-4bcd-af98-7fac4f95ea9c@mailslurp.com';
-	const secondInbox = 'cceec05b-6f5d-4bcd-af98-7fac4f95ea9c';
+	const secondEmail = 'a8a78e8b-5f4a-41e4-b99b-57b945f973a0@mailslurp.com';
+	const secondInbox = 'a8a78e8b-5f4a-41e4-b99b-57b945f973a0';
 
 	const password = 'Test123!';
 
@@ -22,7 +22,7 @@ describe('Change Email', () => {
 
 		cy.get('[data-cy=submit]').click()
 
-		cy.wait(2000)
+		cy.waitUntil(() => cy.url().should('contain', '/'));
 
 		cy.get('h1').contains('Morpher Wallet')
 		cy.get('h2').contains('Hello')
@@ -56,8 +56,7 @@ describe('Change Email', () => {
 
 		cy.get('[data-cy=submit]').click()
 
-		cy.wait(2000)
-
+		cy.waitUntil(() => cy.get('h1').contains('Morpher Wallet'));
 
 		cy.get('h1').contains('Morpher Wallet')
 		cy.get('h2').contains('Hello')
@@ -82,6 +81,8 @@ describe('Change Email', () => {
 			cy.get('[data-cy=twoFa]')
 				.type(code)
 
+			cy.get('[data-cy=updateEmail]').click()
+
 			cy.get('[data-cy=isSuccess]')
 				.contains('Saved')
 
@@ -102,6 +103,8 @@ describe('Change Email', () => {
 
 		cy.get('[data-cy=submit]').click()
 
+		cy.waitUntil(() => cy.get('h1').contains('Morpher Wallet'));
+
 		cy.get('h1').contains('Morpher Wallet')
 		cy.get('h2').contains('Hello')
 
@@ -119,6 +122,8 @@ describe('Change Email', () => {
 			.should('have.value', password)
 
 		cy.get('[data-cy=submit]').click()
+
+		cy.waitUntil(() => cy.get('h1').contains('Morpher Wallet'));
 
 
 		cy.get('h1').contains('Morpher Wallet')
@@ -143,6 +148,8 @@ describe('Change Email', () => {
 
 			cy.get('[data-cy=twoFa]')
 				.type(code)
+
+			cy.get('[data-cy=updateEmail]').click()
 
 			cy.get('[data-cy=isSuccess]')
 				.contains('Saved')

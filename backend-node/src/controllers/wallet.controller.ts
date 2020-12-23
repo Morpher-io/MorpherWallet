@@ -76,7 +76,6 @@ export async function saveEmailPassword(req: Request, res: Response) {
         }
     } catch (error) {
         // If an error happened anywhere along the way, rollback all the changes.
-        // console.log(error);
         await transaction.rollback();
         return errorResponse(res, error.message);
     }
@@ -170,8 +169,6 @@ export async function updateEmail(req: Request, res: Response) {
         const recoveryTypeId = 1;
         const sendEmail = req.body.sendEmail || 'true';
 
-        console.log('here with stuff')
-
         const recovery = await Recovery.findOne({ where: { key: key, recovery_type_id: recoveryTypeId }, transaction });
         if (recovery != null) {
             const user = await User.findOne({ where: { id: recovery.user_id }, transaction });
@@ -180,7 +177,6 @@ export async function updateEmail(req: Request, res: Response) {
             if (user_should_not_exist == null) {
                 //email 2FA alredy sent out to verify new email address exists?
                 if (email2faVerification == undefined) {
-                    console.log('here without stuff')
                     let verificationCode = await updateEmail2fa(user.id);
                     if(sendEmail === 'true'){
                         await sendEmail2FA(verificationCode, newEmail);
@@ -188,7 +184,6 @@ export async function updateEmail(req: Request, res: Response) {
                     transaction.commit(); //close the transaction after the 2fa was sent
                     return successResponse(res, "sent 2fa code to new email address");
                 } else {
-                    console.log('here hehe')
                     // 2FA tokens in query params
                     // Attempt to get user from database.
                     if (verifyEmail2FA(user.id.toString(), email2faVerification)) {
@@ -534,7 +529,6 @@ export async function send2FAEmail(req, res) {
         return successResponse(res, { sent: true });
     }
     catch (e) {
-        // console.log(e);
         Logger.info({ method: arguments.callee.name, type: "Error: Can't send 2FA email", user_id: user.id, user, headers: req.headers, body: req.body });
         return errorResponse(res, 'There was a problem parsing the email');
     }

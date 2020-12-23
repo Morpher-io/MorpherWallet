@@ -52,14 +52,12 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 		this.showSpinner('Saving Keystore for Recovery');
 		const userID = googleUser.getBasicProfile().getId();
 		const key = await sha256(this.clientId + userID);
-		// console.log(this.clientId + userID, key);
 		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
 			.then(async () => {
 				this.showSpinnerThenAutohide('Saved Successfully');
 				this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 			})
 			.catch(e => {
-				// console.log(e);
 				this.showSpinnerThenAutohide('Error');
 				this.error = e.toString();
 			});

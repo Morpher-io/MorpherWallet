@@ -38,18 +38,15 @@ class App extends Component {
       this.setState({ walletEmail: res.walletEmail });
       let web3 = await getWeb3();
       let accounts = await web3.eth.getAccounts();
-      // console.log(accounts);
       this.setState({ isAuthenticated: true, web3 });
     }
 
     this.zeroWallet.onLogin(async (walletAddress, walletEmail) => {
-      // console.log("On Login arrived");
       this.setState({ walletEmail: walletEmail });
       this.setState({ walletAddress: walletAddress });
       let web3 = await getWeb3();
 
       let accounts = await web3.eth.getAccounts();
-      // console.log(accounts);
       this.setState({ isAuthenticated: true, web3 });
       let balance = web3.utils.fromWei(await web3.eth.getBalance(accounts[0]), "ether");
       this.setState({balance});
@@ -80,7 +77,6 @@ class App extends Component {
       let balance = web3.utils.fromWei(await web3.eth.getBalance(accounts[0]), "ether");
       this.setState({balance});
     }
-    // console.log(result);
   };
 
   toggleWallet = async() => {

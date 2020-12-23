@@ -54,20 +54,14 @@ export default {
 	},
 	mounted() {
 		this.encryptedAccounts = JSON.parse(localStorage.getItem('encryptedSeed'));
-		// console.log(this.encryptedAccounts);
 	},
 	methods: {
 		async exportSeedPhrase(account) {
 			const storedPassword = window.sessionStorage.getItem('password');
 			const password = await sha256(this.password);
 			if (storedPassword === password) {
-				// let encryptedSeed = JSON.parse(localStorage.getItem("encryptedSeed"))
-				// console.log(encryptedSeed)
-				// this.seedPhrase = await cryptoDecrypt(password, encryptedSeed.ciphertext, encryptedSeed.iv, encryptedSeed.salt)
-				// this.password = "";
-				// console.log(account);
+
 				const keystore = await getKeystoreFromEncryptedSeed([account], password);
-				// console.log(keystore);
 
 				downloadEncryptedKeystore(keystore[0].encrypt(this.password));
 			} else alert('Password is not right!');

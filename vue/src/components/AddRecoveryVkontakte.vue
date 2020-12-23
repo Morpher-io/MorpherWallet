@@ -79,9 +79,6 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 						result[parts[0]] = parts[1];
 						return result;
 					}, {});
-					//console.log(params)
-					//console.log("Access token: " + params.access_token)
-					//console.log("UserID: " + params.user_id)
 
 					setTimeout(() => {
 						win.close();
@@ -98,14 +95,12 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 							this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 						})
 						.catch(e => {
-							// console.log(e);
 							this.showSpinnerThenAutohide('Error');
 							this.error = e.toString();
 						});
 				}
 			} catch (e) {
 				//win.close()
-				// console.log(e);
 			}
 		}, 100);
 	}

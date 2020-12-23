@@ -1,8 +1,8 @@
 // https://docs.cypress.io/api/introduction/api.html
 
 describe('Change Authenticator', () => {
-    const email = 'eb4efc22-f589-4655-86dd-7514982c946a@mailslurp.com';
-    const inbox = 'eb4efc22-f589-4655-86dd-7514982c946a';
+	const email = '6b93f9b1-ba8e-42ee-b2ee-0b566a9b0ce8@mailslurp.com';
+	const inbox = '6b93f9b1-ba8e-42ee-b2ee-0b566a9b0ce8';
 
     const password = 'Test123!';
 
@@ -18,6 +18,8 @@ describe('Change Authenticator', () => {
     		.should('have.value', password)
 
     	cy.get('[data-cy=submit]').click()
+
+		cy.waitUntil(() => cy.get('h1').contains('Morpher Wallet'));
 
     	cy.get('h1').contains('Morpher Wallet')
     	cy.get('h2').contains('Hello')
@@ -49,6 +51,8 @@ describe('Change Authenticator', () => {
     		.should('have.value', password)
 
     	cy.get('[data-cy=submit]').click()
+
+		cy.waitUntil(() => cy.get('h1').contains('Morpher Wallet'));
 
     	cy.get('h1').contains('Morpher Wallet')
     	cy.get('h2').contains('Hello')
@@ -91,6 +95,8 @@ describe('Change Authenticator', () => {
 
         cy.get('[data-cy=submit]').click()
 
+		cy.waitUntil(() => cy.url().should('contain', '/2fa'));
+
         cy.request('POST', 'http://localhost:8080/v1/test/getUserSecret', { email })
             .then((response) => {
                 // response.body is automatically serialized into JSON
@@ -100,6 +106,8 @@ describe('Change Authenticator', () => {
                     cy.get('[data-cy=authenticatorCode]').type(token)
 
                     cy.get('[data-cy=unlock]').click()
+
+					cy.waitUntil(() => cy.get('h1').contains('Morpher Wallet'));
 
                     cy.get('h1').contains('Morpher Wallet')
 
@@ -121,6 +129,8 @@ describe('Change Authenticator', () => {
 
 		cy.get('[data-cy=submit]').click()
 
+		cy.waitUntil(() => cy.url().should('contain', '/2fa'));
+
 		cy.request('POST', 'http://localhost:8080/v1/test/getUserSecret', { email })
 		.then((response) => {
 			// response.body is automatically serialized into JSON
@@ -130,6 +140,8 @@ describe('Change Authenticator', () => {
 				cy.get('[data-cy=authenticatorCode]').type(token)
 
 				cy.get('[data-cy=unlock]').click()
+
+				cy.waitUntil(() => cy.get('h1').contains('Morpher Wallet'));
 
 				cy.get('h1').contains('Morpher Wallet')
 

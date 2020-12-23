@@ -97,7 +97,6 @@ export default class Signup extends mixins(Global) {
 
 	// Methods
 	async signupExecute(e: any) {
-		//console.log(e);
 		e.preventDefault();
 		this.invalidEmail = '';
 		this.invalidPassword = '';
@@ -146,7 +145,6 @@ export default class Signup extends mixins(Global) {
 			.catch(e => {
 				this.updateLoading({ message: '' });
 				this.invalidEmail = e.toString();
-				console.log(e);
 			});
 	}
 }

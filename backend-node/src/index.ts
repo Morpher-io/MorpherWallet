@@ -21,7 +21,7 @@ const rateLimit = require('express-rate-limit');
 
 const webLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    max: 60 // limit each IP to 60 requests per minute
+    max: 600 // limit each IP to 60 requests per minute
 });
 
 // apply a rate limit to the web endpoints.

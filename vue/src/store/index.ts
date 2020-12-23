@@ -377,7 +377,6 @@ const store: Store<RootState> = new Vuex.Store({
 							//commit('updatePayload', { email: false, authenticator: false });
 							commit('seedFound', { encryptedSeed });
 							if (state.hashedPassword) {
-								//console.log(password found);
 								dispatch('unlockWithStoredPassword')
 									.then(() => resolve('/'))
 									.catch(() => {
@@ -396,12 +395,10 @@ const store: Store<RootState> = new Vuex.Store({
 								commit('authError', '2FA Authentication code not correct');
 								reject('2FA Authentication not correct');
 							} else {
-								// console.log(err);
 								reject('error');
 							}
 						});
 				} else {
-					// console.log('Reached here for wathever reason');
 					reject();
 				}
 			});
@@ -417,7 +414,6 @@ const store: Store<RootState> = new Vuex.Store({
 							resolve(true);
 						})
 						.catch(() => {
-							// console.log('unlockWithStoredPassword error', err);
 							reject(false);
 						});
 				} else {
@@ -443,7 +439,6 @@ const store: Store<RootState> = new Vuex.Store({
 						});
 					})
 					.catch(err => {
-						// console.log('unlockWithPassword error', err);
 						commit('authError', "The user wasn't found: Signup first!");
 						reject(err);
 					});

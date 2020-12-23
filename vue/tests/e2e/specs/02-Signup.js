@@ -1,8 +1,8 @@
 // https://docs.cypress.io/api/introduction/api.html
 
 describe('Signup', () => {
-	const email = 'eb4efc22-f589-4655-86dd-7514982c946a@mailslurp.com';
-	const inbox = 'eb4efc22-f589-4655-86dd-7514982c946a';
+	const email = '6b93f9b1-ba8e-42ee-b2ee-0b566a9b0ce8@mailslurp.com';
+	const inbox = '6b93f9b1-ba8e-42ee-b2ee-0b566a9b0ce8';
 
 	const password = 'Test123!';
 
@@ -121,7 +121,7 @@ describe('Signup', () => {
 
 		cy.get('[data-cy=submit]').click()
 
-		cy.wait(2000)
+		cy.waitUntil(() => cy.get('h1').contains('Morpher Wallet'));
 
 		cy.get('h1').contains('Morpher Wallet')
 		cy.get('h2').contains('Hello')

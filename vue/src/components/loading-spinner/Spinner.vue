@@ -2,7 +2,7 @@
 	<transition name="fade">
 		<div class="overlay" v-if="isActive">
 			<dots></dots>
-			<p class="status-text">{{ status }}</p>
+			<p class="status-text" data-cy="status">{{ status }}</p>
 		</div>
 	</transition>
 </template>
