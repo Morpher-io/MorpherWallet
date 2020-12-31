@@ -23,6 +23,10 @@
                     "value": "80"
                 },
                 {
+                    "name": "ENVIRONMENT",
+                    "value": "production"
+                },
+                {
                     "name": "DB_PORT",
                     "value": "5432"
                 },
@@ -34,14 +38,6 @@
             "mountPoints": [],
             "volumesFrom": [],
             "secrets": [
-                {
-                    "name": "ACCESS_KEY_ID",
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:ACCESS_KEY_ID::"
-                },
-                {
-                    "name": "ACCESS_KEY_SECRET",
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:ACCESS_KEY_SECRET::"
-                },
                 {
                     "name": "DB_BACKEND_SALT",
                     "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_BACKEND_SALT::"
