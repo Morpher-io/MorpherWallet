@@ -1,6 +1,8 @@
 version: 0.2
 
 env:
+    variables:
+        VUE_APP_BACKEND_ENDPOINT: 'https://wallet-api-dev.morpher.com'
     secrets-manager:
         VUE_APP_GOOGLE_APP_ID: "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_GOOGLE_APP_ID::"
         VUE_APP_FACEBOOK_APP_ID: "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_FACEBOOK_APP_ID::"
