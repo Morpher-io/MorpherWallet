@@ -1,12 +1,11 @@
 const { getKeystore } = require('./keystore');
-const config = require('./../config.json');
 const { cryptoEncrypt, cryptoDecrypt, sha256 } = require('./cryptoFunctions');
 
 import { TypeEncryptedSeed, TypePayloadData, TypeCreatedKeystore } from '../types/global-types';
 import { WalletBase } from 'web3-core';
 
 const getBackendEndpoint = () => {
-	return process.env.VUE_APP_BACKEND_ENDPOINT || config.BACKEND_ENDPOINT;
+	return process.env.VUE_APP_BACKEND_ENDPOINT || 'http://localhost:8080';
 };
 
 const changePasswordEncryptedSeed = async (encryptedSeed: TypeEncryptedSeed, oldPassword: string, newPassword: string) => {

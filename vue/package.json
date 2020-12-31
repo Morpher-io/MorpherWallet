@@ -10,8 +10,8 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "bip39": "^3.0.3",
     "@types/downloadjs": "^1.4.2",
+    "bip39": "^3.0.3",
     "core-js": "^3.6.5",
     "downloadjs": "^1.4.7",
     "ethereumjs-wallet": "^1.0.1",

@@ -1,0 +1,103 @@
+{
+    "family": "morpher-wallet-dev",
+    "taskRoleArn": "arn:aws:iam::612970435624:role/morpher-wallet-backend-role",
+    "executionRoleArn": "arn:aws:iam::612970435624:role/ecsTaskExecutionRoleDevStaging",
+    "networkMode": "awsvpc",
+    "containerDefinitions": [
+        {
+            "name": "morpher-wallet-backend",
+            "image": "612970435624.dkr.ecr.eu-central-1.amazonaws.com/morpher-wallet-backend",
+            "cpu": 0,
+            "memoryReservation": 256,
+            "portMappings": [
+                {
+                    "containerPort": 80,
+                    "hostPort": 80,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [
+                {
+                    "name": "PORT",
+                    "value": "80"
+                },
+                {
+                    "name": "DB_PORT",
+                    "value": "5432"
+                },
+                {
+                    "name": "DB_DIALECT",
+                    "value": "postgres"
+                }
+            ],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "secrets": [
+                {
+                    "name": "ACCESS_KEY_ID",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:ACCESS_KEY_ID::"
+                },
+                {
+                    "name": "ACCESS_KEY_SECRET",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:ACCESS_KEY_SECRET::"
+                },
+                {
+                    "name": "DB_BACKEND_SALT",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_BACKEND_SALT::"
+                },
+                {
+                    "name": "DB_HOST",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_DB_HOST::"
+                },
+                {
+                    "name": "DB_NAME",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_DB_DB::"
+                },
+                {
+                    "name": "DB_PASSWORD",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_DB_PASSWORD::"
+                },
+                {
+                    "name": "DB_USER",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_DB_USER::"
+                },
+                {
+                    "name": "FACEBOOK_APP_ID",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_FACEBOOK_APP_ID::"
+                },
+                {
+                    "name": "FACEBOOK_APP_SECRET",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_FACEBOOK_APP_SECRET::"
+                },
+                {
+                    "name": "GOOGLE_APP_ID",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_GOOGLE_APP_ID::"
+                },
+                {
+                    "name": "GOOGLE_APP_SECRET",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_GOOGLE_APP_SECRET::"
+                },
+                {
+                    "name": "VK_APP_ID",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_VK_APP_ID::"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/morpher-wallet-dev-backend",
+                    "awslogs-region": "eu-central-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
+        }
+    ],
+    "volumes": [],
+    "placementConstraints": [],
+    "requiresCompatibilities": [
+        "EC2"
+    ],
+    "cpu": "256",
+    "memory": "256"
+}

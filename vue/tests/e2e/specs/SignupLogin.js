@@ -14,37 +14,33 @@ describe('Register', () => {
 	});
 
 	it('Register', () => {
-		
 		cy.get('#walletEmail')
-		.type('test4@beornb.com')
-		.should('have.value', 'test4@beornb.com')
-
+			.type('test4@beornb.com')
+			.should('have.value', 'test4@beornb.com');
 
 		cy.get('#walletPassword')
-		.type('Password123###')
-		.should('have.value', 'Password123###')
+			.type('Password123###')
+			.should('have.value', 'Password123###');
 
 		cy.get('#walletPasswordRepeat')
-		.type('Password123###')
-		.should('have.value', 'Password123###')		
+			.type('Password123###')
+			.should('have.value', 'Password123###');
 
-		cy.contains('Create new Wallet').click()
+		cy.contains('Create new Wallet').click();
 
 		cy.wait(8000);
-
-
 	});
 
 	it('Enter 2fa', () => {
-		cy.url().should('include', '/2fa')
+		cy.url().should('include', '/2fa');
 
-		const code = window.prompt('Email 2fa code')
+		const code = window.prompt('Email 2fa code');
 
 		cy.get('#emailCode')
-		.type(code)
-		.should('have.value', code)		
+			.type(code)
+			.should('have.value', code);
 
-		cy.contains('Unlock').click()
+		cy.contains('Unlock').click();
 
 		cy.wait(8000);
 	});
@@ -56,4 +52,3 @@ describe('Logout and Login', () => {
 		cy.contains('h2', 'Welcome');
 	});
 });
-
