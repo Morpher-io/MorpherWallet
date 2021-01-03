@@ -1,9 +1,7 @@
 // https://docs.cypress.io/api/introduction/api.html
 
 describe('Signup', () => {
-	const email = '';
-	const inbox = '';
-
+	const email = Cypress.env('firstEmail');
 	const password = 'Test123!';
 
 	it('Signup and Login', () => {
@@ -23,14 +21,15 @@ describe('Signup', () => {
 
 		cy.get('[data-cy=createNewWallet]').click();
 
-		cy.wait(3000);
+		cy.wait(2000);
 
-		cy.waitForLatestEmail(inbox).then(email => {
-			const code = email.body.substr(email.body.length - 8);
+		cy.request('POST', 'http://localhost:8080/v1/test/getEmailCode', { email }).then(response => {
+			// response.body is automatically serialized into JSON
+			const code = response.body.email_verification_code;
 
 			cy.get('[data-cy=emailCode]').type(code);
 
-			cy.get('[data-cy=unlock]');
+			cy.get('[data-cy=unlock]').click();
 
 			cy.get('h1').contains('Morpher Wallet');
 			cy.get('h2').contains('Hello');
@@ -50,14 +49,13 @@ describe('Signup', () => {
 
 		cy.get('[data-cy=submit]').click();
 
-		cy.wait(3000);
-
-		cy.waitForLatestEmail(inbox).then(email => {
-			const code = email.body.substr(email.body.length - 8);
+		cy.request('POST', 'http://localhost:8080/v1/test/getEmailCode', { email }).then(response => {
+			// response.body is automatically serialized into JSON
+			const code = response.body.email_verification_code;
 
 			cy.get('[data-cy=emailCode]').type(code);
 
-			cy.get('[data-cy=unlock]');
+			cy.get('[data-cy=unlock]').click();
 
 			cy.get('h1').contains('Morpher Wallet');
 			cy.get('h2').contains('Hello');
@@ -77,14 +75,13 @@ describe('Signup', () => {
 
 		cy.get('[data-cy=submit]').click();
 
-		cy.wait(3000);
-
-		cy.waitForLatestEmail(inbox).then(email => {
-			const code = email.body.substr(email.body.length - 8);
+		cy.request('POST', 'http://localhost:8080/v1/test/getEmailCode', { email }).then(response => {
+			// response.body is automatically serialized into JSON
+			const code = response.body.email_verification_code;
 
 			cy.get('[data-cy=emailCode]').type(code);
 
-			cy.get('[data-cy=unlock]');
+			cy.get('[data-cy=unlock]').click();
 
 			cy.get('h1').contains('Morpher Wallet');
 			cy.get('h2').contains('Hello');
@@ -96,8 +93,6 @@ describe('Signup', () => {
 			cy.get('[data-cy=twoFaEmail]').click();
 
 			cy.get('[data-cy=saveTwoFa]').click();
-
-			cy.wait(2000);
 
 			cy.get('[data-cy=isSuccess]').contains('Saved');
 		});

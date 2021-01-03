@@ -1,7 +1,7 @@
 // https://docs.cypress.io/api/introduction/api.html
 
 describe('Change Password', () => {
-	const email = '';
+	const email = Cypress.env('firstEmail');
 
 	const password = 'Test123!';
 	const newPassword = 'Test12345!';

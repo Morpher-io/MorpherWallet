@@ -1,11 +1,8 @@
 // https://docs.cypress.io/api/introduction/api.html
 
 describe('Change Email', () => {
-	const email = '';
-	const inbox = '';
-
-	const secondEmail = '';
-	const secondInbox = '';
+	const email = Cypress.env('firstEmail');
+	const secondEmail = Cypress.env('secondEmail');
 
 	const password = 'Test123!';
 
@@ -68,10 +65,9 @@ describe('Change Email', () => {
 
 		cy.get('[data-cy=updateEmail]').click();
 
-		cy.wait(3000);
-
-		cy.waitForLatestEmail(secondInbox).then(email => {
-			const code = email.body.substr(email.body.length - 8);
+		cy.request('POST', 'http://localhost:8080/v1/test/getEmailCode', { email }).then(response => {
+			// response.body is automatically serialized into JSON
+			const code = response.body.email_verification_code;
 
 			cy.get('[data-cy=twoFa]').type(code);
 
@@ -128,10 +124,9 @@ describe('Change Email', () => {
 
 		cy.get('[data-cy=updateEmail]').click();
 
-		cy.wait(3000);
-
-		cy.waitForLatestEmail(inbox).then(email => {
-			const code = email.body.substr(email.body.length - 8);
+		cy.request('POST', 'http://localhost:8080/v1/test/getEmailCode', { email: secondEmail }).then(response => {
+			// response.body is automatically serialized into JSON
+			const code = response.body.email_verification_code;
 
 			cy.get('[data-cy=twoFa]').type(code);
 

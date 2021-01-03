@@ -145,8 +145,7 @@ describe('Wallet controller test cases', async () => {
 
         // Simulate sending an email by changing only user payload.
         const emailData = {
-            key: bodyData.key,
-            sendEmail: 'false'
+            key: bodyData.key
         };
 
         await request(app)
@@ -351,8 +350,7 @@ describe('Wallet controller test cases', async () => {
 
         // Simulate sending an email by changing only user payload.
         const emailData = {
-            key: bodyData.key,
-            sendEmail: 'false'
+            key: bodyData.key
         };
 
         await request(app)
@@ -366,8 +364,7 @@ describe('Wallet controller test cases', async () => {
 
         const newEmailData = {
             email2faVerification: user.email_verification_code,
-            newEmail: 'test@morpher.io',
-            sendEmail: 'false'
+            newEmail: 'test@morpher.io'
         };
 
         newEmailData['nonce'] = user.nonce;
@@ -485,8 +482,7 @@ describe('Wallet controller test cases', async () => {
 
         // Simulate sending an email by changing only user payload.
         const emailData = {
-            key: bodyData.key,
-            sendEmail: 'false'
+            key: bodyData.key
         };
 
         await request(app)
@@ -517,8 +513,7 @@ describe('Wallet controller test cases', async () => {
 
         // Simulate sending an email by changing only user payload.
         const emailData = {
-            key: bodyData.key,
-            sendEmail: 'false'
+            key: bodyData.key
         };
 
         await request(app)

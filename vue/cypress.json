@@ -1,4 +1,9 @@
 {
   "pluginsFile": "tests/e2e/plugins/index.js",
-  "experimentalNetworkStubbing": true
+  "experimentalNetworkStubbing": true,
+  "retries": 4,
+  "env": {
+    "firstEmail": "",
+    "secondEmail": ""
+  }
 }

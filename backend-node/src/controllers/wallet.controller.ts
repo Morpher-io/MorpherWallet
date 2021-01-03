@@ -178,7 +178,7 @@ export async function updateEmail(req: Request, res: Response) {
         const email2faVerification = req.body.email2faVerification;
         const key = req.header('key');
         const recoveryTypeId = 1;
-        const sendEmail = req.body.sendEmail || 'true';
+        const environment = process.env.ENVIRONMENT;
 
         const recovery = await Recovery.findOne({ where: { key, recovery_type_id: recoveryTypeId }, transaction });
         if (recovery != null) {
@@ -189,7 +189,7 @@ export async function updateEmail(req: Request, res: Response) {
                 //email 2FA alredy sent out to verify new email address exists?
                 if (email2faVerification === undefined) {
                     const verificationCode = await updateEmail2fa(user.id);
-                    if (sendEmail === 'true') {
+                    if (environment !== 'development') {
                         await sendEmail2FA(verificationCode, newEmail);
                     }
                     transaction.commit(); //close the transaction after the 2fa was sent
@@ -206,7 +206,7 @@ export async function updateEmail(req: Request, res: Response) {
                             change_type: 'updateEmail',
                             stringified_headers: JSON.stringify(req.headers)
                         });
-                        if (sendEmail === 'true') {
+                        if (environment !== 'development') {
                             await sendEmailChanged(newEmail, user.email);
                         } //send the old user an info-mail that his email address got updated.
 
@@ -613,12 +613,12 @@ export async function send2FAEmail(req, res) {
     const key = req.body.key;
     const recovery = await Recovery.findOne({ where: { key } });
     const user = await User.findOne({ where: { id: recovery.user_id } });
-    const sendEmail = req.body.sendEmail || 'true';
+    const environment = process.env.ENVIRONMENT;
 
     try {
         const verificationCode = await updateEmail2fa(user.id);
 
-        if (sendEmail === 'true') {
+        if (environment !== 'development') {
             await sendEmail2FA(verificationCode, user.email);
         }
 

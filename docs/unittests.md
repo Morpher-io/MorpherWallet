@@ -6,7 +6,7 @@ You will need Node.js and Npm installed to run the backend unit tests.
 
 You can either use Docker, or a local/cloud machine with a Node.js installation. This guide assumes you have already deployed the database and backend according to the instructions in the repository readme file.
 
-#### Testing using Docker
+## Testing using Docker
 
 * Run `docker ps` to get the Docker `CONTAINER ID` under image `morpher/backend-node`.
  
@@ -14,7 +14,7 @@ You can either use Docker, or a local/cloud machine with a Node.js installation.
 
 * Run `npm run test` to run the whole test suite.
 
-#### Testing using Node.js
+## Testing using Node.js
 
 * `cd` into the `backend-node` directory.
 * Run `npm run test` to run the whole test suite.

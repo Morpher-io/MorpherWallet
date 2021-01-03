@@ -1,7 +1,7 @@
 // https://docs.cypress.io/api/introduction/api.html
 
 describe('Change Authenticator', () => {
-	const email = '';
+	const email = Cypress.env('firstEmail');
 
 	const password = 'Test123!';
 
@@ -80,7 +80,7 @@ describe('Change Authenticator', () => {
 		});
 	});
 
-	it('login after authenticator change', () => {
+	it('login after authenticator change', { retries: 3 }, () => {
 		cy.visit('/');
 
 		cy.get('[data-cy=walletEmail]')
@@ -113,7 +113,7 @@ describe('Change Authenticator', () => {
 		});
 	});
 
-	it('disable twofa authenticator', () => {
+	it('disable twofa authenticator', { retries: 3 }, () => {
 		cy.visit('/');
 
 		cy.get('[data-cy=walletEmail]')

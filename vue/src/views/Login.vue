@@ -42,7 +42,7 @@
 
 			<div class="field" v-if="showError">
 				<label class="label is-danger">Login Error</label>
-				<p class="help is-danger">
+				<p class="help is-danger" data-cy="loginError">
 					{{ logonError }}
 				</p>
 			</div>
