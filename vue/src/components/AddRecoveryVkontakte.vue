@@ -1,11 +1,11 @@
 <template>
 	<div class="field">
 		<div class="control is-expanded">
-			<button class="button is-fullwidth" style="background-color: #45668e" @click="doLogin" v-if="!hasRecoveryMethod">
+			<button class="button is-fullwidth vk-button" @click="doLogin" v-if="!hasRecoveryMethod">
 				<span class="icon google-icon">
 					<i class="fab fa-vk"></i>
 				</span>
-				<span style="color: #fff"> Link to VKontakte</span>
+				<span class="vk-text"> Link to VKontakte</span>
 			</button>
 			<div v-if="hasRecoveryMethod" class="has-text-centered">
 				<span class="icon google-icon">
@@ -38,9 +38,9 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 		this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 	}
 
-	async resetRecovery(){
+	async resetRecovery() {
 		const success = await this.resetRecoveryMethod({ recoveryTypeId: this.recoveryTypeId });
-		if(success) {
+		if (success) {
 			this.hasRecoveryMethod = false;
 		}
 	}
@@ -108,4 +108,11 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped></style>
+<style scoped>
+.vk-button {
+	background-color: #45668e;
+}
+.vk-text {
+	color: #fff;
+}
+</style>

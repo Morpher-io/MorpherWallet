@@ -76,7 +76,6 @@ export type TypeResetRecovery = {
 	recoveryTypeId: string;
 };
 
-
 export type TypeChangeEmail = {
 	__typename?: 'TypeChangePassword';
 	password: string;
@@ -139,4 +138,4 @@ export type TypeAddRecoveryParams = {
 	key: string;
 	password: string;
 	recoveryTypeId: number;
-}
+};

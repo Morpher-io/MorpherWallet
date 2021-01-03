@@ -6,37 +6,34 @@ describe('Signup', () => {
 
 	const password = 'Test123!';
 
-
 	it('Signup and Login', () => {
 		cy.visit('/signup');
 
 		cy.get('[data-cy=walletEmail]')
 			.type(email)
-			.should('have.value', email)
+			.should('have.value', email);
 
 		cy.get('[data-cy=walletPassword]')
 			.type(password)
-			.should('have.value', password)
-
+			.should('have.value', password);
 
 		cy.get('[data-cy=walletPasswordRepeat]')
 			.type(password)
-			.should('have.value', password)
+			.should('have.value', password);
 
-		cy.get('[data-cy=createNewWallet]').click()
+		cy.get('[data-cy=createNewWallet]').click();
 
-		cy.wait(3000)
+		cy.wait(3000);
 
-		cy.waitForLatestEmail(inbox).then((email) => {
-			const code = email.body.substr(email.body.length - 8)
+		cy.waitForLatestEmail(inbox).then(email => {
+			const code = email.body.substr(email.body.length - 8);
 
-			cy.get('[data-cy=emailCode]')
-				.type(code)
+			cy.get('[data-cy=emailCode]').type(code);
 
-			cy.get('[data-cy=unlock]')
+			cy.get('[data-cy=unlock]');
 
-			cy.get('h1').contains('Morpher Wallet')
-			cy.get('h2').contains('Hello')
+			cy.get('h1').contains('Morpher Wallet');
+			cy.get('h2').contains('Hello');
 		});
 	});
 
@@ -45,26 +42,25 @@ describe('Signup', () => {
 
 		cy.get('[data-cy=walletEmail]')
 			.type(email)
-			.should('have.value', email)
+			.should('have.value', email);
 
 		cy.get('[data-cy=walletPassword]')
 			.type(password)
-			.should('have.value', password)
+			.should('have.value', password);
 
-		cy.get('[data-cy=submit]').click()
+		cy.get('[data-cy=submit]').click();
 
-		cy.wait(3000)
+		cy.wait(3000);
 
-		cy.waitForLatestEmail(inbox).then((email) => {
-			const code = email.body.substr(email.body.length - 8)
+		cy.waitForLatestEmail(inbox).then(email => {
+			const code = email.body.substr(email.body.length - 8);
 
-			cy.get('[data-cy=emailCode]')
-				.type(code)
+			cy.get('[data-cy=emailCode]').type(code);
 
-			cy.get('[data-cy=unlock]')
+			cy.get('[data-cy=unlock]');
 
-			cy.get('h1').contains('Morpher Wallet')
-			cy.get('h2').contains('Hello')
+			cy.get('h1').contains('Morpher Wallet');
+			cy.get('h2').contains('Hello');
 		});
 	});
 
@@ -73,38 +69,37 @@ describe('Signup', () => {
 
 		cy.get('[data-cy=walletEmail]')
 			.type(email)
-			.should('have.value', email)
+			.should('have.value', email);
 
 		cy.get('[data-cy=walletPassword]')
 			.type(password)
-			.should('have.value', password)
+			.should('have.value', password);
 
-		cy.get('[data-cy=submit]').click()
+		cy.get('[data-cy=submit]').click();
 
-		cy.wait(3000)
+		cy.wait(3000);
 
-		cy.waitForLatestEmail(inbox).then((email) => {
+		cy.waitForLatestEmail(inbox).then(email => {
 			const code = email.body.substr(email.body.length - 8);
 
-			cy.get('[data-cy=emailCode]')
-				.type(code)
+			cy.get('[data-cy=emailCode]').type(code);
 
-			cy.get('[data-cy=unlock]')
+			cy.get('[data-cy=unlock]');
 
-			cy.get('h1').contains('Morpher Wallet')
-			cy.get('h2').contains('Hello')
+			cy.get('h1').contains('Morpher Wallet');
+			cy.get('h2').contains('Hello');
 
-			cy.get('[data-cy=settings]').click()
+			cy.get('[data-cy=settings]').click();
 
-			cy.get('[data-cy=openTwoFaChange]').click()
+			cy.get('[data-cy=openTwoFaChange]').click();
 
-			cy.get('[data-cy=twoFaEmail]').click()
+			cy.get('[data-cy=twoFaEmail]').click();
 
-			cy.get('[data-cy=saveTwoFa]').click()
+			cy.get('[data-cy=saveTwoFa]').click();
 
-			cy.wait(2000)
+			cy.wait(2000);
 
-			cy.get('[data-cy=isSuccess]').contains('Saved')
+			cy.get('[data-cy=isSuccess]').contains('Saved');
 		});
 	});
 
@@ -113,20 +108,20 @@ describe('Signup', () => {
 
 		cy.get('[data-cy=walletEmail]')
 			.type(email)
-			.should('have.value', email)
+			.should('have.value', email);
 
 		cy.get('[data-cy=walletPassword]')
 			.type(password)
-			.should('have.value', password)
+			.should('have.value', password);
 
-		cy.get('[data-cy=submit]').click()
+		cy.get('[data-cy=submit]').click();
 
 		cy.waitUntil(() => cy.get('h1').contains('Morpher Wallet'));
 
-		cy.get('h1').contains('Morpher Wallet')
-		cy.get('h2').contains('Hello')
+		cy.get('h1').contains('Morpher Wallet');
+		cy.get('h2').contains('Hello');
 
-		cy.get('[data-cy=logout]').click()
+		cy.get('[data-cy=logout]').click();
 
 		cy.contains('h2', 'Wallet Login');
 	});

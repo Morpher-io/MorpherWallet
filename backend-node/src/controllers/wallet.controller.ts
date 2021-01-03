@@ -5,9 +5,9 @@ import { Request, Response } from 'express';
 
 import { VK } from 'vk-io';
 import { Facebook } from 'fb';
-import { sendEmail2FA, sendEmailChanged } from "../helpers/functions/email";
-import { authenticator } from "otplib";
-const QRCode = require('qrcode')
+import { sendEmail2FA, sendEmailChanged } from '../helpers/functions/email';
+import { authenticator } from 'otplib';
+const QRCode = require('qrcode');
 const options = {
     app_id: process.env.FACEBOOK_APP_ID,
     app_secret: process.env.FACEBOOK_APP_SECRET,
@@ -34,9 +34,13 @@ export async function saveEmailPassword(req: Request, res: Response) {
         const recoveryTypeId = req.body.recoveryTypeId || 1;
         const eth_address = req.body.ethAddress;
 
-        if(key.length !== 64 || encryptedSeed.ciphertext === undefined ||
-            encryptedSeed.iv === undefined || encryptedSeed.salt === undefined){
-            return errorResponse(res, "Bad body data.");
+        if (
+            key.length !== 64 ||
+            encryptedSeed.ciphertext === undefined ||
+            encryptedSeed.iv === undefined ||
+            encryptedSeed.salt === undefined
+        ) {
+            return errorResponse(res, 'Bad body data.');
         }
 
         let userId;
@@ -80,7 +84,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
         return errorResponse(res, error.message);
     }
 
-    return errorResponse(res, "User not found", 404);
+    return errorResponse(res, 'User not found', 404);
 }
 
 export async function getRecoveryMethods(req: Request, res: Response) {
@@ -104,26 +108,29 @@ export async function addRecoveryMethod(req: Request, res: Response) {
     const recovery = await Recovery.findOne({ where: { user_id: emailRecovery.user_id, recovery_type_id: recoveryTypeId } });
     if (recovery == null) {
         const newRecoveryId = (
-            await Recovery.create(
-                {
-                    recovery_type_id: recoveryTypeId,
-                    user_id: emailRecovery.user_id,
-                    encrypted_seed: JSON.stringify(encrypt(JSON.stringify(req.body.encryptedSeed), process.env.DB_BACKEND_SALT)),
-                    key: keyForSaving
-                }
-            )
+            await Recovery.create({
+                recovery_type_id: recoveryTypeId,
+                user_id: emailRecovery.user_id,
+                encrypted_seed: JSON.stringify(encrypt(JSON.stringify(req.body.encryptedSeed), process.env.DB_BACKEND_SALT)),
+                key: keyForSaving
+            })
         ).dataValues.id;
 
-        Logger.info({ method: arguments.callee.name, type: 'Added new Recovery Method', user_id: emailRecovery.user_id, recovery_id: newRecoveryId, headers: req.headers, body: req.body });
+        Logger.info({
+            method: arguments.callee.name,
+            type: 'Added new Recovery Method',
+            user_id: emailRecovery.user_id,
+            recovery_id: newRecoveryId,
+            headers: req.headers,
+            body: req.body
+        });
         return successResponse(res, {
             recovery_id: newRecoveryId
         });
     }
 
-    return errorResponse(res, "Recovery Method already set!",)
-
+    return errorResponse(res, 'Recovery Method already set!');
 }
-
 
 // Function to save new email/password to the database.
 //only works if passed through a middleware that checks the signature!
@@ -137,29 +144,33 @@ export async function updatePassword(req: Request, res: Response) {
         const encryptedSeed = req.body.encryptedSeed;
 
         // Create a new recovery method.
-        const recovery = await Recovery.findOne({ where: { key: key, recovery_type_id: 1 } });
+        const recovery = await Recovery.findOne({ where: { key, recovery_type_id: 1 } });
         if (recovery != null) {
             recovery.encrypted_seed = JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT));
             await recovery.save();
 
-            Logger.info({ method: arguments.callee.name, type: "Password Change", user_id: recovery.user_id, headers: req.headers, body: req.body });
-            return successResponse(res, "updated");
-
+            Logger.info({
+                method: arguments.callee.name,
+                type: 'Password Change',
+                user_id: recovery.user_id,
+                headers: req.headers,
+                body: req.body
+            });
+            return successResponse(res, 'updated');
         }
     } catch (error) {
         // If an error happened anywhere along the way, rollback all the changes.
         return errorResponse(res, error.message);
     }
     //error out in any other case
-    return errorResponse(res, "Internal Error", 500);
+    return errorResponse(res, 'Internal Error', 500);
 }
-
 
 // Function to save new email/password to the database.
 //only works if passed through a middleware that checks the signature!
 export async function updateEmail(req: Request, res: Response) {
     // Get sequelize transactions to rollback changes in case of failure.
-    let transaction = await getTransaction();
+    const transaction = await getTransaction();
 
     try {
         // Get variables from request body.
@@ -169,31 +180,45 @@ export async function updateEmail(req: Request, res: Response) {
         const recoveryTypeId = 1;
         const sendEmail = req.body.sendEmail || 'true';
 
-        const recovery = await Recovery.findOne({ where: { key: key, recovery_type_id: recoveryTypeId }, transaction });
+        const recovery = await Recovery.findOne({ where: { key, recovery_type_id: recoveryTypeId }, transaction });
         if (recovery != null) {
             const user = await User.findOne({ where: { id: recovery.user_id }, transaction });
             const user_should_not_exist = await User.findOne({ where: { email: newEmail, [Op.not]: { id: user.id } } });
             //the user doesn't exist yet
             if (user_should_not_exist == null) {
                 //email 2FA alredy sent out to verify new email address exists?
-                if (email2faVerification == undefined) {
-                    let verificationCode = await updateEmail2fa(user.id);
-                    if(sendEmail === 'true'){
+                if (email2faVerification === undefined) {
+                    const verificationCode = await updateEmail2fa(user.id);
+                    if (sendEmail === 'true') {
                         await sendEmail2FA(verificationCode, newEmail);
                     }
                     transaction.commit(); //close the transaction after the 2fa was sent
-                    return successResponse(res, "sent 2fa code to new email address");
+                    return successResponse(res, 'sent 2fa code to new email address');
                 } else {
                     // 2FA tokens in query params
                     // Attempt to get user from database.
                     if (verifyEmail2FA(user.id.toString(), email2faVerification)) {
                         //2fa passed here
-                        Userhistory.create({ user_id: user.id, old_value: user.email, new_value: newEmail, change_type: 'updateEmail', stringified_headers: JSON.stringify(req.headers) });
-                        if(sendEmail === 'true'){
+                        Userhistory.create({
+                            user_id: user.id,
+                            old_value: user.email,
+                            new_value: newEmail,
+                            change_type: 'updateEmail',
+                            stringified_headers: JSON.stringify(req.headers)
+                        });
+                        if (sendEmail === 'true') {
                             await sendEmailChanged(newEmail, user.email);
                         } //send the old user an info-mail that his email address got updated.
 
-                        Logger.info({ method: arguments.callee.name, type: "Email Change", user_id: user.id, old_value: user.email, new_value: newEmail, headers: req.headers, body: req.body });
+                        Logger.info({
+                            method: arguments.callee.name,
+                            type: 'Email Change',
+                            user_id: user.id,
+                            old_value: user.email,
+                            new_value: newEmail,
+                            headers: req.headers,
+                            body: req.body
+                        });
 
                         //save the new user email
                         user.email = newEmail;
@@ -211,21 +236,17 @@ export async function updateEmail(req: Request, res: Response) {
             } else {
                 //user exists error
                 await transaction.rollback();
-                return errorResponse(res, "Error: User with this Email address already exists.", 409);
+                return errorResponse(res, 'Error: User with this Email address already exists.', 409);
             }
         }
         //any other error case
         await transaction.rollback();
-        return errorResponse(res, "Error: Update Operation aborted.", 500);
-
-
+        return errorResponse(res, 'Error: Update Operation aborted.', 500);
     } catch (error) {
         // If an error happened anywhere along the way, rollback all the changes.
         return errorResponse(res, error.message);
     }
 }
-
-
 
 // Function to get an encrypted seed from the database using a key.
 export async function getEncryptedSeed(req, res) {
@@ -237,23 +258,37 @@ export async function getEncryptedSeed(req, res) {
     // Simply get Recovery instance that has this key and return it if its found.
     const recovery = await Recovery.findOne({ where: { key, recovery_type_id }, raw: true });
 
-
     if (recovery) {
         const user = await User.findOne({ where: { id: recovery.user_id } });
 
         const email2FAVerified = await verifyEmail2FA(recovery.user_id, email2fa);
         const googleVerified = await verifyGoogle2FA(recovery.user_id, authenticator2fa);
         if (!email2FAVerified || !googleVerified) {
-            Logger.info({ method: arguments.callee.name, type: "Error: Fetch Encrypted Seed Failed", error: "2fa wrong", user_id: user.id, user, headers: req.headers, body: req.body });
-            return errorResponse(res, 'Either Email2FA or Authenticator2FA was wrong. Try again.')
+            Logger.info({
+                method: arguments.callee.name,
+                type: 'Error: Fetch Encrypted Seed Failed',
+                error: '2fa wrong',
+                user_id: user.id,
+                user,
+                headers: req.headers,
+                body: req.body
+            });
+            return errorResponse(res, 'Either Email2FA or Authenticator2FA was wrong. Try again.');
         }
         //avoid replay attack, generate a new Email 2FA after it was validated and seed was sent
-        if(user.payload.email){
+        if (user.payload.email) {
             updateEmail2fa(user.id);
         }
         //only if the codes are correct we get the juicy seed.
 
-        Logger.info({ method: arguments.callee.name, type: "Fetch Encrypted Seed", user_id: user.id, user, headers: req.headers, body: req.body });
+        Logger.info({
+            method: arguments.callee.name,
+            type: 'Fetch Encrypted Seed',
+            user_id: user.id,
+            user,
+            headers: req.headers,
+            body: req.body
+        });
         return successResponse(res, {
             encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT)
         });
@@ -283,11 +318,18 @@ async function getFacebookEncryptedSeed(req, res) {
         // If user exists return the decrypted seed.
         const recovery = await Recovery.findOne({ where: { key, recovery_type_id: 2, user_id: user.id } });
         if (recovery) {
-            Logger.info({ method: arguments.callee.name, type: "Recover Encrypted Seed", user_id: user.id, recovery, headers: req.headers, body: req.body });
+            Logger.info({
+                method: arguments.callee.name,
+                type: 'Recover Encrypted Seed',
+                user_id: user.id,
+                recovery,
+                headers: req.headers,
+                body: req.body
+            });
             return successResponse(res, { encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
         }
     }
-    Logger.info({ method: arguments.callee.name, type: "Failed Recover Encrypted Seed", headers: req.headers, body: req.body });
+    Logger.info({ method: arguments.callee.name, type: 'Failed Recover Encrypted Seed', headers: req.headers, body: req.body });
     // If user does not exist return an error.
     return errorResponse(res, 'User not found.');
 }
@@ -319,12 +361,22 @@ async function getGoogleEncryptedSeed(req, res) {
             /**
              * Big question: are we leaking user-data here? No: The access token has only limited validity and will be different next time
              */
-            Logger.info({ method: arguments.callee.name, type: "Recover Encrypted Seed", user_id: user.id, recovery, headers: req.headers, body: req.body });
-            return successResponse(res, { encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT), email: recovery.user.email });
+            Logger.info({
+                method: arguments.callee.name,
+                type: 'Recover Encrypted Seed',
+                user_id: user.id,
+                recovery,
+                headers: req.headers,
+                body: req.body
+            });
+            return successResponse(res, {
+                encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT),
+                email: recovery.user.email
+            });
         }
     }
 
-    Logger.info({ method: arguments.callee.name, type: "Failed Recover Encrypted Seed", headers: req.headers, body: req.body });
+    Logger.info({ method: arguments.callee.name, type: 'Failed Recover Encrypted Seed', headers: req.headers, body: req.body });
     // If user does not exist return an error.
     return errorResponse(res, 'User not found.');
 }
@@ -351,11 +403,18 @@ async function getVKontakteEncryptedSeed(req, res) {
         // If user exists return the decrypted seed.
         const recovery = await Recovery.findOne({ where: { key, recovery_type_id: 5, user_id: user.id } });
         if (recovery != null) {
-            Logger.info({ method: arguments.callee.name, type: "Recover Encrypted Seed", user_id: user.id, recovery, headers: req.headers, body: req.body });
+            Logger.info({
+                method: arguments.callee.name,
+                type: 'Recover Encrypted Seed',
+                user_id: user.id,
+                recovery,
+                headers: req.headers,
+                body: req.body
+            });
             return successResponse(res, { encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
         }
     }
-    Logger.info({ method: arguments.callee.name, type: "Failed Recover Encrypted Seed", headers: req.headers, body: req.body });
+    Logger.info({ method: arguments.callee.name, type: 'Failed Recover Encrypted Seed', headers: req.headers, body: req.body });
     // If user does not exist return an error.
     return errorResponse(res, 'User not found.');
 }
@@ -384,14 +443,22 @@ export async function getPayload(req, res) {
 
     const payload = {};
     if (user != null && user['payload'] !== null) {
-        if (user['payload'].email !== undefined) { payload['email'] = user.payload.email };
-        if (user['payload'].authenticator !== undefined) { payload['authenticator'] = user.payload.authenticator };
-        if (user['payload'].emailVerificationCode !== undefined) { payload['emailVerificationCode'] = user.payload.emailVerificationCode };
-        if (user['payload'].authenticatorConfirmed !== undefined) { payload['authenticatorConfirmed'] = user.payload.authenticatorConfirmed };
+        if (user['payload'].email !== undefined) {
+            payload['email'] = user.payload.email;
+        }
+        if (user['payload'].authenticator !== undefined) {
+            payload['authenticator'] = user.payload.authenticator;
+        }
+        if (user['payload'].emailVerificationCode !== undefined) {
+            payload['emailVerificationCode'] = user.payload.emailVerificationCode;
+        }
+        if (user['payload'].authenticatorConfirmed !== undefined) {
+            payload['authenticatorConfirmed'] = user.payload.authenticatorConfirmed;
+        }
     }
 
     if (user) {
-        Logger.info({ method: arguments.callee.name, type: "Get Payload", user_id: user.id, user, headers: req.headers, body: req.body });
+        Logger.info({ method: arguments.callee.name, type: 'Get Payload', user_id: user.id, user, headers: req.headers, body: req.body });
         return successResponse(res, payload);
     } else {
         return errorResponse(res, '2FA methods could not be found');
@@ -402,14 +469,13 @@ export async function getNonce(req, res) {
     const key = req.body.key;
     const recovery = await Recovery.findOne({ where: { key } });
     if (recovery == null) {
-
-        Logger.info({ method: arguments.callee.name, type: "Error: User Not found", key, headers: req.headers, body: req.body });
+        Logger.info({ method: arguments.callee.name, type: 'Error: User Not found', key, headers: req.headers, body: req.body });
         return errorResponse(res, 'User not found');
     }
     const user = await User.findOne({ where: { id: recovery.user_id }, raw: true });
 
     if (user) {
-        Logger.info({ method: arguments.callee.name, type: "Get Nonce", user_id: user.id, user, headers: req.headers, body: req.body });
+        Logger.info({ method: arguments.callee.name, type: 'Get Nonce', user_id: user.id, user, headers: req.headers, body: req.body });
         return successResponse(res, { nonce: user.nonce });
     } else {
         return errorResponse(res, 'Nonce could not be found');
@@ -427,10 +493,16 @@ export async function change2FAMethods(req, res) {
     if (recovery != null) {
         const user = await User.findOne({ where: { id: recovery.user_id } });
 
-        Userhistory.create({ user_id: user.id, new_value: JSON.stringify(req.body), old_value: JSON.stringify(user.payload), change_type: 'update2fa', stringified_headers: JSON.stringify(req.headers) });
+        Userhistory.create({
+            user_id: user.id,
+            new_value: JSON.stringify(req.body),
+            old_value: JSON.stringify(user.payload),
+            change_type: 'update2fa',
+            stringified_headers: JSON.stringify(req.headers)
+        });
         user.payload.email = toggleEmail;
         user.payload.authenticator = toggleAuthenticator;
-        if (toggleAuthenticator == false) {
+        if (toggleAuthenticator === false) {
             user.authenticator_qr = null;
             user.authenticator_secret = null;
             user.payload.authenticatorConfirmed = false;
@@ -438,13 +510,19 @@ export async function change2FAMethods(req, res) {
         user.changed('payload', true);
         await user.save();
 
-        Logger.info({ method: arguments.callee.name, type: "2FA Methods Changed", user_id: user.id, user, headers: req.headers, body: req.body });
+        Logger.info({
+            method: arguments.callee.name,
+            type: '2FA Methods Changed',
+            user_id: user.id,
+            user,
+            headers: req.headers,
+            body: req.body
+        });
         return successResponse(res, { message: 'User payload updated successfully.' });
     }
     //in any other case, return error
-    return errorResponse(res, "Error: User not found.", 404);
+    return errorResponse(res, 'Error: User not found.', 404);
 }
-
 
 export async function generateAuthenticatorQR(req, res) {
     const key = req.header('key');
@@ -452,10 +530,9 @@ export async function generateAuthenticatorQR(req, res) {
     if (recovery != null) {
         const user = await User.findOne({ where: { id: recovery.user_id } });
         if (user != null) {
-
             user.authenticator_secret = authenticator.generateSecret();
 
-            const otp = authenticator.keyuri(user.email, "Morpher Wallet", user.authenticator_secret);
+            const otp = authenticator.keyuri(user.email, 'Morpher Wallet', user.authenticator_secret);
 
             try {
                 const result = await QRCode.toDataURL(otp);
@@ -463,13 +540,19 @@ export async function generateAuthenticatorQR(req, res) {
                 user.authenticator_qr = result;
                 await user.save();
 
-                Logger.info({ method: arguments.callee.name, type: "Generated Authenticator QR Code", user_id: user.id, user, headers: req.headers, body: req.body });
+                Logger.info({
+                    method: arguments.callee.name,
+                    type: 'Generated Authenticator QR Code',
+                    user_id: user.id,
+                    user,
+                    headers: req.headers,
+                    body: req.body
+                });
                 return successResponse(res, {
                     image: result
                 });
-            }
-            catch (e) {
-                return errorResponse(res, 'Could not generate QR code.')
+            } catch (e) {
+                return errorResponse(res, 'Could not generate QR code.');
             }
         }
     }
@@ -486,21 +569,35 @@ export async function verifyAuthenticatorCode(req, res) {
 
         if (user != null) {
             if (await verifyGoogle2FA(user.id.toString(), code, false)) {
-                if (user.payload.authenticatorConfirmed == false) {
+                if (user.payload.authenticatorConfirmed === false) {
                     user.payload.authenticator = true;
                     user.payload.authenticatorConfirmed = true;
                     user.changed('payload', true);
                     await user.save();
                 }
-                Logger.info({ method: arguments.callee.name, type: "Verify Authenticator Code", user_id: user.id, user, headers: req.headers, body: req.body });
-                return successResponse(res, true)
+                Logger.info({
+                    method: arguments.callee.name,
+                    type: 'Verify Authenticator Code',
+                    user_id: user.id,
+                    user,
+                    headers: req.headers,
+                    body: req.body
+                });
+                return successResponse(res, true);
             } else {
-                Logger.info({ method: arguments.callee.name, type: "Error: Authenticator Code Wrong", user_id: user.id, user, headers: req.headers, body: req.body });
-                return errorResponse(res, 'Could not verify authenticator code.', 500)
+                Logger.info({
+                    method: arguments.callee.name,
+                    type: 'Error: Authenticator Code Wrong',
+                    user_id: user.id,
+                    user,
+                    headers: req.headers,
+                    body: req.body
+                });
+                return errorResponse(res, 'Could not verify authenticator code.', 500);
             }
         }
     }
-    Logger.info({ method: arguments.callee.name, type: "Error: User Not found", headers: req.headers, body: req.body });
+    Logger.info({ method: arguments.callee.name, type: 'Error: User Not found', headers: req.headers, body: req.body });
     return errorResponse(res, 'User not found, aborting');
 }
 
@@ -519,17 +616,30 @@ export async function send2FAEmail(req, res) {
     const sendEmail = req.body.sendEmail || 'true';
 
     try {
-        let verificationCode = await updateEmail2fa(user.id);
+        const verificationCode = await updateEmail2fa(user.id);
 
-        if(sendEmail === 'true'){
+        if (sendEmail === 'true') {
             await sendEmail2FA(verificationCode, user.email);
         }
 
-        Logger.info({ method: arguments.callee.name, type: "2FA Email Sent", user_id: user.id, user, headers: req.headers, body: req.body });
+        Logger.info({
+            method: arguments.callee.name,
+            type: '2FA Email Sent',
+            user_id: user.id,
+            user,
+            headers: req.headers,
+            body: req.body
+        });
         return successResponse(res, { sent: true });
-    }
-    catch (e) {
-        Logger.info({ method: arguments.callee.name, type: "Error: Can't send 2FA email", user_id: user.id, user, headers: req.headers, body: req.body });
+    } catch (e) {
+        Logger.info({
+            method: arguments.callee.name,
+            type: "Error: Can't send 2FA email",
+            user_id: user.id,
+            user,
+            headers: req.headers,
+            body: req.body
+        });
         return errorResponse(res, 'There was a problem parsing the email');
     }
 }
@@ -542,47 +652,57 @@ export async function verifyEmailCode(req, res) {
         const user = await User.findOne({ where: { id: recovery.user_id } });
         if (user != null) {
             if (await verifyEmail2FA(recovery.user_id, code)) {
-                Logger.info({ method: arguments.callee.name, type: "Email 2FA Code Verified", user_id: user.id, user, headers: req.headers, body: req.body });
-                return successResponse(res, true)
+                Logger.info({
+                    method: arguments.callee.name,
+                    type: 'Email 2FA Code Verified',
+                    user_id: user.id,
+                    user,
+                    headers: req.headers,
+                    body: req.body
+                });
+                return successResponse(res, true);
             } else {
-                Logger.info({ method: arguments.callee.name, type: "Error: Email 2FA Code Wrong", user_id: user.id, user, headers: req.headers, body: req.body });
-                return errorResponse(res, 'Could not verify email code.')
+                Logger.info({
+                    method: arguments.callee.name,
+                    type: 'Error: Email 2FA Code Wrong',
+                    user_id: user.id,
+                    user,
+                    headers: req.headers,
+                    body: req.body
+                });
+                return errorResponse(res, 'Could not verify email code.');
             }
         }
     }
 
-    return errorResponse(res, "Could not find User!", 404);
-
+    return errorResponse(res, 'Could not find User!', 404);
 }
 
 export async function resetRecovery(req, res) {
     const recoveryTypeId = req.body.recoveryTypeId;
     const key = req.header('key');
     const defaultRecovery = await Recovery.findOne({ where: { key } });
-    if (defaultRecovery != null) {
+    if (defaultRecovery !== null && recoveryTypeId !== 1) {
         const recovery = await Recovery.findOne({ where: { user_id: defaultRecovery.user_id, recovery_type_id: recoveryTypeId } });
-        if(recovery !== null) {
+        if (recovery !== null) {
             await recovery.destroy();
-            return successResponse(res, true)
+            return successResponse(res, true);
         }
 
-        return errorResponse(res, "Could not find recovery!", 404);
-
+        return errorResponse(res, 'Could not find recovery!', 404);
     }
 
-    return errorResponse(res, "Could not find User!", 404);
-
+    return errorResponse(res, 'Could not find User!', 404);
 }
 
 async function verifyEmail2FA(user_id: string, code: string): Promise<boolean> {
     const user = await User.findOne({ where: { id: user_id } });
-    return (user.payload.email == false || user.email_verification_code === Number(code));
+    return user.payload.email === false || user.email_verification_code === Number(code);
 }
 
 async function verifyGoogle2FA(user_id: string, code: string, getSeed: boolean = true): Promise<boolean> {
     const user = await User.findOne({ where: { id: user_id } });
-    if(getSeed) {
-        return (user.payload.authenticator === false || authenticator.check(code, user.authenticator_secret));
-    }
-    else return authenticator.check(code, user.authenticator_secret)
+    if (getSeed) {
+        return user.payload.authenticator === false || authenticator.check(code, user.authenticator_secret);
+    } else return authenticator.check(code, user.authenticator_secret);
 }

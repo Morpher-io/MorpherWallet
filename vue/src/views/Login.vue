@@ -6,7 +6,14 @@
 			<div class="field">
 				<label class="label">Email</label>
 				<div class="control">
-					<input type="email" class="input" data-cy="walletEmail" name="walletEmail" placeholder="example@example.com" v-model="walletEmail" />
+					<input
+						type="email"
+						class="input"
+						data-cy="walletEmail"
+						name="walletEmail"
+						placeholder="example@example.com"
+						v-model="walletEmail"
+					/>
 				</div>
 			</div>
 
@@ -14,12 +21,15 @@
 				<label class="label">Password</label>
 
 				<div class="control">
-					<input type="password" class="input" data-cy="walletPassword" name="walletPassword" placeholder="Strong Password!" v-model="walletPassword" />
+					<input
+						type="password"
+						class="input"
+						data-cy="walletPassword"
+						name="walletPassword"
+						placeholder="Strong Password!"
+						v-model="walletPassword"
+					/>
 					<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial; margin-top: -8px" />
-					<p class="help">
-						Use a strong Password! It encrypts your Wallet and keeps your Funds secure. It must be at least 8 characters long and include
-						one lower-case, one upper-case character and a number.
-					</p>
 
 					<div v-if="store.status === 'invalid password' || showRecovery == true">
 						<p class="help is-danger">
@@ -63,7 +73,7 @@
 <script lang="ts">
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
-import Password from "vue-password-strength-meter";
+import Password from 'vue-password-strength-meter';
 
 @Component({
 	components: {
@@ -106,7 +116,7 @@ export default class Login extends mixins(Global) {
 	 */
 	login() {
 		this.showError = false;
-		this.updateLoading({ message: 'Loading user...' });
+		this.showSpinner('Loading User...');
 		this.store.loginComplete = false;
 		const email = this.walletEmail;
 		const password = this.walletPassword;
@@ -116,24 +126,24 @@ export default class Login extends mixins(Global) {
 			.then(() => {
 				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator) {
 					// open 2fa page if 2fa is required
-					this.updateLoading({ message: '' });
+					this.hideSpinner();
 					this.$router.push('/2fa');
 				} else {
 					this.unlockWithStoredPassword()
 						.then(() => {
-							this.updateLoading({ message: '' });
+							this.hideSpinner();
 							// open root page after logon success
 							this.$router.push('/');
 						})
 						.catch(() => {
-							this.updateLoading({ message: '' });
+							this.hideSpinner();
 							this.showRecovery = true;
 						});
 				}
 			})
 			.catch(error => {
 				// Logon failed
-				this.updateLoading({ message: '' });
+				this.hideSpinner();
 				if (error !== true && error !== false) {
 					if (error.success === false) {
 						this.showError = true;

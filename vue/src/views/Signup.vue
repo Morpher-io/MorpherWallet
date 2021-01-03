@@ -6,7 +6,14 @@
 			<div class="field">
 				<label class="label">Email</label>
 				<div class="control">
-					<input type="email" class="input" name="walletEmail" data-cy="walletEmail" placeholder="example@example.com" v-model="walletEmail" />
+					<input
+						type="email"
+						class="input"
+						name="walletEmail"
+						data-cy="walletEmail"
+						placeholder="example@example.com"
+						v-model="walletEmail"
+					/>
 				</div>
 
 				<p class="help">Use this Email-Address for Wallet Recovery</p>
@@ -109,10 +116,10 @@ export default class Signup extends mixins(Global) {
 		/**
 		 * Validating Email
 		 */
-		this.updateLoading({ message: 'Validating Email...' });
+		this.showSpinner('Validating Email...');
 		const emailMessage = await validateInput('email', this.walletEmail);
 		if (emailMessage) {
-			this.updateLoading({ message: '' });
+			this.hideSpinner();
 			this.invalidEmail = emailMessage;
 			return;
 		}
@@ -121,20 +128,20 @@ export default class Signup extends mixins(Global) {
 		 * Validating Password
 		 */
 
-		this.updateLoading({ message: 'Validating Password...' });
+		this.showSpinner('Validating Password...');
 		const passwordMessage = await validateInput('password', this.walletPassword);
 		if (passwordMessage) {
-			this.updateLoading({ message: '' });
+			this.hideSpinner();
 			this.invalidPassword = passwordMessage;
 			return;
 		}
 
 		const email = this.walletEmail;
 
-		this.updateLoading({ message: 'Creating Wallet...' });
+		this.showSpinner('Creating Wallet...');
 		this.createWallet({ email, password: this.walletPassword })
 			.then(() => {
-				this.updateLoading({ message: '' });
+				this.hideSpinner();
 				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator) {
 					// open 2fa page if 2fa is required
 					this.$router.push('/2fa');
@@ -143,7 +150,7 @@ export default class Signup extends mixins(Global) {
 				}
 			})
 			.catch(e => {
-				this.updateLoading({ message: '' });
+				this.hideSpinner();
 				this.invalidEmail = e.toString();
 			});
 	}

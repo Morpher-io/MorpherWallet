@@ -9,7 +9,7 @@
 					<i class="fas fa-chevron-down"></i>
 				</span>
 
-				<span class="header" @click="collapsed = !collapsed" data-cy="openTwoFaChange" >
+				<span class="header" @click="collapsed = !collapsed" data-cy="openTwoFaChange">
 					Change 2-Factor authentication (2FA)
 					<span class="help is-success" v-if="success" data-cy="isSuccess">Saved!</span>
 				</span>
@@ -46,7 +46,13 @@
 						<div class="field" v-if="this.authenticator && !this.authenticatorConfirmed && this.qrCode">
 							<label class="label">Enter the Authenticator Code to Verify Successful Setup!</label>
 							<div class="control">
-								<input type="text" placeholder="Authenticator Code" data-cy="authenticatorCode" class="textbox" v-model="authenticatorCode" />
+								<input
+									type="text"
+									placeholder="Authenticator Code"
+									data-cy="authenticatorCode"
+									class="textbox"
+									v-model="authenticatorCode"
+								/>
 								<p class="help is-danger" v-if="invalidAuthenticator" data-cy="authenticatorMessage">
 									{{ invalidAuthenticator }}
 								</p>

@@ -17,13 +17,27 @@
 					<div class="field" v-if="!hideOldPassword">
 						<label class="label">Old Password</label>
 						<div class="control">
-							<input type="password" data-cy="oldPassword" name="oldPassword" class="input is-primary" placeholder="Current Password" v-model="oldPassword" />
+							<input
+								type="password"
+								data-cy="oldPassword"
+								name="oldPassword"
+								class="input is-primary"
+								placeholder="Current Password"
+								v-model="oldPassword"
+							/>
 						</div>
 					</div>
 					<div class="field">
 						<label class="label">New Password</label>
 						<div class="control">
-							<input type="password" name="newPassword" data-cy="newPassword" class="input is-primary" placeholder="New Password" v-model="walletPassword" />
+							<input
+								type="password"
+								name="newPassword"
+								data-cy="newPassword"
+								class="input is-primary"
+								placeholder="New Password"
+								v-model="walletPassword"
+							/>
 							<password
 								v-model="walletPassword"
 								:strength-meter-only="true"

@@ -57,7 +57,7 @@
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 import { sha256 } from '../utils/cryptoFunctions';
-import Password from "vue-password-strength-meter";
+import Password from 'vue-password-strength-meter';
 
 @Component({
 	components: {
@@ -74,17 +74,18 @@ export default class Unlock extends mixins(Global) {
 	 * Cmponent mounted lifestyle hook
 	 */
 	mounted() {
-		this.updateLoading({ message: 'Loading user...' });
+		this.showSpinner('Loading User...');
 		// Check if the wallet can be unlocked using the local-storage stored password
 		this.unlockWithStoredPassword()
 			.then(result => {
-				this.updateLoading({ message: '' });
+				this.hideSpinner();
 				if (result) {
 					this.$router.push('/');
 				}
 			})
 			.catch(error => {
-				this.updateLoading({ message: '' });
+				this.hideSpinner();
+				console.log(error);
 				// error
 			});
 	}
@@ -102,6 +103,7 @@ export default class Unlock extends mixins(Global) {
 				this.router.push('/');
 			})
 			.catch(error => {
+				console.log(error);
 				// Logon failed
 			});
 	}

@@ -64,7 +64,7 @@ async function seedDatabase() {
 // Black box encryption functions.
 function encrypt(text, secret) {
     const iv = crypto.randomBytes(16);
-    let key = sha256(secret).substr(0, 32);
+    const key = sha256(secret).substr(0, 32);
 
     const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
     let encrypted = cipher.update(text);
@@ -74,7 +74,7 @@ function encrypt(text, secret) {
 
 function decrypt(text, secret) {
     const iv = Buffer.from(text.iv, 'hex');
-    let key = sha256(secret).substr(0, 32);
+    const key = sha256(secret).substr(0, 32);
     const encryptedText = Buffer.from(text.encryptedData, 'hex');
     const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), iv);
     let decrypted = decipher.update(encryptedText);
@@ -89,21 +89,33 @@ function sha256(text) {
         .digest('hex');
 }
 
-const randomFixedInteger = function (length) {
-    return Math.floor(Math.pow(10, length-1) + Math.random() * (Math.pow(10, length) - Math.pow(10, length-1) - 1));
-}
+const randomFixedInteger = function(length) {
+    return Math.floor(Math.pow(10, length - 1) + Math.random() * (Math.pow(10, length) - Math.pow(10, length - 1) - 1));
+};
 
-function sortObject(object: any){
-    if (typeof object != "object" || object instanceof Array) // Not to sort the array
+function sortObject(object: any) {
+    if (typeof object !== 'object' || object instanceof Array)
+        // Not to sort the array
         return object;
     const keys = Object.keys(object);
     keys.sort();
     const newObject = {};
-    for (let i = 0; i < keys.length; i++){
+    for (let i = 0; i < keys.length; i++) {
         // @ts-ignore
-        newObject[keys[i]] = sortObject(object[keys[i]])
+        newObject[keys[i]] = sortObject(object[keys[i]]);
     }
     return newObject;
 }
 
-export { errorResponse, successResponse, asyncForEach, formatMarketId, seedDatabase, encrypt, decrypt, sha256, randomFixedInteger, sortObject };
+export {
+    errorResponse,
+    successResponse,
+    asyncForEach,
+    formatMarketId,
+    seedDatabase,
+    encrypt,
+    decrypt,
+    sha256,
+    randomFixedInteger,
+    sortObject
+};

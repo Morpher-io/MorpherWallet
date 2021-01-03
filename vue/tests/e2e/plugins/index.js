@@ -15,8 +15,8 @@ module.exports = (on, config) => {
 	//  watchOptions: {}
 	// }))
 
-	on("task", {
-		generateOTP: require("cypress-otp")
+	on('task', {
+		generateOTP: require('cypress-otp')
 	});
 
 	return Object.assign({}, config, {

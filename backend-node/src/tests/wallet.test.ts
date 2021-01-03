@@ -1,7 +1,7 @@
 import * as expect from 'expect';
 import { describe, it, beforeEach } from 'mocha';
 import { Recovery, Recovery_Type, sequelize, User, Userhistory } from '../database/models';
-import {sha256, sortObject} from '../helpers/functions/util';
+import { sha256, sortObject } from '../helpers/functions/util';
 import { authenticator } from 'otplib';
 
 const app = require('../index').app;
@@ -12,28 +12,43 @@ const Web3EthAccounts = require('web3-eth-accounts');
 const Account = new Web3EthAccounts('https://sidechain.morpher.com');
 
 async function clearDatabase() {
-    await Recovery.destroy({where: {}});
-    await User.destroy({where: {}});
+    await Recovery.destroy({ where: {} });
+    await User.destroy({ where: {} });
 }
 
 const bodyData = {
     email: 'test@morpher.com',
     key: '5eb8f7d40f8b67dec627deeb9f18620c40014e1346994b567a27374001c337ad',
-    encryptedSeed: {"ciphertext":"yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==","iv":"TljpH9fl8eUC/6M3","salt":"zAdVIXo4K+QJvSbjeqFVug=="},
+    encryptedSeed: {
+        ciphertext:
+            'yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==',
+        iv: 'TljpH9fl8eUC/6M3',
+        salt: 'zAdVIXo4K+QJvSbjeqFVug=='
+    },
     ethAddress: '0xCb4DB6D3554B3F6439847f3559c41501967192fE'
 };
 
 const newBodyData = {
     email: 'test@morpher.com',
     key: '5eb8f7d40f8b67dec627deeb9f18620c40014e1346994b567a27374001c337ad',
-    encryptedSeed: {"ciphertext":"EzT86NIuZD88pe7jd=gsGgaNSCGIS8I/Yu4kxF/CcC3HLCmSOpwaDZxcSmXCyHSH4IvaRj7UFz+QauXI5Ea+ISju7mscxUCwXC/eahu2eCe8keYINEue/H=CSC=/dxR2","iv":"GgddR6jdlyQF/4R1","salt":"sSJvJXeVzqg+4eVbIAQb4S=="},
+    encryptedSeed: {
+        ciphertext:
+            'EzT86NIuZD88pe7jd=gsGgaNSCGIS8I/Yu4kxF/CcC3HLCmSOpwaDZxcSmXCyHSH4IvaRj7UFz+QauXI5Ea+ISju7mscxUCwXC/eahu2eCe8keYINEue/H=CSC=/dxR2',
+        iv: 'GgddR6jdlyQF/4R1',
+        salt: 'sSJvJXeVzqg+4eVbIAQb4S=='
+    },
     ethAddress: '0xCb4DB6D3554B3F6439847f3559c41501967192fE'
 };
 
 const badBodyKey = {
     email: 'test@morpher.com',
     key: 'secureKeyBad',
-    encryptedSeed: {"ciphertext":"yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==","iv":"TljpH9fl8eUC/6M3","salt":"zAdVIXo4K+QJvSbjeqFVug=="},
+    encryptedSeed: {
+        ciphertext:
+            'yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==',
+        iv: 'TljpH9fl8eUC/6M3',
+        salt: 'zAdVIXo4K+QJvSbjeqFVug=='
+    },
     ethAddress: '0xCb4DB6D3554B3F6439847f3559c41501967192fE'
 };
 
@@ -47,12 +62,17 @@ const encryptedSeedData = {
     key: '5eb8f7d40f8b67dec627deeb9f18620c40014e1346994b567a27374001c337ad',
     email2fa: '',
     authenticator2fa: ''
-}
+};
 
 const facebookData = {
     email: 'test@morpher.com',
     key: sha256(process.env.FACEBOOK_APP_ID + '.' + '1212'), // simulating facebook id
-    encryptedSeed: {"ciphertext":"yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==","iv":"TljpH9fl8eUC/6M3","salt":"zAdVIXo4K+QJvSbjeqFVug=="},
+    encryptedSeed: {
+        ciphertext:
+            'yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==',
+        iv: 'TljpH9fl8eUC/6M3',
+        salt: 'zAdVIXo4K+QJvSbjeqFVug=='
+    },
     recoveryTypeId: 2
 };
 
@@ -64,10 +84,10 @@ const facebookRecovery = {
 const secureAccount = {
     ethAddress: '0xCb4DB6D3554B3F6439847f3559c41501967192fE',
     privateKey: '7dc0746fd1a3c6180ee0b95462a4a2bd6689a7618981c7adc629326bc5f52825'
-}
+};
 
 describe('Wallet controller test cases', async () => {
-    beforeEach(async () =>  {
+    beforeEach(async () => {
         await clearDatabase();
     });
 
@@ -127,7 +147,7 @@ describe('Wallet controller test cases', async () => {
         const emailData = {
             key: bodyData.key,
             sendEmail: 'false'
-        }
+        };
 
         await request(app)
             .post('/v1/send2FAEmail')
@@ -136,7 +156,7 @@ describe('Wallet controller test cases', async () => {
 
         // Get the email verification code from the payload.
         const user = await User.findOne();
-        encryptedSeedData.email2fa = user.email_verification_code
+        encryptedSeedData.email2fa = user.email_verification_code;
 
         const walletResponse = await request(app)
             .post('/v1/getEncryptedSeed')
@@ -187,7 +207,7 @@ describe('Wallet controller test cases', async () => {
 
         const badData = {
             key: 'randomstring'
-        }
+        };
 
         const walletResponse = await request(app)
             .post('/v1/getPayload')
@@ -221,7 +241,7 @@ describe('Wallet controller test cases', async () => {
 
         const badData = {
             key: 'randomstring'
-        }
+        };
 
         const walletResponse = await request(app)
             .post('/v1/getNonce')
@@ -246,9 +266,9 @@ describe('Wallet controller test cases', async () => {
 
         facebookData['nonce'] = user.nonce;
 
-        const body = sortObject(facebookData)
+        const body = sortObject(facebookData);
 
-        const signature = account.sign(JSON.stringify(body))
+        const signature = account.sign(JSON.stringify(body));
 
         facebookData['nonce'] = user.nonce;
 
@@ -276,7 +296,7 @@ describe('Wallet controller test cases', async () => {
 
         const user = await User.findOne();
 
-        const signature = account.sign(JSON.stringify(sortObject({ nonce: user.nonce })))
+        const signature = account.sign(JSON.stringify(sortObject({ nonce: user.nonce })));
 
         const response = await request(app)
             .post('/v1/auth/getRecoveryMethods')
@@ -285,11 +305,9 @@ describe('Wallet controller test cases', async () => {
             .set('Signature', JSON.stringify(signature))
             .set('key', bodyData.key);
 
-
         expect(response.status).toEqual(200);
         expect(response.body.length).toBeGreaterThan(0);
     });
-
 
     it('tests change password user auth', async () => {
         // Create account with private key that corresponds to eth wallet in user database.
@@ -306,7 +324,7 @@ describe('Wallet controller test cases', async () => {
 
         newBodyData['nonce'] = user.nonce;
 
-        const signature = account.sign(JSON.stringify(sortObject(newBodyData)))
+        const signature = account.sign(JSON.stringify(sortObject(newBodyData)));
 
         const response = await request(app)
             .post('/v1/auth/updatePassword')
@@ -335,7 +353,7 @@ describe('Wallet controller test cases', async () => {
         const emailData = {
             key: bodyData.key,
             sendEmail: 'false'
-        }
+        };
 
         await request(app)
             .post('/v1/send2FAEmail')
@@ -344,17 +362,17 @@ describe('Wallet controller test cases', async () => {
 
         // Get the email verification code from the payload.
         let user = await User.findOne();
-        encryptedSeedData.email2fa = user.email_verification_code
+        encryptedSeedData.email2fa = user.email_verification_code;
 
         const newEmailData = {
             email2faVerification: user.email_verification_code,
             newEmail: 'test@morpher.io',
             sendEmail: 'false'
-        }
+        };
 
         newEmailData['nonce'] = user.nonce;
 
-        const signature = account.sign(JSON.stringify(sortObject(newEmailData)))
+        const signature = account.sign(JSON.stringify(sortObject(newEmailData)));
 
         const response = await request(app)
             .post('/v1/auth/updateEmail')
@@ -365,12 +383,10 @@ describe('Wallet controller test cases', async () => {
 
         user = await User.findOne();
 
-
         expect(response.status).toEqual(200);
         expect(response.body.updated).toEqual(true);
         expect(user.email).toEqual(newEmailData.newEmail);
     });
-
 
     it('tests change password user auth error if bad body data', async () => {
         // Create account with private key that corresponds to eth wallet in user database.
@@ -383,7 +399,7 @@ describe('Wallet controller test cases', async () => {
 
         newBodyData['nonce'] = '6565';
 
-        const signature = account.sign(JSON.stringify(sortObject(newBodyData)))
+        const signature = account.sign(JSON.stringify(sortObject(newBodyData)));
 
         const response = await request(app)
             .post('/v1/auth/updatePassword')
@@ -414,7 +430,7 @@ describe('Wallet controller test cases', async () => {
 
         data['nonce'] = user.nonce;
 
-        const signature = account.sign(JSON.stringify(sortObject(data)))
+        const signature = account.sign(JSON.stringify(sortObject(data)));
 
         const response = await request(app)
             .post('/v1/auth/change2FAMethods')
@@ -432,7 +448,6 @@ describe('Wallet controller test cases', async () => {
         expect(user.payload.authenticator).toEqual(false);
     });
 
-
     it('tests generate qr code', async () => {
         // Create account with private key that corresponds to eth wallet in user database.
         const account = Account.privateKeyToAccount(secureAccount.privateKey);
@@ -444,7 +459,7 @@ describe('Wallet controller test cases', async () => {
 
         let user = await User.findOne();
 
-        const signature = account.sign(JSON.stringify(sortObject({ nonce: user.nonce })))
+        const signature = account.sign(JSON.stringify(sortObject({ nonce: user.nonce })));
 
         const response = await request(app)
             .post('/v1/auth/generateAuthenticatorQR')
@@ -472,7 +487,7 @@ describe('Wallet controller test cases', async () => {
         const emailData = {
             key: bodyData.key,
             sendEmail: 'false'
-        }
+        };
 
         await request(app)
             .post('/v1/send2FAEmail')
@@ -482,7 +497,7 @@ describe('Wallet controller test cases', async () => {
         const data = {
             key: bodyData.key,
             code: (await User.findOne()).email_verification_code
-        }
+        };
 
         const response = await request(app)
             .post('/v1/verifyEmailCode')
@@ -490,7 +505,7 @@ describe('Wallet controller test cases', async () => {
             .set('Accept', 'application/json');
 
         expect(response.status).toEqual(200);
-        expect(response.body.success).toEqual(true)
+        expect(response.body.success).toEqual(true);
     });
 
     // Create account with private key that corresponds to eth wallet in user database.
@@ -504,7 +519,7 @@ describe('Wallet controller test cases', async () => {
         const emailData = {
             key: bodyData.key,
             sendEmail: 'false'
-        }
+        };
 
         await request(app)
             .post('/v1/send2FAEmail')
@@ -514,7 +529,7 @@ describe('Wallet controller test cases', async () => {
         const data = {
             key: bodyData.key,
             code: 'randomString'
-        }
+        };
 
         const response = await request(app)
             .post('/v1/verifyEmailCode')
@@ -522,7 +537,7 @@ describe('Wallet controller test cases', async () => {
             .set('Accept', 'application/json');
 
         expect(response.status).toEqual(404);
-        expect(response.body.error).toEqual('Could not verify email code.')
+        expect(response.body.error).toEqual('Could not verify email code.');
     });
 
     // Create account with private key that corresponds to eth wallet in user database.
@@ -536,7 +551,7 @@ describe('Wallet controller test cases', async () => {
 
         let user = await User.findOne();
 
-        const signature = account.sign(JSON.stringify(sortObject({ nonce: user.nonce })))
+        const signature = account.sign(JSON.stringify(sortObject({ nonce: user.nonce })));
 
         await request(app)
             .post('/v1/auth/generateAuthenticatorQR')
@@ -553,7 +568,7 @@ describe('Wallet controller test cases', async () => {
 
         const isValid = authenticator.verify({ token, secret });
 
-        expect(isValid).toEqual(true)
+        expect(isValid).toEqual(true);
     });
 
     // Create account with private key that corresponds to eth wallet in user database.
@@ -567,7 +582,7 @@ describe('Wallet controller test cases', async () => {
 
         let user = await User.findOne();
 
-        const signature = account.sign(JSON.stringify(sortObject({ nonce: user.nonce })))
+        const signature = account.sign(JSON.stringify(sortObject({ nonce: user.nonce })));
 
         await request(app)
             .post('/v1/auth/generateAuthenticatorQR')
@@ -584,6 +599,6 @@ describe('Wallet controller test cases', async () => {
 
         const isValid = authenticator.verify({ token, secret });
 
-        expect(isValid).toEqual(false)
+        expect(isValid).toEqual(false);
     });
 });

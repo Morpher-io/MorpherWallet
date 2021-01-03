@@ -21,7 +21,7 @@ You can deploy Zerowallet on your local/cloud machine for testing in two ways:
 
 * You can setup a Postgres database, install Node.js and Npm.
 
-###Setting up the wallet with Docker 
+### Setting up the wallet with Docker 
 * Run `docker compose up --build` in this root repository.
 
 Postgres database, backend and frontend will be automatically setup through the Docker scripts.  

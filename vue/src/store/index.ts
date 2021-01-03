@@ -33,7 +33,8 @@ import {
 	TypeChangeEmail,
 	TypePayloadData,
 	TypeRecoveryParams,
-	TypeAddRecoveryParams, TypeLoadingMessage, TypeResetRecovery
+	TypeAddRecoveryParams,
+	TypeResetRecovery
 } from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
@@ -232,15 +233,14 @@ const store: Store<RootState> = new Vuex.Store({
 										.then(resolve)
 										.catch(reject);
 								}
-								if(!payload.email && !payload.authenticator){
+								if (!payload.email && !payload.authenticator) {
 									getEncryptedSeedFromMail(email, '', '')
 										.then(encryptedSeed => {
 											commit('seedFound', { encryptedSeed });
 											resolve(true);
 										})
 										.catch(reject);
-								}
-								else {
+								} else {
 									resolve(true);
 								}
 							})
@@ -596,12 +596,9 @@ const store: Store<RootState> = new Vuex.Store({
 				}
 			});
 		},
-		updateLoading({ commit, state, dispatch }, params: TypeLoadingMessage) {
-			commit('loading', params.message)
-		},
-		resetRecoveryMethod({ commit, state, dispatch }, params: TypeResetRecovery) {
+		resetRecoveryMethod({ commit, dispatch }, params: TypeResetRecovery) {
 			return new Promise((resolve, reject) => {
-				commit('loading', 'Resetting recovery...')
+				commit('loading', 'Resetting recovery...');
 				dispatch('sendSignedRequest', {
 					body: { recoveryTypeId: params.recoveryTypeId },
 					method: 'POST',
@@ -609,12 +606,13 @@ const store: Store<RootState> = new Vuex.Store({
 				})
 					.then(() => {
 						dispatch('updateRecoveryMethods').then(() => {
-							commit('loading', '')
+							commit('loading', '');
 							resolve(true);
 						});
 					})
-					.catch(reject => {
-						commit('loading', '')
+					.catch(e => {
+						reject(e);
+						commit('loading', '');
 					});
 			});
 		}

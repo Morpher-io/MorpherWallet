@@ -1,25 +1,25 @@
-import {User} from "../../database/models";
-import {errorResponse, successResponse} from "../../helpers/functions/util";
+import { User } from '../../database/models';
+import { errorResponse, successResponse } from '../../helpers/functions/util';
 
 const WalletController = require('../../controllers/wallet.controller');
 const ValidationController = require('../../controllers/validation.controller');
-const secureRoutes = require("./secure");
+const secureRoutes = require('./secure');
 
 // The index route file which connects all the other files.
 module.exports = function(express) {
     const router = express.Router();
 
-    if(process.env.ENVIRONMENT === 'development'){
+    if (process.env.ENVIRONMENT === 'development') {
         router.get('/test/clearDatabase', async (req, res) => {
-            await User.destroy({ where: {}});
+            await User.destroy({ where: {} });
             return successResponse(res, { success: true });
         });
     }
 
-    if(process.env.ENVIRONMENT === 'development'){
+    if (process.env.ENVIRONMENT === 'development') {
         router.post('/test/getUserSecret', async (req, res) => {
             const user = await User.findOne({ where: { email: req.body.email } });
-            if(user) return successResponse(res, { authenticator_secret: user.authenticator_secret });
+            if (user) return successResponse(res, { authenticator_secret: user.authenticator_secret });
             else return errorResponse(res, 'User not found');
         });
     }

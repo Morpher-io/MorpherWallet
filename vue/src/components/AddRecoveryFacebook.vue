@@ -49,9 +49,9 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 		this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 	}
 
-	async resetRecovery(){
+	async resetRecovery() {
 		const success = await this.resetRecoveryMethod({ recoveryTypeId: this.recoveryTypeId });
-		if(success) {
+		if (success) {
 			this.hasRecoveryMethod = false;
 		}
 	}

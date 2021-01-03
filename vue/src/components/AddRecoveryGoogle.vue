@@ -5,7 +5,7 @@
 				<span class="icon google-icon">
 					<i class="fab fa-google"></i>
 				</span>
-				<span style="color: #fff"> Link to Google</span>
+				<span class="google-text"> Link to Google</span>
 			</GoogleLogin>
 		</div>
 		<div v-if="hasRecoveryMethod" class="has-text-centered">
@@ -41,9 +41,9 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 		this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 	}
 
-	async resetRecovery(){
+	async resetRecovery() {
 		const success = await this.resetRecoveryMethod({ recoveryTypeId: this.recoveryTypeId });
-		if(success) {
+		if (success) {
 			this.hasRecoveryMethod = false;
 		}
 	}
@@ -73,5 +73,8 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 .google-icon {
 	font-size: 18px;
 	margin-right: 10px;
+}
+.google-text {
+	color: #fff;
 }
 </style>

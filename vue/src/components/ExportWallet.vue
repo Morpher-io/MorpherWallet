@@ -60,7 +60,6 @@ export default {
 			const storedPassword = window.sessionStorage.getItem('password');
 			const password = await sha256(this.password);
 			if (storedPassword === password) {
-
 				const keystore = await getKeystoreFromEncryptedSeed([account], password);
 
 				downloadEncryptedKeystore(keystore[0].encrypt(this.password));

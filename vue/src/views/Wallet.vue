@@ -1,8 +1,8 @@
 <template>
 	<div class="container">
-		<h1 class="title" data-cy="header" >Morpher Wallet</h1>
+		<h1 class="title" data-cy="header">Morpher Wallet</h1>
 
-		<h2 class="subtitle" data-cy="subtitle" >Hello {{ walletEmail }}</h2>
+		<h2 class="subtitle" data-cy="subtitle">Hello {{ walletEmail }}</h2>
 
 		<div :class="noRecoveryMethods ? 'collapse' : ''">
 			<div class="field">
