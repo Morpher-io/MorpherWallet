@@ -15,6 +15,10 @@ module.exports = (on, config) => {
 	//  watchOptions: {}
 	// }))
 
+	on('task', {
+		generateOTP: require('cypress-otp')
+	});
+
 	return Object.assign({}, config, {
 		fixturesFolder: 'tests/e2e/fixtures',
 		integrationFolder: 'tests/e2e/specs',

@@ -64,7 +64,7 @@ export async function validateInput(req, res) {
         while (
             noLeadingOrTrailingDigits.length > 0 &&
             noLeadingOrTrailingDigits[noLeadingOrTrailingDigits.length - 1].match(regNumberCheck)
-            )
+        )
             noLeadingOrTrailingDigits = noLeadingOrTrailingDigits.substring(0, noLeadingOrTrailingDigits.length - 1);
 
         if (
@@ -105,7 +105,7 @@ export async function validateInput(req, res) {
             .has()
             .lowercase() // Must have lowercase letters
             .has()
-            .digits() // Must have digits
+            .digits(); // Must have digits
 
         const validationReturn = schema.validate(inputFieldValue, { list: true });
 

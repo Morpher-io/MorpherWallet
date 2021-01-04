@@ -1,12 +1,18 @@
+import { User } from '../../database/models';
+import { errorResponse, successResponse } from '../../helpers/functions/util';
+
 const WalletController = require('../../controllers/wallet.controller');
 const ValidationController = require('../../controllers/validation.controller');
-const secureRoutes = require("./secure");
-
-console.log(secureRoutes)
+const secureRoutes = require('./secure');
 
 // The index route file which connects all the other files.
 module.exports = function(express) {
     const router = express.Router();
+
+    if (process.env.ENVIRONMENT === 'development') {
+        const testingRoutes = require('./testing')(express.Router());
+        router.use('/test', testingRoutes);
+    }
 
     router.post('/saveEmailPassword', WalletController.saveEmailPassword);
     router.post('/getEncryptedSeed', WalletController.getEncryptedSeed);
@@ -27,6 +33,7 @@ module.exports = function(express) {
      * Secure routes checking signature matching eth_address
      */
     router.use('/auth', secureRoutes);
+    router.post('/auth/resetRecovery', WalletController.resetRecovery);
     router.post('/auth/updatePassword', WalletController.updatePassword);
     router.post('/auth/updateEmail', WalletController.updateEmail);
     router.post('/auth/change2FAMethods', WalletController.change2FAMethods);

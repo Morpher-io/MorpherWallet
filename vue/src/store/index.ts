@@ -33,7 +33,8 @@ import {
 	TypeChangeEmail,
 	TypePayloadData,
 	TypeRecoveryParams,
-	TypeAddRecoveryParams
+	TypeAddRecoveryParams,
+	TypeResetRecovery
 } from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
@@ -231,13 +232,16 @@ const store: Store<RootState> = new Vuex.Store({
 									send2FAEmail(email)
 										.then(resolve)
 										.catch(reject);
-								} else {
+								}
+								if (!payload.email && !payload.authenticator) {
 									getEncryptedSeedFromMail(email, '', '')
 										.then(encryptedSeed => {
 											commit('seedFound', { encryptedSeed });
 											resolve(true);
 										})
 										.catch(reject);
+								} else {
+									resolve(true);
 								}
 							})
 							.catch(err => {
@@ -373,7 +377,6 @@ const store: Store<RootState> = new Vuex.Store({
 							//commit('updatePayload', { email: false, authenticator: false });
 							commit('seedFound', { encryptedSeed });
 							if (state.hashedPassword) {
-								//console.log(password found);
 								dispatch('unlockWithStoredPassword')
 									.then(() => resolve('/'))
 									.catch(() => {
@@ -392,12 +395,10 @@ const store: Store<RootState> = new Vuex.Store({
 								commit('authError', '2FA Authentication code not correct');
 								reject('2FA Authentication not correct');
 							} else {
-								console.log(err);
 								reject('error');
 							}
 						});
 				} else {
-					console.log('Reached here for wathever reason');
 					reject();
 				}
 			});
@@ -413,7 +414,6 @@ const store: Store<RootState> = new Vuex.Store({
 							resolve(true);
 						})
 						.catch(() => {
-							// console.log('unlockWithStoredPassword error', err);
 							reject(false);
 						});
 				} else {
@@ -439,7 +439,6 @@ const store: Store<RootState> = new Vuex.Store({
 						});
 					})
 					.catch(err => {
-						// console.log('unlockWithPassword error', err);
 						commit('authError', "The user wasn't found: Signup first!");
 						reject(err);
 					});
@@ -595,6 +594,26 @@ const store: Store<RootState> = new Vuex.Store({
 				} else {
 					reject('Keystore not found, aborting');
 				}
+			});
+		},
+		resetRecoveryMethod({ commit, dispatch }, params: TypeResetRecovery) {
+			return new Promise((resolve, reject) => {
+				commit('loading', 'Resetting recovery...');
+				dispatch('sendSignedRequest', {
+					body: { recoveryTypeId: params.recoveryTypeId },
+					method: 'POST',
+					url: getBackendEndpoint() + '/v1/auth/resetRecovery'
+				})
+					.then(() => {
+						dispatch('updateRecoveryMethods').then(() => {
+							commit('loading', '');
+							resolve(true);
+						});
+					})
+					.catch(e => {
+						reject(e);
+						commit('loading', '');
+					});
 			});
 		}
 	},

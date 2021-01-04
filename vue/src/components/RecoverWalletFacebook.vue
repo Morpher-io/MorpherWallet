@@ -56,7 +56,7 @@ export default class RecoverWalletFacebook extends mixins(Global) {
 					this.seedFound = true;
 					this.oldPassword = userID;
 				})
-				.catch((error) => {
+				.catch(error => {
 					this.hideSpinner();
 					this.recoveryError = error;
 				});
