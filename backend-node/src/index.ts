@@ -8,7 +8,7 @@ import * as morgan from 'morgan';
 import * as helmet from 'helmet';
 import * as bodyParser from 'body-parser';
 import { sequelize, User } from './database/models';
-import {decrypt, encrypt, errorResponse, randomFixedInteger, sha256, successResponse} from './helpers/functions/util';
+import { decrypt, encrypt, errorResponse, randomFixedInteger, sha256, successResponse } from './helpers/functions/util';
 import { Logger } from './helpers/functions/winston';
 
 // Import v1 routes instance for REST endpoint.
@@ -19,10 +19,16 @@ const app = express();
 
 const rateLimit = require('express-rate-limit');
 
-const webLimiter = rateLimit({
+const limiter = {
     windowMs: 60 * 1000, // 1 minute
     max: 60 // limit each IP to 60 requests per minute
-});
+};
+
+if (process.env.ENVIRONMENT === 'development') {
+    limiter.max = 600;
+}
+
+const webLimiter = rateLimit(limiter);
 
 // apply a rate limit to the web endpoints.
 app.use('/v1/', webLimiter);
@@ -66,15 +72,16 @@ process.on('unhandledRejection', (error: any, promise) => {
     Logger.info(error.stack || error);
 });
 
+if (!module.parent) {
+    // Listen to the server ports.
+    httpServer.listen(process.env.PORT, async () => {
+        Logger.info({ status: `🚀Express Server ready at http://localhost:${process.env.PORT}` });
 
-// Listen to the server ports.
-httpServer.listen(process.env.PORT, async () => {
-    Logger.info({status: `🚀Express Server ready at http://localhost:${process.env.PORT}`});
-
-    // Database initialization.
-    await sequelize.sync();
-    Logger.info({status: 'Connected to database'});
-});
+        // Database initialization.
+        await sequelize.sync();
+        Logger.info({ status: 'Connected to database' });
+    });
+}
 
 // Export server for testing purposes
 module.exports.app = app;

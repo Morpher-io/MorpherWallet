@@ -8,7 +8,6 @@ export class Userhistory extends Model<Userhistory> {
     @Column
     id: number;
 
-    
     @ForeignKey(() => User)
     @Column({
         type: DataType.INTEGER,
@@ -39,5 +38,4 @@ export class Userhistory extends Model<Userhistory> {
         type: DataType.TEXT
     })
     stringified_headers;
-
 }

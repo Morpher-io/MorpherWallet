@@ -10,6 +10,7 @@
 				<i class="fas fa-check-circle"></i>
 			</span>
 			Facebook Recovery Added
+			<button class="button is-danger" @click="resetRecovery">Reset</button>
 		</div>
 		<div v-if="error">{{ error }}</div>
 	</div>
@@ -48,6 +49,13 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 		this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 	}
 
+	async resetRecovery() {
+		const success = await this.resetRecoveryMethod({ recoveryTypeId: this.recoveryTypeId });
+		if (success) {
+			this.hasRecoveryMethod = false;
+		}
+	}
+
 	async onLogin(data) {
 		if (data == undefined) {
 			// this.showSpinnerThenAutohide('Aborted Facebook Recovery');
@@ -56,7 +64,6 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 		this.showSpinner('Saving Keystore for Recovery');
 		const userID = data.authResponse.userID;
 		const key = await sha256(this.clientId + userID);
-		console.log(this.clientId + userID, key);
 		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
 			.then(async () => {
 				this.showSpinnerThenAutohide('Saved Successfully');

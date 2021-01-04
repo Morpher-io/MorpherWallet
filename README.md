@@ -1,69 +1,60 @@
-# Zerowallet Fortmatic/Portis drop-in replacement
-A wallet which needs zero installation and zero configuration (almost!)
+![image info](./docs/Logo.png)
+
+# Introduction
+This is the repository for the core Morpher Wallet components of https://wallet.morpher.com
+
+A wallet which needs zero installation and zero configuration.
+
+![](https://img.shields.io/david/Morpher-io/MorpherWallet) ![](https://img.shields.io/github/last-commit/Morpher-io/MorpherWallet) ![](https://img.shields.io/github/license/Morpher-io/MorpherProtocol)
+
+# Prerequisites
+* Install Docker https://docs.docker.com/get-docker/ and configure it correctly.
+* Install Postgres https://www.postgresql.org/download/ (optional if you work with Docker).
+* Install Node.js and Npm https://nodejs.org/en/download/ (optional if you work with Docker).
+* Git clone this repo and `cd` into it.
+
 
 # Installation
+You can deploy Zerowallet on your local/cloud machine for testing in two ways: 
 
-First you need the eth-lightwallet repository/folder in the frontend. Either download the whole repository from 
-https://github.com/Morpher-io/eth-lightwallet or simply clone it into the folder:
+* You can deploy using Docker.
 
-`cd vue && git clone git@github.com:Morpher-io/eth-lightwallet.git && cd ..`
+* You can setup a Postgres database, install Node.js and Npm.
 
-then start docker-compose:
+### Setting up the wallet with Docker 
+* Run `docker compose up --build` in this root repository.
 
-`docker-compose up`
+Postgres database, backend and frontend will be automatically setup through the Docker scripts.  
 
+Postgres database will be deployed at: `http://127.0.0.1:5432`.
 
+Backend will be deployed at: `http://127.0.0.1:8080`.
 
-# Components
+Frontend will be deployed at: `http://127.0.0.1:3001`.
 
-## SDK
-In /zerowallet-sdk you find the actual SDK. This is used in a sample trade app (see below). You can basically do:
+### Setting up the wallet with Node.js and Npm
 
-```
-let sdk = new ZeroWallet("ws://127.0.0.1:7545");
-let web3 = new Web3(sdk.getProvider());
-```
+#### Setting up backend
+ 
+* Run `npm install` in the `backend-node` directory.
 
-It will override getAccounts and signTransaction and delegate it to the Wallet (Keystore)
+* Rename the `.env.example.` to `.env`.
 
-## Sample-Trade App
-This is a sample React app integrating the Zerowallet. 
+* Input the correct database `DB_` variables.
 
-Run it with
-```
-cd client_trade_morpher_com
-npm install
-npm start
-```
+* Run `npm run start`.
 
-It should be running on localhost:3000
+* Run `npm run db:seed` to populate the database with the initial data.
+ 
+ Backend will be deployed at: `http://127.0.0.1:8080`.
 
-*You Need To Run The Wallet First!*
+#### Setting up frontend
 
-## Wallet
-This is the actual keystore which should be running under wallet.morpher.com (or localhost:3001 in development)
+* Run `npm install` in the `vue` directory. 
+* Run `npm run serve` to start the frontend process.
 
-The SDK tries to open this in an iFrame.
+ Frontend will be deployed at: `http://127.0.0.1:3001`.
 
-Run it with
-```
-cd client_wallet_morpher_com
-npm install
-npm start
-```
+# More information
 
-Communication is done via postMessage/onMessage wrapped in penpal.
-
-Idea:
-
-sample-app wants to know if you are logged in:
-in parent isLoggedIn() -> to iframe child -> isLoggedIn() in child -> messageBack to parent -> result
-
-## Backend
-There is a social recovery method which uses a backend to try and get encrypted seed phrases from a server
-
-start the php-backend and a database with
-
-```
-docker-compose up
-```
+Please take a look into the `docs` folder in this repository for some extra documentation and frequently asked questions.

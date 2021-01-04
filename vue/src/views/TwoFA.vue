@@ -13,6 +13,7 @@
 						class="input"
 						name="emailCode"
 						id="emailCode"
+						data-cy="emailCode"
 						placeholder="123456"
 						v-model="emailCode"
 					/>
@@ -31,6 +32,7 @@
 						class="input"
 						name="authenticatorCode"
 						id="authenticatorCode"
+						data-cy="authenticatorCode"
 						placeholder="123456"
 						v-model="authenticatorCode"
 					/>
@@ -50,7 +52,7 @@
 			</div>
 			<div class="field is-grouped">
 				<div class="layout split first">
-					<button class="button is-green" type="submit">
+					<button class="button is-green" type="submit" data-cy="unlock">
 						<span class="icon is-small">
 							<i class="far fa-file"></i>
 						</span>
@@ -91,15 +93,15 @@ export default class TwoFA extends mixins(Global) {
 	 * Process email 2fa authentication
 	 */
 	async validateCode() {
-		this.$store.commit('loading', 'Validating 2FA codes...');
+		this.showSpinner('Validating 2FA codes...');
 		this.showError = false;
 		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.authenticatorCode })
 			.then(nextroute => {
-				this.$store.commit('loading', '');
+				this.hideSpinner();
 				this.router.push(nextroute);
 			})
 			.catch(error => {
-				this.$store.commit('loading', '');
+				this.hideSpinner();
 				if (error.toString() === 'invalid password') {
 					this.store.status = 'invalid password';
 					this.router.push('/login');

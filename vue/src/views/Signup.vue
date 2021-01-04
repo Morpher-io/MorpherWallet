@@ -6,7 +6,14 @@
 			<div class="field">
 				<label class="label">Email</label>
 				<div class="control">
-					<input type="email" class="input" name="walletEmail" id="walletEmail" placeholder="example@example.com" v-model="walletEmail" />
+					<input
+						type="email"
+						class="input"
+						name="walletEmail"
+						data-cy="walletEmail"
+						placeholder="example@example.com"
+						v-model="walletEmail"
+					/>
 				</div>
 
 				<p class="help">Use this Email-Address for Wallet Recovery</p>
@@ -23,7 +30,7 @@
 						type="password"
 						class="input"
 						name="walletPassword"
-						id="walletPassword"
+						data-cy="walletPassword"
 						placeholder="Strong Password!"
 						v-model="walletPassword"
 					/>
@@ -45,7 +52,7 @@
 						type="password"
 						class="input"
 						name="walletPasswordRepeat"
-						id="walletPasswordRepeat"
+						data-cy="walletPasswordRepeat"
 						placeholder="Repeat Password"
 						v-model="walletPasswordRepeat"
 					/>
@@ -54,7 +61,7 @@
 
 			<div class="field">
 				<div class="layout split first">
-					<button class="button is-green" type="submit">
+					<button class="button is-green" type="submit" data-cy="createNewWallet">
 						<span class="icon is-small">
 							<i class="far fa-file"></i>
 						</span>
@@ -97,7 +104,6 @@ export default class Signup extends mixins(Global) {
 
 	// Methods
 	async signupExecute(e: any) {
-		//console.log(e);
 		e.preventDefault();
 		this.invalidEmail = '';
 		this.invalidPassword = '';
@@ -110,9 +116,10 @@ export default class Signup extends mixins(Global) {
 		/**
 		 * Validating Email
 		 */
-		this.$store.commit('loading', 'Validating Email ...');
+		this.showSpinner('Validating Email...');
 		const emailMessage = await validateInput('email', this.walletEmail);
 		if (emailMessage) {
+			this.hideSpinner();
 			this.invalidEmail = emailMessage;
 			return;
 		}
@@ -121,19 +128,20 @@ export default class Signup extends mixins(Global) {
 		 * Validating Password
 		 */
 
-		this.$store.commit('loading', 'Validating Password ...');
+		this.showSpinner('Validating Password...');
 		const passwordMessage = await validateInput('password', this.walletPassword);
 		if (passwordMessage) {
+			this.hideSpinner();
 			this.invalidPassword = passwordMessage;
 			return;
 		}
 
 		const email = this.walletEmail;
 
-		this.$store.commit('loading', 'Creating Wallet ...');
+		this.showSpinner('Creating Wallet...');
 		this.createWallet({ email, password: this.walletPassword })
 			.then(() => {
-				this.$store.commit('loading', '');
+				this.hideSpinner();
 				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator) {
 					// open 2fa page if 2fa is required
 					this.$router.push('/2fa');
@@ -142,8 +150,8 @@ export default class Signup extends mixins(Global) {
 				}
 			})
 			.catch(e => {
+				this.hideSpinner();
 				this.invalidEmail = e.toString();
-				console.log(e);
 			});
 	}
 }

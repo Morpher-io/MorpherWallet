@@ -400,7 +400,6 @@ export default class ZeroWallet {
   }
 
   clearSubprovider(subproviderType: any) {
-		console.log('clearSubprovider')
     //const subprovider = this.provider._providers.find((subprovider: any) => subprovider instanceof subproviderType);
     //this.provider.removeProvider(subprovider);
     //this.provider.addProvider(new subproviderType());

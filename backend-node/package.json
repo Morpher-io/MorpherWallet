@@ -4,11 +4,12 @@
   "description": "Morpher Wallet Backend",
   "main": "index.ts",
   "scripts": {
-    "test": "mocha -r ts-node/register src/tests/validation.test.ts --exit",
+    "test": "mocha -r ts-node/register src/tests/*.test.ts --exit",
     "start": "ts-node ./src/index.ts",
     "start:production": "./node_modules/pm2/bin/pm2-runtime index.js --max-memory-restart 2G",
     "start:watch": "nodemon --exec ts-node ./src/index.ts",
     "start:debug": "nodemon --inspect ts-node ./src/index.ts",
+    "db:seed": "ts-node ./src/database/seed/index.ts",
     "env:dev": "ts-node src/helpers/functions/aws.ts dev",
     "env:production": "ts-node src/helpers/functions/aws.ts production",
     "env:staging": "ts-node src/helpers/functions/aws.ts staging",
@@ -57,6 +58,7 @@
     "typescript": "^3.6.3",
     "validate.js": "^0.13.1",
     "vk-io": "^4.0.0-rc.30",
+    "web3-eth-accounts": "^1.3.0",
     "winston": "^3.1.0",
     "winston-aws-cloudwatch": "^3.0.0"
   },

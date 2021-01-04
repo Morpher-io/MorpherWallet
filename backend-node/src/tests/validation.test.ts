@@ -48,7 +48,7 @@ describe('Validation controller test cases', async () => {
 
         expect(validationResponse.body.success).toEqual(false);
         expect(validationResponse.body.returnMessage).toEqual('Password insufficient');
-        expect(validationResponse.body.validationFails).toEqual([ 'min', 'uppercase', 'lowercase' ]);
+        expect(validationResponse.body.validationFails).toEqual(['min', 'uppercase', 'lowercase']);
     });
 
     it('returns error for all lowercase password', async () => {

@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
 
-export async function sendEmail2FA(payload, email){
+export async function sendEmail2FA(payload, email) {
     const SES = new AWS.SES({
         accessKeyId: process.env.ACCESS_KEY_ID,
         secretAccessKey: process.env.ACCESS_KEY_SECRET,
@@ -11,25 +11,25 @@ export async function sendEmail2FA(payload, email){
 
     const params = {
         Destination: {
-            ToAddresses:  [email]
+            ToAddresses: [email]
         },
         Message: {
             Body: {
                 Text: {
-                    Data: emailBody,
+                    Data: emailBody
                 }
             },
             Subject: {
-                Data: 'Email 2FA',
+                Data: 'Email 2FA'
             }
         },
-        Source: 'team@morpher.com',
+        Source: 'team@morpher.com'
     };
 
     await SES.sendEmail(params).promise();
 }
 
-export async function sendEmailChanged(payload, email){
+export async function sendEmailChanged(payload, email) {
     const SES = new AWS.SES({
         accessKeyId: process.env.ACCESS_KEY_ID,
         secretAccessKey: process.env.ACCESS_KEY_SECRET,
@@ -40,19 +40,19 @@ export async function sendEmailChanged(payload, email){
 
     const params = {
         Destination: {
-            ToAddresses:  [email]
+            ToAddresses: [email]
         },
         Message: {
             Body: {
                 Text: {
-                    Data: emailBody,
+                    Data: emailBody
                 }
             },
             Subject: {
-                Data: 'Morpher Wallet Email Has Changed!',
+                Data: 'Morpher Wallet Email Has Changed!'
             }
         },
-        Source: 'team@morpher.com',
+        Source: 'team@morpher.com'
     };
 
     await SES.sendEmail(params).promise();

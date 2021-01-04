@@ -108,7 +108,6 @@ router.beforeEach((to, from, next) => {
 		}
 		next('/login');
 	} else if (to.matched.some(record => record.meta.requires2fa)) {
-		console.log(store.getters.twoFaRequired);
 		if (store.getters.twoFaRequired) {
 			next();
 			return;
