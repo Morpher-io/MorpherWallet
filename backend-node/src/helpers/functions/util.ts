@@ -94,9 +94,10 @@ const randomFixedInteger = function(length) {
 };
 
 function sortObject(object: any) {
-    if (typeof object !== 'object' || object instanceof Array)
+    if (typeof object !== 'object' || object instanceof Array) {
         // Not to sort the array
         return object;
+    }
     const keys = Object.keys(object);
     keys.sort();
     const newObject = {};
