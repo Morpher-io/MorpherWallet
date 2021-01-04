@@ -1,0 +1,34 @@
+version: 0.2
+
+env:
+    variables:
+        VUE_APP_BACKEND_ENDPOINT: 'https://wallet-api-dev.morpher.com'
+    secrets-manager:
+        VUE_APP_GOOGLE_APP_ID: "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_GOOGLE_APP_ID::"
+        VUE_APP_FACEBOOK_APP_ID: "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_FACEBOOK_APP_ID::"
+        VUE_APP_VK_APP_ID: "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_VK_APP_ID::"
+
+phases:
+    install:
+        runtime-versions:
+            nodejs: 10
+        commands:
+            - pip install --upgrade pip
+            - pip install --upgrade awscli
+    pre_build:
+        commands:
+            - cd vue
+            - npm install
+    build:
+        commands:
+            - npm run lint
+            - npm run build
+    post_build:
+        commands:
+            - find . -name \*.map -type f -delete
+
+artifacts:
+    files:
+        - '**/*'
+    base-directory: 'vue/dist*'
+
