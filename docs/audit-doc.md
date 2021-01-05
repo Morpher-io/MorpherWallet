@@ -53,3 +53,15 @@ The inputs from the main app are:
 
 
 :[Packages](logging.md)
+<div style='page-break-after: always;'></div>
+
+
+:[Packages](socialrecovery.md)
+<div style='page-break-after: always;'></div>
+
+
+:[Packages](frontendtests.md)
+<div style='page-break-after: always;'></div>
+
+
+:[Packages](unittests.md)

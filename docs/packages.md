@@ -21,7 +21,7 @@ The following is a non-exhaustive list of important packages used in the Keystor
 https://web3js.readthedocs.io/en/v1.2.0/web3-eth-accounts.html
 The web3.eth.accounts contains functions to generate Ethereum accounts and sign transactions and data.
 
-It's currently marked as "_This package has NOT been audited and might potentially be unsafe. Take precautions to clear memory properly, store the private keys safely, and test transaction receiving and sending functionality properly before using in production!_". We're aware of this fact, no data leakage is indicated at this point. Web3js is a well maintained open source library and widely in use. Web3.eth.accounts is giving back an object containing scoped functions to sign a transaction. The object is never exposed 
+It's currently marked as "_This package has NOT been audited and might potentially be unsafe. Take precautions to clear memory properly, store the private keys safely, and test transaction receiving and sending functionality properly before using in production!_". We're aware of this fact, but no data leakage is indicated at this point. Web3js is a well maintained open source library and widely in use. Web3.eth.accounts is giving back an object containing scoped functions to sign a transaction. The object is never exposed 
 
 ```javascript
 {
