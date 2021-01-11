@@ -1,9 +1,17 @@
-import { User } from '../../database/models';
-import { errorResponse, successResponse } from '../../helpers/functions/util';
-
 const WalletController = require('../../controllers/wallet.controller');
 const ValidationController = require('../../controllers/validation.controller');
 const secureRoutes = require('./secure');
+
+const rateLimit = require('express-rate-limit');
+
+const limiter = new rateLimit({
+    windowMs: 60 * 1000,
+    max: 60,
+    keyGenerator (req, res) {
+        return req.body.key;
+    }
+});
+
 
 // The index route file which connects all the other files.
 module.exports = function(express) {
@@ -15,7 +23,7 @@ module.exports = function(express) {
     }
 
     router.post('/saveEmailPassword', WalletController.saveEmailPassword);
-    router.post('/getEncryptedSeed', WalletController.getEncryptedSeed);
+    router.post('/getEncryptedSeed', limiter, WalletController.getEncryptedSeed);
 
     /**
      * Recovery Methods
