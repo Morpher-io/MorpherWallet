@@ -14,9 +14,7 @@ phases:
       - docker-compose up --build -d
   post_build:
     commands:
-      - backend_id=$(docker ps -aqf "name=zerowalletrecoverable_backend_1")
-      - frontend_id=$(docker ps -aqf "name=zerowalletrecoverable_vue_1")
-      - docker exec -it $backend_id /bin/bash
+      - docker exec -it zerowalletrecoverable_backend_1 sh
       - npm run test
       - echo Build completed on `date`
 artifacts:
