@@ -1,5 +1,9 @@
 version: 0.2
 
+env:
+  variables:
+    VUE_APP_BACKEND_ENDPOINT: 'http://backend'
+
 phases:
   pre_build:
     commands:
@@ -15,6 +19,10 @@ phases:
   post_build:
     commands:
       - docker exec src_backend_1 npm run test
+      - docker exec src_vue_1 apt-get update
+      - docker exec src_vue_1 apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb -y
+      - docker exec src_vue_1 cp cypress.test.json cypress.json
+      - docker exec npx src_vue_1 npx cypress run --headless
       - echo Build completed on `date`
 artifacts:
     files:
