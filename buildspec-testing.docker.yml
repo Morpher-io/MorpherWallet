@@ -16,6 +16,7 @@ phases:
     commands:
       - docker exec src_backend_1 npm run test
       - npm run test
+      - exit
       - echo Build completed on `date`
 artifacts:
     files: 
