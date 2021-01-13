@@ -14,7 +14,7 @@ phases:
       - docker-compose up --build -d
   post_build:
     commands:
-      - docker exec -it src_backend_1 sh
+      - docker exec -it src_backend_1 bash
       - npm run test
       - echo Build completed on `date`
 artifacts:
