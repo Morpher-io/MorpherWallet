@@ -4,6 +4,8 @@ describe('Change Email', () => {
 	const email = Cypress.env('firstEmail');
 	const secondEmail = Cypress.env('secondEmail');
 
+	const backendUrl = Cypress.env('backendUrl');
+
 	const password = 'Test123!';
 
 	it('change email error', () => {
@@ -65,7 +67,7 @@ describe('Change Email', () => {
 
 		cy.get('[data-cy=updateEmail]').click();
 
-		cy.request('POST', 'http://localhost:8080/v1/test/getEmailCode', { email }).then(response => {
+		cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email }).then(response => {
 			// response.body is automatically serialized into JSON
 			const code = response.body.email_verification_code;
 
@@ -124,7 +126,7 @@ describe('Change Email', () => {
 
 		cy.get('[data-cy=updateEmail]').click();
 
-		cy.request('POST', 'http://localhost:8080/v1/test/getEmailCode', { email: secondEmail }).then(response => {
+		cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email: secondEmail }).then(response => {
 			// response.body is automatically serialized into JSON
 			const code = response.body.email_verification_code;
 

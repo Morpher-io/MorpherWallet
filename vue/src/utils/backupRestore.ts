@@ -5,7 +5,7 @@ import { TypeEncryptedSeed, TypePayloadData, TypeCreatedKeystore } from '../type
 import { WalletBase } from 'web3-core';
 
 const getBackendEndpoint = () => {
-	return process.env.VUE_APP_BACKEND_ENDPOINT || 'http://localhost:8080';
+	return process.env.VUE_APP_BACKEND_ENDPOINT;
 };
 
 const changePasswordEncryptedSeed = async (encryptedSeed: TypeEncryptedSeed, oldPassword: string, newPassword: string) => {

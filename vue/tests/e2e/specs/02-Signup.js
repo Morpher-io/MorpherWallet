@@ -4,6 +4,8 @@ describe('Signup', () => {
 	const email = Cypress.env('firstEmail');
 	const password = 'Test123!';
 
+	const backendUrl = Cypress.env('backendUrl');
+
 	it('Signup and Login', () => {
 		cy.visit('/signup');
 
@@ -23,7 +25,7 @@ describe('Signup', () => {
 
 		cy.wait(2000);
 
-		cy.request('POST', 'http://localhost:8080/v1/test/getEmailCode', { email }).then(response => {
+		cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email }).then(response => {
 			// response.body is automatically serialized into JSON
 			const code = response.body.email_verification_code;
 
@@ -49,7 +51,7 @@ describe('Signup', () => {
 
 		cy.get('[data-cy=submit]').click();
 
-		cy.request('POST', 'http://localhost:8080/v1/test/getEmailCode', { email }).then(response => {
+		cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email }).then(response => {
 			// response.body is automatically serialized into JSON
 			const code = response.body.email_verification_code;
 
@@ -75,7 +77,7 @@ describe('Signup', () => {
 
 		cy.get('[data-cy=submit]').click();
 
-		cy.request('POST', 'http://localhost:8080/v1/test/getEmailCode', { email }).then(response => {
+		cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email }).then(response => {
 			// response.body is automatically serialized into JSON
 			const code = response.body.email_verification_code;
 

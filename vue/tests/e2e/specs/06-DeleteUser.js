@@ -4,8 +4,11 @@ describe('Delete User', () => {
 	const email = Cypress.env('firstEmail');
 	const password = 'Test123!';
 
+	const backendUrl = Cypress.env('backendUrl');
+
 	it('Deletes the user for a fresh database', () => {
-		cy.request('POST', 'http://localhost:8080/v1/test/deleteUser', { email }).then(() => {
+		console.log(backendUrl)
+		cy.request('POST', `${backendUrl}/v1/test/deleteUser`, { email }).then(() => {
 			cy.visit('/');
 
 			cy.get('[data-cy=walletEmail]')

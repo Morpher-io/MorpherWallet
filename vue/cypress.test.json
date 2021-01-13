@@ -1,11 +1,11 @@
 {
   "pluginsFile": "tests/e2e/plugins/index.js",
   "experimentalNetworkStubbing": true,
-  "retries": 1,
+  "retries": 4,
   "baseUrl": "http://localhost:3001",
   "env": {
     "firstEmail": "test@email.com",
     "secondEmail": "test2@email.com",
-    "backendUrl": "http://localhost:8080"
+    "backendUrl": "http://backend"
   }
 }
