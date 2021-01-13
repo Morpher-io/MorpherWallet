@@ -16,6 +16,11 @@ phases:
       - cd backend-node
       - docker build -t $REPOSITORY_URI:latest .
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+      - docker-compose up -d
+      - backend_id=$(docker ps -aqf "name=zerowalletrecoverable_backend_1")
+      - frontend_id=$(docker ps -aqf "name=zerowalletrecoverable_vue_1")
+      - docker exec -it $backend_id /bin/bash
+      - npm run test
   post_build:
     commands:
       - echo Build completed on `date`
