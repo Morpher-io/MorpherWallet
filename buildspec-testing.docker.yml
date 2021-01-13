@@ -17,5 +17,5 @@ phases:
       - docker exec src_backend_1 npm run test
       - echo Build completed on `date`
 artifacts:
-    files: 
-      - imagedefinitions.json
+    files:
+      - '**/*'
