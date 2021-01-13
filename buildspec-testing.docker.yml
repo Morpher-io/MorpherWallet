@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - cp .env.aws.backend.example .env.aws.backend
+      - docker-compose up --build
+  post_build:
+    commands:
+      - backend_id=$(docker ps -aqf "name=zerowalletrecoverable_backend_1")
+      - frontend_id=$(docker ps -aqf "name=zerowalletrecoverable_vue_1")
+      - docker exec -it $backend_id /bin/bash
+      - npm run test
+      - echo Build completed on `date`
+artifacts:
+    files: 
+      - imagedefinitions.json
