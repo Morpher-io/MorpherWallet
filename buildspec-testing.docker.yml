@@ -11,7 +11,7 @@ phases:
       - echo Build started on `date`
       - echo Building the Docker image...
       - cp .env.aws.backend.example .env.aws.backend
-      - docker-compose up --build
+      - docker-compose up --build -d
   post_build:
     commands:
       - backend_id=$(docker ps -aqf "name=zerowalletrecoverable_backend_1")
