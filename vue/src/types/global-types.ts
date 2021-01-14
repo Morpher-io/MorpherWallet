@@ -144,3 +144,14 @@ export type TypeExportSeed = {
 	account: string;
 	password: string;
 };
+
+export type TypeShowPrivateKey = {
+	__typename?: 'TypeShowPrivateKey';
+	account: string;
+	password: string;
+};
+
+export type TypeUpdatePrivateKey = {
+	__typename?: 'TypeUpdatePrivateKey';
+	privateKey: string;
+};

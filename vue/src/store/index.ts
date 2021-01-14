@@ -34,7 +34,7 @@ import {
 	TypePayloadData,
 	TypeRecoveryParams,
 	TypeAddRecoveryParams,
-	TypeResetRecovery, TypeExportSeed
+	TypeResetRecovery, TypeExportSeed, TypeShowPrivateKey, TypeUpdatePrivateKey
 } from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
@@ -68,6 +68,7 @@ export interface RootState {
 	loginComplete: boolean;
 	recoveryMethods: Array<any>;
 	seedExported: boolean;
+	privateKey: string;
 }
 
 /**
@@ -108,7 +109,8 @@ function initialState(): RootState {
 		openPage: '',
 		loginComplete: false,
 		recoveryMethods: [],
-		seedExported: false
+		seedExported: false,
+		privateKey: ''
 	} as RootState;
 }
 
@@ -207,7 +209,10 @@ const store: Store<RootState> = new Vuex.Store({
 		},
 		seedExported(state: RootState) {
 			state.seedExported = true;
-		}
+		},
+		updatePrivateKey(state: RootState, payload: TypeUpdatePrivateKey) {
+			state.privateKey = payload.privateKey;
+		},
 	},
 	actions: {
 		showSpinner({ commit }, message: string) {
@@ -627,7 +632,7 @@ const store: Store<RootState> = new Vuex.Store({
 
 			if (storedPassword === params.password) {
 
-				if(state.keystore !== null){
+				if (state.keystore !== null) {
 					downloadEncryptedKeystore(state.keystore[0].encrypt(params.password), params.account)
 					commit('delayedSpinnerMessage', 'Seed exported successfully');
 					commit('seedExported')
@@ -636,6 +641,23 @@ const store: Store<RootState> = new Vuex.Store({
 			} else {
 				commit('delayedSpinnerMessage', 'Wrong password for seed');
 			}
+		},
+		showPrivateKey({ commit, dispatch, state }, params: TypeShowPrivateKey) {
+			const storedPassword = state.hashedPassword;
+
+			if (storedPassword === params.password) {
+				if (state.keystore !== null) {
+					const privateKey = state.keystore[0].privateKey.substring(2)
+					commit('delayedSpinnerMessage', 'Private key exported successfully');
+					commit('updatePrivateKey', { privateKey })
+				}
+
+			} else {
+				commit('delayedSpinnerMessage', 'Wrong password for private key');
+			}
+		},
+		clearPrivateKey({ commit }) {
+			commit('updatePrivateKey', { privateKey: '' })
 		}
 	},
 	getters: {

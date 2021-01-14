@@ -22,27 +22,31 @@
 						<br />
 						<span class="account"> {{ account }} </span>
 					</button>
-					<button class="button is-green export" type="submit">
+					<button class="button is-green export" type="submit" @click="showKey()">
 							<span class="icon is-small">
 								<i class="fas fa-key"></i>
 							</span>
 						<span> Show private key </span>
 					</button>
+					<p v-if="store.seedExported" class="help private-key-text warning">Before you delete your account, make sure you have exported your Keystore.</p>
 					<button v-if="store.seedExported" class="button is-danger export" type="submit">
 							<span class="icon is-small">
 								<i class="fas fa-key"></i>
 							</span>
 						<span> Delete account </span>
 					</button>
-					<p v-if="store.seedExported" class="help">Before you delete your account, make sure you have exported your Keystore.</p>
 					<div v-if="seedPhrase">
 						<h3>Seed Phrase:</h3>
 						<h4>{{ seedPhrase }}</h4>
 					</div>
-					<div v-if="privateKey">
-						<h3>Private Key:</h3>
-						<h4>{{ privateKey }}</h4>
-					</div>
+					<h4 v-if="store.privateKey !== ''" class="private-key-header private-key-text">Private Key</h4>
+					<h4 v-if="store.privateKey !== ''" class="private-key-text">{{ store.privateKey }}</h4>
+					<button v-if="store.privateKey !== ''" class="button is-danger export" @click="clearKey()" type="submit">
+							<span class="icon is-small">
+								<i class="fas fa-key"></i>
+							</span>
+						<span> Clear </span>
+					</button>
 				</div>
 			</div>
 		</div>
@@ -51,37 +55,31 @@
 
 <script>
 import { sha256 } from '../utils/cryptoFunctions';
-import { getKeystoreFromEncryptedSeed } from '../utils/backupRestore';
-import { getAccountsFromKeystore } from '../utils/utils';
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '@/mixins/mixins';
 
-@Component({})
+@Component({
+
+})
 export default class ExportWallet extends mixins(Global, Authenticated) {
 	password = '';
 	seedPhrase = '';
-	privateKey = '';
 	collapsed = true;
 
 	async exportSeedPhrase(account) {
 		const password = await sha256(this.password);
 		await this.exportSeed({ account, password });
+		this.password = '';
 	}
 
-	async exportPrivateKey() {
-		const storedPassword = window.sessionStorage.getItem('password');
+	async showKey() {
 		const password = await sha256(this.password);
-		if (storedPassword === password) {
-			const encryptedSeed = JSON.parse(localStorage.getItem('encryptedSeed'));
+		await this.showPrivateKey({ password });
+		this.password = '';
+	}
 
-			const keystore = await getKeystoreFromEncryptedSeed(encryptedSeed, password);
-			const address = getAccountsFromKeystore(keystore)[0];
-
-			keystore.keyFromPassword(password, function(err, pwDerivedKey) {
-				if (err) throw err;
-				this.privateKey = keystore.exportPrivateKey(address, pwDerivedKey);
-			});
-		} else alert('Password is not right!');
+	async clearKey(){
+		await this.clearPrivateKey();
 	}
 
 };
@@ -98,5 +96,19 @@ export default class ExportWallet extends mixins(Global, Authenticated) {
 	}
 	.account{
 		font-size: 14px;
+	}
+	.private-key-text{
+		text-align: center;
+		word-break: break-word;
+		margin: 20px;
+	}
+	.private-key-header {
+		border-style: solid;
+		border-radius: 10px;
+		border-color: #00c386;
+		margin: 20px;
+	}
+	.warning {
+		font-size: 18px;
 	}
 </style>

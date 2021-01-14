@@ -12,7 +12,7 @@ import {
 	TypePayloadData,
 	TypeRecoveryParams,
 	TypeAddRecoveryParams,
-	TypeResetRecovery, TypeExportSeed
+	TypeResetRecovery, TypeExportSeed, TypeShowPrivateKey
 } from '../types/global-types';
 import { mapState } from 'vuex';
 import { RootState } from '../store';
@@ -66,6 +66,12 @@ export class Global extends Vue {
 
 	@Action
 	public exportSeed!: (params: TypeExportSeed) => Promise<unknown>;
+
+	@Action
+	public showPrivateKey!: (params: TypeShowPrivateKey) => Promise<unknown>;
+
+	@Action
+	public clearPrivateKey!: () => void;
 
 	@Action
 	public clearPage!: () => void;
