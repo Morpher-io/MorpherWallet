@@ -12,7 +12,7 @@ import {
 	TypePayloadData,
 	TypeRecoveryParams,
 	TypeAddRecoveryParams,
-	TypeResetRecovery
+	TypeResetRecovery, TypeExportSeed
 } from '../types/global-types';
 import { mapState } from 'vuex';
 import { RootState } from '../store';
@@ -63,6 +63,9 @@ export class Global extends Vue {
 
 	@Action
 	public resetRecoveryMethod!: (params: TypeResetRecovery) => Promise<unknown>;
+
+	@Action
+	public exportSeed!: (params: TypeExportSeed) => Promise<unknown>;
 
 	@Action
 	public clearPage!: () => void;

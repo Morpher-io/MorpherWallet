@@ -139,3 +139,8 @@ export type TypeAddRecoveryParams = {
 	password: string;
 	recoveryTypeId: number;
 };
+export type TypeExportSeed = {
+	__typename?: 'TypeExportSeed';
+	account: string;
+	password: string;
+};

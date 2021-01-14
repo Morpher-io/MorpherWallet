@@ -85,7 +85,6 @@
 				</div>
 			</div>
 		</form>
-		<br />
 	</div>
 </template>
 
@@ -164,8 +163,5 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.option,
-.boxLabel {
-	margin: 10px;
-}
+
 </style>

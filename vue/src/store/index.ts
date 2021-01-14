@@ -14,7 +14,7 @@ import {
 	getNonce,
 	recoverSeedSocialRecovery
 } from '../utils/backupRestore';
-import { getAccountsFromKeystore, sortObject } from '../utils/utils';
+import {downloadEncryptedKeystore, getAccountsFromKeystore, sortObject} from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
 
 import {
@@ -34,7 +34,7 @@ import {
 	TypePayloadData,
 	TypeRecoveryParams,
 	TypeAddRecoveryParams,
-	TypeResetRecovery
+	TypeResetRecovery, TypeExportSeed
 } from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
@@ -67,6 +67,7 @@ export interface RootState {
 	openPage: string;
 	loginComplete: boolean;
 	recoveryMethods: Array<any>;
+	seedExported: boolean;
 }
 
 /**
@@ -106,7 +107,8 @@ function initialState(): RootState {
 		messageDetails: {},
 		openPage: '',
 		loginComplete: false,
-		recoveryMethods: []
+		recoveryMethods: [],
+		seedExported: false
 	} as RootState;
 }
 
@@ -131,6 +133,7 @@ const store: Store<RootState> = new Vuex.Store({
 			}
 		},
 		delayedSpinnerMessage(state: RootState, statusMessage: string) {
+			state.loading = true;
 			state.spinnerStatusText = statusMessage;
 			setTimeout(() => {
 				state.loading = false;
@@ -201,6 +204,9 @@ const store: Store<RootState> = new Vuex.Store({
 			state.accounts = payload.accounts;
 			state.hashedPassword = payload.hashedPassword;
 			sessionStorage.setItem('password', payload.hashedPassword);
+		},
+		seedExported(state: RootState) {
+			state.seedExported = true;
 		}
 	},
 	actions: {
@@ -615,6 +621,21 @@ const store: Store<RootState> = new Vuex.Store({
 						commit('loading', '');
 					});
 			});
+		},
+		exportSeed({ commit, state }, params: TypeExportSeed) {
+			const storedPassword = state.hashedPassword;
+
+			if (storedPassword === params.password) {
+
+				if(state.keystore !== null){
+					downloadEncryptedKeystore(state.keystore[0].encrypt(params.password), params.account)
+					commit('delayedSpinnerMessage', 'Seed exported successfully');
+					commit('seedExported')
+				}
+
+			} else {
+				commit('delayedSpinnerMessage', 'Wrong password for seed');
+			}
 		}
 	},
 	getters: {
