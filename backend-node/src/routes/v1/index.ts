@@ -48,6 +48,7 @@ module.exports = function(express) {
     router.post('/auth/generateAuthenticatorQR', WalletController.generateAuthenticatorQR);
     router.post('/auth/addRecoveryMethod', WalletController.addRecoveryMethod);
     router.post('/auth/getRecoveryMethods', WalletController.getRecoveryMethods);
+    router.post('/auth/deleteAccount', WalletController.deleteAccount);
 
     return router;
 };

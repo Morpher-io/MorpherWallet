@@ -695,6 +695,22 @@ export async function resetRecovery(req, res) {
     return errorResponse(res, 'Could not find User!', 404);
 }
 
+export async function deleteAccount(req, res) {
+    const user = await User.findOne({ where: { email: req.body.email } });
+    if (user !== null) {
+        try{
+            await user.destroy()
+            return successResponse(res, true);
+        }
+        catch (e) {
+            return errorResponse(res, 'Could not delete User!', 500);
+        }
+
+    }
+
+    return errorResponse(res, 'Could not find User!', 404);
+}
+
 async function verifyEmail2FA(user_id: string, code: string): Promise<boolean> {
     const user = await User.findOne({ where: { id: user_id } });
     return user.payload.email === false || user.email_verification_code === Number(code);

@@ -724,7 +724,25 @@ const store: Store<RootState> = new Vuex.Store({
 		},
 		clearSeedPhrase({ commit }) {
 			commit('updateSeedPhrase', { seedPhrase: '' })
-		}
+		},
+		deleteWalletAccount({ state, dispatch }) {
+			return new Promise(async (resolve, reject) => {
+				dispatch('sendSignedRequest', {
+					body: {
+						email: state.email.toLowerCase()
+					},
+					method: 'POST',
+					url: getBackendEndpoint() + '/v1/auth/deleteAccount'
+				})
+				.then(() => {
+					dispatch('showSpinnerThenAutohide', 'Wallet deleted successfully');
+					dispatch('logoutWallet').then(() => {
+						resolve(true);
+					});
+				})
+				.catch(reject);
+			});
+		},
 	},
 	getters: {
 		isLoggedIn: state => {
