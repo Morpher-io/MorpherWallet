@@ -8,7 +8,7 @@
 
 		<Change2FA></Change2FA>
 
-		<ExportWallet :accounts="accounts" :keystore="keystore"></ExportWallet>
+		<ExportWallet></ExportWallet>
 
 		<div class="field is-grouped">
 			<router-link to="/addrecovery" tag="button" class="button is-danger">

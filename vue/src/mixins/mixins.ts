@@ -12,7 +12,9 @@ import {
 	TypePayloadData,
 	TypeRecoveryParams,
 	TypeAddRecoveryParams,
-	TypeResetRecovery, TypeExportSeed, TypeShowPrivateKey
+	TypeResetRecovery,
+	TypeExportPhraseKeyVariables,
+	TypeShowPhraseKeyVariables
 } from '../types/global-types';
 import { mapState } from 'vuex';
 import { RootState } from '../store';
@@ -65,13 +67,28 @@ export class Global extends Vue {
 	public resetRecoveryMethod!: (params: TypeResetRecovery) => Promise<unknown>;
 
 	@Action
-	public exportSeed!: (params: TypeExportSeed) => Promise<unknown>;
+	public exportSeed!: (params: TypeExportPhraseKeyVariables) => Promise<unknown>;
 
 	@Action
-	public showPrivateKey!: (params: TypeShowPrivateKey) => Promise<unknown>;
+	public exportKeystore!: (params: TypeExportPhraseKeyVariables) => Promise<unknown>;
+
+	@Action
+	public showPrivateKey!: (params: TypeShowPhraseKeyVariables) => Promise<unknown>;
+
+	@Action
+	public showSeedPhrase!: (params: TypeShowPhraseKeyVariables) => Promise<unknown>;
+
+	@Action
+	public exportSeedPhrase!: (params: TypeExportPhraseKeyVariables) => Promise<unknown>;
+
+	@Action
+	public deleteWalletAccount!: () => Promise<unknown>;
 
 	@Action
 	public clearPrivateKey!: () => void;
+
+	@Action
+	public clearSeedPhrase!: () => void;
 
 	@Action
 	public clearPage!: () => void;

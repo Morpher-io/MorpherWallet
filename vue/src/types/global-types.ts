@@ -139,19 +139,24 @@ export type TypeAddRecoveryParams = {
 	password: string;
 	recoveryTypeId: number;
 };
-export type TypeExportSeed = {
-	__typename?: 'TypeExportSeed';
+
+export type TypeExportPhraseKeyVariables = {
+	__typename?: 'TypeExportPhraseKeyVariables';
 	account: string;
 	password: string;
 };
 
-export type TypeShowPrivateKey = {
-	__typename?: 'TypeShowPrivateKey';
-	account: string;
+export type TypeShowPhraseKeyVariables = {
+	__typename?: 'TypeShowPhraseKeyVariables';
 	password: string;
 };
 
 export type TypeUpdatePrivateKey = {
 	__typename?: 'TypeUpdatePrivateKey';
 	privateKey: string;
+};
+
+export type TypeUpdateSeedPhrase = {
+	__typename?: 'TypeUpdateSeedPhrase';
+	seedPhrase: string;
 };

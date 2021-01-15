@@ -8,37 +8,41 @@
 				<i class="fas fa-chevron-down"></i>
 			</span>
 
-			<span class="header" @click="collapsed = !collapsed"> Export the Wallet Seed Phrase </span>
+			<span class="header" @click="collapsed = !collapsed"> Export the Wallet Seed Phrase and Keys</span>
 
 			<div :class="collapsed ? 'hidden' : 'visible'">
 				<div class="message-body">
+					<p class="help header-text warning">Before you delete your account, make sure you have exported at least your Seed Phrase.</p>
 					<input class="password" type="password" name="password" placeholder="Enter Wallet password" v-model="password" />
 					<br />
-					<button v-for="account in accounts" :key="account" class="button is-green export" type="submit" @click="exportSeedPhrase(account)">
+					<button class="button is-green export" type="submit" @click="showPhrase()">
 							<span class="icon is-small">
 								<i class="fas fa-key"></i>
 							</span>
-						<span> Export Keystore for </span>
-						<br />
-						<span class="account"> {{ account }} </span>
+						<span> Show Seed Phrase </span>
+					</button>
+					<h4 v-if="store.seedPhrase !== ''" class="private-key-header private-key-text">Seed Phrase</h4>
+					<h4 v-if="store.seedPhrase !== ''" class="private-key-text">{{ store.seedPhrase }}</h4>
+					<button v-if="store.seedPhrase !== ''" class="button is-danger export" @click="clearPhrase()" type="submit">
+						<span class="icon is-small">
+								<i class="fas fa-key"></i>
+							</span>
+						<span> Clear </span>
+					</button>
+					<button class="button is-green export" type="submit" @click="exportPhrase(store.accounts[0])">
+							<span class="icon is-small">
+								<i class="fas fa-key"></i>
+							</span>
+						<span> Export Seed Phrase </span>
 					</button>
 					<button class="button is-green export" type="submit" @click="showKey()">
 							<span class="icon is-small">
 								<i class="fas fa-key"></i>
 							</span>
-						<span> Show private key </span>
+						<span> Show Private Key for </span>
+						<br />
+						<span class="account"> {{ store.accounts[0] }} </span>
 					</button>
-					<p v-if="store.seedExported" class="help private-key-text warning">Before you delete your account, make sure you have exported your Keystore.</p>
-					<button v-if="store.seedExported" class="button is-danger export" type="submit">
-							<span class="icon is-small">
-								<i class="fas fa-key"></i>
-							</span>
-						<span> Delete account </span>
-					</button>
-					<div v-if="seedPhrase">
-						<h3>Seed Phrase:</h3>
-						<h4>{{ seedPhrase }}</h4>
-					</div>
 					<h4 v-if="store.privateKey !== ''" class="private-key-header private-key-text">Private Key</h4>
 					<h4 v-if="store.privateKey !== ''" class="private-key-text">{{ store.privateKey }}</h4>
 					<button v-if="store.privateKey !== ''" class="button is-danger export" @click="clearKey()" type="submit">
@@ -46,6 +50,20 @@
 								<i class="fas fa-key"></i>
 							</span>
 						<span> Clear </span>
+					</button>
+					<button class="button is-green export" type="submit" @click="exportKey(store.accounts[0])">
+							<span class="icon is-small">
+								<i class="fas fa-key"></i>
+							</span>
+						<span> Export Private Key Keystore for </span>
+						<br />
+						<span class="account"> {{ store.accounts[0] }} </span>
+					</button>
+					<button v-if="store.seedExported" class="button is-danger export" type="submit" @click="deleteAccount()">
+							<span class="icon is-small">
+								<i class="fas fa-key"></i>
+							</span>
+						<span> Delete account </span>
 					</button>
 				</div>
 			</div>
@@ -66,9 +84,15 @@ export default class ExportWallet extends mixins(Global, Authenticated) {
 	seedPhrase = '';
 	collapsed = true;
 
-	async exportSeedPhrase(account) {
+	async exportKey(account) {
 		const password = await sha256(this.password);
-		await this.exportSeed({ account, password });
+		await this.exportKeystore({ account, password });
+		this.password = '';
+	}
+
+	async exportPhrase(account) {
+		const password = await sha256(this.password);
+		await this.exportSeedPhrase({ account, password });
 		this.password = '';
 	}
 
@@ -78,8 +102,22 @@ export default class ExportWallet extends mixins(Global, Authenticated) {
 		this.password = '';
 	}
 
+	async showPhrase() {
+		const password = await sha256(this.password);
+		await this.showSeedPhrase({ password });
+		this.password = '';
+	}
+
 	async clearKey(){
 		await this.clearPrivateKey();
+	}
+
+	async clearPhrase(){
+		await this.clearSeedPhrase();
+	}
+
+	async deleteAccount(){
+		await this.deleteWalletAccount();
 	}
 
 };
@@ -92,7 +130,7 @@ export default class ExportWallet extends mixins(Global, Authenticated) {
 	}
 	.export{
 		height: 60px;
-		margin: 10px 0;
+		margin: 20px 0;
 	}
 	.account{
 		font-size: 14px;
@@ -107,6 +145,14 @@ export default class ExportWallet extends mixins(Global, Authenticated) {
 		border-radius: 10px;
 		border-color: #00c386;
 		margin: 20px;
+	}
+	.header-text{
+		text-align: center;
+		word-break: break-word;
+		margin-top: 20px;
+		margin-left: 20px;
+		margin-right: 20px;
+		margin-bottom: 10px;
 	}
 	.warning {
 		font-size: 18px;
