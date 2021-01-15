@@ -5,12 +5,10 @@
 				><span slot="login">Link to Facebook</span>
 			</v-facebook-login>
 		</div>
-		<div v-if="hasRecoveryMethod" class="has-text-centered">
-			<span class="icon google-icon">
-				<i class="fas fa-check-circle"></i>
-			</span>
-			Facebook Recovery Added
-			<button class="button is-danger" @click="resetRecovery">Reset</button>
+		<div class="control is-expanded" v-if="hasRecoveryMethod">
+			<v-facebook-login class="button is-fullwidth" :appId="clientId" @sdk-init="handleSdkInit" @login="deleteRecovery" v-model="facebook.model"
+			><span slot="login">Delete access to Facebook</span>
+			</v-facebook-login>
 		</div>
 		<div v-if="error">{{ error }}</div>
 	</div>
@@ -71,6 +69,27 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 			})
 			.catch(() => {
 				this.showSpinnerThenAutohide('Error During Saving');
+				this.error = 'Error during Saving.';
+			});
+	}
+
+	async deleteRecovery(data) {
+		if (data == undefined) {
+			// this.showSpinnerThenAutohide('Aborted Facebook Recovery');
+			return;
+		}
+
+		const userID = data.authResponse.userID;
+		const key = await sha256(this.clientId + userID);
+		this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId })
+			.then(async () => {
+				this.facebook.FB.api("/me/permissions","DELETE", () =>{
+					this.showSpinnerThenAutohide('Deleted Successfully');
+					this.hasRecoveryMethod = false;
+				});
+			})
+			.catch(() => {
+				this.showSpinnerThenAutohide('Error finding user');
 				this.error = 'Error during Saving.';
 			});
 	}

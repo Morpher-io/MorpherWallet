@@ -626,7 +626,7 @@ const store: Store<RootState> = new Vuex.Store({
 			return new Promise((resolve, reject) => {
 				commit('loading', 'Resetting recovery...');
 				dispatch('sendSignedRequest', {
-					body: { recoveryTypeId: params.recoveryTypeId },
+					body: { key: params.key, recoveryTypeId: params.recoveryTypeId },
 					method: 'POST',
 					url: getBackendEndpoint() + '/v1/auth/resetRecovery'
 				})

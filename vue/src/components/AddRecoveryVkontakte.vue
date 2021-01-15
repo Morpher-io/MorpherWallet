@@ -7,13 +7,6 @@
 				</span>
 				<span class="vk-text"> Link to VKontakte</span>
 			</button>
-			<div v-if="hasRecoveryMethod" class="has-text-centered">
-				<span class="icon google-icon">
-					<i class="fas fa-check-circle"></i>
-				</span>
-				VKontakte Recovery Added
-				<button class="button is-danger" @click="resetRecovery">Reset</button>
-			</div>
 			<div v-if="error">{{ error }}</div>
 		</div>
 	</div>

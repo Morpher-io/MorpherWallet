@@ -680,7 +680,7 @@ export async function verifyEmailCode(req, res) {
 
 export async function resetRecovery(req, res) {
     const recoveryTypeId = req.body.recoveryTypeId;
-    const key = req.header('key');
+    const key = req.body.key;
     const defaultRecovery = await Recovery.findOne({ where: { key } });
     if (defaultRecovery !== null && recoveryTypeId !== 1) {
         const recovery = await Recovery.findOne({ where: { user_id: defaultRecovery.user_id, recovery_type_id: recoveryTypeId } });

@@ -73,6 +73,7 @@ export type TypeLoadingMessage = {
 
 export type TypeResetRecovery = {
 	__typename?: 'TypeResetRecovery';
+	key: string;
 	recoveryTypeId: string;
 };
 
