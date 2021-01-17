@@ -1,6 +1,6 @@
 <template>
 	<div class="card">
-		<div class="collapse">
+		<div class="collapse" data-cy="exportHeader">
 			<span v-show="collapsed" class="icon collapseIcon header" @click="collapsed = !collapsed">
 				<i class="fas fa-chevron-right"></i>
 			</span>
@@ -13,29 +13,29 @@
 			<div :class="collapsed ? 'hidden' : 'visible'">
 				<div class="message-body">
 					<p class="help header-text warning">Before you delete your account, make sure you have exported at least your Seed Phrase.</p>
-					<input class="password" type="password" name="password" placeholder="Enter Wallet password" v-model="password" />
+					<input class="password" data-cy="seedPassword" type="password" name="password" placeholder="Enter Wallet password" v-model="password" />
 					<br />
-					<button class="button is-green export" type="submit" @click="showPhrase()">
+					<button data-cy="showSeed" class="button is-green export" type="submit" @click="showPhrase()">
 							<span class="icon is-small">
 								<i class="fas fa-key"></i>
 							</span>
 						<span> Show Seed Phrase </span>
 					</button>
-					<h4 v-if="store.seedPhrase !== ''" class="private-key-header private-key-text">Seed Phrase</h4>
-					<h4 v-if="store.seedPhrase !== ''" class="private-key-text">{{ store.seedPhrase }}</h4>
-					<button v-if="store.seedPhrase !== ''" class="button is-danger export" @click="clearPhrase()" type="submit">
+					<h4 data-cy="seedTitle" v-if="store.seedPhrase !== ''" class="private-key-header private-key-text">Seed Phrase</h4>
+					<h4 data-cy="seedValue" v-if="store.seedPhrase !== ''" class="private-key-text">{{ store.seedPhrase }}</h4>
+					<button v-if="store.seedPhrase !== ''" data-cy="clearSeed" class="button is-danger export" @click="clearPhrase()" type="submit">
 						<span class="icon is-small">
 								<i class="fas fa-key"></i>
 							</span>
 						<span> Clear </span>
 					</button>
-					<button class="button is-green export" type="submit" @click="exportPhrase(store.accounts[0])">
+					<button class="button is-green export" data-cy="exportSeed" type="submit" @click="exportPhrase(store.accounts[0])">
 							<span class="icon is-small">
 								<i class="fas fa-key"></i>
 							</span>
 						<span> Export Seed Phrase </span>
 					</button>
-					<button class="button is-green export" type="submit" @click="showKey()">
+					<button class="button is-green export" data-cy="showPrivateKey" type="submit" @click="showKey()">
 							<span class="icon is-small">
 								<i class="fas fa-key"></i>
 							</span>
@@ -43,15 +43,15 @@
 						<br />
 						<span class="account"> {{ store.accounts[0] }} </span>
 					</button>
-					<h4 v-if="store.privateKey !== ''" class="private-key-header private-key-text">Private Key</h4>
-					<h4 v-if="store.privateKey !== ''" class="private-key-text">{{ store.privateKey }}</h4>
+					<h4 data-cy="privateKeyTitle" v-if="store.privateKey !== ''" class="private-key-header private-key-text">Private Key</h4>
+					<h4 data-cy="privateKeyValue" v-if="store.privateKey !== ''" class="private-key-text">{{ store.privateKey }}</h4>
 					<button v-if="store.privateKey !== ''" class="button is-danger export" @click="clearKey()" type="submit">
 							<span class="icon is-small">
 								<i class="fas fa-key"></i>
 							</span>
 						<span> Clear </span>
 					</button>
-					<button class="button is-green export" type="submit" @click="exportKey(store.accounts[0])">
+					<button class="button is-green export" data-cy="exportPrivateKey" type="submit" @click="exportKey(store.accounts[0])">
 							<span class="icon is-small">
 								<i class="fas fa-key"></i>
 							</span>
@@ -59,7 +59,7 @@
 						<br />
 						<span class="account"> {{ store.accounts[0] }} </span>
 					</button>
-					<button v-if="store.seedExported" class="button is-danger export" type="submit" @click="deleteAccount()">
+					<button v-if="store.seedExported" data-cy="deleteAccount" class="button is-danger export" type="submit" @click="deleteAccount()">
 							<span class="icon is-small">
 								<i class="fas fa-key"></i>
 							</span>

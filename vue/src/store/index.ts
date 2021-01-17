@@ -148,7 +148,7 @@ const store: Store<RootState> = new Vuex.Store({
 			state.spinnerStatusText = statusMessage;
 			setTimeout(() => {
 				state.loading = false;
-			}, 1500);
+			}, 2000);
 		},
 		seedFound(state: RootState, seedFoundData: TypeSeedFoundData) {
 			state.status = 'success';
@@ -740,7 +740,11 @@ const store: Store<RootState> = new Vuex.Store({
 						resolve(true);
 					});
 				})
-				.catch(reject);
+				.catch(e => {
+					dispatch('showSpinnerThenAutohide', e.toString());
+					reject()
+				})
+
 			});
 		},
 	},

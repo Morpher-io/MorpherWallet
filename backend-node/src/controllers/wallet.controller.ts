@@ -698,6 +698,8 @@ export async function resetRecovery(req, res) {
 export async function deleteAccount(req, res) {
     const user = await User.findOne({ where: { email: req.body.email } });
     if (user !== null) {
+        const recoveries = await Recovery.findAll({ where: { user_id: user.id }, raw: true });
+        if(recoveries.length > 1) return errorResponse(res, 'Please delete Recovery methods first', 500);
         try{
             await user.destroy()
             return successResponse(res, true);
