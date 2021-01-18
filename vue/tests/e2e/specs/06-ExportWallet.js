@@ -137,8 +137,40 @@ describe('Export Wallet', () => {
 		cy.wait(1000)
 
 		cy.get('[data-cy=spinner-status]').contains('Keystore exported successfully');
+	});
 
-		// cy.get('[data-cy=status]').contains('Seed Phrase retrieved successfully');
+	it('delete user', () => {
+		cy.visit('/');
 
+		cy.get('[data-cy=walletEmail]')
+			.type(email)
+			.should('have.value', email);
+
+		cy.get('[data-cy=walletPassword]')
+			.type(password)
+			.should('have.value', password);
+
+		cy.get('[data-cy=submit]').click();
+
+		cy.waitUntil(() => cy.url().should('contain', '/'));
+
+		cy.get('h1').contains('Morpher Wallet');
+		cy.get('h2').contains('Hello');
+
+		cy.get('[data-cy=settings]').click();
+
+		cy.get('[data-cy=exportHeader]').click();
+
+		cy.get('[data-cy=seedPassword]')
+			.type(password)
+			.should('have.value', password);
+
+		cy.get('[data-cy=exportSeed]').click();
+
+		cy.wait(2000)
+
+		cy.get('[data-cy=deleteAccount]').click();
+
+		cy.get('[data-cy=spinner-status]').contains('Wallet deleted successfully');
 	});
 });

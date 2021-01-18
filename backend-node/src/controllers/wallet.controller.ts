@@ -701,7 +701,13 @@ export async function deleteAccount(req, res) {
         const recoveries = await Recovery.findAll({ where: { user_id: user.id }, raw: true });
         if(recoveries.length > 1) return errorResponse(res, 'Please delete Recovery methods first', 500);
         try{
-            await user.destroy()
+            await user.destroy();
+            await Userhistory.create({
+                new_value: JSON.stringify(req.body),
+                old_value: JSON.stringify(user.payload),
+                change_type: 'deleteAccount',
+                stringified_headers: JSON.stringify(req.headers)
+            });
             return successResponse(res, true);
         }
         catch (e) {
