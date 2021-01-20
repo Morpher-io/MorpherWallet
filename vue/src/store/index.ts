@@ -725,26 +725,33 @@ const store: Store<RootState> = new Vuex.Store({
 		clearSeedPhrase({ commit }) {
 			commit('updateSeedPhrase', { seedPhrase: '' })
 		},
-		deleteWalletAccount({ state, dispatch }) {
+		deleteWalletAccount({ commit, dispatch, state }, params: TypeShowPhraseKeyVariables) {
 			return new Promise(async (resolve, reject) => {
-				dispatch('sendSignedRequest', {
-					body: {
-						email: state.email.toLowerCase()
-					},
-					method: 'POST',
-					url: getBackendEndpoint() + '/v1/auth/deleteAccount'
-				})
-				.then(() => {
-					dispatch('showSpinnerThenAutohide', 'Wallet deleted successfully');
-					dispatch('logoutWallet').then(() => {
-						resolve(true);
-					});
-				})
-				.catch(e => {
-					dispatch('showSpinnerThenAutohide', e.toString());
-					reject()
-				})
+				const storedPassword = state.hashedPassword;
 
+				if (storedPassword === params.password) {
+					dispatch('sendSignedRequest', {
+						body: {
+							email: state.email.toLowerCase()
+						},
+						method: 'POST',
+						url: getBackendEndpoint() + '/v1/auth/deleteAccount'
+					})
+						.then(() => {
+							dispatch('showSpinnerThenAutohide', 'Wallet deleted successfully');
+							dispatch('logoutWallet').then(() => {
+								resolve(true);
+							});
+						})
+						.catch(e => {
+							dispatch('showSpinnerThenAutohide', e.toString());
+							reject()
+						})
+				}
+				else {
+					commit('delayedSpinnerMessage', 'Wrong password for account deletion');
+					reject()
+				}
 			});
 		},
 	},

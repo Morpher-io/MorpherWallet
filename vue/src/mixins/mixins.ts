@@ -82,7 +82,7 @@ export class Global extends Vue {
 	public exportSeedPhrase!: (params: TypeExportPhraseKeyVariables) => Promise<unknown>;
 
 	@Action
-	public deleteWalletAccount!: () => Promise<unknown>;
+	public deleteWalletAccount!: (params: TypeShowPhraseKeyVariables) => Promise<unknown>;
 
 	@Action
 	public clearPrivateKey!: () => void;

@@ -139,7 +139,7 @@ describe('Export Wallet', () => {
 		cy.get('[data-cy=spinner-status]').contains('Keystore exported successfully');
 	});
 
-	it('delete user', () => {
+	it('fails to delete wallet if wrong password', () => {
 		cy.visit('/');
 
 		cy.get('[data-cy=walletEmail]')
@@ -168,6 +168,45 @@ describe('Export Wallet', () => {
 		cy.get('[data-cy=exportSeed]').click();
 
 		cy.wait(2000)
+
+		cy.get('[data-cy=deleteAccount]').click();
+
+		cy.get('[data-cy=spinner-status]').contains('Wrong password for account deletion');
+	});
+
+	it('deletes wallet successfully', () => {
+		cy.visit('/');
+
+		cy.get('[data-cy=walletEmail]')
+			.type(email)
+			.should('have.value', email);
+
+		cy.get('[data-cy=walletPassword]')
+			.type(password)
+			.should('have.value', password);
+
+		cy.get('[data-cy=submit]').click();
+
+		cy.waitUntil(() => cy.url().should('contain', '/'));
+
+		cy.get('h1').contains('Morpher Wallet');
+		cy.get('h2').contains('Hello');
+
+		cy.get('[data-cy=settings]').click();
+
+		cy.get('[data-cy=exportHeader]').click();
+
+		cy.get('[data-cy=seedPassword]')
+			.type(password)
+			.should('have.value', password);
+
+		cy.get('[data-cy=exportSeed]').click();
+
+		cy.wait(2000)
+
+		cy.get('[data-cy=seedPassword]')
+			.type(password)
+			.should('have.value', password);
 
 		cy.get('[data-cy=deleteAccount]').click();
 
