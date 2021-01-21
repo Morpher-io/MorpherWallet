@@ -7,7 +7,17 @@
 				</span>
 				<span class="vk-text"> Link to VKontakte</span>
 			</button>
-			<div v-if="error">{{ error }}</div>
+		</div>
+
+		<div class="control is-expanded has-text-centered" v-if="hasRecoveryMethod">
+			<span class="icon google-icon">
+					<i class="fas fa-check-circle"></i>
+				</span>
+			VK Recovery Added
+			<button class="button is-fullwidth vk-button" @click="doDelete">
+
+				<span class="vk-text">Delete access to VKontakte</span>
+			</button>
 		</div>
 	</div>
 </template>
@@ -91,6 +101,53 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 							this.showSpinnerThenAutohide('Error');
 							this.error = e.toString();
 						});
+				}
+			} catch (e) {
+				//win.close()
+			}
+		}, 100);
+	}
+
+	async doDelete() {
+		const redirectUri = this.callbackUrlForPopup;
+		const uriRegex = new RegExp(redirectUri);
+		const url =
+				'http://oauth.vk.com/authorize?client_id=7734395&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=' + redirectUri;
+		const win = this.vkPopup({
+			width: 620,
+			height: 370,
+			url: url
+		});
+
+		const watchTimer = setInterval(async () => {
+			try {
+				if (uriRegex.test(win.location)) {
+					clearInterval(watchTimer);
+					const hash = win.location.hash.substr(1);
+					const params = hash.split('&').reduce((result, item) => {
+						const parts = item.split('=');
+						result[parts[0]] = parts[1];
+						return result;
+					}, {});
+
+					setTimeout(() => {
+						win.close();
+						//document.location.reload();
+					}, 100);
+
+					const userID = params.user_id;
+					this.showSpinner('Saving Keystore for Recovery');
+
+					const key = await sha256(this.clientId + userID);
+					this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId })
+							.then(async () => {
+								this.showSpinnerThenAutohide('Deleted Successfully');
+								this.hasRecoveryMethod = false;
+							})
+							.catch(e => {
+								this.showSpinnerThenAutohide('Error finding user');
+								this.error = e.toString();
+							});
 				}
 			} catch (e) {
 				//win.close()

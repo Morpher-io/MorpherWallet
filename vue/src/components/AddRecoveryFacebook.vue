@@ -6,6 +6,10 @@
 			</v-facebook-login>
 		</div>
 		<div class="control is-expanded" v-if="hasRecoveryMethod">
+			<span class="icon google-icon">
+				<i class="fas fa-check-circle"></i>
+			</span>
+			Facebook Recovery Added
 			<v-facebook-login class="button is-fullwidth" :appId="clientId" @sdk-init="handleSdkInit" @login="deleteRecovery" v-model="facebook.model"
 			><span slot="login">Delete access to Facebook</span>
 			</v-facebook-login>

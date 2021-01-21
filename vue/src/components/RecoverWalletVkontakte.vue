@@ -43,7 +43,7 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 		const redirectUri = this.callbackUrlForPopup;
 		const uriRegex = new RegExp(redirectUri);
 		const url =
-			'http://oauth.vk.com/authorize?client_id=7548057&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=' + redirectUri;
+			'http://oauth.vk.com/authorize?client_id=7734395&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=' + redirectUri;
 		const win = this.vkPopup({
 			width: 620,
 			height: 370,
