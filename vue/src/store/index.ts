@@ -659,17 +659,23 @@ const store: Store<RootState> = new Vuex.Store({
 		exportKeystore({ commit, state }, params: TypeExportPhraseKeyVariables) {
 			const storedPassword = state.hashedPassword;
 
-			if (storedPassword === params.password) {
+			sha256(params.password)
+				.then(hashedPassword => {
+					if (storedPassword === hashedPassword) {
+						if (state.keystore !== null) {
+							downloadEncryptedKeystore(state.keystore[0].encrypt(params.password), params.account)
+							commit('delayedSpinnerMessage', 'Keystore exported successfully');
+							commit('keystoreExported')
+						}
 
-				if (state.keystore !== null) {
-					downloadEncryptedKeystore(state.keystore[0].encrypt(params.password), params.account)
-					commit('delayedSpinnerMessage', 'Keystore exported successfully');
-					commit('keystoreExported')
-				}
+					} else {
+						commit('delayedSpinnerMessage', 'Wrong password for Keystore');
+					}
 
-			} else {
-				commit('delayedSpinnerMessage', 'Wrong password for Keystore');
-			}
+				})
+				.catch(() => {
+					commit('delayedSpinnerMessage', 'Something went wrong, please try again');
+				})
 		},
 		showSeedPhrase({ commit, dispatch, state }, params: TypeShowPhraseKeyVariables) {
 			const storedPassword = state.hashedPassword;

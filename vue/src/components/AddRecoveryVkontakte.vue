@@ -65,7 +65,7 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 		const redirectUri = this.callbackUrlForPopup;
 		const uriRegex = new RegExp(redirectUri);
 		const url =
-			'http://oauth.vk.com/authorize?client_id=7734395&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=' + redirectUri;
+			`http://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=${redirectUri}`;
 		const win = this.vkPopup({
 			width: 620,
 			height: 370,
@@ -112,7 +112,7 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 		const redirectUri = this.callbackUrlForPopup;
 		const uriRegex = new RegExp(redirectUri);
 		const url =
-				'http://oauth.vk.com/authorize?client_id=7734395&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=' + redirectUri;
+				`http://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=${redirectUri}`;
 		const win = this.vkPopup({
 			width: 620,
 			height: 370,

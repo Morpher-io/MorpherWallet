@@ -5,7 +5,7 @@
 				><span slot="login">Link to Facebook</span>
 			</v-facebook-login>
 		</div>
-		<div class="control is-expanded" v-if="hasRecoveryMethod">
+		<div class="control is-expanded has-text-centered" v-if="hasRecoveryMethod">
 			<span class="icon google-icon">
 				<i class="fas fa-check-circle"></i>
 			</span>

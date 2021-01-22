@@ -12,7 +12,7 @@
 
 			<div :class="collapsed ? 'hidden' : 'visible'">
 				<div class="message-body">
-					<p class="help header-text warning">Before you delete your account, make sure you have exported your Seed Phrase.</p>
+					<p class="header-text help warning">Before you delete your account, make sure you have exported your Seed Phrase.</p>
 					<input class="password" data-cy="seedPassword" type="password" name="password" placeholder="Enter Wallet password" v-model="password" />
 					<br />
 					<button data-cy="showSeed" class="button is-green export" type="submit" @click="showPhrase()">
@@ -85,8 +85,7 @@ export default class ExportWallet extends mixins(Global, Authenticated) {
 	collapsed = true;
 
 	async exportKey(account) {
-		const password = await sha256(this.password);
-		await this.exportKeystore({ account, password });
+		await this.exportKeystore({ account, password: this.password });
 		this.password = '';
 	}
 
@@ -155,6 +154,10 @@ export default class ExportWallet extends mixins(Global, Authenticated) {
 		margin-bottom: 10px;
 	}
 	.warning {
+		border-style: solid;
 		font-size: 18px;
+		border-radius: 10px;
+		border-color: #fc6404;
+		margin: 20px;
 	}
 </style>
