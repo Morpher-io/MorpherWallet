@@ -81,7 +81,8 @@ export async function saveEmailPassword(req: Request, res: Response) {
     } catch (error) {
         // If an error happened anywhere along the way, rollback all the changes.
         await transaction.rollback();
-        return errorResponse(res, error.message);
+        Logger.info(error.message)
+        return errorResponse(res, 'Internal error', 500);
     }
 
     return errorResponse(res, 'User not found', 404);
@@ -159,8 +160,8 @@ export async function updatePassword(req: Request, res: Response) {
             return successResponse(res, 'updated');
         }
     } catch (error) {
-        // If an error happened anywhere along the way, rollback all the changes.
-        return errorResponse(res, error.message);
+        Logger.info(error.message)
+        return errorResponse(res, 'Internal error', 500);
     }
     //error out in any other case
     return errorResponse(res, 'Internal Error', 500);
@@ -243,8 +244,8 @@ export async function updateEmail(req: Request, res: Response) {
         await transaction.rollback();
         return errorResponse(res, 'Error: Update Operation aborted.', 500);
     } catch (error) {
-        // If an error happened anywhere along the way, rollback all the changes.
-        return errorResponse(res, error.message);
+        Logger.info(error.message)
+        return errorResponse(res, 'Internal error', 500);
     }
 }
 
