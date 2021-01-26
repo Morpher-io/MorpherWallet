@@ -1,6 +1,11 @@
 <template>
 	<div class="control is-expanded">
-		<button type="button" class="button is-fullwidth is-grey" @click="doLogin">Recover using VKontakte</button>
+		<button type="button" class="button is-fullwidth vk-button" @click="doLogin">
+			<span class="icon google-icon">
+					<i class="fab fa-vk"></i>
+				</span>
+			<span class="vk-text"> Recover using VKontakte</span>
+		</button>
 		<ChangePassword v-if="seedFound" :presetOldPassword="oldPassword"></ChangePassword>
 	</div>
 </template>
@@ -43,7 +48,7 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 		const redirectUri = this.callbackUrlForPopup;
 		const uriRegex = new RegExp(redirectUri);
 		const url =
-			'http://oauth.vk.com/authorize?client_id=7734395&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=' + redirectUri;
+				`http://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=${redirectUri}`;
 		const win = this.vkPopup({
 			width: 620,
 			height: 370,
@@ -79,11 +84,11 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 								this.oldPassword = userID;
 							})
 							.catch(error => {
-								this.hideSpinner();
+								this.showSpinnerThenAutohide('No recovery found...');
 								this.recoveryError = error;
 							});
 					} catch (e) {
-						this.hideSpinner();
+						this.showSpinnerThenAutohide('No recovery found...');
 						this.recoveryError = e.toString();
 						console.error(e);
 					}
@@ -97,4 +102,11 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped></style>
+<style scoped>
+	.vk-text{
+		color: #fff
+	}
+	.vk-button{
+		background-color: #45668e;
+	}
+</style>

@@ -11,7 +11,7 @@ function getAccountsFromKeystore(keystore: WalletBase) {
 
 function downloadEncryptedKeystore(exportedSeed: EncryptedKeystoreV3Json, account: string) {
 	const now = new Date();
-	download(JSON.stringify(exportedSeed), 'keystore' + '--' + now.toISOString() + '--' + account);
+	download(JSON.stringify(exportedSeed), 'keystore' + '--' + now.toISOString() + '--' + account + '.json');
 }
 
 function sortObject(object: any) {

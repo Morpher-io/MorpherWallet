@@ -132,22 +132,22 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 
 					setTimeout(() => {
 						win.close();
-						//document.location.reload();
+
 					}, 100);
 
 					const userID = params.user_id;
-					this.showSpinner('Saving Keystore for Recovery');
+					this.showSpinner('Deleting Keystore for Recovery');
 
 					const key = await sha256(this.clientId + userID);
 					this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId })
-							.then(async () => {
-								this.showSpinnerThenAutohide('Deleted Successfully');
-								this.hasRecoveryMethod = false;
-							})
-							.catch(e => {
-								this.showSpinnerThenAutohide('Error finding user');
-								this.error = e.toString();
-							});
+						.then(async () => {
+							this.showSpinnerThenAutohide('Deleted Successfully');
+							this.hasRecoveryMethod = false;
+						})
+						.catch(e => {
+							this.showSpinnerThenAutohide('Error finding user');
+							this.error = e.toString();
+						});
 				}
 			} catch (e) {
 				//win.close()

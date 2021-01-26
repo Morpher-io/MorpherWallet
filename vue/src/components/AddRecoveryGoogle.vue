@@ -61,6 +61,7 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 		const key = await sha256(this.clientId + userID);
 		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
 			.then(async () => {
+				googleUser.disconnect();
 				this.showSpinnerThenAutohide('Saved Successfully');
 				this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 			})
@@ -71,13 +72,13 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 	}
 
 	async onDelete(googleUser) {
-		this.showSpinner('Saving Keystore for Recovery');
+		this.showSpinner('Deleting Keystore for Recovery');
 		const userID = googleUser.getBasicProfile().getId();
 		const key = await sha256(this.clientId + userID);
 		this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId })
 			.then(async () => {
 				googleUser.disconnect();
-				this.showSpinnerThenAutohide('Deleted Successfully');
+				this.showSpinnerThenAutohide('Keystore deleted successfully');
 				this.hasRecoveryMethod = false;
 			})
 			.catch(e => {

@@ -624,7 +624,6 @@ const store: Store<RootState> = new Vuex.Store({
 		},
 		resetRecoveryMethod({ commit, dispatch }, params: TypeResetRecovery) {
 			return new Promise((resolve, reject) => {
-				commit('loading', 'Resetting recovery...');
 				dispatch('sendSignedRequest', {
 					body: { key: params.key, recoveryTypeId: params.recoveryTypeId },
 					method: 'POST',
@@ -632,13 +631,11 @@ const store: Store<RootState> = new Vuex.Store({
 				})
 					.then(() => {
 						dispatch('updateRecoveryMethods').then(() => {
-							commit('loading', '');
 							resolve(true);
 						});
 					})
 					.catch(e => {
 						reject(e);
-						commit('loading', '');
 					});
 			});
 		},

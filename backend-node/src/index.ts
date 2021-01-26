@@ -77,7 +77,6 @@ if (!module.parent) {
     httpServer.listen(process.env.PORT, async () => {
         Logger.info({ status: `🚀Express Server ready at http://localhost:${process.env.PORT}` });
 
-        console.log('ss')
         // Database initialization.
         await sequelize.sync();
         Logger.info({ status: 'Connected to database' });

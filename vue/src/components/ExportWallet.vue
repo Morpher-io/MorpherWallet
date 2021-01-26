@@ -158,6 +158,7 @@ export default class ExportWallet extends mixins(Global, Authenticated) {
 		font-size: 18px;
 		border-radius: 10px;
 		border-color: #fc6404;
-		margin: 20px;
+		margin: 20px 20px 12px 20px;
+		color: red;
 	}
 </style>
