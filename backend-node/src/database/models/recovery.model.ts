@@ -26,7 +26,8 @@ export class Recovery extends Model<Recovery> {
         references: {
             model: 'User',
             key: 'id'
-        }
+        },
+        onDelete: 'cascade'
     })
     user_id;
 

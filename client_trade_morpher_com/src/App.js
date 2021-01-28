@@ -30,7 +30,7 @@ class App extends Component {
 
   async componentDidMount() {
 
-    this.zeroWallet = new ZeroWallet("ws://127.0.0.1:7545");
+    this.zeroWallet = new ZeroWallet("ws://127.0.0.1:7545", 5777);
     //let web3 = await this.zeroWallet.getProvider();
 
     let res = await this.zeroWallet.isLoggedIn();
@@ -38,7 +38,6 @@ class App extends Component {
       this.setState({ walletEmail: res.walletEmail });
       let web3 = await getWeb3();
       let accounts = await web3.eth.getAccounts();
-      console.log(accounts);
       this.setState({ isAuthenticated: true, web3 });
     }
 
@@ -48,7 +47,6 @@ class App extends Component {
       let web3 = await getWeb3();
 
       let accounts = await web3.eth.getAccounts();
-      console.log(accounts);
       this.setState({ isAuthenticated: true, web3 });
       let balance = web3.utils.fromWei(await web3.eth.getBalance(accounts[0]), "ether");
       this.setState({balance});
@@ -79,7 +77,6 @@ class App extends Component {
       let balance = web3.utils.fromWei(await web3.eth.getBalance(accounts[0]), "ether");
       this.setState({balance});
     }
-    console.log(result);
   };
 
   toggleWallet = async() => {

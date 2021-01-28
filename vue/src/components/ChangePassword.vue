@@ -1,89 +1,161 @@
 <template>
-    <div>
-        <form v-on:submit.prevent="formSubmitChangePassword">
-            <input
-                    type="password"
-                    name="oldPassword"
-                    placeholder="Old Password"
-                    v-model="oldPassword"
-            />
-            <input
-                    type="password"
-                    name="newPassword"
-                    placeholder="New Password"
-                    v-model="newPassword"
-            />
-            <input
-                    type="password"
-                    name="newPasswordRepeat"
-                    placeholder="New Password Again"
-                    v-model="newPasswordRepeat"
-            />
-            <input type="submit" value="Submit" />
-        </form>
-    </div>
+	<div class="card">
+		<form v-on:submit.prevent="changePasswordExecute">
+			<div class="collapse">
+				<span v-show="collapsed && !hideOldPassword" class="icon collapseIcon header" @click="collapsed = !collapsed">
+					<i class="fas fa-chevron-right"></i>
+				</span>
+				<span v-show="!collapsed && !hideOldPassword" class="icon collapseIcon header" @click="collapsed = !collapsed">
+					<i class="fas fa-chevron-down"></i>
+				</span>
+
+				<span class="header" data-cy="openPasswordChange" @click="collapsed = !collapsed" v-show="!hideOldPassword">
+					Password Change
+					<span data-cy="confirmed" class="help is-success" v-if="success">Saved!</span>
+				</span>
+				<div :class="collapsed ? 'hidden' : 'visible'">
+					<div class="field" v-if="!hideOldPassword">
+						<label class="label">Old Password</label>
+						<div class="control">
+							<input
+								type="password"
+								data-cy="oldPassword"
+								name="oldPassword"
+								class="input is-primary"
+								placeholder="Current Password"
+								v-model="oldPassword"
+							/>
+						</div>
+					</div>
+					<div class="field">
+						<label class="label">New Password</label>
+						<div class="control">
+							<input
+								type="password"
+								name="newPassword"
+								data-cy="newPassword"
+								class="input is-primary"
+								placeholder="New Password"
+								v-model="walletPassword"
+							/>
+							<password
+								v-model="walletPassword"
+								:strength-meter-only="true"
+								:secure-length="8"
+								style="max-width: initial; margin-top: -8px"
+							/>
+							<p class="help">Use a strong Password! It encrypts your Wallet and keeps your Funds secure.</p>
+
+							<p class="help is-danger" v-if="invalidPassword" data-cy="invalidMessage">
+								{{ invalidPassword }}
+							</p>
+						</div>
+					</div>
+					<div class="field">
+						<div class="control">
+							<input
+								type="password"
+								class="input is-primary"
+								name="newPasswordRepeat"
+								data-cy="newPasswordRepeat"
+								placeholder="Repeat New Password"
+								v-model="walletPasswordRepeat"
+							/>
+						</div>
+					</div>
+
+					<div class="field is-grouped">
+						<button class="button is-green" type="submit" data-cy="passwordSubmit">
+							<span class="icon is-small">
+								<i class="fas fa-save"></i>
+							</span>
+							<span> Update Password </span>
+						</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
 </template>
 
-
 <script>
-    const { sha256 } = require("../utils/cryptoFunctions");
-    const {
-        getKeystoreFromEncryptedSeed,
-        changePasswordEncryptedSeed,
-        saveWalletEmailPassword
-    } = require("../utils/backupRestore");
+import { validateInput } from '../utils/backupRestore';
+import Password from 'vue-password-strength-meter';
+import { sha256 } from '../utils/cryptoFunctions';
 
-    export default {
-        name: "ChangePassword",
-        data: function(){
-            return {
-                oldPassword: "",
-                newPassword: "",
-                newPasswordRepeat: ""
-            }
-        },
-        methods: {
-            async formSubmitChangePassword(e) {
-                e.preventDefault();
+import Component, { mixins } from 'vue-class-component';
+import { Authenticated, Global } from '../mixins/mixins';
 
-                if(this.newPassword === this.newPasswordRepeat) {
-                    let encryptedSeed = JSON.parse(localStorage.getItem("encryptedSeed"))
+@Component({
+	components: {
+		Password
+	},
+	props: {
+		presetOldPassword: String
+	}
+})
+export default class ChangePassword extends mixins(Global, Authenticated) {
+	oldPassword = '';
+	hideOldPassword = false;
+	walletPassword = '';
+	walletPasswordRepeat = '';
+	invalidPassword = '';
+	collapsed = true;
+	success = false;
 
-                    const oldPassword = await sha256(this.oldPassword);
-                    const newPassword = await sha256(this.newPassword);
+	mounted() {
+		if (this.presetOldPassword !== undefined) {
+			this.oldPassword = this.presetOldPassword;
+			this.hideOldPassword = true;
+			this.collapsed = false;
+		}
+	}
 
-                    try{
-                        await getKeystoreFromEncryptedSeed(encryptedSeed, oldPassword);
-                    }
-                    catch(e){
-                        alert("Old password is not right.")
-                    }
+	async changePasswordExecute() {
+		//this.invalidPassword = '';
 
-                    const newEncryptedSeed = await changePasswordEncryptedSeed(encryptedSeed, oldPassword, newPassword);
+		if (this.walletPassword != this.walletPasswordRepeat) {
+			this.invalidPassword = 'The passwords are not the identical, please repeat the password';
+			return;
+		}
 
-                    await saveWalletEmailPassword(window.localStorage.getItem("email"), newEncryptedSeed)
+		const passwordMessage = await validateInput('password', this.walletPassword);
 
-                    window.localStorage.setItem("encryptedSeed", JSON.stringify(newEncryptedSeed));
+		if (passwordMessage) {
+			this.invalidPassword = passwordMessage;
+			return;
+		}
+		const oldPasswordHashed = this.presetOldPassword || (await sha256(this.oldPassword));
+		const newPasswordHashed = await sha256(this.walletPassword);
 
-                    window.sessionStorage.setItem("password", newPassword);
-
-                    alert("Password changed successfully.")
-
-                    this.oldPassword = ""
-                    this.newPassword = ""
-                    this.newPasswordRepeat = ""
-                }
-
-                else alert("New passwords do not match.")
-            }
-        },
-        mounted(){
-
-        }
-    }
+		this.showSpinner('Changing Password');
+		this.changePassword({ oldPassword: oldPasswordHashed, newPassword: newPasswordHashed })
+			.then(() => {
+				this.collapsed = true;
+				this.oldPassword = '';
+				this.walletPassword = '';
+				this.walletPasswordRepeat = '';
+				this.success = true;
+				this.showSpinnerThenAutohide('Password Changed Successfully');
+				if (this.presetOldPassword !== undefined) {
+					this.$router.push('/login');
+				}
+			})
+			.catch(() => {
+				this.showSpinnerThenAutohide('Error happened!');
+				this.invalidPassword = 'Error happened during Update. Aborted.';
+			});
+	}
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+button.card-footer-item {
+	background-color: transparent;
+	cursor: pointer;
+	border: 0;
+	font-size: 1rem;
+	line-height: 1.5;
+}
 </style>

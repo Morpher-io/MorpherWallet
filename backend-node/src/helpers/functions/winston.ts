@@ -5,6 +5,7 @@ const CloudWatchTransport = require('winston-aws-cloudwatch');
 
 const path = require('path');
 
+// @ts-ignore
 const mainModuleName = path.basename(process.mainModule.filename);
 
 const logStreamName = mainModuleName;
@@ -17,7 +18,7 @@ export const Logger = createLogger({
             format: 'DD-MM-YYYY HH:mm:ss'
         }),
         format.simple(),
-        format.printf(info => `${info.timestamp} ${info.level}: ${info.message}`)
+        format.printf((info: { timestamp: any; level: any; message: any }) => `${info.timestamp} ${info.level}: ${info.message}`)
     ),
     defaultMeta: {
         service: logStreamName
@@ -25,7 +26,8 @@ export const Logger = createLogger({
     transports: [
         new transports.Console({
             level: 'debug',
-            handleExceptions: false
+            handleExceptions: false,
+            format: format.json()
         }),
         new CloudWatchTransport({
             logGroupName: 'morpher-wallet-' + process.env.ENVIRONMENT, // REQUIRED
@@ -40,7 +42,7 @@ export const Logger = createLogger({
                 secretAccessKey: process.env.ACCESS_KEY_SECRET,
                 region: 'eu-central-1'
             },
-            formatLog: item => JSON.stringify(item)
+            formatLog: (item: any) => JSON.stringify(item)
         })
     ],
     exitOnError: false

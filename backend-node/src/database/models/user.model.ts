@@ -1,8 +1,9 @@
 import { AutoIncrement, Column, DataType, HasMany, Model, PrimaryKey, Table, Unique } from 'sequelize-typescript';
 import { Recovery } from './recovery.model';
+import { Userhistory } from './userhistory.model';
 import * as moment from 'moment';
 
-@Table({ timestamps: false })
+@Table({ timestamps: true })
 export class User extends Model<User> {
     @PrimaryKey
     @AutoIncrement
@@ -16,11 +17,44 @@ export class User extends Model<User> {
     email;
 
     @Column({
-        type: DataType.BIGINT,
-        defaultValue: () => moment.utc().valueOf()
+        type: DataType.TEXT
     })
-    created_at;
+    authenticator_qr;
+
+    @Column({
+        type: DataType.TEXT
+    })
+    authenticator_secret;
+
+    @Column({
+        type: DataType.TEXT
+    })
+    eth_address;
+
+    @Column({
+        type: DataType.INTEGER
+    })
+    email_verification_code;
+
+    @Column({
+        type: DataType.INTEGER
+    })
+    nonce;
+
+    @Column({
+        type: DataType.JSONB
+    })
+    payload;
+
+    // @Column({
+    //     type: DataType.BIGINT,
+    //     defaultValue: () => moment.utc().valueOf()
+    // })
+    // created_at;
 
     @HasMany(() => Recovery)
     recovery: Recovery[];
+
+    @HasMany(() => Userhistory)
+    history: Userhistory[];
 }
