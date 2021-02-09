@@ -2,7 +2,7 @@
 	<transition name="fade">
 		<div class="overlay" v-if="isActive">
 			<dots></dots>
-			<p class="status-text" data-cy="status">{{ status }}</p>
+			<p class="status-text" data-cy="spinner-status">{{ status }}</p>
 		</div>
 	</transition>
 </template>
@@ -25,7 +25,7 @@ export default class Spinner extends Vue {
 	active!: boolean;
 
 	@Prop({ default: '' })
-	status!: boolean;
+	status!: string;
 
 	isActive = this.active || false;
 

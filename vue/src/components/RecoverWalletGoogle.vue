@@ -4,7 +4,7 @@
 			<span class="icon google-icon">
 				<i class="fab fa-google"></i>
 			</span>
-			<span> Recover using Google</span>
+			<span class="header-text"> Recover using Google</span>
 		</GoogleLogin>
 		<ChangePassword v-if="seedFound" :presetOldPassword="oldPassword"></ChangePassword>
 	</div>
@@ -31,24 +31,26 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 	clientId = process.env.VUE_APP_GOOGLE_APP_ID;
 	recoveryTypeId = 3;
 
-	onLogin(data) {
+	onLogin(googleUser) {
 		this.showSpinner('Trying to Login...');
 		try {
-			const userID = data.getBasicProfile().getId();
-			const accessToken = data.getAuthResponse(true).access_token;
+			const userID = googleUser.getBasicProfile().getId();
+			const accessToken = googleUser.getAuthResponse(true).access_token;
 
 			this.fetchWalletFromRecovery({ accessToken, password: userID, recoveryTypeId: this.recoveryTypeId })
 				.then(() => {
+					googleUser.disconnect();
 					this.hideSpinner();
 					this.seedFound = true;
 					this.oldPassword = userID;
 				})
 				.catch(error => {
-					this.hideSpinner();
+					googleUser.disconnect();
+					this.showSpinnerThenAutohide('No recovery found...');
 					this.recoveryError = error;
 				});
 		} catch (e) {
-			this.hideSpinner();
+			this.showSpinnerThenAutohide('No recovery found...');
 			this.recoveryError = e.toString();
 			console.error(e);
 		}
@@ -65,4 +67,7 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 	font-size: 18px;
 	margin-right: 10px;
 }
+	.header-text{
+		color: #fff
+	}
 </style>

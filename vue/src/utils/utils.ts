@@ -1,5 +1,5 @@
 import download from 'downloadjs';
-import { WalletBase } from 'web3-core';
+import { WalletBase, EncryptedKeystoreV3Json } from 'web3-core';
 
 function getAccountsFromKeystore(keystore: WalletBase) {
 	const accounts: Array<string> = [];
@@ -9,9 +9,9 @@ function getAccountsFromKeystore(keystore: WalletBase) {
 	return accounts;
 }
 
-function downloadEncryptedKeystore(keystore: WalletBase) {
+function downloadEncryptedKeystore(exportedSeed: EncryptedKeystoreV3Json, account: string) {
 	const now = new Date();
-	download(JSON.stringify(keystore), now.toISOString() + '--' + keystore[0].address);
+	download(JSON.stringify(exportedSeed), 'keystore' + '--' + now.toISOString() + '--' + account + '.json');
 }
 
 function sortObject(object: any) {

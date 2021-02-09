@@ -73,6 +73,7 @@ export type TypeLoadingMessage = {
 
 export type TypeResetRecovery = {
 	__typename?: 'TypeResetRecovery';
+	key: string;
 	recoveryTypeId: string;
 };
 
@@ -138,4 +139,25 @@ export type TypeAddRecoveryParams = {
 	key: string;
 	password: string;
 	recoveryTypeId: number;
+};
+
+export type TypeExportPhraseKeyVariables = {
+	__typename?: 'TypeExportPhraseKeyVariables';
+	account: string;
+	password: string;
+};
+
+export type TypeShowPhraseKeyVariables = {
+	__typename?: 'TypeShowPhraseKeyVariables';
+	password: string;
+};
+
+export type TypeUpdatePrivateKey = {
+	__typename?: 'TypeUpdatePrivateKey';
+	privateKey: string;
+};
+
+export type TypeUpdateSeedPhrase = {
+	__typename?: 'TypeUpdateSeedPhrase';
+	seedPhrase: string;
 };
