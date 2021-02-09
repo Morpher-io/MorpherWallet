@@ -1,11 +1,7 @@
 // https://docs.cypress.io/api/introduction/api.html
 
-const getStore = () => cy.window().its('app.$store')
-
 describe('Export Wallet', () => {
 	const email = Cypress.env('firstEmail');
-
-	const backendUrl = Cypress.env('backendUrl');
 
 	const password = 'Test123!';
 
@@ -68,10 +64,9 @@ describe('Export Wallet', () => {
 
 		cy.get('[data-cy=exportSeed]').click();
 
-		cy.wait(1000)
+		cy.wait(1000);
 
 		cy.get('[data-cy=spinner-status]').contains('Seed Phrase exported successfully');
-
 	});
 
 	it('show private key', () => {
@@ -103,7 +98,6 @@ describe('Export Wallet', () => {
 		cy.get('[data-cy=showPrivateKey]').click();
 
 		cy.get('[data-cy=privateKeyTitle]').contains('Private Key');
-
 	});
 
 	it('export keystore', () => {
@@ -134,7 +128,7 @@ describe('Export Wallet', () => {
 
 		cy.get('[data-cy=exportPrivateKey]').click();
 
-		cy.wait(1000)
+		cy.wait(1000);
 
 		cy.get('[data-cy=spinner-status]').contains('Keystore exported successfully');
 	});
@@ -167,7 +161,7 @@ describe('Export Wallet', () => {
 
 		cy.get('[data-cy=exportSeed]').click();
 
-		cy.wait(2000)
+		cy.wait(2000);
 
 		cy.get('[data-cy=deleteAccount]').click();
 
@@ -202,7 +196,7 @@ describe('Export Wallet', () => {
 
 		cy.get('[data-cy=exportSeed]').click();
 
-		cy.wait(2000)
+		cy.wait(2000);
 
 		cy.get('[data-cy=seedPassword]')
 			.type(password)

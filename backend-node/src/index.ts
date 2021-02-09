@@ -48,8 +48,6 @@ app.use((req, res, next) => {
 });
 app.use(cors());
 
-
-
 // Use morgan combined with winston for logging.
 app.use(morgan('combined'));
 

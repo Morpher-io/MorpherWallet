@@ -25,7 +25,7 @@
   "dependencies": {
     "await-to-js": "^2.1.1",
     "aws-sdk": "^2.788.0",
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "bad-words": "^3.0.3",
     "cors": "^2.8.5",
     "cron": "^1.6.0",
@@ -41,7 +41,7 @@
     "fb": "^2.0.0",
     "googleapis": "^58.0.0",
     "helmet": "^3.15.0",
-    "isomorphic-fetch": "^2.2.1",
+    "isomorphic-fetch": "^3.0.0",
     "mailchecker": "^3.3.14",
     "moment": "^2.23.0",
     "morgan": "^1.9.1",
