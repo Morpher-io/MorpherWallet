@@ -15,6 +15,7 @@ export class Userhistory extends Model<Userhistory> {
             model: 'User',
             key: 'id'
         },
+        allowNull: true,
         onDelete: 'cascade'
     })
     user_id;

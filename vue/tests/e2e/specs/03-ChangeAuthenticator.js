@@ -3,6 +3,8 @@
 describe('Change Authenticator', () => {
 	const email = Cypress.env('firstEmail');
 
+	const backendUrl = Cypress.env('backendUrl');
+
 	const password = 'Test123!';
 
 	it('error if change twofa authenticator bad code', () => {
@@ -64,7 +66,9 @@ describe('Change Authenticator', () => {
 
 		cy.get('[data-cy=generateQR]').click();
 
-		cy.request('POST', 'http://localhost:8080/v1/test/getUserSecret', { email }).then(response => {
+		cy.wait(2000);
+
+		cy.request('POST', `${backendUrl}/v1/test/getUserSecret`, { email }).then(response => {
 			// response.body is automatically serialized into JSON
 			const secret = response.body.authenticator_secret;
 
@@ -95,7 +99,7 @@ describe('Change Authenticator', () => {
 
 		cy.waitUntil(() => cy.url().should('contain', '/2fa'));
 
-		cy.request('POST', 'http://localhost:8080/v1/test/getUserSecret', { email }).then(response => {
+		cy.request('POST', `${backendUrl}/v1/test/getUserSecret`, { email }).then(response => {
 			// response.body is automatically serialized into JSON
 			const secret = response.body.authenticator_secret;
 
@@ -128,7 +132,7 @@ describe('Change Authenticator', () => {
 
 		cy.waitUntil(() => cy.url().should('contain', '/2fa'));
 
-		cy.request('POST', 'http://localhost:8080/v1/test/getUserSecret', { email }).then(response => {
+		cy.request('POST', `${backendUrl}/v1/test/getUserSecret`, { email }).then(response => {
 			// response.body is automatically serialized into JSON
 			const secret = response.body.authenticator_secret;
 

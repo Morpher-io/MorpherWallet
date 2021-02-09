@@ -81,7 +81,8 @@ export async function saveEmailPassword(req: Request, res: Response) {
     } catch (error) {
         // If an error happened anywhere along the way, rollback all the changes.
         await transaction.rollback();
-        return errorResponse(res, error.message);
+        Logger.info(error.message)
+        return errorResponse(res, 'Internal error', 500);
     }
 
     return errorResponse(res, 'User not found', 404);
@@ -159,8 +160,8 @@ export async function updatePassword(req: Request, res: Response) {
             return successResponse(res, 'updated');
         }
     } catch (error) {
-        // If an error happened anywhere along the way, rollback all the changes.
-        return errorResponse(res, error.message);
+        Logger.info(error.message)
+        return errorResponse(res, 'Internal error', 500);
     }
     //error out in any other case
     return errorResponse(res, 'Internal Error', 500);
@@ -243,8 +244,8 @@ export async function updateEmail(req: Request, res: Response) {
         await transaction.rollback();
         return errorResponse(res, 'Error: Update Operation aborted.', 500);
     } catch (error) {
-        // If an error happened anywhere along the way, rollback all the changes.
-        return errorResponse(res, error.message);
+        Logger.info(error.message)
+        return errorResponse(res, 'Internal error', 500);
     }
 }
 
@@ -680,7 +681,7 @@ export async function verifyEmailCode(req, res) {
 
 export async function resetRecovery(req, res) {
     const recoveryTypeId = req.body.recoveryTypeId;
-    const key = req.header('key');
+    const key = req.body.key;
     const defaultRecovery = await Recovery.findOne({ where: { key } });
     if (defaultRecovery !== null && recoveryTypeId !== 1) {
         const recovery = await Recovery.findOne({ where: { user_id: defaultRecovery.user_id, recovery_type_id: recoveryTypeId } });
@@ -690,6 +691,28 @@ export async function resetRecovery(req, res) {
         }
 
         return errorResponse(res, 'Could not find recovery!', 404);
+    }
+
+    return errorResponse(res, 'Could not find User!', 404);
+}
+
+export async function deleteAccount(req, res) {
+    const user = await User.findOne({ where: { email: req.body.email } });
+    if (user !== null) {
+        try{
+            await user.destroy();
+            await Userhistory.create({
+                new_value: JSON.stringify(req.body),
+                old_value: JSON.stringify(user.payload),
+                change_type: 'deleteAccount',
+                stringified_headers: JSON.stringify(req.headers)
+            });
+            return successResponse(res, true);
+        }
+        catch (e) {
+            return errorResponse(res, 'Could not delete User!', 500);
+        }
+
     }
 
     return errorResponse(res, 'Could not find User!', 404);

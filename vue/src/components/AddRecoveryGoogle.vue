@@ -13,9 +13,16 @@
 				<i class="fas fa-check-circle"></i>
 			</span>
 			Google Recovery Added
-			<button class="button is-danger" @click="resetRecovery">Reset</button>
+			<div class="control is-expanded" v-if="hasRecoveryMethod">
+				<GoogleLogin class="button is-fullwidth is-google" :params="{ clientId }" :onSuccess="onDelete">
+				<span class="icon google-icon">
+					<i class="fab fa-google"></i>
+				</span>
+					<span class="google-text"> Delete access to Google </span>
+				</GoogleLogin>
+			</div>
 		</div>
-		<div v-if="error">{{ error }}</div>
+<!--		<div v-if="error">{{ error }}</div>-->
 	</div>
 </template>
 
@@ -54,11 +61,28 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 		const key = await sha256(this.clientId + userID);
 		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
 			.then(async () => {
+				googleUser.disconnect();
 				this.showSpinnerThenAutohide('Saved Successfully');
 				this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 			})
 			.catch(e => {
 				this.showSpinnerThenAutohide('Error');
+				this.error = e.toString();
+			});
+	}
+
+	async onDelete(googleUser) {
+		this.showSpinner('Deleting Keystore for Recovery');
+		const userID = googleUser.getBasicProfile().getId();
+		const key = await sha256(this.clientId + userID);
+		this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId })
+			.then(async () => {
+				googleUser.disconnect();
+				this.showSpinnerThenAutohide('Keystore deleted successfully');
+				this.hasRecoveryMethod = false;
+			})
+			.catch(e => {
+				this.showSpinnerThenAutohide('Error finding user');
 				this.error = e.toString();
 			});
 	}

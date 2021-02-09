@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Vuex, { Store } from 'vuex';
-import { sha256 } from '../utils/cryptoFunctions';
+import {cryptoDecrypt, sha256} from '../utils/cryptoFunctions';
 import {
 	getEncryptedSeedFromMail,
 	verifyAuthenticatorCode,
@@ -14,7 +14,7 @@ import {
 	getNonce,
 	recoverSeedSocialRecovery
 } from '../utils/backupRestore';
-import { getAccountsFromKeystore, sortObject } from '../utils/utils';
+import {downloadEncryptedKeystore, getAccountsFromKeystore, sortObject} from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
 
 import {
@@ -34,7 +34,9 @@ import {
 	TypePayloadData,
 	TypeRecoveryParams,
 	TypeAddRecoveryParams,
-	TypeResetRecovery
+	TypeResetRecovery,
+	TypeUpdatePrivateKey,
+	TypeUpdateSeedPhrase, TypeShowPhraseKeyVariables, TypeExportPhraseKeyVariables,
 } from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
@@ -42,6 +44,7 @@ import { connectToParent } from 'penpal';
 import { WalletBase, SignedTransaction } from 'web3-core';
 import { CallSender, Connection } from 'penpal/lib/types';
 import router from '@/router';
+import download from "downloadjs";
 
 Vue.use(Vuex);
 
@@ -67,6 +70,11 @@ export interface RootState {
 	openPage: string;
 	loginComplete: boolean;
 	recoveryMethods: Array<any>;
+	seedExported: boolean;
+	keystoreExported: boolean,
+	seedPhrase: string;
+	privateKey: string;
+	privateKeyKeystore: string;
 }
 
 /**
@@ -106,7 +114,12 @@ function initialState(): RootState {
 		messageDetails: {},
 		openPage: '',
 		loginComplete: false,
-		recoveryMethods: []
+		recoveryMethods: [],
+		seedExported: false,
+		keystoreExported: false,
+		seedPhrase: '',
+		privateKey: '',
+		privateKeyKeystore: ''
 	} as RootState;
 }
 
@@ -131,10 +144,11 @@ const store: Store<RootState> = new Vuex.Store({
 			}
 		},
 		delayedSpinnerMessage(state: RootState, statusMessage: string) {
+			state.loading = true;
 			state.spinnerStatusText = statusMessage;
 			setTimeout(() => {
 				state.loading = false;
-			}, 1500);
+			}, 2000);
 		},
 		seedFound(state: RootState, seedFoundData: TypeSeedFoundData) {
 			state.status = 'success';
@@ -201,7 +215,19 @@ const store: Store<RootState> = new Vuex.Store({
 			state.accounts = payload.accounts;
 			state.hashedPassword = payload.hashedPassword;
 			sessionStorage.setItem('password', payload.hashedPassword);
-		}
+		},
+		seedExported(state: RootState) {
+			state.seedExported = true;
+		},
+		keystoreExported(state: RootState) {
+			state.keystoreExported = true;
+		},
+		updatePrivateKey(state: RootState, payload: TypeUpdatePrivateKey) {
+			state.privateKey = payload.privateKey;
+		},
+		updateSeedPhrase(state: RootState, payload: TypeUpdateSeedPhrase) {
+			state.seedPhrase = payload.seedPhrase;
+		},
 	},
 	actions: {
 		showSpinner({ commit }, message: string) {
@@ -598,24 +624,139 @@ const store: Store<RootState> = new Vuex.Store({
 		},
 		resetRecoveryMethod({ commit, dispatch }, params: TypeResetRecovery) {
 			return new Promise((resolve, reject) => {
-				commit('loading', 'Resetting recovery...');
 				dispatch('sendSignedRequest', {
-					body: { recoveryTypeId: params.recoveryTypeId },
+					body: { key: params.key, recoveryTypeId: params.recoveryTypeId },
 					method: 'POST',
 					url: getBackendEndpoint() + '/v1/auth/resetRecovery'
 				})
 					.then(() => {
 						dispatch('updateRecoveryMethods').then(() => {
-							commit('loading', '');
 							resolve(true);
 						});
 					})
 					.catch(e => {
 						reject(e);
-						commit('loading', '');
 					});
 			});
-		}
+		},
+		showPrivateKey({ commit, dispatch, state }, params: TypeShowPhraseKeyVariables) {
+			const storedPassword = state.hashedPassword;
+
+			if (storedPassword === params.password) {
+				if (state.keystore !== null) {
+					const privateKey = state.keystore[0].privateKey.substring(2)
+					commit('delayedSpinnerMessage', 'Private key exported successfully');
+					commit('updatePrivateKey', { privateKey })
+				}
+
+			} else {
+				commit('delayedSpinnerMessage', 'Wrong password for private key');
+			}
+		},
+		exportKeystore({ commit, state }, params: TypeExportPhraseKeyVariables) {
+			const storedPassword = state.hashedPassword;
+
+			sha256(params.password)
+				.then(hashedPassword => {
+					if (storedPassword === hashedPassword) {
+						if (state.keystore !== null) {
+							downloadEncryptedKeystore(state.keystore[0].encrypt(params.password), params.account)
+							commit('delayedSpinnerMessage', 'Keystore exported successfully');
+							commit('keystoreExported')
+						}
+
+					} else {
+						commit('delayedSpinnerMessage', 'Wrong password for Keystore');
+					}
+
+				})
+				.catch(() => {
+					commit('delayedSpinnerMessage', 'Something went wrong, please try again');
+				})
+		},
+		showSeedPhrase({ commit, dispatch, state }, params: TypeShowPhraseKeyVariables) {
+			const storedPassword = state.hashedPassword;
+
+			if (storedPassword === params.password) {
+				if (state.keystore !== null) {
+					const seed = state.encryptedSeed;
+					if(seed.ciphertext !== undefined && seed.iv !== undefined && seed.salt !== undefined){
+						cryptoDecrypt(params.password, seed.ciphertext, seed.iv, seed.salt)
+							.then(mnemonic => {
+								commit('delayedSpinnerMessage', 'Seed Phrase retrieved successfully');
+								commit('updateSeedPhrase', { seedPhrase: mnemonic })
+							});
+					}
+
+					else {
+						commit('delayedSpinnerMessage', 'Wrong seed given');
+					}
+				}
+
+			} else {
+				commit('delayedSpinnerMessage', 'Wrong password for Seed Phrase');
+			}
+		},
+		exportSeedPhrase({ commit, dispatch, state }, params: TypeExportPhraseKeyVariables) {
+			const storedPassword = state.hashedPassword;
+
+			if (storedPassword === params.password) {
+				if (state.keystore !== null) {
+					const seed = state.encryptedSeed;
+					if(seed.ciphertext !== undefined && seed.iv !== undefined && seed.salt !== undefined){
+						cryptoDecrypt(params.password, seed.ciphertext, seed.iv, seed.salt)
+							.then(mnemonic => {
+								const now = new Date();
+								download(mnemonic, 'seed' + '--' + now.toISOString() + '--' + params.account);
+								commit('delayedSpinnerMessage', 'Seed Phrase exported successfully');
+								commit('seedExported')
+							});
+					}
+
+					else {
+						commit('delayedSpinnerMessage', 'Wrong seed given');
+					}
+				}
+
+			} else {
+				commit('delayedSpinnerMessage', 'Wrong password for Seed Phrase');
+			}
+		},
+		clearPrivateKey({ commit }) {
+			commit('updatePrivateKey', { privateKey: '' })
+		},
+		clearSeedPhrase({ commit }) {
+			commit('updateSeedPhrase', { seedPhrase: '' })
+		},
+		deleteWalletAccount({ commit, dispatch, state }, params: TypeShowPhraseKeyVariables) {
+			return new Promise(async (resolve, reject) => {
+				const storedPassword = state.hashedPassword;
+
+				if (storedPassword === params.password) {
+					dispatch('sendSignedRequest', {
+						body: {
+							email: state.email.toLowerCase()
+						},
+						method: 'POST',
+						url: getBackendEndpoint() + '/v1/auth/deleteAccount'
+					})
+						.then(() => {
+							dispatch('showSpinnerThenAutohide', 'Wallet deleted successfully');
+							dispatch('logoutWallet').then(() => {
+								resolve(true);
+							});
+						})
+						.catch(e => {
+							dispatch('showSpinnerThenAutohide', e.toString());
+							reject()
+						})
+				}
+				else {
+					commit('delayedSpinnerMessage', 'Wrong password for account deletion');
+					reject()
+				}
+			});
+		},
 	},
 	getters: {
 		isLoggedIn: state => {

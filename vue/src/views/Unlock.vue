@@ -95,6 +95,7 @@ export default class Unlock extends mixins(Global) {
 	 */
 	async login() {
 		const password = await sha256(this.walletPassword);
+		this.showSpinnerThenAutohide('Logging in User...');
 
 		// Call the fetchUser store action to process the wallet logon
 		this.unlockWithPassword({ password })

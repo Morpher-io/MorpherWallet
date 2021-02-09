@@ -72,6 +72,7 @@
     "@types/validator": "10.11.3",
     "@typescript-eslint/eslint-plugin": "^2.3.1",
     "@typescript-eslint/parser": "^2.3.1",
+    "cypress-otp": "^1.0.3",
     "eslint": "^6.1.0",
     "eslint-config-prettier": "^6.3.0",
     "eslint-plugin-import": "^2.18.2",

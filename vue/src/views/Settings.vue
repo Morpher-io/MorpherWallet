@@ -8,7 +8,7 @@
 
 		<Change2FA></Change2FA>
 
-		<ExportWallet v-if="false"></ExportWallet>
+		<ExportWallet></ExportWallet>
 
 		<div class="field is-grouped">
 			<router-link to="/addrecovery" tag="button" class="button is-danger">
@@ -50,7 +50,8 @@ import ExportWallet from '../components/ExportWallet.vue';
 			twoFaRequired: (state: any) => state.twoFaRequired,
 			walletEmail: (state: any) => state.email,
 			status: (state: any) => state.status,
-			accounts: (state: any) => state.accounts
+			accounts: (state: any) => state.accounts,
+			keystore: (state: any) => state.keystore
 		})
 	}
 })
