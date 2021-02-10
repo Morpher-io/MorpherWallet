@@ -1,8 +1,8 @@
 import { AutoIncrement, Column, DataType, HasMany, Model, PrimaryKey, Table } from 'sequelize-typescript';
-import { Recovery } from './';
+import { Recovery } from './recovery.model';
 
 @Table({ timestamps: false })
-export default class Recovery_Type extends Model {
+export class Recovery_Type extends Model implements Recovery_Type {
     @PrimaryKey
     @AutoIncrement
     @Column

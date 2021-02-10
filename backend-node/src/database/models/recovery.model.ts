@@ -1,10 +1,10 @@
 import { AutoIncrement, BelongsTo, Column, DataType, ForeignKey, Model, PrimaryKey, Table } from 'sequelize-typescript';
-import { Recovery_Type } from './';
-import { User } from './';
+import { Recovery_Type } from './recovery_type.model';
+import { User } from './user.model';
 import * as moment from 'moment';
 
 @Table({ timestamps: false })
-export default class Recovery extends Model {
+export class Recovery extends Model implements Recovery {
     @PrimaryKey
     @AutoIncrement
     @Column

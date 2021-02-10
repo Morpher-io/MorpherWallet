@@ -12,10 +12,18 @@ export const sequelize = new Sequelize({
     database: process.env.DB_NAME,
     port: process.env.DB_PORT,
     dialect: process.env.DB_DIALECT,
+    define: {
+        //prevent sequelize from pluralizing table names
+        freezeTableName: true
+    },    
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     freezeTableName: true,
-    models: [__dirname + '/**/*.model.ts'],
+    modelPaths: [__dirname + '/*.model.*'],
+        modelMatch: (filename, member) => {
+            return filename.substring(0, filename.indexOf('.model')) === member.toLowerCase();
+        },
+    //models: [__dirname + '/**/*.model.ts'],
     logging: false,
     storage: ':memory:',
     pool: {
