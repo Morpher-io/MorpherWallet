@@ -7,11 +7,10 @@ const rateLimit = require('express-rate-limit');
 const limiter = new rateLimit({
     windowMs: 60 * 1000,
     max: 60,
-    keyGenerator (req, res) {
+    keyGenerator(req, res) {
         return req.body.key;
     }
 });
-
 
 // The index route file which connects all the other files.
 module.exports = function(express) {

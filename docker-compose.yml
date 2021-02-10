@@ -8,7 +8,7 @@ services:
         env_file:
             - .env.development.db
         volumes:
-            - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+            #- ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
             - postgres_data:/var/lib/mysql
         ports:
             - "5432:5432"
@@ -24,6 +24,21 @@ services:
         ports:
             - "8080:80"
         command: "npx nodemon --legacy-watch --exec ts-node ./src/index.ts"
+        env_file:
+            - .env.development.backend
+            - .env.aws.backend
+    seeder:
+        build:
+            context: ./backend-node
+            dockerfile: Dockerfile
+        image: morpher/backend-node
+        depends_on: 
+            - db
+            - backend
+        volumes:
+            - ./backend-node:/usr/src/app
+            - /usr/src/app/node_modules
+        command: "npx ts-node ./src/database/seed/index.ts"
         env_file:
             - .env.development.backend
             - .env.aws.backend

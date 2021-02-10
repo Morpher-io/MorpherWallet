@@ -3,6 +3,7 @@
   "experimentalNetworkStubbing": true,
   "retries": 1,
   "baseUrl": "http://localhost:3001",
+  "video": false,
   "env": {
     "firstEmail": "test@email.com",
     "secondEmail": "test2@email.com",

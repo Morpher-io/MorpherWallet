@@ -1,7 +1,7 @@
 <template>
 	<div class="field">
 		<div class="control is-expanded" v-if="!hasRecoveryMethod">
-			<v-facebook-login class="button is-fullwidth" :appId="clientId"  @sdk-init="handleSdkInit" @login="onLogin" v-model="facebook.model"
+			<v-facebook-login class="button is-fullwidth" :appId="clientId" @sdk-init="handleSdkInit" @login="onLogin" v-model="facebook.model"
 				><span slot="login">Link to Facebook</span>
 			</v-facebook-login>
 		</div>
@@ -10,8 +10,13 @@
 				<i class="fas fa-check-circle"></i>
 			</span>
 			Facebook Recovery Added
-			<v-facebook-login class="button is-fullwidth" :appId="clientId" @sdk-init="handleSdkInit" @login="deleteRecovery" v-model="facebook.model"
-			><span slot="login">Delete access to Facebook</span>
+			<v-facebook-login
+				class="button is-fullwidth"
+				:appId="clientId"
+				@sdk-init="handleSdkInit"
+				@login="deleteRecovery"
+				v-model="facebook.model"
+				><span slot="login">Delete access to Facebook</span>
 			</v-facebook-login>
 		</div>
 		<div v-if="error">{{ error }}</div>
@@ -62,7 +67,7 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 
 		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
 			.then(async () => {
-				this.facebook.FB.api("/me/permissions","DELETE", async () =>{
+				this.facebook.FB.api('/me/permissions', 'DELETE', async () => {
 					this.facebook.scope.logout();
 					this.showSpinnerThenAutohide('Saved Successfully');
 					this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
@@ -85,7 +90,7 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 		const key = await sha256(this.clientId + userID);
 		this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId })
 			.then(async () => {
-				this.facebook.FB.api("/me/permissions","DELETE", () =>{
+				this.facebook.FB.api('/me/permissions', 'DELETE', () => {
 					this.facebook.scope.logout();
 					this.showSpinnerThenAutohide('Keystore deleted successfully');
 					this.hasRecoveryMethod = false;

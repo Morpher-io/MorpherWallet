@@ -1,4 +1,4 @@
-import { getTransaction, Op, Recovery, Recovery_Type, User, Userhistory } from '../database/models';
+import { getTransaction, Op, Recovery, Recovery_Type, User, Userhistory } from '../database';
 import { decrypt, encrypt, errorResponse, successResponse, sha256, randomFixedInteger } from '../helpers/functions/util';
 const { to } = require('await-to-js');
 import { Request, Response } from 'express';
@@ -55,7 +55,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
 
             const nonce = 1;
 
-            userId = (await User.create({ email, payload, nonce, eth_address }, { transaction })).dataValues.id;
+            userId = (await User.create({ email, payload, nonce, eth_address }, { transaction })).getDataValue('id');
 
             // Create a new recovery method.
             const recoveryId = (
@@ -68,7 +68,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
                     },
                     { transaction }
                 )
-            ).dataValues.id;
+            ).getDataValue('id');
             // Commit changes to database and return successfully.
             await transaction.commit();
 
@@ -81,7 +81,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
     } catch (error) {
         // If an error happened anywhere along the way, rollback all the changes.
         await transaction.rollback();
-        Logger.info(error.message)
+        Logger.info(error.message);
         return errorResponse(res, 'Internal error', 500);
     }
 
@@ -115,7 +115,7 @@ export async function addRecoveryMethod(req: Request, res: Response) {
                 encrypted_seed: JSON.stringify(encrypt(JSON.stringify(req.body.encryptedSeed), process.env.DB_BACKEND_SALT)),
                 key: keyForSaving
             })
-        ).dataValues.id;
+        ).getDataValue('id');
 
         Logger.info({
             method: arguments.callee.name,
@@ -160,7 +160,7 @@ export async function updatePassword(req: Request, res: Response) {
             return successResponse(res, 'updated');
         }
     } catch (error) {
-        Logger.info(error.message)
+        Logger.info(error.message);
         return errorResponse(res, 'Internal error', 500);
     }
     //error out in any other case
@@ -244,7 +244,7 @@ export async function updateEmail(req: Request, res: Response) {
         await transaction.rollback();
         return errorResponse(res, 'Error: Update Operation aborted.', 500);
     } catch (error) {
-        Logger.info(error.message)
+        Logger.info(error.message);
         return errorResponse(res, 'Internal error', 500);
     }
 }
@@ -699,7 +699,7 @@ export async function resetRecovery(req, res) {
 export async function deleteAccount(req, res) {
     const user = await User.findOne({ where: { email: req.body.email } });
     if (user !== null) {
-        try{
+        try {
             await user.destroy();
             await Userhistory.create({
                 new_value: JSON.stringify(req.body),
@@ -708,11 +708,9 @@ export async function deleteAccount(req, res) {
                 stringified_headers: JSON.stringify(req.headers)
             });
             return successResponse(res, true);
-        }
-        catch (e) {
+        } catch (e) {
             return errorResponse(res, 'Could not delete User!', 500);
         }
-
     }
 
     return errorResponse(res, 'Could not find User!', 404);

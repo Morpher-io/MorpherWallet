@@ -67,7 +67,7 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 	font-size: 18px;
 	margin-right: 10px;
 }
-	.header-text{
-		color: #fff
-	}
+.header-text {
+	color: #fff;
+}
 </style>
