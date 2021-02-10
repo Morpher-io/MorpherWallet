@@ -36,8 +36,4 @@ const getTransaction = async () => {
 
 export { Op };
 export { getTransaction };
-export { Recovery } from './models/Recovery.model';
-export { Recovery_Type } from './models/Recovery_Type.model';
-export { User } from './models/User.model';
-export { Userhistory } from './models/Userhistory.model';
 
