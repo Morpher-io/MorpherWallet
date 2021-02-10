@@ -1,4 +1,4 @@
-import { Recovery_Type, Recovery, User, Userhistory, sequelize } from '../models';
+import { Recovery_Type, Recovery, User, Userhistory, sequelize } from '../';
 
 const recoveryTypes = [
     {
@@ -30,3 +30,5 @@ async function main() {
 }
 
 main();
+
+export { main };

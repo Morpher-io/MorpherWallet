@@ -1,4 +1,4 @@
-import { getTransaction, Op, Recovery, Recovery_Type, User, Userhistory } from '../database/models';
+import { getTransaction, Op, Recovery, Recovery_Type, User, Userhistory } from '../database';
 import { decrypt, encrypt, errorResponse, successResponse, sha256, randomFixedInteger } from '../helpers/functions/util';
 const { to } = require('await-to-js');
 import { Request, Response } from 'express';
