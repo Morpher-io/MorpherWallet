@@ -1,4 +1,4 @@
-import { Recovery_Type } from '../../database/models';
+import { Recovery_Type } from '../../database';
 
 const crypto = require('crypto');
 

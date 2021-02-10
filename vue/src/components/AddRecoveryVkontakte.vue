@@ -11,11 +11,10 @@
 
 		<div class="control is-expanded has-text-centered" v-if="hasRecoveryMethod">
 			<span class="icon google-icon">
-					<i class="fas fa-check-circle"></i>
-				</span>
+				<i class="fas fa-check-circle"></i>
+			</span>
 			VK Recovery Added
 			<button class="button is-fullwidth vk-button" @click="doDelete">
-
 				<span class="vk-text">Delete access to VKontakte</span>
 			</button>
 		</div>
@@ -64,8 +63,7 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 	async doLogin() {
 		const redirectUri = this.callbackUrlForPopup;
 		const uriRegex = new RegExp(redirectUri);
-		const url =
-			`http://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=${redirectUri}`;
+		const url = `http://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=${redirectUri}`;
 		const win = this.vkPopup({
 			width: 620,
 			height: 370,
@@ -111,8 +109,7 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 	async doDelete() {
 		const redirectUri = this.callbackUrlForPopup;
 		const uriRegex = new RegExp(redirectUri);
-		const url =
-				`http://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=${redirectUri}`;
+		const url = `http://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=${redirectUri}`;
 		const win = this.vkPopup({
 			width: 620,
 			height: 370,
@@ -132,7 +129,6 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 
 					setTimeout(() => {
 						win.close();
-
 					}, 100);
 
 					const userID = params.user_id;

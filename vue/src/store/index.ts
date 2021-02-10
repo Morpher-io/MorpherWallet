@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Vuex, { Store } from 'vuex';
-import {cryptoDecrypt, sha256} from '../utils/cryptoFunctions';
+import { cryptoDecrypt, sha256 } from '../utils/cryptoFunctions';
 import {
 	getEncryptedSeedFromMail,
 	verifyAuthenticatorCode,
@@ -14,7 +14,7 @@ import {
 	getNonce,
 	recoverSeedSocialRecovery
 } from '../utils/backupRestore';
-import {downloadEncryptedKeystore, getAccountsFromKeystore, sortObject} from '../utils/utils';
+import { downloadEncryptedKeystore, getAccountsFromKeystore, sortObject } from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
 
 import {
@@ -36,7 +36,9 @@ import {
 	TypeAddRecoveryParams,
 	TypeResetRecovery,
 	TypeUpdatePrivateKey,
-	TypeUpdateSeedPhrase, TypeShowPhraseKeyVariables, TypeExportPhraseKeyVariables,
+	TypeUpdateSeedPhrase,
+	TypeShowPhraseKeyVariables,
+	TypeExportPhraseKeyVariables
 } from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
@@ -44,7 +46,7 @@ import { connectToParent } from 'penpal';
 import { WalletBase, SignedTransaction } from 'web3-core';
 import { CallSender, Connection } from 'penpal/lib/types';
 import router from '@/router';
-import download from "downloadjs";
+import download from 'downloadjs';
 
 Vue.use(Vuex);
 
@@ -71,7 +73,7 @@ export interface RootState {
 	loginComplete: boolean;
 	recoveryMethods: Array<any>;
 	seedExported: boolean;
-	keystoreExported: boolean,
+	keystoreExported: boolean;
 	seedPhrase: string;
 	privateKey: string;
 	privateKeyKeystore: string;
@@ -227,7 +229,7 @@ const store: Store<RootState> = new Vuex.Store({
 		},
 		updateSeedPhrase(state: RootState, payload: TypeUpdateSeedPhrase) {
 			state.seedPhrase = payload.seedPhrase;
-		},
+		}
 	},
 	actions: {
 		showSpinner({ commit }, message: string) {
@@ -622,7 +624,7 @@ const store: Store<RootState> = new Vuex.Store({
 				}
 			});
 		},
-		resetRecoveryMethod({ commit, dispatch }, params: TypeResetRecovery) {
+		resetRecoveryMethod({ dispatch }, params: TypeResetRecovery) {
 			return new Promise((resolve, reject) => {
 				dispatch('sendSignedRequest', {
 					body: { key: params.key, recoveryTypeId: params.recoveryTypeId },
@@ -639,16 +641,15 @@ const store: Store<RootState> = new Vuex.Store({
 					});
 			});
 		},
-		showPrivateKey({ commit, dispatch, state }, params: TypeShowPhraseKeyVariables) {
+		showPrivateKey({ commit, state }, params: TypeShowPhraseKeyVariables) {
 			const storedPassword = state.hashedPassword;
 
 			if (storedPassword === params.password) {
 				if (state.keystore !== null) {
-					const privateKey = state.keystore[0].privateKey.substring(2)
+					const privateKey = state.keystore[0].privateKey.substring(2);
 					commit('delayedSpinnerMessage', 'Private key exported successfully');
-					commit('updatePrivateKey', { privateKey })
+					commit('updatePrivateKey', { privateKey });
 				}
-
 			} else {
 				commit('delayedSpinnerMessage', 'Wrong password for private key');
 			}
@@ -660,73 +661,63 @@ const store: Store<RootState> = new Vuex.Store({
 				.then(hashedPassword => {
 					if (storedPassword === hashedPassword) {
 						if (state.keystore !== null) {
-							downloadEncryptedKeystore(state.keystore[0].encrypt(params.password), params.account)
+							downloadEncryptedKeystore(state.keystore[0].encrypt(params.password), params.account);
 							commit('delayedSpinnerMessage', 'Keystore exported successfully');
-							commit('keystoreExported')
+							commit('keystoreExported');
 						}
-
 					} else {
 						commit('delayedSpinnerMessage', 'Wrong password for Keystore');
 					}
-
 				})
 				.catch(() => {
 					commit('delayedSpinnerMessage', 'Something went wrong, please try again');
-				})
+				});
 		},
-		showSeedPhrase({ commit, dispatch, state }, params: TypeShowPhraseKeyVariables) {
+		showSeedPhrase({ commit, state }, params: TypeShowPhraseKeyVariables) {
 			const storedPassword = state.hashedPassword;
 
 			if (storedPassword === params.password) {
 				if (state.keystore !== null) {
 					const seed = state.encryptedSeed;
-					if(seed.ciphertext !== undefined && seed.iv !== undefined && seed.salt !== undefined){
-						cryptoDecrypt(params.password, seed.ciphertext, seed.iv, seed.salt)
-							.then(mnemonic => {
-								commit('delayedSpinnerMessage', 'Seed Phrase retrieved successfully');
-								commit('updateSeedPhrase', { seedPhrase: mnemonic })
-							});
-					}
-
-					else {
+					if (seed.ciphertext !== undefined && seed.iv !== undefined && seed.salt !== undefined) {
+						cryptoDecrypt(params.password, seed.ciphertext, seed.iv, seed.salt).then(mnemonic => {
+							commit('delayedSpinnerMessage', 'Seed Phrase retrieved successfully');
+							commit('updateSeedPhrase', { seedPhrase: mnemonic });
+						});
+					} else {
 						commit('delayedSpinnerMessage', 'Wrong seed given');
 					}
 				}
-
 			} else {
 				commit('delayedSpinnerMessage', 'Wrong password for Seed Phrase');
 			}
 		},
-		exportSeedPhrase({ commit, dispatch, state }, params: TypeExportPhraseKeyVariables) {
+		exportSeedPhrase({ commit, state }, params: TypeExportPhraseKeyVariables) {
 			const storedPassword = state.hashedPassword;
 
 			if (storedPassword === params.password) {
 				if (state.keystore !== null) {
 					const seed = state.encryptedSeed;
-					if(seed.ciphertext !== undefined && seed.iv !== undefined && seed.salt !== undefined){
-						cryptoDecrypt(params.password, seed.ciphertext, seed.iv, seed.salt)
-							.then(mnemonic => {
-								const now = new Date();
-								download(mnemonic, 'seed' + '--' + now.toISOString() + '--' + params.account);
-								commit('delayedSpinnerMessage', 'Seed Phrase exported successfully');
-								commit('seedExported')
-							});
-					}
-
-					else {
+					if (seed.ciphertext !== undefined && seed.iv !== undefined && seed.salt !== undefined) {
+						cryptoDecrypt(params.password, seed.ciphertext, seed.iv, seed.salt).then(mnemonic => {
+							const now = new Date();
+							download(mnemonic, 'seed' + '--' + now.toISOString() + '--' + params.account);
+							commit('delayedSpinnerMessage', 'Seed Phrase exported successfully');
+							commit('seedExported');
+						});
+					} else {
 						commit('delayedSpinnerMessage', 'Wrong seed given');
 					}
 				}
-
 			} else {
 				commit('delayedSpinnerMessage', 'Wrong password for Seed Phrase');
 			}
 		},
 		clearPrivateKey({ commit }) {
-			commit('updatePrivateKey', { privateKey: '' })
+			commit('updatePrivateKey', { privateKey: '' });
 		},
 		clearSeedPhrase({ commit }) {
-			commit('updateSeedPhrase', { seedPhrase: '' })
+			commit('updateSeedPhrase', { seedPhrase: '' });
 		},
 		deleteWalletAccount({ commit, dispatch, state }, params: TypeShowPhraseKeyVariables) {
 			return new Promise(async (resolve, reject) => {
@@ -748,15 +739,14 @@ const store: Store<RootState> = new Vuex.Store({
 						})
 						.catch(e => {
 							dispatch('showSpinnerThenAutohide', e.toString());
-							reject()
-						})
-				}
-				else {
+							reject();
+						});
+				} else {
 					commit('delayedSpinnerMessage', 'Wrong password for account deletion');
-					reject()
+					reject();
 				}
 			});
-		},
+		}
 	},
 	getters: {
 		isLoggedIn: state => {

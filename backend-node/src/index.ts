@@ -7,8 +7,8 @@ import * as cors from 'cors';
 import * as morgan from 'morgan';
 import * as helmet from 'helmet';
 import * as bodyParser from 'body-parser';
-import { sequelize, User } from './database/models';
-import { decrypt, encrypt, errorResponse, randomFixedInteger, sha256, successResponse } from './helpers/functions/util';
+import { sequelize } from './database/index';
+import { successResponse } from './helpers/functions/util';
 import { Logger } from './helpers/functions/winston';
 
 // Import v1 routes instance for REST endpoint.
@@ -47,8 +47,6 @@ app.use((req, res, next) => {
     next();
 });
 app.use(cors());
-
-
 
 // Use morgan combined with winston for logging.
 app.use(morgan('combined'));

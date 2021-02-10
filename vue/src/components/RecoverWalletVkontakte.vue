@@ -2,8 +2,8 @@
 	<div class="control is-expanded">
 		<button type="button" class="button is-fullwidth vk-button" @click="doLogin">
 			<span class="icon google-icon">
-					<i class="fab fa-vk"></i>
-				</span>
+				<i class="fab fa-vk"></i>
+			</span>
 			<span class="vk-text"> Recover using VKontakte</span>
 		</button>
 		<ChangePassword v-if="seedFound" :presetOldPassword="oldPassword"></ChangePassword>
@@ -47,8 +47,7 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 	doLogin() {
 		const redirectUri = this.callbackUrlForPopup;
 		const uriRegex = new RegExp(redirectUri);
-		const url =
-				`http://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=${redirectUri}`;
+		const url = `http://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=${redirectUri}`;
 		const win = this.vkPopup({
 			width: 620,
 			height: 370,
@@ -103,10 +102,10 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-	.vk-text{
-		color: #fff
-	}
-	.vk-button{
-		background-color: #45668e;
-	}
+.vk-text {
+	color: #fff;
+}
+.vk-button {
+	background-color: #45668e;
+}
 </style>
