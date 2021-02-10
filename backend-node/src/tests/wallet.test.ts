@@ -1,6 +1,6 @@
 import * as expect from 'expect';
 import { describe, it, beforeEach } from 'mocha';
-import { Recovery, Recovery_Type, sequelize, User, Userhistory } from '../database/models';
+import { Recovery, User } from '../database/models';
 import { sha256, sortObject } from '../helpers/functions/util';
 import { authenticator } from 'otplib';
 
