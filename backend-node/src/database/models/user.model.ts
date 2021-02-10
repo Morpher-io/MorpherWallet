@@ -1,10 +1,9 @@
 import { AutoIncrement, Column, DataType, HasMany, Model, PrimaryKey, Table, Unique } from 'sequelize-typescript';
-import { Recovery } from './recovery.model';
-import { Userhistory } from './userhistory.model';
-import * as moment from 'moment';
+import { Recovery } from './';
+import { Userhistory } from './';
 
 @Table({ timestamps: true })
-export class User extends Model<User> {
+export default class User extends Model {
     @PrimaryKey
     @AutoIncrement
     @Column

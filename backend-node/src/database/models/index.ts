@@ -4,7 +4,7 @@ dotEnv.config();
 
 import { Sequelize } from 'sequelize-typescript';
 
-const Op = Sequelize.Op;
+import { Op } from 'sequelize';
 
 // @ts-ignore
 export const sequelize = new Sequelize({
@@ -14,12 +14,9 @@ export const sequelize = new Sequelize({
     dialect: process.env.DB_DIALECT,
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    modelPaths: [__dirname + '/*.model.*'],
-    modelMatch: (filename, member) => {
-        return filename.substring(0, filename.indexOf('.model')) === member.toLowerCase();
-    },
+    freezeTableName: true,
+    models: [__dirname + '/**/*.model.ts'],
     logging: false,
-    operatorsAliases: false,
     storage: ':memory:',
     pool: {
         max: 100,
@@ -35,7 +32,7 @@ const getTransaction = async () => {
 
 export { Op };
 export { getTransaction };
-export { Recovery } from './recovery.model';
-export { Recovery_Type } from './recovery_type.model';
-export { User } from './user.model';
-export { Userhistory } from './userhistory.model';
+export { Recovery } from './Recovery.model';
+export { Recovery_Type } from './Recovery_Type.model';
+export { User } from './User.model';
+export { Userhistory } from './Userhistory.model';

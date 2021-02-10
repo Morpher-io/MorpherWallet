@@ -55,7 +55,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
 
             const nonce = 1;
 
-            userId = (await User.create({ email, payload, nonce, eth_address }, { transaction })).dataValues.id;
+            userId = (await User.create({ email, payload, nonce, eth_address }, { transaction })).getDataValue('id');
 
             // Create a new recovery method.
             const recoveryId = (
@@ -68,7 +68,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
                     },
                     { transaction }
                 )
-            ).dataValues.id;
+            ).getDataValue('id');
             // Commit changes to database and return successfully.
             await transaction.commit();
 
@@ -115,7 +115,7 @@ export async function addRecoveryMethod(req: Request, res: Response) {
                 encrypted_seed: JSON.stringify(encrypt(JSON.stringify(req.body.encryptedSeed), process.env.DB_BACKEND_SALT)),
                 key: keyForSaving
             })
-        ).dataValues.id;
+        ).getDataValue('id');
 
         Logger.info({
             method: arguments.callee.name,

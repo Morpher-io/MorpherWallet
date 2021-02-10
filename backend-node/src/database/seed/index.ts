@@ -1,4 +1,4 @@
-import { Recovery_Type, sequelize } from '../models';
+import { Recovery_Type, Recovery, User, Userhistory, sequelize } from '../models';
 
 const recoveryTypes = [
     {
@@ -24,7 +24,7 @@ const recoveryTypes = [
 ];
 
 async function main() {
-    await sequelize.sync();
+    await sequelize.sync({ alter: true });
     await Recovery_Type.bulkCreate(recoveryTypes);
     console.log('Database seeded successfully.');
 }
