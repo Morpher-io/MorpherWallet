@@ -1,6 +1,6 @@
 // Setup market routes according to controller functions.
 
-import { User } from '../../database';
+import { User } from '../../database/models/User.model';
 import { errorResponse, successResponse } from '../../helpers/functions/util';
 
 module.exports = function(router) {

@@ -1,4 +1,5 @@
-import { Recovery, User } from '../../database/models';
+import { Recovery } from '../../database/models/Recovery.model';
+import { User } from '../../database/models/User.model';
 import { errorResponse, sortObject } from '../../helpers/functions/util';
 const ethereumjs = require('ethereumjs-util');
 
