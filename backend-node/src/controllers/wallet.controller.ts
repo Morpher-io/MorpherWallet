@@ -64,7 +64,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
                     {
                         recovery_type_id: recoveryTypeId,
                         user_id: userId,
-                        encrypted_seed: JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT)),
+                        encrypted_seed: JSON.stringify(await encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT)),
                         key
                     },
                     { transaction }
@@ -113,7 +113,7 @@ export async function addRecoveryMethod(req: Request, res: Response) {
             await Recovery.create({
                 recovery_type_id: recoveryTypeId,
                 user_id: emailRecovery.user_id,
-                encrypted_seed: JSON.stringify(encrypt(JSON.stringify(req.body.encryptedSeed), process.env.DB_BACKEND_SALT)),
+                encrypted_seed: JSON.stringify(await encrypt(JSON.stringify(req.body.encryptedSeed), process.env.DB_BACKEND_SALT)),
                 key: keyForSaving
             })
         ).getDataValue('id');
@@ -148,7 +148,7 @@ export async function updatePassword(req: Request, res: Response) {
         // Create a new recovery method.
         const recovery = await Recovery.findOne({ where: { key, recovery_type_id: 1 } });
         if (recovery != null) {
-            recovery.encrypted_seed = JSON.stringify(encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT));
+            recovery.encrypted_seed = JSON.stringify(await encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT));
             await recovery.save();
 
             Logger.info({
@@ -292,7 +292,7 @@ export async function getEncryptedSeed(req, res) {
             body: req.body
         });
         return successResponse(res, {
-            encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT)
+            encryptedSeed: await decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT)
         });
     }
 
@@ -328,7 +328,7 @@ async function getFacebookEncryptedSeed(req, res) {
                 headers: req.headers,
                 body: req.body
             });
-            return successResponse(res, { encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
+            return successResponse(res, { encryptedSeed: await decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
         }
     }
     Logger.info({ method: arguments.callee.name, type: 'Failed Recover Encrypted Seed', headers: req.headers, body: req.body });
@@ -372,7 +372,7 @@ async function getGoogleEncryptedSeed(req, res) {
                 body: req.body
             });
             return successResponse(res, {
-                encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT),
+                encryptedSeed: await decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT),
                 email: recovery.user.email
             });
         }
@@ -413,7 +413,7 @@ async function getVKontakteEncryptedSeed(req, res) {
                 headers: req.headers,
                 body: req.body
             });
-            return successResponse(res, { encryptedSeed: decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
+            return successResponse(res, { encryptedSeed: await decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
         }
     }
     Logger.info({ method: arguments.callee.name, type: 'Failed Recover Encrypted Seed', headers: req.headers, body: req.body });
