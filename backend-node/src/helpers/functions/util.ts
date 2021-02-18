@@ -64,9 +64,10 @@ async function seedDatabase() {
 // Black box encryption functions.
 function encrypt(text, secret) {
     const iv = crypto.randomBytes(16);
-    const key = sha256(secret).substr(0, 32);
+    const key = crypto.createHash('sha256').update(String(secret)).digest();
+    //this will reduce to const key = sha256(secret).substr(0, 64);
 
-    const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
+    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
     let encrypted = cipher.update(text);
     encrypted = Buffer.concat([encrypted, cipher.final()]);
     return { iv: iv.toString('hex'), encryptedData: encrypted.toString('hex') };
@@ -74,9 +75,11 @@ function encrypt(text, secret) {
 
 function decrypt(text, secret) {
     const iv = Buffer.from(text.iv, 'hex');
-    const key = sha256(secret).substr(0, 32);
+    //const key = sha256(secret).substr(0, 64);
+    
+    const key = crypto.createHash('sha256').update(String(secret)).digest();
     const encryptedText = Buffer.from(text.encryptedData, 'hex');
-    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), iv);
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
     let decrypted = decipher.update(encryptedText);
     decrypted = Buffer.concat([decrypted, decipher.final()]);
     return decrypted.toString();
