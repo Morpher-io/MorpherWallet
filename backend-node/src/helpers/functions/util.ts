@@ -62,22 +62,41 @@ async function seedDatabase() {
 }
 
 // Black box encryption functions.
-function encrypt(text, secret) {
+async function encrypt(text, secret) {
     const iv = crypto.randomBytes(16);
-    const key = crypto.createHash('sha256').update(String(secret)).digest();
+    const salt = crypto.randomBytes(16);
+    //const key = crypto.createHash('sha256').update(String(secret)).digest();
     //this will reduce to const key = sha256(secret).substr(0, 64);
-
+    const key = await new Promise((resolve, reject) => {
+        crypto.pbkdf2(String(secret), salt, 100000, 32, 'sha512', (err, derivedKey) => {
+        if (err) {
+            reject(err);
+            return;
+        };
+        resolve(derivedKey);  // '3745e48...08d59ae'
+      });
+    });
     const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
     let encrypted = cipher.update(text);
     encrypted = Buffer.concat([encrypted, cipher.final()]);
-    return { iv: iv.toString('hex'), encryptedData: encrypted.toString('hex') };
+    return { salt: salt.toString('hex'), iv: iv.toString('hex'), encryptedData: encrypted.toString('hex') };
 }
 
-function decrypt(text, secret) {
+async function decrypt(text, secret) {
     const iv = Buffer.from(text.iv, 'hex');
+    const salt = Buffer.from(text.salt, 'hex');
     //const key = sha256(secret).substr(0, 64);
     
-    const key = crypto.createHash('sha256').update(String(secret)).digest();
+    //const key = crypto.createHash('sha256').update(String(secret)).digest();
+    const key = await new Promise((resolve, reject) => {
+        crypto.pbkdf2(String(secret), salt, 100000, 32, 'sha512', (err, derivedKey) => {
+        if (err) {
+            reject(err);
+            return;
+        };
+        resolve(derivedKey);  // '3745e48...08d59ae'
+      });
+    });
     const encryptedText = Buffer.from(text.encryptedData, 'hex');
     const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
     let decrypted = decipher.update(encryptedText);
