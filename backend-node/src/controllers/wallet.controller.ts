@@ -751,8 +751,9 @@ async function verifyEmail2FA(user_id: string, code: string): Promise<boolean> {
 
 async function isEmail2FaStillValid(user_id: string): Promise<boolean> {
     const user = await User.findOne({ where: { id: user_id } });
+
     const email2faValidUntil = new Date(user.email2fa_valid_until);
-    return (email2faValidUntil > new Date());
+    return (user.payload.email === false || email2faValidUntil > new Date());
 }
 
 async function verifyGoogle2FA(user_id: string, code: string, getSeed: boolean = true): Promise<boolean> {
