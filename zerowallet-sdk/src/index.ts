@@ -239,7 +239,8 @@ export default class ZeroWallet {
         onLogout: this._onLogout.bind(this),
         onActiveWalletChanged: this._onActiveWalletChanged.bind(this),
 				onError: this._onError.bind(this),
-				hideWallet: this.hideWallet
+				hideWallet: this.hideWallet,
+        showWallet: this.showWallet
       },
     });
 

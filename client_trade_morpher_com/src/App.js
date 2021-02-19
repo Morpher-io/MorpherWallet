@@ -2,10 +2,12 @@
  * Sample app using the wallet-sdk
  */
 import React, { Component } from "react";
-import getWeb3 from "./getWeb3";
+//import getWeb3 from "./getWeb3";
 import ZeroWallet from "zerowallet-sdk";
 import "./App.css";
 //import { connectToChild } from 'penpal';
+
+const Web3 = require('web3');
 
 class App extends Component {
   //connection;
@@ -31,25 +33,31 @@ class App extends Component {
   async componentDidMount() {
 
     this.zeroWallet = new ZeroWallet("ws://127.0.0.1:7545", 5777);
+
     //let web3 = await this.zeroWallet.getProvider();
 
     let res = await this.zeroWallet.isLoggedIn();
     if (res.isLoggedIn === true) {
       this.setState({ walletEmail: res.walletEmail });
-      let web3 = await getWeb3();
+      //let web3 = await getWeb3();
+      let web3 = new Web3(await this.zeroWallet.getProvider());
       let accounts = await web3.eth.getAccounts();
+      console.log(accounts);
       this.setState({ isAuthenticated: true, web3 });
+    } else {
+      
+      this.setState({ showWallet: false });
     }
 
     this.zeroWallet.onLogin(async (walletAddress, walletEmail) => {
       this.setState({ walletEmail: walletEmail });
       this.setState({ walletAddress: walletAddress });
-      let web3 = await getWeb3();
-
+      //let web3 = await getWeb3();
+      let web3 = new Web3(await this.zeroWallet.getProvider());
       let accounts = await web3.eth.getAccounts();
       this.setState({ isAuthenticated: true, web3 });
       let balance = web3.utils.fromWei(await web3.eth.getBalance(accounts[0]), "ether");
-      this.setState({balance});
+      this.setState({ balance });
       this.toggleWallet();
 
     });
@@ -71,21 +79,22 @@ class App extends Component {
       to,
       value: amount * 1000000000000000000,
     });
-    if(result.status === true) {
+    if (result.status === true) {
       alert("Sent was successful");
       let accounts = await web3.eth.getAccounts();
       let balance = web3.utils.fromWei(await web3.eth.getBalance(accounts[0]), "ether");
-      this.setState({balance});
+      this.setState({ balance });
     }
   };
 
-  toggleWallet = async() => {
-    if(this.state.showWallet) {
-      document.getElementsByClassName("zerowallet-iframe")[0].style.display = "none"
+  toggleWallet = async () => {
+    if (this.state.showWallet) {
+      await this.zeroWallet.hideWallet();
       this.setState({ showWallet: false });
 
     } else {
-      document.getElementsByClassName("zerowallet-iframe")[0].style.display = ""
+      await this.zeroWallet.showWallet();
+      
       this.setState({ showWallet: true });
 
     }
@@ -120,24 +129,24 @@ class App extends Component {
           <span>Your Balance is {this.state.balance} ether</span>
           <h3>Send some Ether</h3>
           <form onSubmit={this.sendEther}>
-          Target Address: <input
-            type="text"
-            name="targetAddress"
-            placeholder="0x123"
-            value={this.state.targetAddress}
-            onChange={this.handleInputChange}
-          /><br />
-          Ether: 
+            Target Address: <input
+              type="text"
+              name="targetAddress"
+              placeholder="0x123"
+              value={this.state.targetAddress}
+              onChange={this.handleInputChange}
+            /><br />
+          Ether:
           <input
-            type="text"
-            name="numberOfEther"
-            placeholder="1"
-            value={this.state.numberOfEther}
-            onChange={this.handleInputChange}
-            className="Input"
-          /><br />
-          <input type="submit" value="Send Now" />
-        </form>
+              type="text"
+              name="numberOfEther"
+              placeholder="1"
+              value={this.state.numberOfEther}
+              onChange={this.handleInputChange}
+              className="Input"
+            /><br />
+            <input type="submit" value="Send Now" />
+          </form>
           <br />
           <br />
           <br />
@@ -145,12 +154,16 @@ class App extends Component {
         </div>
       </div>
     ) : (
-      <div>Not logged in!</div>
-    );
+        <div>
+          <div>Not logged in!</div>
+
+          <button onClick={this.toggleWallet}>Show/Hide Wallet</button>
+        </div>
+      );
     return (
       <div className="App">
         <h1>Welcome to the trade engine!</h1>
-        
+
         <br />
         {content}
       </div>
