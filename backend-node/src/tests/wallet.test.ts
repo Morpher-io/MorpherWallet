@@ -532,7 +532,7 @@ describe('Wallet controller test cases', async () => {
             .set('Accept', 'application/json');
 
         expect(response.status).toEqual(404);
-        expect(response.body.error).toEqual('Could not verify email code.');
+        expect(response.body.error).toEqual('Could not verify email code. Please try again!');
     });
 
     // Create account with private key that corresponds to eth wallet in user database.
