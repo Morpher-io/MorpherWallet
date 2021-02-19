@@ -76,15 +76,18 @@ async function encrypt(text, secret) {
         resolve(derivedKey);  // '3745e48...08d59ae'
       });
     });
-    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+
     let encrypted = cipher.update(text);
     encrypted = Buffer.concat([encrypted, cipher.final()]);
-    return { salt: salt.toString('hex'), iv: iv.toString('hex'), encryptedData: encrypted.toString('hex') };
+    const cipherTag = cipher.getAuthTag();
+    return { salt: salt.toString('hex'), iv: iv.toString('hex'), encryptedData: encrypted.toString('hex'), cipherTag: cipherTag.toString('hex') };
 }
 
 async function decrypt(text, secret) {
     const iv = Buffer.from(text.iv, 'hex');
     const salt = Buffer.from(text.salt, 'hex');
+    const cipherTag = Buffer.from(text.cipherTag, 'hex');
     //const key = sha256(secret).substr(0, 64);
     
     //const key = crypto.createHash('sha256').update(String(secret)).digest();
@@ -98,7 +101,8 @@ async function decrypt(text, secret) {
       });
     });
     const encryptedText = Buffer.from(text.encryptedData, 'hex');
-    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+    const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+    decipher.setAuthTag(cipherTag);
     let decrypted = decipher.update(encryptedText);
     decrypted = Buffer.concat([decrypted, decipher.final()]);
     return decrypted.toString();
