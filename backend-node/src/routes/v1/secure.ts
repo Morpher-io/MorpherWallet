@@ -12,9 +12,8 @@ module.exports = async function(req, res, next) {
         const user = await User.findOne({ where: { id: recovery.user_id } });
         if (req.body.nonce === user.nonce) {
             const signMessage = Buffer.from(JSON.stringify(sortObject(req.body)));
-            const prefix = Buffer.from('\x19Ethereum Signed Message:\n');
-            const prefixedMsg = ethereumjs.keccak256(Buffer.concat([prefix, Buffer.from(String(signMessage.length)), signMessage]));
-            const pub = ethereumjs.ecrecover(prefixedMsg, signature.v, signature.r, signature.s);
+            const prefixedMsg = ethereumjs.hashPersonalMessage(signMessage);
+            const pub = ethereumjs.ecrecover(prefixedMsg, parseInt(signature.v), ethereumjs.toBuffer(signature.r), ethereumjs.toBuffer(signature.s));
             const addrBuf = ethereumjs.pubToAddress(pub);
             const addr = ethereumjs.toChecksumAddress(ethereumjs.bufferToHex(addrBuf));
 
