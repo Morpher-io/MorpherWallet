@@ -377,11 +377,12 @@ const store: Store<RootState> = new Vuex.Store({
 				let emailCorrect = false;
 				let authenticatorCorrect = false;
 				if (state.twoFaRequired.email == true) {
-					if (await verifyEmailCode(rootState.email, params.email2FA)) {
+					const result = await verifyEmailCode(rootState.email, params.email2FA);
+					if (result.success) {
 						emailCorrect = true;
 					} else {
 						commit('authError', '2FA Email code not correct');
-						reject('The 2FA Mail Code seems to be incorrect. Try again.');
+						reject(result.error);
 					}
 				} else {
 					emailCorrect = true;
@@ -521,7 +522,8 @@ const store: Store<RootState> = new Vuex.Store({
 						if (params.password == state.hashedPassword) {
 							if (params.twoFa != undefined && params.twoFa > 0) {
 								//twoFA was sent
-								if (await verifyEmailCode(state.email, params.twoFa.toString())) {
+								const resultEmail2fa = await verifyEmailCode(state.email, params.twoFa.toString());
+								if (resultEmail2fa.success) {
 									const body = {
 										oldEmail: state.email,
 										newEmail: params.newEmail,
