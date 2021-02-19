@@ -256,8 +256,9 @@ const verifyEmailCode = async (email: string, code: string) => {
 	try {
 		const result = await fetch(getBackendEndpoint() + '/v1/verifyEmailCode', options);
 		const body = await result.json();
-		return body.success;
+		return body;
 	} catch (e) {
+		console.log(e);
 		return false;
 	}
 };

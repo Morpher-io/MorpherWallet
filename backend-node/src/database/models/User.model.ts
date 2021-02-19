@@ -36,6 +36,11 @@ export class User extends Model {
     email_verification_code;
 
     @Column({
+        type: DataType.DATE
+    })
+    email2fa_valid_until;
+
+    @Column({
         type: DataType.INTEGER
     })
     nonce;
