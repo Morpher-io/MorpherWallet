@@ -263,6 +263,20 @@ export async function getEncryptedSeed(req, res) {
     if (recovery) {
         const user = await User.findOne({ where: { id: recovery.user_id } });
 
+        const email2faStillValid = await isEmail2FaStillValid(recovery.user_id);
+        if (!email2faStillValid) {
+            Logger.info({
+                method: arguments.callee.name,
+                type: 'Error: Fetch Encrypted Seed Failed',
+                error: '2fa expired',
+                user_id: user.id,
+                user,
+                headers: req.headers,
+                body: req.body
+            });
+            return errorResponse(res, 'Email 2FA is expired. Logout/Login and enter Email 2FA within 15 minutes.');
+        }
+
         const email2FAVerified = await verifyEmail2FA(recovery.user_id, email2fa);
         const googleVerified = await verifyGoogle2FA(recovery.user_id, authenticator2fa);
         if (!email2FAVerified || !googleVerified) {
@@ -607,6 +621,7 @@ async function updateEmail2fa(user_id) {
     const user = await User.findOne({ where: { id: user_id } });
     const verificationCode = randomFixedInteger(6);
     user.email_verification_code = verificationCode;
+    user.email2fa_valid_until = new Date(Date.now() + (15 * 60 * 1000)); //15 minutes valid
     await user.save();
     return user.email_verification_code;
 }
@@ -653,26 +668,38 @@ export async function verifyEmailCode(req, res) {
     if (recovery != null) {
         const user = await User.findOne({ where: { id: recovery.user_id } });
         if (user != null) {
-            if (await verifyEmail2FA(recovery.user_id, code)) {
-                Logger.info({
-                    method: arguments.callee.name,
-                    type: 'Email 2FA Code Verified',
-                    user_id: user.id,
-                    user,
-                    headers: req.headers,
-                    body: req.body
-                });
-                return successResponse(res, true);
+            if (await isEmail2FaStillValid(recovery.user_id)) {
+                if (await verifyEmail2FA(recovery.user_id, code)) {
+                    Logger.info({
+                        method: arguments.callee.name,
+                        type: 'Email 2FA Code Verified',
+                        user_id: user.id,
+                        user,
+                        headers: req.headers,
+                        body: req.body
+                    });
+                    return successResponse(res, true);
+                } else {
+                    Logger.info({
+                        method: arguments.callee.name,
+                        type: 'Error: Email 2FA Code Wrong',
+                        user_id: user.id,
+                        user,
+                        headers: req.headers,
+                        body: req.body
+                    });
+                    return errorResponse(res, 'Could not verify email code. Please try again!');
+                }
             } else {
                 Logger.info({
                     method: arguments.callee.name,
-                    type: 'Error: Email 2FA Code Wrong',
+                    type: 'Error: Email 2FA Code Expired',
                     user_id: user.id,
                     user,
                     headers: req.headers,
                     body: req.body
                 });
-                return errorResponse(res, 'Could not verify email code.');
+                return errorResponse(res, 'Email 2FA code expired. Logout and Login again.');
             }
         }
     }
@@ -719,7 +746,13 @@ export async function deleteAccount(req, res) {
 
 async function verifyEmail2FA(user_id: string, code: string): Promise<boolean> {
     const user = await User.findOne({ where: { id: user_id } });
-    return user.payload.email === false || user.email_verification_code === Number(code);
+    return user.payload.email === false || (user.email_verification_code === Number(code));
+}
+
+async function isEmail2FaStillValid(user_id: string): Promise<boolean> {
+    const user = await User.findOne({ where: { id: user_id } });
+    const email2faValidUntil = new Date(user.email2fa_valid_until);
+    return (email2faValidUntil > new Date());
 }
 
 async function verifyGoogle2FA(user_id: string, code: string, getSeed: boolean = true): Promise<boolean> {
