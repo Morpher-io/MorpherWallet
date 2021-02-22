@@ -263,19 +263,7 @@ export async function getEncryptedSeed(req, res) {
     if (recovery) {
         const user = await User.findOne({ where: { id: recovery.user_id } });
 
-        const email2faStillValid = await isEmail2FaStillValid(recovery.user_id);
-        if (!email2faStillValid) {
-            Logger.info({
-                method: arguments.callee.name,
-                type: 'Error: Fetch Encrypted Seed Failed',
-                error: '2fa expired',
-                user_id: user.id,
-                user,
-                headers: req.headers,
-                body: req.body
-            });
-            return errorResponse(res, 'Email 2FA is expired. Logout/Login and enter Email 2FA within 15 minutes.');
-        }
+      
 
         const email2FAVerified = await verifyEmail2FA(recovery.user_id, email2fa);
         const googleVerified = await verifyGoogle2FA(recovery.user_id, authenticator2fa);
@@ -291,6 +279,21 @@ export async function getEncryptedSeed(req, res) {
             });
             return errorResponse(res, 'Either Email2FA or Authenticator2FA was wrong. Try again.');
         }
+
+        const email2faStillValid = await isEmail2FaStillValid(recovery.user_id);
+        if (!email2faStillValid) {
+            Logger.info({
+                method: arguments.callee.name,
+                type: 'Error: Fetch Encrypted Seed Failed',
+                error: '2fa expired',
+                user_id: user.id,
+                user,
+                headers: req.headers,
+                body: req.body
+            });
+            return errorResponse(res, 'Email 2FA is expired. Logout/Login and enter Email 2FA within 15 minutes.');
+        }
+        
         //avoid replay attack, generate a new Email 2FA after it was validated and seed was sent
         if (user.payload.email) {
             updateEmail2fa(user.id);
