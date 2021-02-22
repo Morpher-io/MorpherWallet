@@ -838,7 +838,7 @@ if (isIframe()) {
 				else return { isLoggedIn: false };
 			},
 			hasSocialRecoveryMethods() {
-				if (store.recoveryMethods.length == 1) {
+				if (store.state.recoveryMethods.length == 1) {
 					return false;
 				} 
 				return true;
