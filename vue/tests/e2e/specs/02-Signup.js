@@ -23,7 +23,7 @@ describe('Signup', () => {
 
 		cy.get('[data-cy=createNewWallet]').click();
 
-		cy.wait(2000);
+		cy.wait(4000);
 
 		cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email }).then(response => {
 			// response.body is automatically serialized into JSON
