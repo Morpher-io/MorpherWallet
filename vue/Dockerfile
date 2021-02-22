@@ -1,4 +1,4 @@
-FROM node:14-slim
+FROM public.ecr.aws/socar/node:lts-alpine3.9
 
 # Create app directory
 WORKDIR /usr/src/app
