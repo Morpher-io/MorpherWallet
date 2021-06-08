@@ -3,13 +3,22 @@
 		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 		<div class="container">
 			<spinner v-model="showSpinner" v-bind:status="status"></spinner>
-			<h2 class="title">Sign Transaction</h2>
-			<h4 class="subtitle">Sign the transaction to continue</h4>
+			<h2 class="title">Confirm Transaction</h2>
+			<h4 class="subtitle">Confirm the transaction to continue</h4>
 
 			<div class="field">
 				<label class="label">Transaction Details</label>
 				<div class="control">
-					{{ store.transactionDetails }}
+					Chain: {{ chainName }}<br>
+					
+				</div>
+				<div class="control">
+					Eth Address: <br>
+					{{ store.transactionDetails.from }}
+				</div>
+				<div class="control">
+					Contract: <br>
+					{{ store.transactionDetails.to }}
 				</div>
 			</div>
 
@@ -19,7 +28,7 @@
 						<span class="icon is-small">
 							<i class="far fa-file"></i>
 						</span>
-						<span> Sign </span>
+						<span> Confirm </span>
 					</button>
 				</div>
 				<div class="layout split second">
@@ -41,11 +50,30 @@ import { Global, Authenticated } from '../mixins/mixins';
 
 export default class SignTx extends mixins(Global, Authenticated) {
 	sign() {
+		this.store.signResponse = 'confirm';
 		this.$router.push('/');
 	}
 	cancel() {
+		this.store.signResponse = 'cancel';
 		this.$router.push('/');
 	}
+	get chainName() {
+		if (this.store.transactionDetails && Number(this.store.transactionDetails.chainId) === 21) {
+			return 'Morpher Sidechain'	
+		}
+
+		if (this.store.transactionDetails && Number(this.store.transactionDetails.chainId) === 1) {
+			return 'Etherum Mainchain'	
+		}		
+
+		if (this.store.transactionDetails && Number(this.store.transactionDetails.chainId) === 42) {
+			return 'Kovan Testnet'	
+		}		
+
+		
+		return 'Unknown'
+	}
+
 }
 </script>
 
