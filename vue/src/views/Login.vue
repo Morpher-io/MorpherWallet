@@ -85,7 +85,7 @@ export default class Login extends mixins(Global) {
 		if (this.store.email) {
 			this.walletEmail = this.store.email;
 		}
-		if (this.store.status !== 'invalid password') {
+		if (this.store.status !== 'invalid password' && this.store.email) {
 			// Check if the wallet can be unlocked using the local-storage stored password
 			this.unlockWithStoredPassword()
 				.then(result => {

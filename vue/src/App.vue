@@ -44,7 +44,7 @@ export default class App extends Vue {
 		if (this.iFrameDisplay) {
 			if (this.connection && this.connection !== null) {
 				const promise = this.connection.promise;
-
+				this.$store.state.signResponse = 'cancel';
 				(await promise).hideWallet();
 				(await promise).onClose();
 
