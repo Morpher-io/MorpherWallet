@@ -1,72 +1,62 @@
 <template>
-	<div class="container">
-		<h2 class="title">Wallet Login</h2>
-		<h4 class="subtitle">Unlock your Morpher Wallet</h4>
-		<form v-on:submit.prevent="login">
-			<div class="field">
-				<label class="label">Email</label>
-				<div class="control">
-					<input
-						type="email"
-						class="input"
-						data-cy="walletEmail"
-						name="walletEmail"
-						placeholder="example@example.com"
-						v-model="walletEmail"
-					/>
-				</div>
-			</div>
-
-			<div class="field">
-				<label class="label">Password</label>
-
-				<div class="control">
-					<input
-						type="password"
-						class="input"
-						data-cy="walletPassword"
-						name="walletPassword"
-						placeholder="Strong Password!"
-						v-model="walletPassword"
-					/>
-					<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial; margin-top: -8px" />
-
-					<div v-if="store.status === 'invalid password' || showRecovery == true">
-						<p class="help is-danger">
-							The Password you provided can't be used to de-crypt your wallet.
-							<router-link to="/recovery">Do you want to restore your Account?</router-link>
-						</p>
+	<div>
+		<div class="container">
+			<h2 class="title">Log In</h2>
+			<p class="subtitle">Unlock your crypto wallet.</p>
+			<form v-on:submit.prevent="login">
+				<div class="field">
+					<label class="label">Email</label>
+					<div class="control">
+						<input
+							type="email"
+							class="input"
+							data-cy="walletEmail"
+							name="walletEmail"
+							v-model="walletEmail"
+						/>
 					</div>
 				</div>
-			</div>
 
-			<div class="field" v-if="showError">
-				<label class="label is-danger">Login Error</label>
-				<p class="help is-danger" data-cy="loginError">
-					{{ logonError }}
-				</p>
-			</div>
+				<div class="field">
+					<label class="label">Password</label>
 
-			<div class="field">
-				<div class="layout split first">
-					<button type="submit" data-cy="submit" class="button is-green">
-						<span class="icon is-small">
-							<i class="fas fa-unlock"></i>
-						</span>
-						<span> Unlock </span>
-					</button>
+					<div class="control">
+						<input
+							type="password"
+							class="input password-input"
+							data-cy="walletPassword"
+							name="walletPassword"
+							v-model="walletPassword"
+						/>
+						<password v-model="walletPassword" :strength-meter-only="true" :secure-length="10" style="max-width: initial" />
+
+						<div v-if="store.status === 'invalid password' || showRecovery == true">
+							<p class="help is-danger">
+								The Password you provided can't be used to de-crypt your wallet.
+								<router-link to="/recovery">Do you want to restore your Account?</router-link>
+							</p>
+						</div>
+					</div>
 				</div>
-				<div class="layout split second">
-					<router-link to="/signup" tag="button" class="button is-grey">
-						<span class="icon is-small">
-							<i class="far fa-file"></i>
-						</span>
 
-						<span> Create new Wallet </span>
-					</router-link>
+				<button type="submit" data-cy="submit" class="button is-green big-button is-login transition-faster">
+					<span>Log In</span>
+				</button>
+
+				<div class="field" v-if="showError">
+					<p class="help is-danger" data-cy="loginError">
+						Error: {{ logonError }}
+					</p>
 				</div>
-			</div>
-		</form>
+
+				<div class="divider"></div>
+
+				<router-link to="/signup" tag="button" class="button is-grey big-button outlined-button is-thick transition-faster">
+					<span>Sign Up</span>
+				</router-link>
+				<p class="new-account">Don’t have a wallet? Create one in 2 minutes.</p>
+			</form>
+		</div>
 	</div>
 </template>
 

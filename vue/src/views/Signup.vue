@@ -1,83 +1,80 @@
 <template>
-	<div class="container">
-		<h2 class="title">Signup</h2>
-		<h4 class="subtitle">Create a new Wallet</h4>
-		<form v-on:submit.prevent="signupExecute">
-			<div class="field">
-				<label class="label">Email</label>
-				<div class="control">
-					<input
-						type="email"
-						class="input"
-						name="walletEmail"
-						data-cy="walletEmail"
-						placeholder="example@example.com"
-						v-model="walletEmail"
-					/>
-				</div>
+	<div>
+		<div class="container">
+			<h2 class="title">Sign Up</h2>
+			<p class="subtitle">Create a new Wallet</p>
+			<form v-on:submit.prevent="signupExecute">
+				<div class="field">
+					<label class="label">Email</label>
+					<div class="control">
+						<input
+							type="email"
+							class="input"
+							name="walletEmail"
+							data-cy="walletEmail"
+							v-model="walletEmail"
+						/>
+					</div>
 
-				<p class="help">Use this Email-Address for Wallet Recovery</p>
-				<p class="help is-danger" v-if="invalidEmail">
-					{{ invalidEmail }}
-				</p>
-			</div>
-
-			<div class="field">
-				<label class="label">Password</label>
-
-				<div class="control">
-					<input
-						type="password"
-						class="input"
-						name="walletPassword"
-						data-cy="walletPassword"
-						placeholder="Strong Password!"
-						v-model="walletPassword"
-					/>
-					<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial; margin-top: -8px" />
-					<p class="help">
-						Use a strong Password! It encrypts your Wallet and keeps your Funds secure. It must be at least 8 characters long and include
-						one lower-case, one upper-case character and a number.
-					</p>
-
-					<p class="help is-danger" v-if="invalidPassword">
-						{{ invalidPassword }}
+					<!-- <p class="help">Use this Email-Address for Wallet Recovery</p> -->
+					<p class="help is-danger" v-if="invalidEmail">
+						Error: {{ invalidEmail }}
 					</p>
 				</div>
-			</div>
-			<div class="field">
-				<label class="label">Repeat Password</label>
-				<div class="control">
-					<input
-						type="password"
-						class="input"
-						name="walletPasswordRepeat"
-						data-cy="walletPasswordRepeat"
-						placeholder="Repeat Password"
-						v-model="walletPasswordRepeat"
-					/>
-				</div>
-			</div>
 
-			<div class="field">
-				<div class="layout split first">
-					<button class="button is-green" type="submit" data-cy="createNewWallet">
-						<span class="icon is-small">
-							<i class="far fa-file"></i>
-						</span>
-						<span> Create new Wallet </span>
-					</button>
+				<div class="field">
+					<label class="label">Password</label>
+
+					<div class="control">
+						<input
+							type="password"
+							class="input password-input"
+							name="walletPassword"
+							data-cy="walletPassword"
+							v-model="walletPassword"
+						/>
+						<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial; margin-top: -8px" />
+						<p class="help">
+							Please choose a strong password with at least: 8 characters, 1 lowercase letter, 1 uppercase letter, and 1 number.
+						</p>
+
+						<p class="help is-danger" v-if="invalidPassword">
+							Error: {{ invalidPassword }}
+						</p>
+					</div>
 				</div>
-				<div class="layout split second">
-					<router-link to="/login" tag="button" class="button is-grey">
-						<span class="icon is-small">
-							<i class="fas fa-unlock"></i>
+				<div class="field">
+					<label class="label">Repeat Password</label>
+					<div class="control">
+						<input
+							type="password"
+							class="input"
+							name="walletPasswordRepeat"
+							data-cy="walletPasswordRepeat"
+							v-model="walletPasswordRepeat"
+						/>
+					</div>
+				</div>
+
+				<button type="submit" data-cy="createNewWallet" class="button is-green big-button is-login transition-faster">
+					<span>Create Wallet</span>
+				</button>
+
+				<div class="divider"></div>
+
+				<div class="subtitle login-link">
+					<span>Already have a wallet?</span>
+					<router-link to="/login" class="login-router">
+						<span>
+							Log In
+							<span class="icon is-small">
+								<i class="fas fa-chevron-right"></i>
+							</span>
 						</span>
-						<span> Login instead </span>
 					</router-link>
 				</div>
-			</div>
-		</form>
+			</form>
+		</div>
 	</div>
 </template>
 
