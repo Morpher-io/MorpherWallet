@@ -106,6 +106,26 @@ export class Global extends Vue {
 
 	router: VueRouter = this.$router;
 
+	
+	roundFormatter(param:any) {
+		const price = parseFloat(param);
+		const abs = Math.abs(price);
+		let round = 0;
+		if (10000 > abs && abs >= 10) round = 2;
+		else if (10 > abs && abs >= 1) round = 3;
+		else if (1 > abs && abs >= 0.1) round = 4;
+		else if (0.1 > abs && abs >= 0.01) round = 5;
+		else if (0.01 > abs) round = 6;
+		return price ? price.toFixed(round) : 0;
+	}
+
+	
+	formatEthAddress(ethAddress: string) {
+		if (!ethAddress) return '';
+		if (ethAddress.length <= 11) return ethAddress;
+		return ethAddress ? ethAddress.substr(0, 5) + '...' + ethAddress.substr(ethAddress.length - 3) : '';
+	}
+
 	// map libraries
 	isIframe = isIframe;
 

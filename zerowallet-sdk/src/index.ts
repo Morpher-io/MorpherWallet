@@ -41,6 +41,7 @@ export type ZeroWalletConfig = {
 	confirm_transaction: boolean;
 	show_message: boolean;
   confirm_message: boolean;
+  rpcEndpoint: string;
 } | null;
 
 let iframeLoadedFired = false;
@@ -66,10 +67,13 @@ export default class ZeroWallet {
 				confirm_transaction: false,
 				show_message: false,
 				confirm_message: false,
-				env: 'live'
-			}
-		}
-		
+				env: 'live',
+        rpcEndpoint: wsRPCEndpointUrl
+      };
+    } else {
+        config['rpcEndpoint'] = wsRPCEndpointUrl;
+    }
+
 		if (!config.env) {
 			config.env = 'live';
 		}
@@ -272,12 +276,12 @@ export default class ZeroWallet {
           const widgetCommunication = (await this.widget).communication;
          
           txParams.chainId = self.getChainId();
-          if (this.config?.show_transaction || Number(txParams.chainId) !== 21)
-            this.showWallet();                
-					const result = await widgetCommunication.signTransaction(txParams, this.config);
+          if (this.config?.show_transaction || this.config?.confirm_transaction || Number(txParams.chainId) !== 21)
+            this.showWallet();
+          const result = await widgetCommunication.signTransaction(txParams, this.config);
 
-          if (this.config?.show_transaction || Number(txParams.chainId) !== 21)
-            this.hideWallet();           
+          if (this.config?.show_transaction || this.config?.confirm_transaction || Number(txParams.chainId) !== 21)
+            this.hideWallet();  
 
 					if(cb) {
             if (!result) {
@@ -293,13 +297,13 @@ export default class ZeroWallet {
         signMessage: async (msgParams: any, cb: any) => {
           const widgetCommunication = (await this.widget).communication;
           const params = Object.assign({}, msgParams, { messageStandard: 'signMessage' });
-          if (this.config?.show_message)
+          if (this.config?.show_message || this.config?.confirm_message)
             this.showWallet();
           const  result  = await widgetCommunication.signMessage(params, this.config);
           if(cb) {
 						cb(null, result);
 					}
-          if (this.config?.show_message)
+          if (this.config?.show_message || this.config?.confirm_message)
             this.hideWallet();    
           return result;           
         },

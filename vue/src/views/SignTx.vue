@@ -14,12 +14,33 @@
 				</div>
 				<div class="control">
 					Eth Address: <br>
-					{{ store.transactionDetails.from }}
+					{{ formatEthAddress(store.transactionDetails.from) }}
 				</div>
 				<div class="control">
 					Contract: <br>
-					{{ store.transactionDetails.to }}
+					{{ formatEthAddress(store.transactionDetails.to) }}
 				</div>
+				<div class="control">
+					Balance: <br>
+					{{ roundFormatter(Number(store.balance)/ Math.pow(10,18)) }} ETH
+				</div>	
+
+				<div class="control">
+					Gas Cost: <br>
+					{{ roundFormatter(Number(store.transactionDetails.gasPrice) * Number(store.transactionDetails.gas) / Math.pow(10,18)) }} ETH<br>
+					Gas Price: {{ roundFormatter(Number(store.transactionDetails.gasPrice) / Math.pow(10,9)) }} gwei - Gas Limit: {{ roundFormatter(Number(store.transactionDetails.gas)) }} 
+				</div>			
+		
+				<div v-if="store.transactionDetails.value" class="control">
+					Eth: <br>
+					{{ roundFormatter(store.transactionDetails.value) }} ETH
+				</div>	
+				<div class="control">
+					Total: <br>
+					{{ roundFormatter(Number(store.transactionDetails.value || 0) + (Number(store.transactionDetails.gasPrice) * Number(store.transactionDetails.gas)) / Math.pow(10,18)) }} ETH
+				</div>											
+
+				
 			</div>
 
 			<div class="field">
