@@ -7,14 +7,13 @@
 		<form v-on:submit.prevent="login">
 			<h5>Hi {{ walletEmail }}!</h5>
 			Enter the password to unlock your wallet!<br />
-			Not you? <a v-on:click="logout()">Logout</a>
 
 			<div class="field">
 				<label class="label">Password</label>
 
 				<div class="control">
-					<input type="password" class="input" name="walletPassword" placeholder="Strong Password!" v-model="walletPassword" />
-					<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial; margin-top: -8px" />
+					<input type="password" class="input" name="walletPassword" v-model="walletPassword" />
+					<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial" />
 					<p class="help">
 						Use a strong Password! It encrypts your Wallet and keeps your Funds secure. It must be at least 8 characters long and include
 						one lower-case, one upper-case character and a number.
@@ -29,27 +28,13 @@
 				</div>
 			</div>
 
-			<div class="field">
-				<div class="layout split first">
-					<button class="button is-green" type="submit">
-						<span class="icon is-small">
-							<i class="fas fa-unlock"></i>
-						</span>
-						<span> Unlock </span>
-					</button>
-				</div>
-				<div class="layout split second">
-					<button class="button is-grey" v-on:click="logout()">
-						<span class="icon is-small">
-							<i class="far fa-file"></i>
-						</span>
-
-						<span> Log Out </span>
-					</button>
-				</div>
-			</div>
+			<button class="button is-green big-button is-login transition-faster mt-5" type="submit" data-cy="unlock" :disabled="!walletPassword">
+				<span>Unlock</span>
+			</button>
+			<button class="button mt-3" v-on:click="logout()">
+				<span>Cancel</span>
+			</button>
 		</form>
-		<br />
 	</div>
 </template>
 

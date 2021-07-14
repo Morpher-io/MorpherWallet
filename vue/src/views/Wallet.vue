@@ -8,7 +8,6 @@
 			<div class="field">
 				<div class="card-content">
 					<div class="content">
-						<label class="label">Account:</label>
 						<div class="data">
 							{{ accounts[0] }}
 						</div>
