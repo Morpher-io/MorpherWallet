@@ -2,30 +2,33 @@
 	<div class="card">
 		<form v-on:submit.prevent="formSubmitChange2FA">
 			<div class="collapse">
-				<span v-show="collapsed" class="icon collapseIcon collapseIcon" @click="collapsed = !collapsed">
-					<i class="fas fa-chevron-right"></i>
-				</span>
-				<span v-show="!collapsed" class="icon collapseIcon collapseIcon" @click="collapsed = !collapsed">
-					<i class="fas fa-chevron-down"></i>
-				</span>
-
-				<span class="header" @click="collapsed = !collapsed" data-cy="openTwoFaChange">
-					Change 2-Factor authentication (2FA)
+				<div class="is-flex is-align-items-center">
+					<span class="header" @click="collapsed = !collapsed">
+						Two-Factor Authentication
 					<span class="help is-success" v-if="success" data-cy="isSuccess">Saved!</span>
-				</span>
+					</span>
+					<span :class="{
+						'icon collapseIcon header': true,
+						'open': !collapsed
+					}" @click="collapsed = !collapsed">
+						<i class="fas fa-chevron-right"></i>
+					</span>
+				</div>
 				<div :class="collapsed ? 'hidden' : 'visible'">
 					<div class="card-content">
 						<div class="field">
-							<label class="label">
-								<input type="checkbox" class="checkbox" id="email" v-model="email" data-cy="twoFaEmail" />
+							<label class="label checkbox">
 								2FA with Email Codes enabled
+								<input type="checkbox" class="checkbox" id="email" v-model="email" data-cy="twoFaEmail" />
+								<span class="checkmark"></span>
 							</label>
 						</div>
 
 						<div class="field">
-							<label class="label">
-								<input type="checkbox" class="checkbox" id="authenticator" v-model="authenticator" data-cy="twoFaAuthenticator" />
+							<label class="label checkbox">
 								2FA with Authenticator Codes enabled
+								<input type="checkbox" class="checkbox" id="authenticator" v-model="authenticator" data-cy="twoFaAuthenticator" />
+								<span class="checkmark"></span>
 							</label>
 						</div>
 						<figure
@@ -75,10 +78,7 @@
 					</div>
 
 					<div class="field is-grouped">
-						<button class="button is-green" type="submit" data-cy="saveTwoFa">
-							<span class="icon is-small">
-								<i class="fas fa-save"></i>
-							</span>
+						<button class="button is-green big-button is-login transition-faster" type="submit" data-cy="saveTwoFa">
 							<span> Save 2FA Settings </span>
 						</button>
 					</div>

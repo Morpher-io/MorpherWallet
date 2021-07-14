@@ -30,7 +30,7 @@ const routes: Array<RouteConfig> = [
 		name: 'Settings',
 		component: Settings,
 		meta: {
-			requiresAuth: true
+			requiresAuth: false
 		}
 	},
 	{
@@ -38,7 +38,7 @@ const routes: Array<RouteConfig> = [
 		name: 'AddRecovery',
 		component: RecoveryAdd,
 		meta: {
-			requiresAuth: true
+			requiresAuth: false
 		}
 	},
 	{
@@ -51,7 +51,7 @@ const routes: Array<RouteConfig> = [
 		name: 'TwoFA',
 		component: TwoFA,
 		meta: {
-			requires2fa: true
+			requires2fa: false
 		}
 	},
 	{
@@ -64,7 +64,7 @@ const routes: Array<RouteConfig> = [
 		name: 'SignTx',
 		component: SignTx,
 		meta: {
-			requiresAuth: true
+			requiresAuth: false
 		}
 	},
 	{
@@ -72,7 +72,7 @@ const routes: Array<RouteConfig> = [
 		name: 'SignMsg',
 		component: SignMsg,
 		meta: {
-			requiresAuth: true
+			requiresAuth: false
 		}
 	},
 
@@ -81,7 +81,7 @@ const routes: Array<RouteConfig> = [
 		name: 'Wallet',
 		component: Wallet,
 		meta: {
-			requiresAuth: true
+			requiresAuth: false
 		}
 	}
 ];

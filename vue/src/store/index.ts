@@ -106,8 +106,8 @@ function initialState(): RootState {
 		keystore: null,
 		accounts: [],
 		twoFaRequired: {
-			email: false,
-			authenticator: false,
+			email: true,
+			authenticator: true,
 			authenticatorConfirmed: false
 		},
 		token: '',

@@ -1,31 +1,23 @@
 <template>
 	<div class="container">
-		<h1 class="title">Settings</h1>
-
-		<ChangePassword></ChangePassword>
+		<div class="title-container has-text-left">
+			<router-link to="/" tag="button" class="button is-grey big-button outlined-button is-thick transition-faster is-icon-only">
+				<span class="icon is-small">
+					<i class="fas fa-chevron-left"></i>
+				</span>
+			</router-link>
+			<h2 class="title ml-4">Settings</h2>
+		</div>
 
 		<ChangeEmail></ChangeEmail>
+
+		<ChangePassword></ChangePassword>
 
 		<Change2FA></Change2FA>
 
 		<ExportWallet></ExportWallet>
 
-		<div class="field is-grouped">
-			<router-link to="/addrecovery" tag="button" class="button is-danger">
-				<span class="icon is-small">
-					<i class="fas fa-life-ring"></i>
-				</span>
-				<span> Add Account Recovery </span>
-			</router-link>
-		</div>
-		<div class="field is-grouped">
-			<router-link to="/" tag="button" class="button is-grey">
-				<span class="icon is-small">
-					<i class="fas fa-chevron-left"></i>
-				</span>
-				<span> Back </span>
-			</router-link>
-		</div>
+		<AccountRecovery></AccountRecovery>
 	</div>
 </template>
 
@@ -37,13 +29,15 @@ import ChangePassword from '../components/ChangePassword.vue';
 import ChangeEmail from '../components/ChangeEmail.vue';
 import Change2FA from '../components/Change2FA.vue';
 import ExportWallet from '../components/ExportWallet.vue';
+import AccountRecovery from '../components/AccountRecovery.vue';
 
 @Component({
 	components: {
 		ChangePassword,
 		ChangeEmail,
 		Change2FA,
-		ExportWallet
+		ExportWallet,
+		AccountRecovery,
 	},
 	computed: {
 		...mapState({
@@ -60,7 +54,7 @@ export default class Settings extends Vue {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 h3 {
 	margin: 40px 0 0;
 }
@@ -74,5 +68,14 @@ li {
 }
 a {
 	color: #42b983;
+}
+
+.title-container {
+	display: flex;
+    align-items: center;
+
+	.title {
+		margin: 0;
+	}
 }
 </style>
