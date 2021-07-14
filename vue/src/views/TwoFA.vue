@@ -33,6 +33,7 @@
 						name="authenticatorCode"
 						id="authenticatorCode"
 						data-cy="authenticatorCode"
+						ref="auth_code"
 						v-model="authenticatorCode"
 					/>
 				</div>
@@ -61,6 +62,7 @@
 <script lang="ts">
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
+import { Watch } from 'vue-property-decorator';
 
 @Component
 export default class TwoFA extends mixins(Global) {
@@ -73,6 +75,20 @@ export default class TwoFA extends mixins(Global) {
 	invalidEmail = false;
 	invalidAuthenticator = false;
 
+	mounted() {
+		window.setTimeout(() => {
+					const el: any = this.$refs.auth_code
+					el.focus();
+				}, 100);
+		//
+	}
+
+	@Watch('authenticatorCode')
+	authenticatorCodeChanged(value: any) {
+		if (value.length === 6) {
+			this.validateCode()
+		}
+	}
 	/**
 	 * Process email 2fa authentication
 	 */

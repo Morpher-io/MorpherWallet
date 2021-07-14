@@ -102,7 +102,7 @@ router.beforeEach((to, from, next) => {
 			next();
 			return;
 		}
-		if (store.getters.hasEncryptedKeystore) {
+		if (store.getters.hasEncryptedKeystore && store.state.email) {
 			next('/unlock');
 			return;
 		}
