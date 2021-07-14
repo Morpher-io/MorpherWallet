@@ -47,7 +47,6 @@ import { WalletBase, SignedTransaction } from 'web3-core';
 import { CallSender, Connection } from 'penpal/lib/types';
 import router from '@/router';
 import download from 'downloadjs';
-import Web3 from "web3";
 
 Vue.use(Vuex);
 
@@ -80,8 +79,7 @@ export interface RootState {
 	privateKeyKeystore: string;
 	signMessage: any;
 	signResponse: any;
-	rpcEndpoint: string;
-	balance: string;
+	ethBalance: string;
 }
 
 /**
@@ -129,8 +127,7 @@ function initialState(): RootState {
 		privateKeyKeystore: '',
 		signMessage: null,
 		signResponse: null,
-		rpcEndpoint: '',
-		balance: '0'
+		ethBalance: '0'
 	} as RootState;
 }
 
@@ -788,15 +785,12 @@ if (isIframe()) {
 				}
 			},
 			async signTransaction(txObj: any, config: ZeroWalletConfig) {
-
-				if (config?.rpcEndpoint) {
-					const web3 = new Web3(config?.rpcEndpoint);
-					store.state.balance = await web3.eth.getBalance(txObj.from)
+				if (txObj.eth_balance) {
+					store.state.ethBalance = txObj.eth_balance;
 				}
 				if (txObj.nonce == undefined) {
 					console.error('No nonce defined, aborting tx signing');
 				}
-				store.state.rpcEndpoint = config?.rpcEndpoint || '';
 
 				const signedTx = await new Promise((resolve, reject) => {
 					//see if we are logged in?!
@@ -804,6 +798,9 @@ if (isIframe()) {
 						if (store.state.keystore !== null) {
 							if (config?.confirm_transaction || Number(txObj.chainId) !== 21) {
 
+								if (txObj.amount && ! txObj.value) {
+									txObj.value = txObj.amount
+								}
 								store.state.transactionDetails = txObj;
 								store.state.signResponse = null;
 								router.push('/signtx');

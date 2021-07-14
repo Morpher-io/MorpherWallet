@@ -113,7 +113,6 @@ export type ZeroWalletConfig = {
 	confirm_transaction: boolean;
 	show_message: boolean;
 	confirm_message: boolean;
-	rpcEndpoint: string;
 } | null;
 
 export type TypeKeystoreUnlocked = {

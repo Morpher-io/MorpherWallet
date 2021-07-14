@@ -41,7 +41,6 @@ export type ZeroWalletConfig = {
 	confirm_transaction: boolean;
 	show_message: boolean;
   confirm_message: boolean;
-  rpcEndpoint: string;
 } | null;
 
 let iframeLoadedFired = false;
@@ -67,11 +66,8 @@ export default class ZeroWallet {
 				confirm_transaction: false,
 				show_message: false,
 				confirm_message: false,
-				env: 'live',
-        rpcEndpoint: wsRPCEndpointUrl
+				env: 'live'
       };
-    } else {
-        config['rpcEndpoint'] = wsRPCEndpointUrl;
     }
 
 		if (!config.env) {
@@ -278,7 +274,7 @@ export default class ZeroWallet {
           txParams.chainId = self.getChainId();
           if (this.config?.show_transaction || this.config?.confirm_transaction || Number(txParams.chainId) !== 21)
             this.showWallet();
-          const result = await widgetCommunication.signTransaction(txParams, this.config);
+          const result = await widgetCommunication.signTransaction(txParams, this.config, this.wsRPCEndpointUrl);
 
           if (this.config?.show_transaction || this.config?.confirm_transaction || Number(txParams.chainId) !== 21)
             this.hideWallet();  
