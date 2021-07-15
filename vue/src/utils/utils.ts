@@ -76,4 +76,14 @@ const copyToClipboard = (text: string, self: any) => {
 	
 };
 
-export { getAccountsFromKeystore, downloadEncryptedKeystore, sortObject, copyToClipboard };
+const formatEthAddress = (ethAddress: string) => {
+	if (!ethAddress) return "";
+	if (ethAddress.length <= 11) return ethAddress;
+	return ethAddress
+		? ethAddress.substr(0, 5) +
+				"..." +
+				ethAddress.substr(ethAddress.length - 3)
+		: "";
+};
+
+export { getAccountsFromKeystore, downloadEncryptedKeystore, sortObject, copyToClipboard, formatEthAddress };

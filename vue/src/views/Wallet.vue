@@ -1,59 +1,85 @@
 <template>
 	<div class="container">
-		<h1 class="title" data-cy="header">Morpher Wallet</h1>
+		<h2 class="subtitle" data-cy="subtitle">Hello <b>{{ walletEmail }}</b></h2>
 
-		<h2 class="subtitle" data-cy="subtitle">Hello {{ walletEmail }}</h2>
-
-		<div :class="noRecoveryMethods ? 'collapse' : ''">
-			<div class="field">
+		<div class="field">
 				<div class="card-content">
 					<div class="content">
-						<div class="data">
-							{{ accounts[0] }}
+						<div class="user-data data">
+							<div ref="userImage" class="jazz-icon" />
+							{{ formatEthAddress(accounts[0]) }}
+							<button
+								class="button is-icon-only copy-button"
+								@click="copyETHAddress(accounts[0])"
+								title="Copy ETH Address"
+							>
+								<i class="fas fa-copy" />
+							</button>
 						</div>
 					</div>
 				</div>
-			</div>
 		</div>
-		<div class="collapse" v-if="noRecoveryMethods">
+		<div class="buttons horizontal-buttons">
+			<router-link to="/send" tag="button" class="button is-purple big-button is-thick transition-faster">
+				<span class="icon is-small">
+					<i class="fas fa-paper-plane"></i>
+				</span>
+				<span data-cy="settings">Send</span>
+			</router-link>
+			<router-link to="/settings" tag="button" class="button is-blue big-button is-thick transition-faster">
+				<span class="icon is-small">
+					<i class="fas fa-cog"></i>
+				</span>
+				<span data-cy="settings">Settings</span>
+			</router-link>
+		</div>
+		<div class="divider"></div>
+		<h2 class="title has-text-left">Account Status</h2>
+		<div class="has-text-left" v-if="noRecoveryMethods">
 			<div>
-				<p class="help">
-					You have no wallet recovery options set. You will not be able to recover your wallet if you forget your password.
+				<p class="subtitle">
+					Your account is currently at risk. <b>Losing your password means losing your funds.</b> Please add a trusted account backup.
 				</p>
-				<router-link class="help" to="/addrecovery" tag="a">Set recovery options now?</router-link>
-			</div>
-		</div>
-		<div class="field is-grouped">
-			<div class="layout split first">
-				<button class="button is-green" @click="logout" type="submit" data-cy="logout">
-					<span class="icon is-small">
-						<i class="fas fa-lock"></i>
-					</span>
-					<span> Logout </span>
-				</button>
-			</div>
-
-			<div class="layout split second">
-				<router-link to="/settings" tag="button" class="button is-grey">
-					<span class="icon is-small">
-						<i class="fas fa-cog"></i>
-					</span>
-					<span data-cy="settings"> Settings </span>
+				<router-link to="/addrecovery" tag="button" class="button is-green big-button is-thick transition-faster">
+					Add Trusted Account
 				</router-link>
 			</div>
 		</div>
+		<div class="divider thick"></div>
+		<div class="has-text-left" v-if="!twoFactorActive">
+			<div>
+				<p class="subtitle">
+					We strongly recommend you add 2FA verification to increase wallet security. Please turn on 2FA verification in settings.
+				</p>
+				<router-link to="/settings" tag="button" class="button is-light-purple big-button is-thick transition-faster">
+					Enable 2-Step
+				</router-link>
+			</div>
+		</div>
+		<div class="has-text-left protection-enabled" v-else>
+			<i class="fas fa-envelope"></i>
+			<p>2FA Verification</p>
+			<span class="enabled">Enabled</span>
+		</div>
+		<div class="divider"></div>
+		<button class="button is-danger big-button is-thick transition-faster" @click="logout" type="submit" data-cy="logout">
+			<span>Logout</span>
+		</button>
 	</div>
 </template>
 
 <script lang="ts">
 import Component, { mixins } from 'vue-class-component';
 import { Global, Authenticated } from '../mixins/mixins';
+import jazzicon from "@metamask/jazzicon";
+import { copyToClipboard } from '../utils/utils';
 
 @Component
 export default class Wallet extends mixins(Global, Authenticated) {
 	dropdownIsActive = false;
 	selectedAccount = '';
 	noRecoveryMethods = false;
+	twoFactorActive = false;
 
 	async mounted() {
 		if (this.isIframe() && !this.store.loginComplete) {
@@ -66,7 +92,40 @@ export default class Wallet extends mixins(Global, Authenticated) {
 		if (this.store.recoveryMethods.length == 1) {
 			this.noRecoveryMethods = true;
 		}
+		if (this.store.twoFaRequired.authenticator) {
+			this.twoFactorActive = true;
+		}
+		if (this.store.accounts && this.store.accounts[0]) {
+			this.generateImage(this.store.accounts[0]);
+		}
 		this.store.loginComplete = true;
+	}
+
+	generateImage(ethAddress: any): void {
+		if (!ethAddress) {
+			return;
+		}
+		const ref: any = this.$refs.userImage;
+		if (!ref) {
+			if (ethAddress) {
+				setTimeout(() => {
+					this.generateImage(ethAddress);
+				}, 100);
+			}
+			return;
+		}
+		ref.innerHTML = "";
+		if (!ethAddress) {
+			return;
+		}
+		const seed = parseInt(ethAddress.slice(2, 10), 16);
+		if (!seed) return;
+		const image = jazzicon(36, seed);
+		ref.append(image);
+	}
+
+	copyETHAddress(ethAddress: string): void {
+		copyToClipboard(ethAddress, this);
 	}
 
 	logout() {
@@ -76,7 +135,7 @@ export default class Wallet extends mixins(Global, Authenticated) {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 h3 {
 	margin: 40px 0 0;
 }
@@ -90,5 +149,22 @@ li {
 }
 a {
 	color: #42b983;
+}
+.user-data {
+	display: flex;
+    padding: 10px 20px;
+    background: #eee;
+    border-radius: 10px;
+    align-items: center;
+    justify-content: center;
+	
+	.jazz-icon {
+		height: 36px;
+		width: 36px;
+		margin-right: 10px;
+	}
+}
+.copy-button {
+	margin-left: auto;
 }
 </style>
