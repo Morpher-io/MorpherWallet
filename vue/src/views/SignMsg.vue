@@ -1,38 +1,29 @@
 <template>
-	<section class="section">
+	<div>
 		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 		<div class="container">
 			<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 			<h2 class="title">Sign Message</h2>
-			<h4 class="subtitle">Your signature is being requested</h4>
+			<p class="subtitle">Your signature is being requested</p>
 
 			<div class="field">
 				<label class="label">You are signing:</label>
-				<div class="control">
-					{{ store.messageDetails }}
+				<div class="card">
+					{{ 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam scelerisque orci ligula, et sodales metus sagittis egestas. Nulla sed orci eleifend, hendrerit dui ut, ullamcorper ipsum. Sed sit amet leo feugiat, dictum urna id, pulvinar erat.' }}
 				</div>
 			</div>
 
-			<div class="field">
-				<div class="layout split first">
-					<button class="button is-green" @click="sign()">
-						<span class="icon is-small">
-							<i class="far fa-file"></i>
-						</span>
-						<span> Sign </span>
-					</button>
-				</div>
-				<div class="layout split second">
-					<button class="button is-green" @click="cancel()">
-						<span class="icon is-small">
-							<i class="fas fa-unlock"></i>
-						</span>
-						<span> Cancel </span>
-					</button>
-				</div>
-			</div>
+			<button class="button is-green big-button is-login transition-faster mt-5" @click="sign()">
+				<span>Sign</span>
+			</button>
+
+			<div class="divider thick"></div>	
+
+			<button class="button" @click="cancel()">
+				<span>Cancel</span>
+			</button>
 		</div>
-	</section>
+	</div>
 </template>
 
 <script lang="ts">
@@ -51,4 +42,20 @@ export default class SignMsg extends mixins(Global, Authenticated) {
 }
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+.card {
+	padding: 20px;
+    border-radius: 10px;
+    background: #f9f9f9;
+    display: flex;
+    padding: 10px 20px;
+    border-radius: 10px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 195, 134, 0.1);
+    border: 1px solid #00c386;
+    box-shadow: 0 1px 2px 0 rgb(0 195 134 / 20%), 0 5px 12px 0 rgb(0 0 0 / 10%);
+    position: relative;
+    z-index: 1;
+}
+</style>

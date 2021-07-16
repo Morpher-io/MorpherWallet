@@ -1,91 +1,69 @@
 <template>
-	<section class="section-no-header">
+	<div>
 		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 		<div class="container">
 			<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 			<h2 class="title">Confirm Transaction</h2>
-			<h4 class="subtitle" v-if="store.transactionDetails">{{ chainName  }}</h4>
-			<i class="fas fa-arrow-circle-right transfer-icon" ></i>
-			<div class="field source-dest-output">
+			<p class="subtitle" v-if="store.transactionDetails">{{ chainName  }}</p>
+			<div class="card">
 				
 				<div class="layout split first eth-address-copy" :data-tooltip="copyTextSrc" @click="copySrcETHAddress(store.transactionDetails.from)">
 					{{ formatEthAddress(store.transactionDetails.from) }}
 				</div>
+				<i class="fas fa-arrow-right transfer-icon" ></i>
 				<div class="layout split second eth-address-copy" :data-tooltip="copyTextDest" @click="copyDestETHAddress(store.transactionDetails.to)">
 					 <div class=has-text-right>{{ formatEthAddress(store.transactionDetails.to) }}</div>
 				</div>
 
 			</div>
 
-			<div class="field source-dest-output">
+			<div class="divider thick"></div>
+
+			<div class="card column">
 					<p>Balance: </p>
 					<p class='eth_balance'>{{ roundFormatter(Number(store.ethBalance)/ Math.pow(10,18)) }} ETH</p>
 			</div>
 
-			<div class="field">
-				<label class="label">Transaction Details</label>
-			</div>
-
-			<div class="field">
-				<div class="layout split first transaction-breakdown">
-					<p>Gas Fee: </p>
+			<div class="payment-description">
+				<div class="details-group" v-if="true" >
+					<p class="subtitle"><b>Gas Fee</b></p>
+					<p class="text">{{ roundFormatter(Number(store.transactionDetails.gasPrice) * Number(store.transactionDetails.gas) / Math.pow(10,18)) }} ETH</p>
 				</div>
-				<div class="layout split second has-text-right transaction-breakdown">
-					{{ roundFormatter(Number(store.transactionDetails.gasPrice) * Number(store.transactionDetails.gas) / Math.pow(10,18)) }} ETH<br>
+				<div class="details-group small">
+					<p class="subtitle">Gas Price</p>
+					<p class="text">{{ roundFormatter(Number(store.transactionDetails.gasPrice) / Math.pow(10,9)) }} gwei</p>
 				</div>
-			</div>
-
-			<div class="field">
-				
-				<div class="layout split first eth-address-copy">
-					<p>Gas Price:</p>
-					{{ roundFormatter(Number(store.transactionDetails.gasPrice) / Math.pow(10,9)) }} gwei
-				</div>
-				<div class="layout split second eth-address-copy">
-					<p>Gas Limit:</p>
-					{{ roundFormatter(Number(store.transactionDetails.gas)) }} gwei
+				<div class="details-group small">
+					<p class="subtitle">Gas Limit</p>
+					<p class="text">{{ roundFormatter(Number(store.transactionDetails.gas)) }} gwei</p>
 				</div>
 
-			</div>
-
-			<div class="field" v-if="store.transactionDetails.value" >
-				<div class="layout split first transaction-breakdown">
-					<p>Eth Amount: </p>
+				<div class="divider thick"></div>
+		
+				<div class="details-group" v-if="store.transactionDetails.value" >
+					<p class="subtitle"><b>ETH</b></p>
+					<p class="text">{{ roundFormatter(store.transactionDetails.value / Math.pow(10,18)) }} ETH</p>
 				</div>
-				<div class="layout split second has-text-right transaction-breakdown">
-					{{ roundFormatter(store.transactionDetails.value / Math.pow(10,18)) }} ETH
+
+				<div class="divider thick"></div>
+
+				<div class="details-group" v-if="store.transactionDetails.value" >
+					<p class="subtitle"><b>Total</b></p>
+					<p class="text">{{ roundFormatter(Number(store.transactionDetails.value || 0)/ Math.pow(10,18) + (Number(store.transactionDetails.gasPrice) * Number(store.transactionDetails.gas)) / Math.pow(10,18)) }} ETH</p>
 				</div>
 			</div>
 
-			<div class="field" v-if="store.transactionDetails.value" >
-				<div class="layout split first transaction-breakdown">
-					<p>Total: </p>
-				</div>
-				<div class="layout split second has-text-right transaction-breakdown">
-					{{ roundFormatter(Number(store.transactionDetails.value || 0)/ Math.pow(10,18) + (Number(store.transactionDetails.gasPrice) * Number(store.transactionDetails.gas)) / Math.pow(10,18)) }} ETH
-				</div>
-			</div>			
+			<button class="button is-green big-button is-login transition-faster mt-5" @click="sign()">
+				<span>Confirm</span>
+			</button>
 
-			<div class="field">
-				<div class="layout split first">
-					<button class="button is-green" @click="sign()">
-						<span class="icon is-small">
-							<i class="far fa-file"></i>
-						</span>
-						<span> Confirm </span>
-					</button>
-				</div>
-				<div class="layout split second">
-					<button class="button is-green" @click="cancel()">
-						<span class="icon is-small">
-							<i class="fas fa-unlock"></i>
-						</span>
-						<span> Cancel </span>
-					</button>
-				</div>
-			</div>
+			<div class="divider thick"></div>	
+
+			<button class="button" @click="cancel()">
+				<span>Cancel</span>
+			</button>
 		</div>
-	</section>
+	</div>
 </template>
 
 <script lang="ts">
@@ -147,7 +125,7 @@ export default class SignTx extends mixins(Global, Authenticated) {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .eth_balance {
 	font-size: 21px;
 }
@@ -168,5 +146,69 @@ font-size: 20px;
 }
 .eth-address-copy {
 	cursor: pointer;
+}
+
+.card {
+	display: flex;
+    padding: 10px 20px;
+    border-radius: 10px;
+    align-items: center;
+    justify-content: center;
+	background-color: rgba(0, 195, 134, 0.1);
+	border: 1px solid #00c386;
+    box-shadow: 0 1px 2px 0 rgb(0 195 134 / 20%), 0 5px 12px 0 rgb(0 0 0 / 10%);
+	position: relative;
+	z-index: 1;
+
+	&.column {
+		flex-direction: column;
+	}
+}
+
+.payment-description {
+	padding: 20px;
+    background: #f9f9f9;
+    margin: 0 10px;
+    position: relative;
+    border-radius: 0 0 10px 10px;
+
+	.details-group {
+		display: flex;
+		align-items: center;
+
+		.subtitle {
+			margin: 0;
+		}
+
+		.text {
+			margin-left: auto;
+			font-size: 16px;
+		}
+
+		&.small {
+			padding-left: 15px;
+			margin-top: 5px;
+			position: relative;
+
+			&::before {
+				content: '';
+				position: absolute;
+				top: 50%;
+				transform: translateY(-50%);
+				left: 0;
+				width: 10px;
+				height: 1px;
+				background: #bababa;
+			}
+
+			.subtitle {
+				font-size: 14px;
+			}
+
+			.text {
+				font-size: 14px;
+			}
+		}
+	}
 }
 </style>

@@ -53,7 +53,7 @@
 									type="text"
 									placeholder="Authenticator Code"
 									data-cy="authenticatorCode"
-									class="textbox"
+									class="input"
 									v-model="authenticatorCode"
 								/>
 								<p class="help is-danger" v-if="invalidAuthenticator" data-cy="authenticatorMessage">
