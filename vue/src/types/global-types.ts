@@ -13,6 +13,7 @@ export type Type2FARequired = {
 	email: boolean;
 	authenticator: boolean;
 	authenticatorConfirmed: boolean;
+	needConfirmation?: boolean;
 };
 
 export type TypeSeedFoundData = {
@@ -94,6 +95,7 @@ export type TypePayloadData = {
 	__typename?: 'TypePayloadData';
 	email: boolean;
 	authenticator: boolean;
+	needConfirmation?: boolean;
 };
 
 export type TypeCreatedKeystore = {

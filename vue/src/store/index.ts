@@ -12,7 +12,8 @@ import {
 	changePasswordEncryptedSeed,
 	getBackendEndpoint,
 	getNonce,
-	recoverSeedSocialRecovery
+	recoverSeedSocialRecovery,
+	verifyEmailConfirmationCode
 } from '../utils/backupRestore';
 import { downloadEncryptedKeystore, getAccountsFromKeystore, sortObject } from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
@@ -108,7 +109,8 @@ function initialState(): RootState {
 		twoFaRequired: {
 			email: false,
 			authenticator: false,
-			authenticatorConfirmed: false
+			authenticatorConfirmed: false,
+			needConfirmation: false,
 		},
 		token: '',
 		connection: null,
@@ -164,6 +166,7 @@ const store: Store<RootState> = new Vuex.Store({
 			state.twoFaRequired.email = payload.email;
 			state.twoFaRequired.authenticator = payload.authenticator;
 			state.twoFaRequired.authenticatorConfirmed = payload.authenticatorConfirmed;
+			state.twoFaRequired.needConfirmation = payload.needConfirmation || false;
 		},
 		userFound(state: RootState, userData: TypeUserFoundData) {
 			state.email = userData.email;
@@ -256,12 +259,13 @@ const store: Store<RootState> = new Vuex.Store({
 							.then(payload => {
 								commit('userFound', { email, hashedPassword });
 								commit('updatePayload', payload);
-								if (payload.email) {
+
+								if (payload.email || payload.needConfirmation) {
 									send2FAEmail(email)
 										.then(resolve)
 										.catch(reject);
 								}
-								if (!payload.email && !payload.authenticator) {
+								if (!payload.email && !payload.authenticator && !payload.needConfirmation) {
 									getEncryptedSeedFromMail(email, '', '')
 										.then(encryptedSeed => {
 											commit('seedFound', { encryptedSeed });
@@ -376,6 +380,8 @@ const store: Store<RootState> = new Vuex.Store({
 			return new Promise(async (resolve, reject) => {
 				let emailCorrect = false;
 				let authenticatorCorrect = false;
+				let userConfirmed = false;
+
 				if (state.twoFaRequired.email == true) {
 					const result = await verifyEmailCode(rootState.email, params.email2FA);
 					if (result.success) {
@@ -399,7 +405,19 @@ const store: Store<RootState> = new Vuex.Store({
 					authenticatorCorrect = true;
 				}
 
-				if (emailCorrect && authenticatorCorrect) {
+				if (state.twoFaRequired.needConfirmation == true) {
+					const result = await verifyEmailConfirmationCode(rootState.email, params.email2FA);
+					if (result.success) {
+						userConfirmed = true;
+					} else {
+						commit('authError', 'Confirmation Email code not correct');
+						reject(result.error);
+					}
+				} else {
+					userConfirmed = true;
+				}
+
+				if (emailCorrect && authenticatorCorrect && userConfirmed) {
 					getEncryptedSeedFromMail(rootState.email, params.email2FA, params.authenticator2FA)
 						.then(encryptedSeed => {
 							//const encryptedSeed = state.encryptedSeed; //normally that would need decrypting using 2fa codes
@@ -755,7 +773,7 @@ const store: Store<RootState> = new Vuex.Store({
 			return state.keystore !== undefined && state.keystore !== null;
 		},
 		twoFaRequired: state => {
-			return (state.twoFaRequired.email || state.twoFaRequired.authenticator) && state.encryptedSeed.ciphertext === undefined;
+			return (state.twoFaRequired.email || state.twoFaRequired.authenticator || state.twoFaRequired.needConfirmation) && state.encryptedSeed.ciphertext === undefined;
 		},
 		authStatus: state => state.status,
 		walletEmail: state => state.email,

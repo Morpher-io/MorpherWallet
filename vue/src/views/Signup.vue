@@ -142,7 +142,7 @@ export default class Signup extends mixins(Global) {
 		this.createWallet({ email, password: this.walletPassword })
 			.then(() => {
 				this.hideSpinner();
-				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator) {
+				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator || this.store.twoFaRequired.needConfirmation) {
 					// open 2fa page if 2fa is required
 					this.$router.push('/2fa');
 				} else {

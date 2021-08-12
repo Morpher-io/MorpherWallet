@@ -3,7 +3,7 @@
 		<h2 class="title">Authenticator Unlock</h2>
 		<h4 class="subtitle">Please input two FA Authenticator code</h4>
 		<form v-on:submit.prevent="validateCode">
-			<div class="field" v-if="twoFaRequired.email">
+			<div class="field" v-if="twoFaRequired.email || twoFaRequired.needConfirmation">
 				<label class="label">Email 2FA</label>
 				<div class="control">
 					<input

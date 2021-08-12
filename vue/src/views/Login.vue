@@ -124,7 +124,7 @@ export default class Login extends mixins(Global) {
 		// Call the fetchUser store action to process the wallet logon
 		this.fetchUser({ email, password })
 			.then(() => {
-				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator) {
+				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator || this.store.twoFaRequired.needConfirmation) {
 					// open 2fa page if 2fa is required
 					this.hideSpinner();
 					this.$router.push('/2fa');
