@@ -52,7 +52,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
         if (user == null) {
             // If it exists, set the userId and delete the associated recovery method.
             // If it doesnt exist create a new one.
-            const payload = { email: true, authenticator: false, authenticatorConfirmed: false };
+            const payload = { email: false, authenticator: false, authenticatorConfirmed: false, needConfirmation: true };
 
             const nonce = 1;
 
@@ -474,6 +474,9 @@ export async function getPayload(req, res) {
         if (user['payload'].authenticatorConfirmed !== undefined) {
             payload['authenticatorConfirmed'] = user.payload.authenticatorConfirmed;
         }
+        if (user['payload'].needConfirmation !== undefined) {
+            payload['needConfirmation'] = user.payload.needConfirmation;
+        }
     }
 
     if (user) {
@@ -703,6 +706,44 @@ export async function verifyEmailCode(req, res) {
                     body: req.body
                 });
                 return errorResponse(res, 'Email 2FA code expired. Logout and Login again.');
+            }
+        }
+    }
+
+    return errorResponse(res, 'Could not find User!', 404);
+}
+
+export async function verifyEmailConfirmationCode(req, res) {
+    const code = req.body.code;
+    const key = req.body.key;
+    const recovery = await Recovery.findOne({ where: { key } });
+    if (recovery != null) {
+        const user = await User.findOne({ where: { id: recovery.user_id } });
+        if (user != null) {
+            if (await verifyEmail2FA(recovery.user_id, code)) {
+                user.payload.needConfirmation = false;
+                user.changed('payload', true);
+                await user.save();
+
+                Logger.info({
+                    method: arguments.callee.name,
+                    type: 'Email Confirmation Code Verified',
+                    user_id: user.id,
+                    user,
+                    headers: req.headers,
+                    body: req.body
+                });
+                return successResponse(res, true);
+            } else {
+                Logger.info({
+                    method: arguments.callee.name,
+                    type: 'Error: Email Confirmation Code Wrong',
+                    user_id: user.id,
+                    user,
+                    headers: req.headers,
+                    body: req.body
+                });
+                return errorResponse(res, 'Could not verify email code. Please try again!');
             }
         }
     }
