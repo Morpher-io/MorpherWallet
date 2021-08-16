@@ -789,6 +789,8 @@ export async function deleteAccount(req, res) {
 }
 
 async function verifyEmail2FA(user_id: string, code: string): Promise<boolean> {
+    if (!code) return false;
+
     const user = await User.findOne({ where: { id: user_id } });
     return user.payload.email === false || (user.email_verification_code === Number(code));
 }
