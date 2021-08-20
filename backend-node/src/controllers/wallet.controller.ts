@@ -267,7 +267,7 @@ export async function getEncryptedSeed(req, res) {
 
         const email2FAVerified = await verifyEmail2FA(recovery.user_id, email2fa);
         const googleVerified = await verifyGoogle2FA(recovery.user_id, authenticator2fa);
-        if (!email2FAVerified || !googleVerified) {
+        if ((user.payload.email && !email2FAVerified) || !googleVerified) {
             Logger.info({
                 method: arguments.callee.name,
                 type: 'Error: Fetch Encrypted Seed Failed',
@@ -281,7 +281,7 @@ export async function getEncryptedSeed(req, res) {
         }
 
         const email2faStillValid = await isEmail2FaStillValid(recovery.user_id);
-        if (!email2faStillValid) {
+        if (user.payload.email && !email2faStillValid) {
             Logger.info({
                 method: arguments.callee.name,
                 type: 'Error: Fetch Encrypted Seed Failed',
