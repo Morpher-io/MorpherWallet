@@ -35,14 +35,7 @@ export const  styles =  `
 }
 @media (max-width: 576px) {
   .zerowallet-widget-frame {
-    bottom: 0;
-    top: auto;
-		width: 100%;
-		height: 100%;
-    right: 0;
-    left: 0;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+    width: 90%;
   }
 }
 `;
