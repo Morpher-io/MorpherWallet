@@ -20,7 +20,7 @@
 				</div>
 		</div>
 		<div class="buttons horizontal-buttons">
-			<router-link to="/send" tag="button" class="button is-purple big-button is-thick transition-faster">
+			<router-link to="/send" tag="button" class="button is-purple big-button is-thick transition-faster" disabled>
 				<span class="icon is-small">
 					<i class="fas fa-paper-plane"></i>
 				</span>
@@ -46,7 +46,7 @@
 			</div>
 		</div>
 		<div class="divider thick"></div>
-		<div class="has-text-left" v-if="!twoFactorActive">
+		<div class="has-text-left" v-if="!twoFactorActive && !twoFactorEmailActive">
 			<div>
 				<p class="subtitle">
 					We strongly recommend you add 2FA verification to increase wallet security. Please turn on 2FA verification in settings.
@@ -56,9 +56,14 @@
 				</router-link>
 			</div>
 		</div>
-		<div class="has-text-left protection-enabled" v-else>
+		<div class="has-text-left protection-enabled" v-if="twoFactorEmailActive">
 			<i class="fas fa-envelope"></i>
-			<p>2FA Verification</p>
+			<p>2FA Email</p>
+			<span class="enabled">Enabled</span>
+		</div>
+		<div class="has-text-left protection-enabled mt-5" v-if="twoFactorActive">
+			<i class="fas fa-mobile-alt"></i>
+			<p>2FA Authenticator</p>
 			<span class="enabled">Enabled</span>
 		</div>
 		<div class="divider"></div>
@@ -80,6 +85,7 @@ export default class Wallet extends mixins(Global, Authenticated) {
 	selectedAccount = '';
 	noRecoveryMethods = false;
 	twoFactorActive = false;
+	twoFactorEmailActive = false;
 
 	async mounted() {
 		if (this.isIframe() && !this.store.loginComplete) {
@@ -94,6 +100,9 @@ export default class Wallet extends mixins(Global, Authenticated) {
 		}
 		if (this.store.twoFaRequired.authenticator) {
 			this.twoFactorActive = true;
+		}
+		if (this.store.twoFaRequired.email) {
+			this.twoFactorEmailActive = true;
 		}
 		if (this.store.accounts && this.store.accounts[0]) {
 			this.generateImage(this.store.accounts[0]);

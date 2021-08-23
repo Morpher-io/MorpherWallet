@@ -1,23 +1,25 @@
 <template>
 	<div class="container">
 		<div class="title-container has-text-left">
-			<router-link to="/" tag="button" class="button is-grey big-button outlined-button is-thick transition-faster is-icon-only">
+			<button @click="redirectUser" tag="button" class="button is-grey big-button outlined-button is-thick transition-faster is-icon-only">
 				<span class="icon is-small">
 					<i class="fas fa-chevron-left"></i>
 				</span>
-			</router-link>
-			<h2 class="title ml-4">Settings</h2>
+			</button>
+			<h2 class="title ml-4">{{
+				generateTitle()
+			}}</h2>
 		</div>
 
-		<ChangeEmail></ChangeEmail>
+		<ChangeEmail :activePage="activePage" @changeActive="activePage = 'email'"></ChangeEmail>
 
-		<ChangePassword></ChangePassword>
+		<ChangePassword :activePage="activePage" @changeActive="activePage = 'password'"></ChangePassword>
 
-		<Change2FA></Change2FA>
+		<Change2FA :activePage="activePage" @changeActive="activePage = '2FA'"></Change2FA>
 
-		<ExportWallet></ExportWallet>
+		<ExportWallet :activePage="activePage" @changeActive="activePage = 'keys'"></ExportWallet>
 
-		<AccountRecovery></AccountRecovery>
+		<AccountRecovery :activePage="activePage" @changeActive="activePage = 'recovery'"></AccountRecovery>
 	</div>
 </template>
 
@@ -50,7 +52,33 @@ import AccountRecovery from '../components/AccountRecovery.vue';
 	}
 })
 export default class Settings extends Vue {
-	dropdownIsActive = false;
+	activePage = '';
+
+	generateTitle() {
+		let title = 'Settings';
+
+		if (this.activePage === 'email') {
+			title = 'Email settings';
+		} else if (this.activePage === 'password') {
+			title = 'Password settings';
+		} else if (this.activePage === '2FA') {
+			title = 'Two-Factor settings';
+		} else if (this.activePage === 'keys') {
+			title = 'Keys settings';
+		} else if (this.activePage === 'recovery') {
+			title = 'Recovery settings';
+		}
+
+		return title;
+	}
+
+	redirectUser() {
+		if (!this.activePage) {
+			this.$router.push('/');
+		} else {
+			this.activePage = '';
+		}
+	}
 }
 </script>
 

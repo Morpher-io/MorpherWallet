@@ -1,20 +1,21 @@
 <template>
 	<div class="card">
 		<form v-on:submit.prevent="formSubmitChangeEmail">
-			<div class="collapse">
-				<div class="is-flex is-align-items-center">
-					<span class="header" @click="collapsed = !collapsed">
+			<div :class="{
+				'collapse': true,
+				'hide-border': activePage
+			}">
+				<div v-if="!activePage" class="is-flex is-align-items-center">
+					<span class="header" @click="changeActive">
 						Edit Email Address
-					<span class="help is-success" v-if="success" data-cy="isSuccess">Saved!</span>
 					</span>
 					<span :class="{
-						'icon collapseIcon header': true,
-						'open': !collapsed
-					}" @click="collapsed = !collapsed">
+						'icon collapseIcon header': true
+					}" @click="changeActive">
 						<i class="fas fa-chevron-right"></i>
 					</span>
 				</div>
-				<div :class="collapsed ? 'hidden' : 'visible'">
+				<div :class="activePage === 'email' ? 'visible' : 'hidden'">
 					<div class="card-content">
 						<div class="content">
 							<div class="field">
@@ -68,12 +69,13 @@
 	</div>
 </template>
 
-<script>
+<script lang="ts">
 import { validateInput } from '../utils/backupRestore';
 import { sha256 } from '../utils/cryptoFunctions';
 
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
+import { Emit, Prop } from 'vue-property-decorator';
 
 @Component({})
 export default class ChangeEmail extends mixins(Global, Authenticated) {
@@ -81,11 +83,18 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 	password = '';
 	error = '';
 	twoFaSent = false;
-	twoFa = null;
-	invalidEmail = false;
-	collapsed = true;
-	invalid2FA = false;
+	twoFa: any = null;
+	invalidEmail: any = false;
+	invalid2FA: any = false;
 	success = false;
+
+	@Prop()
+	activePage!: string;
+
+	@Emit('changeActive')
+	changeActive() {
+		return;
+	}
 
 	async formSubmitChangeEmail() {
 		if (!this.newEmail) {
@@ -124,7 +133,6 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 			} else {
 				this.newEmail = '';
 				this.password = '';
-				this.collapsed = true;
 				this.twoFa = '';
 				this.twoFaSent = false;
 				this.invalid2FA = false;

@@ -98,6 +98,12 @@ body {
 	margin-top: $spacing_1;
 	border: 1px solid $col_grey;
 	padding-bottom: $spacing_1;
+
+	height: 600px;
+    overflow: hidden;
+    overflow-y: auto;
+	display: flex;
+	flex-direction: column;
 }
 
 .header {
@@ -152,7 +158,6 @@ body {
 .title {
 	font-weight: 500;
 	font-size: 32px;
-	margin-top: $spacing_2;
 	margin-bottom: 0px;
 }
 .subtitle {
@@ -251,6 +256,13 @@ input[type='checkbox']:checked {
 	margin-bottom: 0px;
 	border-bottom: 1px solid $col_grey_light;
 	padding-bottom: $spacing_1;
+
+	&.hide-border {
+		border-bottom: none;
+		margin: 0;
+		padding: 0;
+	}
+
 	.header {
 		cursor: pointer;
 		margin: 0;
@@ -314,6 +326,7 @@ input[type='checkbox']:checked {
     padding: 25px;
 	padding-top: 0;
     flex-grow: 1;
+	width: 100%;
 }
 
 .main {
@@ -523,6 +536,7 @@ input[type='checkbox']:checked {
 	background-color: #FBFAFC;
 	box-shadow: inset 0 1px 3px 0 rgba(0,0,0,0.05);
 	padding: 8px 10px;
+	margin-top: auto;
 
 	.icon {
 		color: #4C4C4C;

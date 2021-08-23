@@ -1,18 +1,23 @@
 <template>
 	<div class="card">
-		<div class="collapse" data-cy="exportHeader">
-			<div class="is-flex is-align-items-center">
-					<span class="header" @click="collapsed = !collapsed">
+		<div 
+			:class="{
+				'collapse': true,
+				'hide-border': activePage
+			}"
+			data-cy="exportHeader"
+		>
+			<div v-if="!activePage" class="is-flex is-align-items-center">
+					<span class="header" @click="changeActive">
 						Export Private Keys / Seed
 					</span>
 					<span :class="{
-						'icon collapseIcon header': true,
-						'open': !collapsed
-					}" @click="collapsed = !collapsed">
+						'icon collapseIcon header': true
+					}" @click="changeActive">
 						<i class="fas fa-chevron-right"></i>
 					</span>
 				</div>
-			<div :class="collapsed ? 'hidden' : 'visible'">
+			<div :class="activePage === 'keys' ? 'visible' : 'hidden'">
 				<div class="message-body">
 					<p class="header-text help warning">Before you delete your account, make sure you have exported your Seed Phrase.</p>
 					<div class="field">
@@ -81,23 +86,31 @@
 	</div>
 </template>
 
-<script>
+<script lang="ts">
 import { sha256 } from '../utils/cryptoFunctions';
 import Component, { mixins } from 'vue-class-component';
-import { Authenticated, Global } from '@/mixins/mixins';
+import { Authenticated, Global } from '../mixins/mixins';
+import { Emit, Prop } from 'vue-property-decorator';
 
 @Component({})
 export default class ExportWallet extends mixins(Global, Authenticated) {
 	password = '';
 	seedPhrase = '';
-	collapsed = true;
 
-	async exportKey(account) {
+	@Prop()
+	activePage!: string;
+
+	@Emit('changeActive')
+	changeActive() {
+		return;
+	}
+
+	async exportKey(account: any) {
 		await this.exportKeystore({ account, password: this.password });
 		this.password = '';
 	}
 
-	async exportPhrase(account) {
+	async exportPhrase(account: any) {
 		const password = await sha256(this.password);
 		await this.exportSeedPhrase({ account, password });
 		this.password = '';
