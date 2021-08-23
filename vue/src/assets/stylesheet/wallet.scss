@@ -85,7 +85,8 @@ body {
 
 .main_iframe {
 	width: 100%;
-	float: top;
+	display: flex;
+	flex-direction: column
 }
 
 .main {
