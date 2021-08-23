@@ -18,8 +18,7 @@ export const  styles =  `
 .zerowallet-widget-frame {
 	display: block;
 	max-width: 414px;
-	max-height: 800px;
-	height: 90%;
+	height: 600px!important;
 	width: 80%;
 	position: fixed;
 	left: 50%;
