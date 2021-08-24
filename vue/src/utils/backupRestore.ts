@@ -263,6 +263,34 @@ const verifyEmailCode = async (email: string, code: string) => {
 	}
 };
 
+const verifyEmailConfirmationCode = async (email: string, code: string) => {
+	if (email == '' || code == '') {
+		return false;
+	}
+	const key = await sha256(email.toLowerCase());
+	const options: RequestInit = {
+		method: 'POST',
+		headers: {
+			Accept: 'application/json',
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			key,
+			code
+		}),
+		mode: 'cors',
+		cache: 'default'
+	};
+	try {
+		const result = await fetch(getBackendEndpoint() + '/v1/verifyEmailConfirmationCode', options);
+		const body = await result.json();
+		return body;
+	} catch (e) {
+		console.log(e);
+		return false;
+	}
+};
+
 export {
 	validateInput,
 	saveWalletEmailPassword,
@@ -275,5 +303,6 @@ export {
 	send2FAEmail,
 	verifyAuthenticatorCode,
 	verifyEmailCode,
-	getBackendEndpoint
+	getBackendEndpoint,
+	verifyEmailConfirmationCode
 };

@@ -6,7 +6,7 @@
 		<p v-else-if="twoFaRequired.authenticator && !twoFaRequired.email" class="subtitle">Please input two FA Authenticator code.</p>
 		<p v-else class="subtitle">Please input both code we sent you over the email and two FA Authenticator code.</p>
 		<form v-on:submit.prevent="validateCode">
-			<div class="field" v-if="twoFaRequired.email">
+			<div class="field" v-if="twoFaRequired.email || twoFaRequired.needConfirmation">
 				<label class="label">Email Code</label>
 				<div class="control">
 					<input
