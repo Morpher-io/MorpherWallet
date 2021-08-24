@@ -40,7 +40,7 @@ export const  styles =  `
 }
 @media (max-height: 600px) {
   .zerowallet-widget-frame {
-    height: 90%;
+    height: 90%!important;
   }
 }
 `;
