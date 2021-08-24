@@ -9,7 +9,7 @@
 			<div class="field">
 				<label class="label">You are signing:</label>
 				<div class="card">
-					{{ 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam scelerisque orci ligula, et sodales metus sagittis egestas. Nulla sed orci eleifend, hendrerit dui ut, ullamcorper ipsum. Sed sit amet leo feugiat, dictum urna id, pulvinar erat.' }}
+					{{ store.messageDetails }}
 				</div>
 			</div>
 
