@@ -145,6 +145,57 @@ export class Global extends Vue {
 			this.clearPage();
 		}
 	}
+
+	checkPassword(newValue: string, checkErrors: boolean, oldChecks: any, comparePassword: string, checkRepeatOnly = false) {
+		let updatedChecks = checkRepeatOnly ? oldChecks : {
+			min: '',
+			uppercase: '',
+			lowercase: '',
+			number: '',
+			match: '',
+		};
+
+		if (checkErrors) {
+			updatedChecks = {
+				min: 'fail',
+				uppercase: 'fail',
+				lowercase: 'fail',
+				number: 'fail',
+				match: 'fail',
+			};
+		}
+
+		if (newValue) {
+			if (!checkRepeatOnly) {
+				if (newValue.length >= 8) {
+					updatedChecks.min = 'pass';
+				} else if (checkErrors) updatedChecks.min = 'fail';
+
+				if (/[A-Z]/.test(newValue)) {
+					updatedChecks.uppercase = 'pass';
+				} else if (checkErrors) updatedChecks.uppercase = 'fail';
+
+				if (/[a-z]/.test(newValue)) {
+					updatedChecks.lowercase = 'pass';
+				} else if (checkErrors) updatedChecks.lowercase = 'fail';
+
+				if (/[0-9]/.test(newValue)) {
+					updatedChecks.number = 'pass';
+				} else if (checkErrors) updatedChecks.number = 'fail';
+			}
+			
+			if (comparePassword) {
+				if(newValue === comparePassword) {
+					updatedChecks.match = 'pass';
+				} else updatedChecks.match = 'fail';
+			} else {
+				if (checkErrors) updatedChecks.match = 'fail';
+				else updatedChecks.match = '';
+			}
+		}
+
+		return updatedChecks;
+	}
 }
 
 /**

@@ -44,7 +44,31 @@
 								:secure-length="8"
 								style="max-width: initial"
 							/>
-							<p class="help">Use a strong Password! It encrypts your Wallet and keeps your Funds secure.</p>
+							<div class="password-help">
+								<p>Must contain:</p>
+								<ul class="items">
+									<li :class="{
+										'done': passwordChecks.min === 'pass',
+										'fail': passwordChecks.min === 'fail'
+									}">Min 8. characters</li>
+									<li :class="{
+										'done': passwordChecks.lowercase === 'pass',
+										'fail': passwordChecks.lowercase === 'fail'
+									}">A lowercase</li>
+									<li :class="{
+										'done': passwordChecks.uppercase === 'pass',
+										'fail': passwordChecks.uppercase === 'fail'
+									}">An uppercase</li>
+									<li :class="{
+										'done': passwordChecks.number === 'pass',
+										'fail': passwordChecks.number === 'fail'
+									}">A number</li>
+									<li :class="{
+										'done': passwordChecks.match === 'pass',
+										'fail': passwordChecks.match === 'fail'
+									}">Matches repeat</li>
+								</ul>
+							</div>
 
 							<p class="help is-danger" v-if="invalidPassword" data-cy="invalidMessage">
 								{{ invalidPassword }}
@@ -82,7 +106,7 @@ import { sha256 } from '../utils/cryptoFunctions';
 
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
-import { Emit, Prop } from 'vue-property-decorator';
+import { Emit, Prop, Watch } from 'vue-property-decorator';
 
 @Component({
 	components: {
@@ -96,6 +120,13 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 	walletPasswordRepeat = '';
 	invalidPassword = '';
 	success = false;
+	passwordChecks: any = {
+		min: '',
+		uppercase: '',
+		lowercase: '',
+		number: '',
+		match: '',
+	};
 
 	@Prop()
 	activePage!: string;
@@ -108,6 +139,16 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 		return;
 	}
 
+	@Watch('walletPassword')
+	handlePasswordChange(newValue: string) {
+		this.passwordChecks = this.checkPassword(newValue, false, this.passwordChecks, this.walletPasswordRepeat);
+	}
+
+	@Watch('walletPasswordRepeat')
+	handlePasswordRepeatChange(newValue: string) {
+		this.passwordChecks = this.checkPassword(this.walletPassword, false, this.passwordChecks, newValue, true);
+	}
+
 	mounted() {
 		if (this.presetOldPassword !== undefined) {
 			this.oldPassword = this.presetOldPassword;
@@ -118,8 +159,9 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 	async changePasswordExecute() {
 		//this.invalidPassword = '';
 
-		if (this.walletPassword != this.walletPasswordRepeat) {
-			this.invalidPassword = 'The passwords are not the identical, please repeat the password';
+		this.passwordChecks = this.checkPassword(this.walletPassword, true, this.passwordChecks, this.walletPasswordRepeat);
+
+		if (Object.keys(this.passwordChecks).some((value: string) => this.passwordChecks[value] !== 'pass')) {
 			return;
 		}
 

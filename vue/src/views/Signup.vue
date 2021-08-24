@@ -34,9 +34,31 @@
 							v-model="walletPassword"
 						/>
 						<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial; margin-top: -8px" />
-						<p class="help">
-							Please choose a strong password with at least: 8 characters, 1 lowercase letter, 1 uppercase letter, and 1 number.
-						</p>
+						<div class="password-help">
+							<p>Must contain:</p>
+							<ul class="items">
+								<li :class="{
+									'done': passwordChecks.min === 'pass',
+									'fail': passwordChecks.min === 'fail'
+								}">Min 8. characters</li>
+								<li :class="{
+									'done': passwordChecks.lowercase === 'pass',
+									'fail': passwordChecks.lowercase === 'fail'
+								}">A lowercase</li>
+								<li :class="{
+									'done': passwordChecks.uppercase === 'pass',
+									'fail': passwordChecks.uppercase === 'fail'
+								}">An uppercase</li>
+								<li :class="{
+									'done': passwordChecks.number === 'pass',
+									'fail': passwordChecks.number === 'fail'
+								}">A number</li>
+								<li :class="{
+									'done': passwordChecks.match === 'pass',
+									'fail': passwordChecks.match === 'fail'
+								}">Matches repeat</li>
+							</ul>
+						</div>
 
 						<p class="help is-danger" v-if="invalidPassword">
 							Error: {{ invalidPassword }}
@@ -85,6 +107,8 @@ import { validateInput } from '../utils/backupRestore';
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 
+import { Watch } from 'vue-property-decorator';
+
 @Component({
 	components: {
 		Password
@@ -98,6 +122,23 @@ export default class Signup extends mixins(Global) {
 	signup = false;
 	invalidEmail = '';
 	invalidPassword = '';
+	passwordChecks: any = {
+		min: '',
+		uppercase: '',
+		lowercase: '',
+		number: '',
+		match: '',
+	};
+
+	@Watch('walletPassword')
+	handlePasswordChange(newValue: string) {
+		this.passwordChecks = this.checkPassword(newValue, false, this.passwordChecks, this.walletPasswordRepeat);
+	}
+
+	@Watch('walletPasswordRepeat')
+	handlePasswordRepeatChange(newValue: string) {
+		this.passwordChecks = this.checkPassword(this.walletPassword, false, this.passwordChecks, newValue, true);
+	}
 
 	// Methods
 	async signupExecute(e: any) {
@@ -105,8 +146,9 @@ export default class Signup extends mixins(Global) {
 		this.invalidEmail = '';
 		this.invalidPassword = '';
 
-		if (this.walletPassword != this.walletPasswordRepeat) {
-			this.invalidPassword = 'The passwords are not the identical, please repeat the password';
+		this.passwordChecks = this.checkPassword(this.walletPassword, true, this.passwordChecks, this.walletPasswordRepeat);
+
+		if (Object.keys(this.passwordChecks).some((value: string) => this.passwordChecks[value] !== 'pass')) {
 			return;
 		}
 

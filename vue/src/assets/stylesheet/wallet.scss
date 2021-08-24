@@ -671,3 +671,64 @@ a.login-router {
 		font-weight: 500;
 	}
 }
+
+.password-help {
+	font-size: 12px;
+
+	> p {
+		margin-bottom: 5px;
+	}
+
+	.items {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		grid-column-gap: 5px;
+		grid-row-gap: 5px;
+
+		li {
+			margin: 0;
+			padding-left: 15px;
+			position: relative;
+			transition: 200ms;
+
+			&::before {
+				content: '';
+				position: absolute;
+				left: 0;
+				top: 50%;
+				transform: translateY(-50%);
+				width: 8px;
+				height: 8px;
+				border-radius: 4px;
+				border: 1px solid #ccc;
+				transition: 200ms;
+			}
+
+			&.done {
+				color: $col_green;
+
+				&::before {
+					border: none;
+					border-bottom: 2px solid $col_green;
+  					border-right: 2px solid $col_green;
+					transform: translateY(-50%) rotate(45deg);
+					border-radius: 0;
+					width: 6px;
+					height: 10px;
+				}
+			}
+
+			&.fail {
+				color: $col_orange;
+
+				&::before {
+					content: '✕';
+					border: none;
+					border-radius: 0;
+					top: auto;
+					transform: none;
+				}
+			}
+		}
+	}
+}
