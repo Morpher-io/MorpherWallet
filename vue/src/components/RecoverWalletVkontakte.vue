@@ -1,10 +1,10 @@
 <template>
 	<div class="control is-expanded">
-		<button type="button" class="button is-fullwidth vk-button" @click="doLogin">
-			<span class="icon google-icon">
+		<button type="button" class="button is-grey big-button outlined-button is-thick transition-faster" @click="doLogin">
+			<span class="icon vk-icon">
 				<i class="fab fa-vk"></i>
 			</span>
-			<span class="vk-text"> Recover using VKontakte</span>
+			<span>VKontakte</span>
 		</button>
 		<ChangePassword v-if="seedFound" :presetOldPassword="oldPassword"></ChangePassword>
 	</div>
@@ -102,10 +102,7 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.vk-text {
-	color: #fff;
-}
-.vk-button {
-	background-color: #45668e;
+.vk-icon {
+	color: #45668e;
 }
 </style>

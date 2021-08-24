@@ -95,6 +95,7 @@ export type TypePayloadData = {
 	__typename?: 'TypePayloadData';
 	email: boolean;
 	authenticator: boolean;
+	authenticatorConfirmed?: boolean;
 	needConfirmation?: boolean;
 };
 

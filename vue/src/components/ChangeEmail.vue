@@ -1,19 +1,21 @@
 <template>
 	<div class="card">
 		<form v-on:submit.prevent="formSubmitChangeEmail">
-			<div class="collapse">
-				<span v-show="collapsed" class="icon collapseIcon header" @click="collapsed = !collapsed">
-					<i class="fas fa-chevron-right"></i>
-				</span>
-				<span v-show="!collapsed" class="icon collapseIcon header" @click="collapsed = !collapsed">
-					<i class="fas fa-chevron-down"></i>
-				</span>
-
-				<span class="header" @click="collapsed = !collapsed" data-cy="openEmailChange">
-					Change Email Address
-					<span class="help is-success" v-if="success" data-cy="isSuccess">Saved!</span>
-				</span>
-				<div :class="collapsed ? 'hidden' : 'visible'">
+			<div :class="{
+				'collapse': true,
+				'hide-border': activePage
+			}">
+				<div v-if="!activePage" class="is-flex is-align-items-center">
+					<span class="header" @click="changeActive">
+						Edit Email Address
+					</span>
+					<span :class="{
+						'icon collapseIcon header': true
+					}" @click="changeActive">
+						<i class="fas fa-chevron-right"></i>
+					</span>
+				</div>
+				<div :class="activePage === 'email' ? 'visible' : 'hidden'">
 					<div class="card-content">
 						<div class="content">
 							<div class="field">
@@ -23,7 +25,6 @@
 										class="input is-primary"
 										name="newEmail"
 										data-cy="newEmail"
-										placeholder="New Email Address"
 										v-model="newEmail"
 										:disabled="twoFaSent"
 									/>
@@ -40,7 +41,6 @@
 										class="input is-primary"
 										name="password"
 										data-cy="password"
-										placeholder="Enter password"
 										v-model="password"
 										:disabled="twoFaSent"
 									/>
@@ -59,10 +59,7 @@
 					</div>
 
 					<div class="field is-grouped">
-						<button class="button is-green" type="submit" data-cy="updateEmail">
-							<span class="icon is-small">
-								<i class="fas fa-save"></i>
-							</span>
+						<button class="button is-green big-button is-login transition-faster" type="submit" data-cy="updateEmail" :disabled="!newEmail || !password">
 							<span> Update Email </span>
 						</button>
 					</div>
@@ -72,12 +69,13 @@
 	</div>
 </template>
 
-<script>
+<script lang="ts">
 import { validateInput } from '../utils/backupRestore';
 import { sha256 } from '../utils/cryptoFunctions';
 
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
+import { Emit, Prop } from 'vue-property-decorator';
 
 @Component({})
 export default class ChangeEmail extends mixins(Global, Authenticated) {
@@ -85,11 +83,18 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 	password = '';
 	error = '';
 	twoFaSent = false;
-	twoFa = null;
-	invalidEmail = false;
-	collapsed = true;
-	invalid2FA = false;
+	twoFa: any = null;
+	invalidEmail: any = false;
+	invalid2FA: any = false;
 	success = false;
+
+	@Prop()
+	activePage!: string;
+
+	@Emit('changeActive')
+	changeActive() {
+		return;
+	}
 
 	async formSubmitChangeEmail() {
 		if (!this.newEmail) {
@@ -128,7 +133,6 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 			} else {
 				this.newEmail = '';
 				this.password = '';
-				this.collapsed = true;
 				this.twoFa = '';
 				this.twoFaSent = false;
 				this.invalid2FA = false;

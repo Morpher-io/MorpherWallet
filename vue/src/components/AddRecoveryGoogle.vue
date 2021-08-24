@@ -1,25 +1,27 @@
 <template>
 	<div class="field">
 		<div class="control is-expanded" v-if="!hasRecoveryMethod">
-			<GoogleLogin class="button is-fullwidth is-google" :params="{ clientId }" :onSuccess="onLogin">
+			<GoogleLogin class="button is-grey big-button outlined-button is-thick transition-faster" :params="{ clientId }" :onSuccess="onLogin">
 				<span class="icon google-icon">
 					<i class="fab fa-google"></i>
 				</span>
-				<span class="google-text"> Link to Google</span>
+				<span>Google</span>
 			</GoogleLogin>
 		</div>
 		<div v-if="hasRecoveryMethod" class="has-text-centered">
-			<span class="icon google-icon">
-				<i class="fas fa-check-circle"></i>
-			</span>
-			Google Recovery Added
 			<div class="control is-expanded" v-if="hasRecoveryMethod">
-				<GoogleLogin class="button is-fullwidth is-google" :params="{ clientId }" :onSuccess="onDelete">
-					<span class="icon google-icon">
+				<GoogleLogin class="button is-danger big-button is-thick transition-faster" :params="{ clientId }" :onSuccess="onDelete">
+					<span class="icon">
 						<i class="fab fa-google"></i>
 					</span>
-					<span class="google-text"> Delete access to Google </span>
+					<span>Revoke Google Access</span>
 				</GoogleLogin>
+			</div>
+			<div class="recovery-active is-text-small">
+				<span class="icon">
+					<i class="fas fa-check-circle"></i>
+				</span>
+				Google Recovery Active
 			</div>
 		</div>
 		<!--		<div v-if="error">{{ error }}</div>-->
@@ -91,14 +93,7 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.is-google {
-	background-color: #34a853;
-}
 .google-icon {
-	font-size: 18px;
-	margin-right: 10px;
-}
-.google-text {
-	color: #fff;
+	color: #fc6404;
 }
 </style>

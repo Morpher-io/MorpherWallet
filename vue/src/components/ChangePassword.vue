@@ -1,19 +1,21 @@
 <template>
 	<div class="card">
 		<form v-on:submit.prevent="changePasswordExecute">
-			<div class="collapse">
-				<span v-show="collapsed && !hideOldPassword" class="icon collapseIcon header" @click="collapsed = !collapsed">
-					<i class="fas fa-chevron-right"></i>
-				</span>
-				<span v-show="!collapsed && !hideOldPassword" class="icon collapseIcon header" @click="collapsed = !collapsed">
-					<i class="fas fa-chevron-down"></i>
-				</span>
-
-				<span class="header" data-cy="openPasswordChange" @click="collapsed = !collapsed" v-show="!hideOldPassword">
-					Password Change
-					<span data-cy="confirmed" class="help is-success" v-if="success">Saved!</span>
-				</span>
-				<div :class="collapsed ? 'hidden' : 'visible'">
+			<div :class="{
+				'collapse': true,
+				'hide-border': activePage
+			}">
+				<div v-if="!activePage" class="is-flex is-align-items-center">
+					<span class="header" data-cy="openPasswordChange" @click="changeActive" v-show="!hideOldPassword">
+						Change Password
+					</span>
+					<span v-show="!hideOldPassword" :class="{
+						'icon collapseIcon header': true
+					}" @click="changeActive">
+						<i class="fas fa-chevron-right"></i>
+					</span>
+				</div>
+				<div :class="activePage === 'password' ? 'visible' : 'hidden'">
 					<div class="field" v-if="!hideOldPassword">
 						<label class="label">Old Password</label>
 						<div class="control">
@@ -22,7 +24,6 @@
 								data-cy="oldPassword"
 								name="oldPassword"
 								class="input is-primary"
-								placeholder="Current Password"
 								v-model="oldPassword"
 							/>
 						</div>
@@ -35,14 +36,13 @@
 								name="newPassword"
 								data-cy="newPassword"
 								class="input is-primary"
-								placeholder="New Password"
 								v-model="walletPassword"
 							/>
 							<password
 								v-model="walletPassword"
 								:strength-meter-only="true"
 								:secure-length="8"
-								style="max-width: initial; margin-top: -8px"
+								style="max-width: initial"
 							/>
 							<p class="help">Use a strong Password! It encrypts your Wallet and keeps your Funds secure.</p>
 
@@ -52,23 +52,20 @@
 						</div>
 					</div>
 					<div class="field">
+						<label class="label">Repeat Password</label>
 						<div class="control">
 							<input
 								type="password"
 								class="input is-primary"
 								name="newPasswordRepeat"
 								data-cy="newPasswordRepeat"
-								placeholder="Repeat New Password"
 								v-model="walletPasswordRepeat"
 							/>
 						</div>
 					</div>
 
 					<div class="field is-grouped">
-						<button class="button is-green" type="submit" data-cy="passwordSubmit">
-							<span class="icon is-small">
-								<i class="fas fa-save"></i>
-							</span>
+						<button class="button is-green big-button is-login transition-faster" type="submit" data-cy="passwordSubmit" :disabled="!oldPassword || !walletPassword || !walletPasswordRepeat">
 							<span> Update Password </span>
 						</button>
 					</div>
@@ -78,20 +75,18 @@
 	</div>
 </template>
 
-<script>
+<script lang="ts">
 import { validateInput } from '../utils/backupRestore';
 import Password from 'vue-password-strength-meter';
 import { sha256 } from '../utils/cryptoFunctions';
 
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
+import { Emit, Prop } from 'vue-property-decorator';
 
 @Component({
 	components: {
 		Password
-	},
-	props: {
-		presetOldPassword: String
 	}
 })
 export default class ChangePassword extends mixins(Global, Authenticated) {
@@ -100,14 +95,23 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 	walletPassword = '';
 	walletPasswordRepeat = '';
 	invalidPassword = '';
-	collapsed = true;
 	success = false;
+
+	@Prop()
+	activePage!: string;
+
+	@Prop()
+	presetOldPassword!: string;
+
+	@Emit('changeActive')
+	changeActive() {
+		return;
+	}
 
 	mounted() {
 		if (this.presetOldPassword !== undefined) {
 			this.oldPassword = this.presetOldPassword;
 			this.hideOldPassword = true;
-			this.collapsed = false;
 		}
 	}
 
@@ -131,7 +135,6 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 		this.showSpinner('Changing Password');
 		this.changePassword({ oldPassword: oldPasswordHashed, newPassword: newPasswordHashed })
 			.then(() => {
-				this.collapsed = true;
 				this.oldPassword = '';
 				this.walletPassword = '';
 				this.walletPasswordRepeat = '';

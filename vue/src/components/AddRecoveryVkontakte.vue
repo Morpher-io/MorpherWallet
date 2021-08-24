@@ -1,22 +1,27 @@
 <template>
 	<div class="field">
 		<div class="control is-expanded">
-			<button class="button is-fullwidth vk-button" @click="doLogin" v-if="!hasRecoveryMethod">
-				<span class="icon google-icon">
+			<button class="button is-grey big-button outlined-button is-thick facebook-button transition-faster" @click="doLogin" v-if="!hasRecoveryMethod">
+				<span class="icon vk-icon">
 					<i class="fab fa-vk"></i>
 				</span>
-				<span class="vk-text"> Link to VKontakte</span>
+				<span>VKontakte</span>
 			</button>
 		</div>
 
 		<div class="control is-expanded has-text-centered" v-if="hasRecoveryMethod">
-			<span class="icon google-icon">
-				<i class="fas fa-check-circle"></i>
-			</span>
-			VK Recovery Added
-			<button class="button is-fullwidth vk-button" @click="doDelete">
-				<span class="vk-text">Delete access to VKontakte</span>
+			<button class="button big-button is-thick transition-faster vk-button" @click="doDelete">
+				<span class="icon">
+					<i class="fab fa-vk"></i>
+				</span>
+				<span>Revoke VKontakte Access</span>
 			</button>
+			<div class="recovery-active is-text-small">
+				<span class="icon">
+					<i class="fas fa-check-circle"></i>
+				</span>
+				VKontakte Recovery Active
+			</div>
 		</div>
 	</div>
 </template>
@@ -160,5 +165,8 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 }
 .vk-text {
 	color: #fff;
+}
+.vk-icon {
+	color: #45668e;
 }
 </style>

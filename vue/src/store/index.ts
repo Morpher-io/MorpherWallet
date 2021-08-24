@@ -78,6 +78,9 @@ export interface RootState {
 	seedPhrase: string;
 	privateKey: string;
 	privateKeyKeystore: string;
+	signMessage: any;
+	signResponse: any;
+	ethBalance: string;
 }
 
 /**
@@ -115,7 +118,7 @@ function initialState(): RootState {
 		token: '',
 		connection: null,
 		transactionDetails: {},
-		messageDetails: {},
+		messageDetails: null,
 		openPage: '',
 		loginComplete: false,
 		recoveryMethods: [],
@@ -123,7 +126,10 @@ function initialState(): RootState {
 		keystoreExported: false,
 		seedPhrase: '',
 		privateKey: '',
-		privateKeyKeystore: ''
+		privateKeyKeystore: '',
+		signMessage: null,
+		signResponse: null,
+		ethBalance: '0'
 	} as RootState;
 }
 
@@ -796,7 +802,10 @@ if (isIframe()) {
 					return [];
 				}
 			},
-			async signTransaction(txObj: any) {
+			async signTransaction(txObj: any, config: ZeroWalletConfig) {
+				if (txObj.eth_balance) {
+					store.state.ethBalance = txObj.eth_balance;
+				}
 				if (txObj.nonce == undefined) {
 					console.error('No nonce defined, aborting tx signing');
 				}
@@ -805,12 +814,46 @@ if (isIframe()) {
 					//see if we are logged in?!
 					try {
 						if (store.state.keystore !== null) {
-							store.state.keystore[0]
-								.signTransaction(txObj)
-								.then((tran: SignedTransaction) => {
-									resolve(tran.rawTransaction);
-								})
-								.catch(reject);
+							if (config?.confirm_transaction || Number(txObj.chainId) !== 21) {
+
+								if (txObj.amount && ! txObj.value) {
+									txObj.value = txObj.amount
+								}
+								store.state.transactionDetails = txObj;
+								store.state.signResponse = null;
+								router.push('/signtx');
+								const interval = setInterval(() => { 
+									if (store.state.signResponse ) {
+										clearInterval(interval)
+										if (store.state.signResponse === 'confirm' ) {
+											store.state.signResponse = null;
+										
+											if (store.state.keystore !== null) {
+												store.state.keystore[0]
+												.signTransaction(txObj)
+												.then((tran: SignedTransaction) => {
+													resolve(tran.rawTransaction);
+												})
+												.catch(reject);
+											} else {
+												resolve(null);		
+											}
+										} else {
+											store.state.signResponse = null;
+											resolve(null);
+										}
+									}
+									
+								}, 500 )
+
+							} else {
+								store.state.keystore[0]
+									.signTransaction(txObj)
+									.then((tran: SignedTransaction) => {
+										resolve(tran.rawTransaction);
+									})
+									.catch(reject);
+							}
 						}
 					} catch (e) {
 						reject(e);
@@ -824,7 +867,30 @@ if (isIframe()) {
 					try {
 						if (store.state.keystore !== null) {
 							if (config?.confirm_message) {
+								const Web3Utils = require('web3-utils');
+								store.state.messageDetails = Web3Utils.toAscii(txObj.data)
+								store.state.signResponse = null;
 								router.push('/signmsg');
+
+								const interval = setInterval(() => { 
+									if (store.state.signResponse ) {
+
+										clearInterval(interval)
+										if (store.state.signResponse === 'confirm' ) {
+											store.state.signResponse = null;
+											if (store.state.keystore !== null) {
+												const signedData = store.state.keystore[0].sign(txObj.data); //
+												resolve(signedData.signature);
+											} else {
+												resolve(null);		
+											}
+										} else {
+											store.state.signResponse = null;
+											resolve(null);
+										}
+									}
+									
+								}, 500 )
 							} else {
 								const signedData = store.state.keystore[0].sign(txObj.data); //
 

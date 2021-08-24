@@ -1,14 +1,22 @@
 <template>
 	<div id="app">
-		<spinner v-bind:active="loading" v-bind:status="spinnerStatusText"></spinner>
 		<section :class="iFrameDisplay ? 'main_iframe' : 'main'">
+			<spinner v-bind:active="loading" v-bind:status="spinnerStatusText"></spinner>
 			<div class="header">
-				<img src="@/assets/img/logo-nav.png" class="headerImage" />
-				<img v-if="iFrameDisplay" class="closeButton" @click="closeWallet" src="@/assets/img/close.svg" />
+				<img src="@/assets/img/wallet_logo.svg" class="headerImage" />
+				<span class="icon closeButton" v-if="iFrameDisplay" @click="closeWallet">
+					<i class="fa fa-times"/>
+				</span>
 			</div>
 			<transition name="fade" mode="out-in">
 				<router-view />
 			</transition>
+			<div class="footer is-text-small">
+				<span class="icon is-small">
+					<i class="fas fa-lock"></i>
+				</span>
+				Secured with AES | SHA-256 | PBKDF2
+			</div>
 		</section>
 	</div>
 </template>
@@ -36,7 +44,7 @@ export default class App extends Vue {
 		if (this.iFrameDisplay) {
 			if (this.connection && this.connection !== null) {
 				const promise = this.connection.promise;
-
+				this.$store.state.signResponse = 'cancel';
 				(await promise).hideWallet();
 				(await promise).onClose();
 
@@ -48,5 +56,5 @@ export default class App extends Vue {
 </script>
 
 <style lang="scss">
-@import './assets/stylesheet/wallet.scss';
+@import '@/assets/stylesheet/wallet.scss';
 </style>

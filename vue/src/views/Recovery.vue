@@ -1,6 +1,8 @@
 <template>
 	<div class="container">
-		<h1 class="title">Account Recovery</h1>
+		<h2 class="title">Recover Your Wallet</h2>
+		<p class="subtitle">Forgot your password? Login with your recovery account to unlock your wallet.
+		</p>
 
 		<div class="field is-grouped">
 			<RecoverWalletGoogle></RecoverWalletGoogle>
@@ -13,16 +15,9 @@
 		</div>
 
 		<div class="field is-grouped">
-			<div class="layout split first">
-				<router-link to="/login" tag="button" class="button is-grey">
-					<span class="icon is-small">
-						<i class="fas fa-chevron-left"></i>
-					</span>
-					<span> Back </span>
-				</router-link>
-			</div>
-
-			<div class="layout split second"></div>
+			<router-link to="/login" tag="button" class="button">
+				<span>Back</span>
+			</router-link>
 		</div>
 	</div>
 </template>
