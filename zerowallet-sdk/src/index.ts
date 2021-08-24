@@ -134,6 +134,9 @@ export default class ZeroWallet {
 		if (loggedInResult && loggedInResult.isLoggedIn) {
 			const widgetCommunication = (await this.widget).communication;
 			const result = await widgetCommunication.getAccounts();
+      if (this._onLoginCallback) {
+        this._onLoginCallback(result[0], loggedInResult.walletEmail);
+    }      
 			return result
 		} else {
 			this.showWallet();
@@ -184,6 +187,16 @@ export default class ZeroWallet {
 		const widgetCommunication = (await this.widget).communication;
     return widgetCommunication.isLoggedIn();
   }
+
+  async hasSocialRecoveryMethods() {
+
+    await this.iframeLoaded();
+
+    const widget = await this.widget;
+
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.hasSocialRecoveryMethods();        
+}
 
   async iframeLoaded() {
     return new Promise((resolve): void => {

@@ -81,6 +81,7 @@ export interface RootState {
 	signMessage: any;
 	signResponse: any;
 	ethBalance: string;
+	unlocking: boolean
 }
 
 /**
@@ -129,7 +130,8 @@ function initialState(): RootState {
 		privateKeyKeystore: '',
 		signMessage: null,
 		signResponse: null,
-		ethBalance: '0'
+		ethBalance: '0',
+		unlocking: false
 	} as RootState;
 }
 
@@ -167,6 +169,9 @@ const store: Store<RootState> = new Vuex.Store({
 		},
 		recoveryMethodsFound(state: RootState, recoveryMethodsData: Array<any>) {
 			state.recoveryMethods = recoveryMethodsData;
+		},
+		updateUnlocking(state: RootState, payload: boolean) {
+			state.unlocking = payload;
 		},
 		updatePayload(state: RootState, payload: Type2FARequired) {
 			state.twoFaRequired.email = payload.email;
@@ -291,6 +296,7 @@ const store: Store<RootState> = new Vuex.Store({
 			});
 		},
 		fetchWalletFromRecovery({ state, commit }, params: TypeRecoveryParams) {
+			commit('updateUnlocking', true);
 			return new Promise((resolve, reject) => {
 				recoverSeedSocialRecovery(params.accessToken, state.email, params.recoveryTypeId)
 					.then(encryptedSeed => {
@@ -300,14 +306,20 @@ const store: Store<RootState> = new Vuex.Store({
 								const accounts = getAccountsFromKeystore(keystore);
 								//not setting any password here, this is simply for the password change mechanism
 								commit('keystoreUnlocked', { keystore, accounts, hashedPassword: '' });
+								commit('updateUnlocking', false);
 								resolve(true);
 							})
 							.catch(() => {
 								commit('authError', 'Cannot unlock the Keystore, wrong ID');
+								commit('updateUnlocking', false);
 								reject(false);
 							});
 					})
-					.catch(reject);
+					.catch(() => {
+						commit('updateUnlocking', false);
+						reject(false)
+					}
+						);
 			});
 		},
 		addRecoveryMethod({ state, dispatch }, params: TypeAddRecoveryParams) {
@@ -911,7 +923,21 @@ if (isIframe()) {
 
 				return false;
 			},
-			isLoggedIn() {
+			async isLoggedIn() {
+				let counter = 0;
+
+				const waitForUnlock = () => {
+					return new Promise(resolve => {
+						setTimeout(resolve, 200)
+							
+					});
+				};
+				// wait for the store to finish unlocking if it is in progress
+				while (store.state.unlocking && counter < 50) {
+					counter +=1
+					// wait for the wallet to finish unlocking
+					await waitForUnlock();
+				}
 				//return 'ok'
 				if (store.state.keystore)
 					return {
