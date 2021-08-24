@@ -38,4 +38,9 @@ export const  styles =  `
     width: 90%;
   }
 }
+@media (max-height: 600px) {
+  .zerowallet-widget-frame {
+    height: 90%;
+  }
+}
 `;
