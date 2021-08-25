@@ -6,7 +6,7 @@
 			</span>
 			<span>VKontakte</span>
 		</button>
-		<ChangePassword v-if="seedFound" :presetOldPassword="oldPassword"></ChangePassword>
+		<ChangePassword v-if="seedFound" :presetOldPassword="oldPassword" activePage="password"></ChangePassword>
 	</div>
 </template>
 <script>
