@@ -263,11 +263,23 @@ export async function getEncryptedSeed(req, res) {
     if (recovery) {
         const user = await User.findOne({ where: { id: recovery.user_id } });
 
-      
+        if (user.payload.needConfirmation) {
+            Logger.info({
+                method: arguments.callee.name,
+                type: 'Error: Account not confirmed',
+                error: '2fa wrong',
+                user_id: user.id,
+                user,
+                headers: req.headers,
+                body: req.body
+            });
+            return errorResponse(res, 'Account not yet confirmed. Try again.');
+        }
 
         const email2FAVerified = await verifyEmail2FA(recovery.user_id, email2fa);
         const googleVerified = await verifyGoogle2FA(recovery.user_id, authenticator2fa);
-        if ((user.payload.email && !email2FAVerified) || !googleVerified) {
+
+        if (!email2FAVerified || !googleVerified) {
             Logger.info({
                 method: arguments.callee.name,
                 type: 'Error: Fetch Encrypted Seed Failed',
@@ -281,7 +293,7 @@ export async function getEncryptedSeed(req, res) {
         }
 
         const email2faStillValid = await isEmail2FaStillValid(recovery.user_id);
-        if (user.payload.email && !email2faStillValid) {
+        if (!email2faStillValid) {
             Logger.info({
                 method: arguments.callee.name,
                 type: 'Error: Fetch Encrypted Seed Failed',
@@ -789,9 +801,11 @@ export async function deleteAccount(req, res) {
 }
 
 async function verifyEmail2FA(user_id: string, code: string): Promise<boolean> {
-    if (!code) return false;
-
     const user = await User.findOne({ where: { id: user_id } });
+    if (user.payload.needConfirmation) {
+        return user.email_verification_code === Number(code)
+    }
+
     return user.payload.email === false || (user.email_verification_code === Number(code));
 }
 
