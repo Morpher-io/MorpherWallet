@@ -157,6 +157,15 @@ describe('Wallet controller test cases', async () => {
         const user = await User.findOne();
         encryptedSeedData.email2fa = user.email_verification_code;
 
+        // Confirm user first
+        await request(app)
+            .post('/v1/verifyEmailConfirmationCode')
+            .send({
+                key: bodyData.key,
+                code: user.email_verification_code
+            })
+            .set('Accept', 'application/json');
+
         const walletResponse = await request(app)
             .post('/v1/getEncryptedSeed')
             .send(encryptedSeedData)
@@ -166,6 +175,21 @@ describe('Wallet controller test cases', async () => {
         expect(walletResponse.body).toHaveProperty('encryptedSeed');
     });
 
+    it('returns error if user not confirmed', async () => {
+        await request(app)
+            .post('/v1/saveEmailPassword')
+            .send(bodyData)
+            .set('Accept', 'application/json');
+
+        const walletResponse = await request(app)
+            .post('/v1/getEncryptedSeed')
+            .send(encryptedSeedData)
+            .set('Accept', 'application/json');
+
+        expect(walletResponse.status).toEqual(404);
+        expect(walletResponse.body.error).toEqual('Account not yet confirmed. Try again.');
+    });
+
     it('returns error if no email verification code', async () => {
         encryptedSeedData.email2fa = '';
 
@@ -173,6 +197,55 @@ describe('Wallet controller test cases', async () => {
             .post('/v1/saveEmailPassword')
             .send(bodyData)
             .set('Accept', 'application/json');
+
+        // Simulate sending an email by changing only user payload.
+        const emailData = {
+            key: bodyData.key
+        };
+
+        await request(app)
+            .post('/v1/send2FAEmail')
+            .send(emailData)
+            .set('Accept', 'application/json');
+
+        // Get the email verification code from the payload.
+        const user = await User.findOne();
+
+        // Confirm user first
+        await request(app)
+            .post('/v1/verifyEmailConfirmationCode')
+            .send({
+                key: bodyData.key,
+                code: user.email_verification_code
+            })
+            .set('Accept', 'application/json');
+
+        // Confirm user first
+        await request(app)
+            .post('/v1/verifyEmailConfirmationCode')
+            .send({
+                key: bodyData.key,
+                code: user.email_verification_code
+            })
+            .set('Accept', 'application/json');
+
+        // Enable email 2fa since it is disabled by default
+        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+
+        const data = {
+            email: true,
+            authenticator: false,
+            nonce: user.nonce,
+        };
+
+        const signature = account.sign(JSON.stringify(sortObject(data)));
+
+        await request(app)
+            .post('/v1/auth/change2FAMethods')
+            .send(data)
+            .set('Accept', 'application/json')
+            .set('Signature', JSON.stringify(signature))
+            .set('key', bodyData.key);
 
         const walletResponse = await request(app)
             .post('/v1/getEncryptedSeed')
