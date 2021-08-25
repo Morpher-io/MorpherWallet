@@ -33,7 +33,13 @@ import Spinner from './components/loading-spinner/Spinner.vue';
 		Spinner
 	},
 	computed: {
-		...mapState(['loading', 'spinnerStatusText'])
+		...mapState({
+			loading: (state: any) => state.loading,
+			spinnerStatusText: (state: any) => state.spinnerStatusText,
+			unlocking: (state: any) => state.unlocking
+		}
+					
+		)
 	}
 })
 export default class App extends Vue {

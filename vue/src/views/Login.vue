@@ -97,6 +97,8 @@ export default class Login extends mixins(Global) {
 						// console.log('Error in unlock', error);
 					}
 				});
+		} else {
+			this.unlockUpdate()
 		}
 	}
 

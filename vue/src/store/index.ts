@@ -131,7 +131,7 @@ function initialState(): RootState {
 		signMessage: null,
 		signResponse: null,
 		ethBalance: '0',
-		unlocking: false
+		unlocking: true
 	} as RootState;
 }
 
@@ -259,6 +259,8 @@ const store: Store<RootState> = new Vuex.Store({
 		 * Fetch the user data from the database and attempt to unlock the wallet using the mail encrypted seed
 		 */
 		async fetchUser({ commit }, params: TypeFetchUser) {
+			console.log('fetchUser')
+			commit('updateUnlocking', true);
 			const email: string = params.email;
 			const password: string = params.password;
 			commit('logout');
@@ -273,29 +275,45 @@ const store: Store<RootState> = new Vuex.Store({
 
 								if (payload.email || payload.needConfirmation) {
 									send2FAEmail(email)
-										.then(resolve)
-										.catch(reject);
+										.then(() => {
+											commit('updateUnlocking', false);
+											resolve
+										})
+										.catch(() => {
+											commit('updateUnlocking', false);
+											reject
+										});
 								}
 								if (!payload.email && !payload.authenticator && !payload.needConfirmation) {
 									getEncryptedSeedFromMail(email, '', '')
 										.then(encryptedSeed => {
+											commit('updateUnlocking', false);
 											commit('seedFound', { encryptedSeed });
 											resolve(true);
 										})
-										.catch(reject);
+										.catch(() => {
+											commit('updateUnlocking', false);
+											reject
+										});
 								} else {
+									commit('updateUnlocking', false);
 									resolve(true);
 								}
 							})
 							.catch(err => {
+								commit('updateUnlocking', false);
 								commit('authError', "The user wasn't found: Signup first!");
 								reject(err);
 							});
 					})
-					.catch(reject);
+					.catch(() => {
+						commit('updateUnlocking', false);
+						reject
+					});
 			});
 		},
 		fetchWalletFromRecovery({ state, commit }, params: TypeRecoveryParams) {
+			console.log('fetchWalletFromRecovery')
 			commit('updateUnlocking', true);
 			return new Promise((resolve, reject) => {
 				recoverSeedSocialRecovery(params.accessToken, state.email, params.recoveryTypeId)
@@ -471,25 +489,33 @@ const store: Store<RootState> = new Vuex.Store({
 		/**
 		 * Unlock wallet using the password stored in local state
 		 */
-		unlockWithStoredPassword({ dispatch, state }) {
+		unlockWithStoredPassword({ dispatch, commit, state }) {
+			commit('updateUnlocking', true);
 			return new Promise((resolve, reject) => {
 				if (state.hashedPassword && state.encryptedSeed.ciphertext !== undefined) {
 					dispatch('unlockWithPassword', { password: state.hashedPassword })
 						.then(() => {
+							commit('updateUnlocking', false);
 							resolve(true);
 						})
 						.catch(() => {
+							commit('updateUnlocking', false);
 							reject(false);
 						});
 				} else {
+					commit('updateUnlocking', false);
 					reject(false);
 				}
 			});
+		},
+		unlockUpdate({ commit, state, dispatch }, params: TypeUnlockWithPassword) {
+			commit('updateUnlocking', false);
 		},
 		/**
 		 * Unlock wallet using the password entered on the logon form
 		 */
 		unlockWithPassword({ commit, state, dispatch }, params: TypeUnlockWithPassword) {
+			commit('updateUnlocking', true);
 			return new Promise((resolve, reject) => {
 				getKeystoreFromEncryptedSeed(state.encryptedSeed, params.password)
 					.then((keystore: WalletBase) => {
@@ -502,8 +528,10 @@ const store: Store<RootState> = new Vuex.Store({
 								resolve(true);
 							});
 						});
+						commit('updateUnlocking', false);
 					})
 					.catch(err => {
+						commit('updateUnlocking', false);
 						commit('authError', "The user wasn't found: Signup first!");
 						reject(err);
 					});
