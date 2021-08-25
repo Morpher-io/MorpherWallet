@@ -29,7 +29,7 @@ $spacing_3: 60px;
 }
 
 // Update Bulma's global variables
-$family-sans-serif: $font1;
+$family-sans-serif: $font2;
 $primary: $col_green;
 $info: $col_orange;
 $success: $col_blue;
@@ -75,7 +75,7 @@ body {
 
 #app {
 	text-align: center;
-	font-family: $font1;
+	font-family: $font2;
 	height: 100vh;
 	overflow-y: auto;
 	overflow-x: hidden;
@@ -161,10 +161,11 @@ body {
 	font-weight: 500;
 	font-size: 32px;
 	margin-bottom: 0px;
+	font-family: $font1;
 }
 .subtitle {
 	font-weight: 400;
-	font-size: 18px;
+	font-size: 1rem;
 	margin-top: $spacing_1;
 	margin-bottom: 0px;
 }
@@ -375,7 +376,7 @@ input[type='checkbox']:checked {
 
 	&.big-button {
 		color: white !important;
-		font-family: 'Rubik', sans-serif;
+		font-family: $font1;
 		font-weight: 500;
 		font-size: 20px !important;
 		border: none !important;

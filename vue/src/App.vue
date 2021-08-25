@@ -15,7 +15,7 @@
 				<span class="icon is-small">
 					<i class="fas fa-lock"></i>
 				</span>
-				Secured with AES | SHA-256 | PBKDF2
+				<span>Secured with AES | SHA-256 | PBKDF2</span>
 			</div>
 		</section>
 	</div>
