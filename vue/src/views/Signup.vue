@@ -1,83 +1,102 @@
 <template>
-	<div class="container">
-		<h2 class="title">Signup</h2>
-		<h4 class="subtitle">Create a new Wallet</h4>
-		<form v-on:submit.prevent="signupExecute">
-			<div class="field">
-				<label class="label">Email</label>
-				<div class="control">
-					<input
-						type="email"
-						class="input"
-						name="walletEmail"
-						data-cy="walletEmail"
-						placeholder="example@example.com"
-						v-model="walletEmail"
-					/>
-				</div>
+	<div>
+		<div class="container">
+			<h2 class="title">Sign Up</h2>
+			<p class="subtitle">Create a new Wallet</p>
+			<form v-on:submit.prevent="signupExecute">
+				<div class="field">
+					<label class="label">Email</label>
+					<div class="control">
+						<input
+							type="email"
+							class="input"
+							name="walletEmail"
+							data-cy="walletEmail"
+							v-model="walletEmail"
+						/>
+					</div>
 
-				<p class="help">Use this Email-Address for Wallet Recovery</p>
-				<p class="help is-danger" v-if="invalidEmail">
-					{{ invalidEmail }}
-				</p>
-			</div>
-
-			<div class="field">
-				<label class="label">Password</label>
-
-				<div class="control">
-					<input
-						type="password"
-						class="input"
-						name="walletPassword"
-						data-cy="walletPassword"
-						placeholder="Strong Password!"
-						v-model="walletPassword"
-					/>
-					<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial; margin-top: -8px" />
-					<p class="help">
-						Use a strong Password! It encrypts your Wallet and keeps your Funds secure. It must be at least 8 characters long and include
-						one lower-case, one upper-case character and a number.
-					</p>
-
-					<p class="help is-danger" v-if="invalidPassword">
-						{{ invalidPassword }}
+					<!-- <p class="help">Use this Email-Address for Wallet Recovery</p> -->
+					<p class="help is-danger" v-if="invalidEmail">
+						Error: {{ invalidEmail }}
 					</p>
 				</div>
-			</div>
-			<div class="field">
-				<label class="label">Repeat Password</label>
-				<div class="control">
-					<input
-						type="password"
-						class="input"
-						name="walletPasswordRepeat"
-						data-cy="walletPasswordRepeat"
-						placeholder="Repeat Password"
-						v-model="walletPasswordRepeat"
-					/>
-				</div>
-			</div>
 
-			<div class="field">
-				<div class="layout split first">
-					<button class="button is-green" type="submit" data-cy="createNewWallet">
-						<span class="icon is-small">
-							<i class="far fa-file"></i>
-						</span>
-						<span> Create new Wallet </span>
-					</button>
+				<div class="field">
+					<label class="label">Password</label>
+
+					<div class="control">
+						<input
+							type="password"
+							class="input password-input"
+							name="walletPassword"
+							data-cy="walletPassword"
+							v-model="walletPassword"
+						/>
+						<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial; margin-top: -8px" />
+						<div class="password-help">
+							<p>Must contain:</p>
+							<ul class="items">
+								<li :class="{
+									'done': passwordChecks.min === 'pass',
+									'fail': passwordChecks.min === 'fail'
+								}">Min 8. characters</li>
+								<li :class="{
+									'done': passwordChecks.lowercase === 'pass',
+									'fail': passwordChecks.lowercase === 'fail'
+								}">A lowercase</li>
+								<li :class="{
+									'done': passwordChecks.uppercase === 'pass',
+									'fail': passwordChecks.uppercase === 'fail'
+								}">An uppercase</li>
+								<li :class="{
+									'done': passwordChecks.number === 'pass',
+									'fail': passwordChecks.number === 'fail'
+								}">A number</li>
+								<li :class="{
+									'done': passwordChecks.match === 'pass',
+									'fail': passwordChecks.match === 'fail'
+								}">Matches repeat</li>
+							</ul>
+						</div>
+
+						<p class="help is-danger" v-if="invalidPassword">
+							Error: {{ invalidPassword }}
+						</p>
+					</div>
 				</div>
-				<div class="layout split second">
-					<router-link to="/login" tag="button" class="button is-grey">
-						<span class="icon is-small">
-							<i class="fas fa-unlock"></i>
+				<div class="field">
+					<label class="label">Repeat Password</label>
+					<div class="control">
+						<input
+							type="password"
+							class="input"
+							name="walletPasswordRepeat"
+							data-cy="walletPasswordRepeat"
+							v-model="walletPasswordRepeat"
+						/>
+					</div>
+				</div>
+
+				<button type="submit" data-cy="createNewWallet" class="button is-green big-button is-login transition-faster">
+					<span>Create Wallet</span>
+				</button>
+
+				<div class="divider"></div>
+
+				<div class="subtitle login-link">
+					<span>Already have a wallet?</span>
+					<router-link to="/login" class="login-router">
+						<span>
+							Log In
+							<span class="icon is-small">
+								<i class="fas fa-chevron-right"></i>
+							</span>
 						</span>
-						<span> Login instead </span>
 					</router-link>
 				</div>
-			</div>
-		</form>
+			</form>
+		</div>
 	</div>
 </template>
 
@@ -87,6 +106,8 @@ import { validateInput } from '../utils/backupRestore';
 
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
+
+import { Watch } from 'vue-property-decorator';
 
 @Component({
 	components: {
@@ -101,6 +122,23 @@ export default class Signup extends mixins(Global) {
 	signup = false;
 	invalidEmail = '';
 	invalidPassword = '';
+	passwordChecks: any = {
+		min: '',
+		uppercase: '',
+		lowercase: '',
+		number: '',
+		match: '',
+	};
+
+	@Watch('walletPassword')
+	handlePasswordChange(newValue: string) {
+		this.passwordChecks = this.checkPassword(newValue, false, this.passwordChecks, this.walletPasswordRepeat);
+	}
+
+	@Watch('walletPasswordRepeat')
+	handlePasswordRepeatChange(newValue: string) {
+		this.passwordChecks = this.checkPassword(this.walletPassword, false, this.passwordChecks, newValue, true);
+	}
 
 	// Methods
 	async signupExecute(e: any) {
@@ -108,8 +146,9 @@ export default class Signup extends mixins(Global) {
 		this.invalidEmail = '';
 		this.invalidPassword = '';
 
-		if (this.walletPassword != this.walletPasswordRepeat) {
-			this.invalidPassword = 'The passwords are not the identical, please repeat the password';
+		this.passwordChecks = this.checkPassword(this.walletPassword, true, this.passwordChecks, this.walletPasswordRepeat);
+
+		if (Object.keys(this.passwordChecks).some((value: string) => this.passwordChecks[value] !== 'pass')) {
 			return;
 		}
 
@@ -142,7 +181,7 @@ export default class Signup extends mixins(Global) {
 		this.createWallet({ email, password: this.walletPassword })
 			.then(() => {
 				this.hideSpinner();
-				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator) {
+				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator || this.store.twoFaRequired.needConfirmation) {
 					// open 2fa page if 2fa is required
 					this.$router.push('/2fa');
 				} else {

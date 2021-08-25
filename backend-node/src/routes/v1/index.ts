@@ -33,6 +33,7 @@ module.exports = function(express) {
     router.post('/getNonce', WalletController.getNonce);
     router.post('/send2FAEmail', WalletController.send2FAEmail);
     router.post('/verifyEmailCode', WalletController.verifyEmailCode);
+    router.post('/verifyEmailConfirmationCode', WalletController.verifyEmailConfirmationCode);
     router.post('/verifyAuthenticatorCode', WalletController.verifyAuthenticatorCode);
     router.post('/validateInput', ValidationController.validateInput);
 

@@ -1,14 +1,18 @@
 <template>
 	<div class="control is-expanded">
 		<v-facebook-login
+			:logo-style="{
+				color: '#4267B2',
+				marginRight: '5px',
+			}"
 			type="button"
-			class="button is-fullwidth"
+			class="button is-grey big-button outlined-button is-thick transition-faster facebook-button"
 			:appId="clientId"
 			@sdk-init="handleSdkInit"
 			@login="onLogin"
 			v-model="facebook.model"
 		>
-			<span slot="login">Recover using Facebook</span>
+			<span slot="login">Facebook</span>
 		</v-facebook-login>
 		<ChangePassword v-if="seedFound" :presetOldPassword="oldPassword"></ChangePassword>
 	</div>
@@ -76,4 +80,8 @@ export default class RecoverWalletFacebook extends mixins(Global) {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped></style>
+<style scoped>
+.facebook-button {
+	border-radius: 7px!important;
+}
+</style>

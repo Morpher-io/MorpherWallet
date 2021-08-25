@@ -1,31 +1,35 @@
 <template>
 	<div class="card">
 		<form v-on:submit.prevent="formSubmitChange2FA">
-			<div class="collapse">
-				<span v-show="collapsed" class="icon collapseIcon collapseIcon" @click="collapsed = !collapsed">
-					<i class="fas fa-chevron-right"></i>
-				</span>
-				<span v-show="!collapsed" class="icon collapseIcon collapseIcon" @click="collapsed = !collapsed">
-					<i class="fas fa-chevron-down"></i>
-				</span>
-
-				<span class="header" @click="collapsed = !collapsed" data-cy="openTwoFaChange">
-					Change 2-Factor authentication (2FA)
-					<span class="help is-success" v-if="success" data-cy="isSuccess">Saved!</span>
-				</span>
-				<div :class="collapsed ? 'hidden' : 'visible'">
+			<div :class="{
+				'collapse': true,
+				'hide-border': activePage
+			}">
+				<div v-if="!activePage" class="is-flex is-align-items-center">
+					<span class="header" @click="changeActive">
+						Two-Factor Authentication
+					</span>
+					<span :class="{
+						'icon collapseIcon header': true
+					}" @click="changeActive">
+						<i class="fas fa-chevron-right"></i>
+					</span>
+				</div>
+				<div :class="activePage === '2FA' ? 'visible' : 'hidden'">
 					<div class="card-content">
 						<div class="field">
-							<label class="label">
-								<input type="checkbox" class="checkbox" id="email" v-model="email" data-cy="twoFaEmail" />
+							<label class="label checkbox">
 								2FA with Email Codes enabled
+								<input type="checkbox" class="checkbox" id="email" v-model="email" data-cy="twoFaEmail" />
+								<span class="checkmark"></span>
 							</label>
 						</div>
 
 						<div class="field">
-							<label class="label">
-								<input type="checkbox" class="checkbox" id="authenticator" v-model="authenticator" data-cy="twoFaAuthenticator" />
+							<label class="label checkbox">
 								2FA with Authenticator Codes enabled
+								<input type="checkbox" class="checkbox" id="authenticator" v-model="authenticator" data-cy="twoFaAuthenticator" />
+								<span class="checkmark"></span>
 							</label>
 						</div>
 						<figure
@@ -50,7 +54,7 @@
 									type="text"
 									placeholder="Authenticator Code"
 									data-cy="authenticatorCode"
-									class="textbox"
+									class="input"
 									v-model="authenticatorCode"
 								/>
 								<p class="help is-danger" v-if="invalidAuthenticator" data-cy="authenticatorMessage">
@@ -73,12 +77,9 @@
 							</div>
 						</div>
 					</div>
-
+ 
 					<div class="field is-grouped">
-						<button class="button is-green" type="submit" data-cy="saveTwoFa">
-							<span class="icon is-small">
-								<i class="fas fa-save"></i>
-							</span>
+						<button class="button is-green big-button is-login transition-faster" type="submit" data-cy="saveTwoFa">
 							<span> Save 2FA Settings </span>
 						</button>
 					</div>
@@ -88,8 +89,9 @@
 	</div>
 </template>
 
-<script>
+<script lang="ts">
 import Component, { mixins } from 'vue-class-component';
+import { Emit, Prop } from 'vue-property-decorator';
 import { Authenticated, Global } from '../mixins/mixins';
 import { verifyAuthenticatorCode } from '../utils/backupRestore';
 
@@ -97,12 +99,20 @@ import { verifyAuthenticatorCode } from '../utils/backupRestore';
 export default class ChangeEmail extends mixins(Global, Authenticated) {
 	email = false;
 	authenticator = false;
-	authenticatorConfirmed = false;
+	authenticatorConfirmed: any = false;
 	authenticatorCode = '';
 	invalidAuthenticator = '';
 	qrCode = '';
-	collapsed = true;
 	success = false;
+
+	@Prop()
+	activePage!: string;
+
+	@Emit('changeActive')
+	changeActive() {
+		return;
+	}
+
 
 	async formSubmitChange2FA() {
 		if (this.authenticator && !this.authenticatorConfirmed) {
@@ -125,7 +135,6 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 				authenticatorConfirmed: this.authenticatorConfirmed
 			});
 			this.success = true;
-			this.collapsed = true;
 		} catch (e) {
 			// console.log(e);
 		}
@@ -138,7 +147,6 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 
 		if (this.authenticatorConfirmed) {
 			this.success = true;
-			this.collapsed = true;
 			this.invalidAuthenticator = '';
 		} else {
 			this.invalidAuthenticator = 'Authenticator code seems to be incorrect.';
@@ -149,7 +157,7 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 		this.authenticatorConfirmed = false;
 		this.authenticatorCode = '';
 
-		this.qrCode = (await this.generateQRCode()).image;
+		this.qrCode = (await this.generateQRCode() as any).image;
 		return false;
 	}
 

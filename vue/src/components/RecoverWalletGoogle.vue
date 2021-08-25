@@ -1,10 +1,10 @@
 <template>
 	<div class="control is-expanded">
-		<GoogleLogin class="button is-fullwidth is-google" :params="{ clientId }" :onSuccess="onLogin">
+		<GoogleLogin class="button is-grey big-button outlined-button is-thick transition-faster" :params="{ clientId }" :onSuccess="onLogin">
 			<span class="icon google-icon">
 				<i class="fab fa-google"></i>
 			</span>
-			<span class="header-text"> Recover using Google</span>
+			<span>Google</span>
 		</GoogleLogin>
 		<ChangePassword v-if="seedFound" :presetOldPassword="oldPassword"></ChangePassword>
 	</div>
@@ -60,14 +60,7 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.is-google {
-	background-color: #34a853;
-}
 .google-icon {
-	font-size: 18px;
-	margin-right: 10px;
-}
-.header-text {
-	color: #fff;
+	color: #fc6404;
 }
 </style>

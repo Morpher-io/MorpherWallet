@@ -1,23 +1,31 @@
 <template>
 	<div class="field">
 		<div class="control is-expanded" v-if="!hasRecoveryMethod">
-			<v-facebook-login class="button is-fullwidth" :appId="clientId" @sdk-init="handleSdkInit" @login="onLogin" v-model="facebook.model"
-				><span slot="login">Link to Facebook</span>
+			<v-facebook-login :logo-style="{
+				color: '#4267B2',
+				marginRight: '5px',
+			}" class="button is-grey big-button outlined-button is-thick facebook-button transition-faster" :appId="clientId" @sdk-init="handleSdkInit" @login="onLogin" v-model="facebook.model"
+				><span slot="login">Facebook</span>
 			</v-facebook-login>
 		</div>
 		<div class="control is-expanded has-text-centered" v-if="hasRecoveryMethod">
-			<span class="icon google-icon">
-				<i class="fas fa-check-circle"></i>
-			</span>
-			Facebook Recovery Added
 			<v-facebook-login
-				class="button is-fullwidth"
+				:logo-style="{
+					marginRight: '5px',
+				}"
+				class="button is-danger big-button is-thick transition-faster facebook-button"
 				:appId="clientId"
 				@sdk-init="handleSdkInit"
 				@login="deleteRecovery"
 				v-model="facebook.model"
-				><span slot="login">Delete access to Facebook</span>
+				><span slot="login">Revoke Facebook Access</span>
 			</v-facebook-login>
+			<div class="recovery-active is-text-small">
+				<span class="icon">
+					<i class="fas fa-check-circle"></i>
+				</span>
+				Facebook Recovery Active
+			</div>
 		</div>
 		<div v-if="error">{{ error }}</div>
 	</div>
@@ -105,4 +113,8 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped></style>
+<style scoped>
+.facebook-button {
+	border-radius: 7px!important;
+}
+</style>

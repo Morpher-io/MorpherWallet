@@ -67,9 +67,9 @@ export default class ZeroWallet {
 				show_message: false,
 				confirm_message: false,
 				env: 'live'
-			}
-		}
-		
+      };
+    }
+
 		if (!config.env) {
 			config.env = 'live';
 		}
@@ -134,6 +134,9 @@ export default class ZeroWallet {
 		if (loggedInResult && loggedInResult.isLoggedIn) {
 			const widgetCommunication = (await this.widget).communication;
 			const result = await widgetCommunication.getAccounts();
+      if (this._onLoginCallback) {
+        this._onLoginCallback(result[0], loggedInResult.walletEmail);
+    }      
 			return result
 		} else {
 			this.showWallet();
@@ -184,6 +187,16 @@ export default class ZeroWallet {
 		const widgetCommunication = (await this.widget).communication;
     return widgetCommunication.isLoggedIn();
   }
+
+  async hasSocialRecoveryMethods() {
+
+    await this.iframeLoaded();
+
+    const widget = await this.widget;
+
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.hasSocialRecoveryMethods();        
+}
 
   async iframeLoaded() {
     return new Promise((resolve): void => {
@@ -272,49 +285,77 @@ export default class ZeroWallet {
           const widgetCommunication = (await this.widget).communication;
          
           txParams.chainId = self.getChainId();
-          
-					const result = await widgetCommunication.signTransaction(txParams, this.config);
+          if (this.config?.show_transaction || this.config?.confirm_transaction || Number(txParams.chainId) !== 21)
+            this.showWallet();
+          const result = await widgetCommunication.signTransaction(txParams, this.config, this.wsRPCEndpointUrl);
+
+          if (this.config?.show_transaction || this.config?.confirm_transaction || Number(txParams.chainId) !== 21)
+            this.hideWallet();  
+
 					if(cb) {
+            if (!result) {
+              cb("The transaction was cancelled by the user");  
+              return;
+            }
 						cb(null, result);
 					}
+               
           return result;
 				},
         
         signMessage: async (msgParams: any, cb: any) => {
           const widgetCommunication = (await this.widget).communication;
           const params = Object.assign({}, msgParams, { messageStandard: 'signMessage' });
+          if (this.config?.show_message || this.config?.confirm_message)
+            this.showWallet();
           const  result  = await widgetCommunication.signMessage(params, this.config);
           if(cb) {
 						cb(null, result);
 					}
+          if (this.config?.show_message || this.config?.confirm_message)
+            this.hideWallet();    
+          return result;           
         },
         signPersonalMessage: async (msgParams: any, cb: any) => {
 					
           const widgetCommunication = (await this.widget).communication;
           const params = Object.assign({}, msgParams, { messageStandard: 'signPersonalMessage' });
+          if (this.config?.show_message)
+            this.showWallet();                  
           const result  = await widgetCommunication.signMessage(params, this.config);
 					if(cb) {
 						cb(null, result);
 					}
-					return result;
+          if (this.config?.show_message)
+            this.hideWallet();    
+          return result;                     
+
         },
         signTypedMessage: async (msgParams: any, cb: any) => {
           const widgetCommunication = (await this.widget).communication;
           const params = Object.assign({}, msgParams, { messageStandard: 'signTypedMessage' });
+          if (this.config?.show_message)
+            this.showWallet();                  
           const { error, result } = await widgetCommunication.signMessage(params, this.config);
 					if(cb) {
 						cb(null, result);
 					}
-					return result;
+          if (this.config?.show_message)
+            this.hideWallet();    
+          return result;                     
         },
         signTypedMessageV3: async (msgParams: any, cb: any) => {
           const widgetCommunication = (await this.widget).communication;
           const params = Object.assign({}, msgParams, { messageStandard: 'signTypedMessageV3' });
+          if (this.config?.show_message)
+            this.showWallet();                  
           const { error, result } = await widgetCommunication.signMessage(params, this.config);
 					if(cb) {
 						cb(null, result);
 					}
-					return result;
+          if (this.config?.show_message)
+            this.hideWallet();    
+          return result;                     
 				},
 				/*
         estimateGas: async (txParams: any, cb: any) => {

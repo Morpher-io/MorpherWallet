@@ -1,8 +1,10 @@
 <template>
 	<transition name="fade">
 		<div class="overlay" v-if="isActive">
-			<dots></dots>
-			<p class="status-text" data-cy="spinner-status">{{ status }}</p>
+			<div class="overlay-frame">
+				<dots></dots>
+				<p class="status-text" data-cy="spinner-status">{{ status }}</p>
+			</div>
 		</div>
 	</transition>
 </template>
@@ -46,17 +48,26 @@ export default class Spinner extends Vue {
 	overflow: none;
 	top: 0;
 	left: 0;
-	padding-top: 10%;
 	text-align: center;
 	z-index: 9999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.overlay .overlay-frame {
+	background: #fff;
+    padding: 20px;
+    box-shadow: 0 0 15px 0 rgb(0 0 0 / 10%);
+    border-radius: 10px;
+    width: 60%;
+    text-align: center;
 }
 .status-text {
-	text-align: center;
-	font-size: 150%;
-	font-weight: 500;
-	background: rgba(0, 0, 0, 0.5);
-	padding: 15px;
-	color: #fff;
+	background: none;
+    padding: 0;
+    margin-top: 5px;
+    font-size: inherit;
+    font-weight: 300;
 }
 .fade-enter-active,
 .fade-leave-active {
