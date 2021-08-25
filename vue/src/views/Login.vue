@@ -28,7 +28,6 @@
 							name="walletPassword"
 							v-model="walletPassword"
 						/>
-						<password v-model="walletPassword" :strength-meter-only="true" :secure-length="10" style="max-width: initial" />
 
 						<div v-if="store.status === 'invalid password' || showRecovery == true">
 							<p class="help is-danger">
