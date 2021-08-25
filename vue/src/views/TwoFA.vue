@@ -1,10 +1,13 @@
 <template>
 	<div class="container">
-		<h2 class="title">Authenticator Unlock</h2>
-		<h4 class="subtitle">Please input two FA Authenticator code</h4>
+		<h2 v-if="twoFaRequired.email" class="title">2-Step Verification</h2>
+		<p v-if="twoFaRequired.email && !twoFaRequired.authenticator" class="subtitle">Please enter the code we sent to your email.
+		</p>
+		<p v-else-if="twoFaRequired.authenticator && !twoFaRequired.email" class="subtitle">Please input two FA Authenticator code.</p>
+		<p v-else class="subtitle">Please input both code we sent you over the email and two FA Authenticator code.</p>
 		<form v-on:submit.prevent="validateCode">
-			<div class="field" v-if="twoFaRequired.email">
-				<label class="label">Email 2FA</label>
+			<div class="field" v-if="twoFaRequired.email || twoFaRequired.needConfirmation">
+				<label class="label">Email Code</label>
 				<div class="control">
 					<input
 						type="number"
@@ -14,18 +17,15 @@
 						name="emailCode"
 						id="emailCode"
 						data-cy="emailCode"
-						placeholder="123456"
 						v-model="emailCode"
 					/>
 				</div>
-
-				<p class="help">Enter here the Code that we sent you to your inbox!</p>
 				<p class="help is-danger" v-if="invalidEmail">
 					{{ invalidEmail }}
 				</p>
 			</div>
 			<div class="field" v-if="twoFaRequired.authenticator">
-				<label class="label">Authenticator 2FA</label>
+				<label class="label">Authenticator Code</label>
 				<div class="control">
 					<input
 						type="number"
@@ -33,12 +33,10 @@
 						name="authenticatorCode"
 						id="authenticatorCode"
 						data-cy="authenticatorCode"
-						placeholder="123456"
+						ref="auth_code"
 						v-model="authenticatorCode"
 					/>
 				</div>
-
-				<p class="help">Enter here the Code from Google Authenticator!</p>
 				<p class="help is-danger" v-if="invalidAuthenticator">
 					{{ invalidAuthenticator }}
 				</p>
@@ -50,33 +48,21 @@
 					{{ logonError }}
 				</p>
 			</div>
-			<div class="field is-grouped">
-				<div class="layout split first">
-					<button class="button is-green" type="submit" data-cy="unlock">
-						<span class="icon is-small">
-							<i class="far fa-file"></i>
-						</span>
-						<span> Unlock </span>
-					</button>
-				</div>
-				<div class="layout split second">
-					<button class="button is-grey" v-on:click="logout()">
-						<span class="icon is-small">
-							<i class="far fa-file"></i>
-						</span>
 
-						<span> Log Out </span>
-					</button>
-				</div>
-			</div>
+			<button class="button is-green big-button is-login transition-faster mt-5" type="submit" data-cy="unlock">
+				<span>Submit</span>
+			</button>
+			<button class="button mt-3" v-on:click="logout()">
+				<span>Cancel</span>
+			</button>
 		</form>
-		<br />
 	</div>
 </template>
 
 <script lang="ts">
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
+import { Watch } from 'vue-property-decorator';
 
 @Component
 export default class TwoFA extends mixins(Global) {
@@ -89,6 +75,20 @@ export default class TwoFA extends mixins(Global) {
 	invalidEmail = false;
 	invalidAuthenticator = false;
 
+	mounted() {
+		window.setTimeout(() => {
+					const el: any = this.$refs.auth_code
+					el.focus();
+				}, 100);
+		//
+	}
+
+	@Watch('authenticatorCode')
+	authenticatorCodeChanged(value: any) {
+		if (value.length === 6) {
+			this.validateCode()
+		}
+	}
 	/**
 	 * Process email 2fa authentication
 	 */

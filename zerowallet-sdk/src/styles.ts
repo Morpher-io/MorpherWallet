@@ -18,8 +18,7 @@ export const  styles =  `
 .zerowallet-widget-frame {
 	display: block;
 	max-width: 414px;
-	max-height: 800px;
-	height: 90%;
+	height: 600px!important;
 	width: 80%;
 	position: fixed;
 	left: 50%;
@@ -36,14 +35,12 @@ export const  styles =  `
 }
 @media (max-width: 576px) {
   .zerowallet-widget-frame {
-    bottom: 0;
-    top: auto;
-		width: 100%;
-		height: 100%;
-    right: 0;
-    left: 0;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+    width: 90%;
+  }
+}
+@media (max-height: 600px) {
+  .zerowallet-widget-frame {
+    height: 90%!important;
   }
 }
 `;

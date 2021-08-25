@@ -75,7 +75,6 @@ const routes: Array<RouteConfig> = [
 			requiresAuth: true
 		}
 	},
-
 	{
 		path: '/',
 		name: 'Wallet',

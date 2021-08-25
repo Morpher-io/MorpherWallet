@@ -1,6 +1,8 @@
 <template>
 	<div class="container">
-		<h1 class="title">Add Recovery Options</h1>
+		<h2 class="title">Add Trusted Account</h2>
+		<p class="subtitle">Add trusted online account as the recovery method for your funds & wallet.
+		</p>
 
 		<AddRecoveryGoogle></AddRecoveryGoogle>
 
@@ -9,13 +11,12 @@
 		<AddRecoveryVkontakte :walletEmail="store.email"></AddRecoveryVkontakte>
 
 		<div class="field is-grouped">
-			<router-link to="/" tag="button" class="button is-grey">
-				<span class="icon is-small">
-					<i class="fas fa-chevron-left"></i>
-				</span>
-				<span> Back </span>
+			<router-link to="/" tag="button" class="button">
+				<span>Cancel</span>
 			</router-link>
 		</div>
+
+		<p class="mt-10 is-small-text">These services will not have direct access to your wallet. Your wallet keys are never shared and always encrypted.</p>
 	</div>
 </template>
 

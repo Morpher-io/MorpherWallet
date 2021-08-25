@@ -106,6 +106,26 @@ export class Global extends Vue {
 
 	router: VueRouter = this.$router;
 
+	
+	roundFormatter(param:any) {
+		const price = parseFloat(param);
+		const abs = Math.abs(price);
+		let round = 0;
+		if (10000 > abs && abs >= 10) round = 2;
+		else if (10 > abs && abs >= 1) round = 3;
+		else if (1 > abs && abs >= 0.1) round = 4;
+		else if (0.1 > abs && abs >= 0.01) round = 5;
+		else if (0.01 > abs) round = 6;
+		return price ? price.toFixed(round) : 0;
+	}
+
+	
+	formatEthAddress(ethAddress: string) {
+		if (!ethAddress) return '';
+		if (ethAddress.length <= 11) return ethAddress;
+		return ethAddress ? ethAddress.substr(0, 5) + '...' + ethAddress.substr(ethAddress.length - 3) : '';
+	}
+
 	// map libraries
 	isIframe = isIframe;
 
@@ -124,6 +144,57 @@ export class Global extends Vue {
 			if (value === 'register') this.$router.push('/signup');
 			this.clearPage();
 		}
+	}
+
+	checkPassword(newValue: string, checkErrors: boolean, oldChecks: any, comparePassword: string, checkRepeatOnly = false) {
+		let updatedChecks = checkRepeatOnly ? oldChecks : {
+			min: '',
+			uppercase: '',
+			lowercase: '',
+			number: '',
+			match: '',
+		};
+
+		if (checkErrors) {
+			updatedChecks = {
+				min: 'fail',
+				uppercase: 'fail',
+				lowercase: 'fail',
+				number: 'fail',
+				match: 'fail',
+			};
+		}
+
+		if (newValue) {
+			if (!checkRepeatOnly) {
+				if (newValue.length >= 8) {
+					updatedChecks.min = 'pass';
+				} else if (checkErrors) updatedChecks.min = 'fail';
+
+				if (/[A-Z]/.test(newValue)) {
+					updatedChecks.uppercase = 'pass';
+				} else if (checkErrors) updatedChecks.uppercase = 'fail';
+
+				if (/[a-z]/.test(newValue)) {
+					updatedChecks.lowercase = 'pass';
+				} else if (checkErrors) updatedChecks.lowercase = 'fail';
+
+				if (/[0-9]/.test(newValue)) {
+					updatedChecks.number = 'pass';
+				} else if (checkErrors) updatedChecks.number = 'fail';
+			}
+			
+			if (comparePassword) {
+				if(newValue === comparePassword) {
+					updatedChecks.match = 'pass';
+				} else updatedChecks.match = 'fail';
+			} else {
+				if (checkErrors) updatedChecks.match = 'fail';
+				else updatedChecks.match = '';
+			}
+		}
+
+		return updatedChecks;
 	}
 }
 

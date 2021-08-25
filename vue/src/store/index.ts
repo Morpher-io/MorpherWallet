@@ -12,7 +12,8 @@ import {
 	changePasswordEncryptedSeed,
 	getBackendEndpoint,
 	getNonce,
-	recoverSeedSocialRecovery
+	recoverSeedSocialRecovery,
+	verifyEmailConfirmationCode
 } from '../utils/backupRestore';
 import { downloadEncryptedKeystore, getAccountsFromKeystore, sortObject } from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
@@ -78,7 +79,9 @@ export interface RootState {
 	privateKey: string;
 	privateKeyKeystore: string;
 	signMessage: any;
-	signResponse: any
+	signResponse: any;
+	ethBalance: string;
+	unlocking: boolean
 }
 
 /**
@@ -110,7 +113,8 @@ function initialState(): RootState {
 		twoFaRequired: {
 			email: false,
 			authenticator: false,
-			authenticatorConfirmed: false
+			authenticatorConfirmed: false,
+			needConfirmation: false,
 		},
 		token: '',
 		connection: null,
@@ -125,7 +129,9 @@ function initialState(): RootState {
 		privateKey: '',
 		privateKeyKeystore: '',
 		signMessage: null,
-		signResponse: null		
+		signResponse: null,
+		ethBalance: '0',
+		unlocking: false
 	} as RootState;
 }
 
@@ -164,10 +170,14 @@ const store: Store<RootState> = new Vuex.Store({
 		recoveryMethodsFound(state: RootState, recoveryMethodsData: Array<any>) {
 			state.recoveryMethods = recoveryMethodsData;
 		},
+		updateUnlocking(state: RootState, payload: boolean) {
+			state.unlocking = payload;
+		},
 		updatePayload(state: RootState, payload: Type2FARequired) {
 			state.twoFaRequired.email = payload.email;
 			state.twoFaRequired.authenticator = payload.authenticator;
 			state.twoFaRequired.authenticatorConfirmed = payload.authenticatorConfirmed;
+			state.twoFaRequired.needConfirmation = payload.needConfirmation || false;
 		},
 		userFound(state: RootState, userData: TypeUserFoundData) {
 			state.email = userData.email;
@@ -260,12 +270,13 @@ const store: Store<RootState> = new Vuex.Store({
 							.then(payload => {
 								commit('userFound', { email, hashedPassword });
 								commit('updatePayload', payload);
-								if (payload.email) {
+
+								if (payload.email || payload.needConfirmation) {
 									send2FAEmail(email)
 										.then(resolve)
 										.catch(reject);
 								}
-								if (!payload.email && !payload.authenticator) {
+								if (!payload.email && !payload.authenticator && !payload.needConfirmation) {
 									getEncryptedSeedFromMail(email, '', '')
 										.then(encryptedSeed => {
 											commit('seedFound', { encryptedSeed });
@@ -285,6 +296,7 @@ const store: Store<RootState> = new Vuex.Store({
 			});
 		},
 		fetchWalletFromRecovery({ state, commit }, params: TypeRecoveryParams) {
+			commit('updateUnlocking', true);
 			return new Promise((resolve, reject) => {
 				recoverSeedSocialRecovery(params.accessToken, state.email, params.recoveryTypeId)
 					.then(encryptedSeed => {
@@ -294,14 +306,20 @@ const store: Store<RootState> = new Vuex.Store({
 								const accounts = getAccountsFromKeystore(keystore);
 								//not setting any password here, this is simply for the password change mechanism
 								commit('keystoreUnlocked', { keystore, accounts, hashedPassword: '' });
+								commit('updateUnlocking', false);
 								resolve(true);
 							})
 							.catch(() => {
 								commit('authError', 'Cannot unlock the Keystore, wrong ID');
+								commit('updateUnlocking', false);
 								reject(false);
 							});
 					})
-					.catch(reject);
+					.catch(() => {
+						commit('updateUnlocking', false);
+						reject(false)
+					}
+						);
 			});
 		},
 		addRecoveryMethod({ state, dispatch }, params: TypeAddRecoveryParams) {
@@ -380,6 +398,8 @@ const store: Store<RootState> = new Vuex.Store({
 			return new Promise(async (resolve, reject) => {
 				let emailCorrect = false;
 				let authenticatorCorrect = false;
+				let userConfirmed = false;
+
 				if (state.twoFaRequired.email == true) {
 					const result = await verifyEmailCode(rootState.email, params.email2FA);
 					if (result.success) {
@@ -403,7 +423,19 @@ const store: Store<RootState> = new Vuex.Store({
 					authenticatorCorrect = true;
 				}
 
-				if (emailCorrect && authenticatorCorrect) {
+				if (state.twoFaRequired.needConfirmation == true) {
+					const result = await verifyEmailConfirmationCode(rootState.email, params.email2FA);
+					if (result.success) {
+						userConfirmed = true;
+					} else {
+						commit('authError', 'Confirmation Email code not correct');
+						reject(result.error);
+					}
+				} else {
+					userConfirmed = true;
+				}
+
+				if (emailCorrect && authenticatorCorrect && userConfirmed) {
 					getEncryptedSeedFromMail(rootState.email, params.email2FA, params.authenticator2FA)
 						.then(encryptedSeed => {
 							//const encryptedSeed = state.encryptedSeed; //normally that would need decrypting using 2fa codes
@@ -759,7 +791,7 @@ const store: Store<RootState> = new Vuex.Store({
 			return state.keystore !== undefined && state.keystore !== null;
 		},
 		twoFaRequired: state => {
-			return (state.twoFaRequired.email || state.twoFaRequired.authenticator) && state.encryptedSeed.ciphertext === undefined;
+			return (state.twoFaRequired.email || state.twoFaRequired.authenticator || state.twoFaRequired.needConfirmation) && state.encryptedSeed.ciphertext === undefined;
 		},
 		authStatus: state => state.status,
 		walletEmail: state => state.email,
@@ -783,6 +815,9 @@ if (isIframe()) {
 				}
 			},
 			async signTransaction(txObj: any, config: ZeroWalletConfig) {
+				if (txObj.eth_balance) {
+					store.state.ethBalance = txObj.eth_balance;
+				}
 				if (txObj.nonce == undefined) {
 					console.error('No nonce defined, aborting tx signing');
 				}
@@ -793,6 +828,9 @@ if (isIframe()) {
 						if (store.state.keystore !== null) {
 							if (config?.confirm_transaction || Number(txObj.chainId) !== 21) {
 
+								if (txObj.amount && ! txObj.value) {
+									txObj.value = txObj.amount
+								}
 								store.state.transactionDetails = txObj;
 								store.state.signResponse = null;
 								router.push('/signtx');
@@ -885,7 +923,21 @@ if (isIframe()) {
 
 				return false;
 			},
-			isLoggedIn() {
+			async isLoggedIn() {
+				let counter = 0;
+
+				const waitForUnlock = () => {
+					return new Promise(resolve => {
+						setTimeout(resolve, 200)
+							
+					});
+				};
+				// wait for the store to finish unlocking if it is in progress
+				while (store.state.unlocking && counter < 50) {
+					counter +=1
+					// wait for the wallet to finish unlocking
+					await waitForUnlock();
+				}
 				//return 'ok'
 				if (store.state.keystore)
 					return {

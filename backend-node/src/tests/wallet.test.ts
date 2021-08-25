@@ -167,6 +167,8 @@ describe('Wallet controller test cases', async () => {
     });
 
     it('returns error if no email verification code', async () => {
+        encryptedSeedData.email2fa = '';
+
         await request(app)
             .post('/v1/saveEmailPassword')
             .send(bodyData)
@@ -193,9 +195,10 @@ describe('Wallet controller test cases', async () => {
             .send({ key: bodyData.key })
             .set('Accept', 'application/json');
 
-        expect(walletResponse.body.email).toEqual(true);
+        expect(walletResponse.body.email).toEqual(false);
         expect(walletResponse.body.authenticator).toEqual(false);
         expect(walletResponse.body.authenticatorConfirmed).toEqual(false);
+        expect(walletResponse.body.needConfirmation).toEqual(true);
     });
 
     it('returns error for payload if bad key', async () => {
@@ -506,10 +509,30 @@ describe('Wallet controller test cases', async () => {
 
     // Create account with private key that corresponds to eth wallet in user database.
     it('returns error if email code not right', async () => {
+        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+
         await request(app)
             .post('/v1/saveEmailPassword')
             .send(bodyData)
             .set('Accept', 'application/json');
+
+        const email2FAData = {
+            email: true,
+            authenticator: false
+        };
+
+        let user = await User.findOne();
+
+        email2FAData['nonce'] = user.nonce;
+
+        const signature = account.sign(JSON.stringify(sortObject(email2FAData)));
+
+        await request(app)
+            .post('/v1/auth/change2FAMethods')
+            .send(email2FAData)
+            .set('Accept', 'application/json')
+            .set('Signature', JSON.stringify(signature))
+            .set('key', bodyData.key);
 
         // Simulate sending an email by changing only user payload.
         const emailData = {
