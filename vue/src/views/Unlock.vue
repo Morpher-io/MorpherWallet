@@ -13,12 +13,6 @@
 
 				<div class="control">
 					<input type="password" class="input" name="walletPassword" v-model="walletPassword" />
-					<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial" />
-					<p class="help">
-						Use a strong Password! It encrypts your Wallet and keeps your Funds secure. It must be at least 8 characters long and include
-						one lower-case, one upper-case character and a number.
-					</p>
-
 					<div v-if="showRecovery">
 						<p class="help is-danger">
 							The Password you provided can't be used to de-crypt your wallet.
