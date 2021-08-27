@@ -19,13 +19,13 @@
 					</div>
 				</div>
 		</div>
-		<div class="buttons horizontal-buttons">
-			<router-link to="/send" tag="button" class="button is-purple big-button is-thick transition-faster" disabled>
+		<div class="buttons horizontal-buttons"   >
+			<button class="button is-purple big-button is-thick transition-faster" @click="sendInApp" :disabled="!isIframe()">
 				<span class="icon is-small">
 					<i class="fas fa-paper-plane"></i>
 				</span>
 				<span data-cy="settings">Send</span>
-			</router-link>
+			</button>
 			<router-link to="/settings" tag="button" class="button is-blue big-button is-thick transition-faster">
 				<span class="icon is-small">
 					<i class="fas fa-cog"></i>
@@ -131,6 +131,15 @@ export default class Wallet extends mixins(Global, Authenticated) {
 		if (!seed) return;
 		const image = jazzicon(36, seed);
 		ref.append(image);
+	}
+
+	async sendInApp() {
+		if (this.isIframe()) {
+			if (this.store.connection && this.store.connection !== null) {
+				const promise = this.store.connection.promise;
+				(await promise).openSendInApp();
+			}
+		}
 	}
 
 	copyETHAddress(ethAddress: string): void {
