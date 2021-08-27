@@ -243,6 +243,9 @@ const store: Store<RootState> = new Vuex.Store({
 		},
 		updateSeedPhrase(state: RootState, payload: TypeUpdateSeedPhrase) {
 			state.seedPhrase = payload.seedPhrase;
+		},
+		updateEmail(state: RootState, payload: string) {
+			state.email = payload;
 		}
 	},
 	actions: {
@@ -378,7 +381,7 @@ const store: Store<RootState> = new Vuex.Store({
 					getPayload(params.email)
 						.then(() => {
 							commit('delayedSpinnerMessage', 'The user already exists.');
-							reject('Wallet for this mail already exists.');
+							reject('USER_ALREADY_EXISTS');
 						})
 						.catch(async () => {
 							commit('authRequested');
@@ -420,22 +423,27 @@ const store: Store<RootState> = new Vuex.Store({
 
 				if (state.twoFaRequired.email == true) {
 					const result = await verifyEmailCode(rootState.email, params.email2FA);
+
 					if (result.success) {
 						emailCorrect = true;
 					} else {
 						commit('authError', '2FA Email code not correct');
 						reject(result.error);
+						return;
 					}
 				} else {
 					emailCorrect = true;
 				}
 
 				if (state.twoFaRequired.authenticator == true) {
-					if (!(await verifyAuthenticatorCode(rootState.email, params.authenticator2FA))) {
-						commit('authError', '2FA Authenticator code not correct');
-						reject('2FA Authenticator not correct');
-					} else {
+					const result = await verifyAuthenticatorCode(rootState.email, params.authenticator2FA);
+
+					if (result.success) {
 						authenticatorCorrect = true;
+					} else {
+						commit('authError', '2FA Authenticator code not correct');
+						reject(result.error);
+						return;
 					}
 				} else {
 					authenticatorCorrect = true;
@@ -448,6 +456,7 @@ const store: Store<RootState> = new Vuex.Store({
 					} else {
 						commit('authError', 'Confirmation Email code not correct');
 						reject(result.error);
+						return;
 					}
 				} else {
 					userConfirmed = true;
@@ -498,7 +507,7 @@ const store: Store<RootState> = new Vuex.Store({
 							commit('updateUnlocking', false);
 							resolve(true);
 						})
-						.catch(() => {
+						.catch((e) => {
 							commit('updateUnlocking', false);
 							reject(false);
 						});
@@ -812,7 +821,10 @@ const store: Store<RootState> = new Vuex.Store({
 					reject();
 				}
 			});
-		}
+		},
+		setUsersEmail({ commit }, email: string) {
+			commit('updateEmail', email);
+		},
 	},
 	getters: {
 		isLoggedIn: state => {

@@ -69,10 +69,6 @@
 									}">Passwords match</li>
 								</ul>
 							</div>
-
-							<p class="help is-danger" v-if="invalidPassword" data-cy="invalidMessage">
-								{{ invalidPassword }}
-							</p>
 						</div>
 					</div>
 					<div class="field">
@@ -88,9 +84,15 @@
 						</div>
 					</div>
 
+					<div class="error mt-3" v-if="logonError">
+						<p>
+							⚠️ <span v-html="logonError"></span>
+						</p>
+					</div>
+
 					<div class="field is-grouped">
-						<button class="button is-green big-button is-login transition-faster" type="submit" data-cy="passwordSubmit" :disabled="!oldPassword || !walletPassword || !walletPasswordRepeat">
-							<span> Update Password </span>
+						<button class="button is-green big-button is-login transition-faster" type="submit" data-cy="passwordSubmit">
+							<span>Update Password</span>
 						</button>
 					</div>
 				</div>
@@ -107,6 +109,7 @@ import { sha256 } from '../utils/cryptoFunctions';
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
 import { Emit, Prop, Watch } from 'vue-property-decorator';
+import { getDictionaryValue } from '../utils/dictionary';
 
 @Component({
 	components: {
@@ -118,7 +121,7 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 	hideOldPassword = false;
 	walletPassword = '';
 	walletPasswordRepeat = '';
-	invalidPassword = '';
+	logonError = '';
 	success = false;
 	passwordChecks: any = {
 		min: '',
@@ -157,7 +160,7 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 	}
 
 	async changePasswordExecute() {
-		//this.invalidPassword = '';
+		this.logonError = '';
 
 		this.passwordChecks = this.checkPassword(this.walletPassword, true, this.passwordChecks, this.walletPasswordRepeat);
 
@@ -168,7 +171,7 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 		const passwordMessage = await validateInput('password', this.walletPassword);
 
 		if (passwordMessage) {
-			this.invalidPassword = passwordMessage;
+			this.logonError = passwordMessage;
 			return;
 		}
 		const oldPasswordHashed = this.presetOldPassword || (await sha256(this.oldPassword));
@@ -187,8 +190,8 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 				}
 			})
 			.catch(() => {
-				this.showSpinnerThenAutohide('Error happened!');
-				this.invalidPassword = 'Error happened during Update. Aborted.';
+				this.showSpinnerThenAutohide('');
+				this.logonError = getDictionaryValue('');
 			});
 	}
 }

@@ -28,9 +28,6 @@
 										v-model="newEmail"
 										:disabled="twoFaSent"
 									/>
-									<p class="help is-danger" v-if="invalidEmail" data-cy="invalidMessage">
-										{{ invalidEmail }}
-									</p>
 								</div>
 							</div>
 							<div class="field">
@@ -46,21 +43,24 @@
 									/>
 								</div>
 							</div>
-							<div class="field" v-if="twoFaSent">
+							<div class="field mb-0" v-if="twoFaSent">
 								<label class="label">2FA Code</label>
 								<div class="control">
 									<input type="number" class="input is-primary" data-cy="twoFa" name="twoFa" placeholder="Enter 2FA" v-model="twoFa" />
-									<p class="help is-danger" v-if="invalid2FA">
-										{{ invalid2FA }}
-									</p>
 								</div>
 							</div>
 						</div>
 					</div>
 
+					<div class="error mt-3" v-if="logonError">
+						<p>
+							⚠️ <span v-html="logonError"></span>
+						</p>
+					</div>
+
 					<div class="field is-grouped">
 						<button class="button is-green big-button is-login transition-faster" type="submit" data-cy="updateEmail" :disabled="!newEmail || !password">
-							<span> Update Email </span>
+							<span>Update Email</span>
 						</button>
 					</div>
 				</div>
@@ -76,6 +76,7 @@ import { sha256 } from '../utils/cryptoFunctions';
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
 import { Emit, Prop } from 'vue-property-decorator';
+import { getDictionaryValue } from '../utils/dictionary';
 
 @Component({})
 export default class ChangeEmail extends mixins(Global, Authenticated) {
@@ -84,8 +85,7 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 	error = '';
 	twoFaSent = false;
 	twoFa: any = null;
-	invalidEmail: any = false;
-	invalid2FA: any = false;
+	logonError = '';
 	success = false;
 
 	@Prop()
@@ -103,29 +103,28 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 
 		const emailMessage = await validateInput('email', this.newEmail);
 		if (emailMessage) {
-			this.invalidEmail = emailMessage;
+			this.logonError = emailMessage;
 			return;
 		}
 
 		const password = await sha256(this.password);
 
 		if (this.store.hashedPassword !== password) {
-			this.invalidEmail = 'The password you entered is not correct!';
+			this.logonError = 'The password you entered is not correct!';
 			return;
 		}
 
 		if (this.store.email === this.newEmail) {
-			this.invalidEmail = 'The Email Address you entered is the same as you already use.';
+			this.logonError = 'The Email Address you entered is the same as you already use.';
 			return;
 		}
 
 		if (this.twoFaSent == true && this.twoFa == '') {
-			this.invalid2FA = 'Two FA cannot be empty!';
+			this.logonError = 'Two FA cannot be empty!';
 		}
 
 		try {
-			this.invalid2FA = false;
-			this.invalidEmail = false;
+			this.logonError = '';
 			await this.changeEmail({ newEmail: this.newEmail, password: password, twoFa: this.twoFa });
 			if (!this.twoFaSent) {
 				//we show the 2FA fields now
@@ -135,16 +134,12 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 				this.password = '';
 				this.twoFa = '';
 				this.twoFaSent = false;
-				this.invalid2FA = false;
-				this.invalidEmail = false;
+				this.logonError = '';
 				this.success = true;
 			}
 		} catch (e) {
-			this.invalidEmail = e.toString();
+			this.logonError = getDictionaryValue(e.toString());
 		}
 	}
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped></style>

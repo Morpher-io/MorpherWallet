@@ -3,7 +3,7 @@
 		<div class="container">
 			<h2 class="title">Sign Up</h2>
 			<p class="subtitle">Create a new wallet.</p>
-			<form v-on:submit.prevent="signupExecute">
+			<form v-on:submit.prevent="signupExecute" novalidate>
 				<div class="field">
 					<label class="label">Email</label>
 					<div class="control">
@@ -15,11 +15,6 @@
 							v-model="walletEmail"
 						/>
 					</div>
-
-					<!-- <p class="help">Use this Email-Address for Wallet Recovery</p> -->
-					<p class="help is-danger" v-if="invalidEmail">
-						Error: {{ invalidEmail }}
-					</p>
 				</div>
 
 				<div class="field">
@@ -59,10 +54,6 @@
 								}">Passwords match</li>
 							</ul>
 						</div>
-
-						<p class="help is-danger" v-if="invalidPassword">
-							Error: {{ invalidPassword }}
-						</p>
 					</div>
 				</div>
 				<div class="field">
@@ -78,20 +69,23 @@
 					</div>
 				</div>
 
+				<div class="error" v-if="logonError">
+					<p>
+						⚠️ <span v-html="logonError"></span>
+					</p>
+				</div>
+
 				<button type="submit" data-cy="createNewWallet" class="button is-green big-button is-login transition-faster">
 					<span>Create Wallet</span>
 				</button>
 
 				<div class="divider"></div>
 
-				<div class="subtitle login-link">
+				<div class="login-link">
 					<span>Already have a wallet?</span>
 					<router-link to="/login" class="login-router">
 						<span>
 							Log In
-							<span class="icon is-small">
-								<i class="fas fa-chevron-right"></i>
-							</span>
 						</span>
 					</router-link>
 				</div>
@@ -108,6 +102,7 @@ import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 
 import { Watch } from 'vue-property-decorator';
+import { getDictionaryValue } from '../utils/dictionary';
 
 @Component({
 	components: {
@@ -120,8 +115,7 @@ export default class Signup extends mixins(Global) {
 	walletPassword = '';
 	walletPasswordRepeat = '';
 	signup = false;
-	invalidEmail = '';
-	invalidPassword = '';
+	logonError = '';
 	passwordChecks: any = {
 		min: '',
 		uppercase: '',
@@ -143,8 +137,7 @@ export default class Signup extends mixins(Global) {
 	// Methods
 	async signupExecute(e: any) {
 		e.preventDefault();
-		this.invalidEmail = '';
-		this.invalidPassword = '';
+		this.logonError = '';
 
 		this.passwordChecks = this.checkPassword(this.walletPassword, true, this.passwordChecks, this.walletPasswordRepeat);
 
@@ -159,7 +152,7 @@ export default class Signup extends mixins(Global) {
 		const emailMessage = await validateInput('email', this.walletEmail);
 		if (emailMessage) {
 			this.hideSpinner();
-			this.invalidEmail = emailMessage;
+			this.logonError = emailMessage;
 			return;
 		}
 
@@ -171,7 +164,7 @@ export default class Signup extends mixins(Global) {
 		const passwordMessage = await validateInput('password', this.walletPassword);
 		if (passwordMessage) {
 			this.hideSpinner();
-			this.invalidPassword = passwordMessage;
+			this.logonError = passwordMessage;
 			return;
 		}
 
@@ -190,7 +183,7 @@ export default class Signup extends mixins(Global) {
 			})
 			.catch(e => {
 				this.hideSpinner();
-				this.invalidEmail = e.toString();
+				this.logonError = getDictionaryValue(e.toString());
 			});
 	}
 }

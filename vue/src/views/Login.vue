@@ -23,37 +23,36 @@
 					<div class="control">
 						<input
 							type="password"
-							class="input password-input"
+							class="input"
 							data-cy="walletPassword"
 							name="walletPassword"
 							v-model="walletPassword"
 						/>
-
-						<div v-if="store.status === 'invalid password' || showRecovery == true">
-							<p class="help is-danger">
-								The Password you provided can't be used to de-crypt your wallet.
-								<router-link to="/recovery">Do you want to restore your Account?</router-link>
-							</p>
-						</div>
 					</div>
+				</div>
+
+				<div class="error" v-if="logonError">
+					<p data-cy="loginError">
+						⚠️ <span v-html="logonError"></span> <router-link v-if="showRecovery" to="/recovery" class="login-router"><span>Recover your wallet?</span></router-link>
+					</p>
 				</div>
 
 				<button type="submit" data-cy="submit" class="button is-green big-button is-login transition-faster">
 					<span>Log In</span>
 				</button>
 
-				<div class="field" v-if="showError">
-					<p class="help is-danger" data-cy="loginError">
-						Error: {{ logonError }}
-					</p>
-				</div>
+				<p class="forgot-password">Forgot password? <router-link to="/recovery" class="login-router"><span>Recover your wallet</span></router-link></p>
 
 				<div class="divider"></div>
 
-				<router-link to="/signup" tag="button" class="button is-grey big-button outlined-button is-thick transition-faster">
-					<span>Sign Up</span>
-				</router-link>
-				<p class="new-account">Don’t have a wallet? Create one in 2 minutes.</p>
+				<div class="login-link">
+					<span>Don't have a wallet?</span>
+					<router-link to="/signup" class="login-router">
+						<span>
+							Sign up
+						</span>
+					</router-link>
+				</div>
 			</form>
 		</div>
 	</div>
@@ -63,6 +62,7 @@
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 import Password from 'vue-password-strength-meter';
+import { getDictionaryValue } from '../utils/dictionary';
 
 @Component({
 	components: {
@@ -74,7 +74,6 @@ export default class Login extends mixins(Global) {
 	walletEmail = '';
 	walletPassword = '';
 	showRecovery = false;
-	showError = false;
 	logonError = '';
 
 	/**
@@ -106,7 +105,7 @@ export default class Login extends mixins(Global) {
 	 * Execute the logon
 	 */
 	login() {
-		this.showError = false;
+		this.logonError = '';
 		this.showSpinner('Loading User...');
 		this.store.loginComplete = false;
 		const email = this.walletEmail;
@@ -126,8 +125,9 @@ export default class Login extends mixins(Global) {
 							// open root page after logon success
 							this.$router.push('/');
 						})
-						.catch(() => {
+						.catch((e) => {
 							this.hideSpinner();
+							this.logonError = getDictionaryValue('DECRYPT_FAILED');
 							this.showRecovery = true;
 						});
 				}
@@ -137,8 +137,7 @@ export default class Login extends mixins(Global) {
 				this.hideSpinner();
 				if (error !== true && error !== false) {
 					if (error.success === false) {
-						this.showError = true;
-						this.logonError = error.error;
+						this.logonError = getDictionaryValue(error.error);
 					} else {
 						// console.log('Error in login', error);
 					}

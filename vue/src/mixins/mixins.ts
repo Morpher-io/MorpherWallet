@@ -232,4 +232,7 @@ export class Authenticated extends Global {
 
 	@Action
 	public hasRecovery!: (id: number) => boolean;
+
+	@Action
+	public setUsersEmail!: (email: string) => void;
 }

@@ -57,10 +57,13 @@
 									class="input"
 									v-model="authenticatorCode"
 								/>
-								<p class="help is-danger" v-if="invalidAuthenticator" data-cy="authenticatorMessage">
-									{{ invalidAuthenticator }}
-								</p>
 							</div>
+						</div>
+
+						<div class="error mt-3" v-if="logonError">
+							<p>
+								⚠️ <span v-html="logonError"></span>
+							</p>
 						</div>
 
 						<div class="field" v-if="this.authenticator && !this.authenticatorConfirmed && this.qrCode">
@@ -80,7 +83,7 @@
  
 					<div class="field is-grouped">
 						<button class="button is-green big-button is-login transition-faster" type="submit" data-cy="saveTwoFa">
-							<span> Save 2FA Settings </span>
+							<span>Save 2FA Settings</span>
 						</button>
 					</div>
 				</div>
@@ -94,6 +97,7 @@ import Component, { mixins } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
 import { Authenticated, Global } from '../mixins/mixins';
 import { verifyAuthenticatorCode } from '../utils/backupRestore';
+import { getDictionaryValue } from '../utils/dictionary';
 
 @Component({})
 export default class ChangeEmail extends mixins(Global, Authenticated) {
@@ -101,7 +105,7 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 	authenticator = false;
 	authenticatorConfirmed: any = false;
 	authenticatorCode = '';
-	invalidAuthenticator = '';
+	logonError = '';
 	qrCode = '';
 	success = false;
 
@@ -116,7 +120,7 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 
 	async formSubmitChange2FA() {
 		if (this.authenticator && !this.authenticatorConfirmed) {
-			this.invalidAuthenticator = 'Please click Confirm Authenticator first before saving 2FA settings.';
+			this.logonError = 'Please click Confirm Authenticator first before saving 2FA settings.';
 			return;
 		}
 
@@ -145,11 +149,11 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 	async confirmAuthenticator() {
 		this.authenticatorConfirmed = await verifyAuthenticatorCode(this.store.email, this.authenticatorCode);
 
-		if (this.authenticatorConfirmed) {
+		if (this.authenticatorConfirmed.success) {
 			this.success = true;
-			this.invalidAuthenticator = '';
+			this.logonError = '';
 		} else {
-			this.invalidAuthenticator = 'Authenticator code seems to be incorrect.';
+			this.logonError = getDictionaryValue(this.authenticatorConfirmed.error);
 		}
 	}
 

@@ -114,7 +114,7 @@ body {
 }
 .headerImage {
 	@extend %centered_block;
-	height: 25px;
+	height: 22px;
 	margin-left: 0;
 }
 
@@ -165,7 +165,7 @@ body {
 }
 .subtitle {
 	font-weight: 400;
-	font-size: 1rem;
+	font-size: inherit;
 	margin-top: $spacing_1;
 	margin-bottom: 0px;
 }
@@ -350,10 +350,12 @@ input[type='checkbox']:checked {
 	&.thick {
 		height: 1px;
 	}
-}
 
-.subtitle {
-	font-size: 1.1rem;
+	&.just-space {
+		height: 0;
+		margin: 0;
+		margin-top: 20px;
+	}
 }
 
 .button {
@@ -499,10 +501,29 @@ input[type='checkbox']:checked {
 				}
 			}
 		}
+
+		&.is-ghost {
+			background-color: transparent !important;
+			box-shadow: none;
+
+			&:hover {
+				background-color: transparent !important;
+				box-shadow: none;
+				text-decoration: none;
+			}
+
+			&.is-blue {
+				color: #2d9aee!important;
+			}
+		}
 	}
 
 	&.small-text {
 		font-size: 14px!important;
+	}
+
+	&.medium-text {
+		font-size: 1.1rem!important;
 	}
 
 	&.is-icon-only {
@@ -557,6 +578,7 @@ a.login-router {
 
 .login-link {
 	font-weight: 500;
+	font-size: 1rem;
 }
 
 /* Checkbox */
@@ -737,4 +759,14 @@ a.login-router {
 .Password__strength-meter {
 	margin: 0!important;
 	margin-bottom: 10px!important;
+}
+
+.forgot-password {
+	margin-top: 15px;
+}
+
+.error {
+	text-align: left;
+	margin-bottom: 20px;
+	font-size: 14px;
 }

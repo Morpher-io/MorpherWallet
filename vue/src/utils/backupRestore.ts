@@ -224,20 +224,25 @@ const verifyAuthenticatorCode = async (email: string, code: string) => {
 		cache: 'default'
 	};
 	try {
-		const response = await fetch(getBackendEndpoint() + '/v1/verifyAuthenticatorCode', options);
+		const result = await fetch(getBackendEndpoint() + '/v1/verifyAuthenticatorCode', options);
 		//it will throw an exception if it fails
-		if (!response.ok) {
-			return false;
-		}
-		return true;
+		const response = await result.json();
+		
+		return response
 	} catch (e) {
-		return false;
+		return {
+			success: false,
+			error: '',
+		};
 	}
 };
 
 const verifyEmailCode = async (email: string, code: string) => {
 	if (email == '' || code == '') {
-		return false;
+		return {
+			success: false,
+			error: 'CANNOT_VERIFY_EMAIL_CODE'
+		};
 	}
 	const key = await sha256(email.toLowerCase());
 	const options: RequestInit = {
@@ -258,14 +263,19 @@ const verifyEmailCode = async (email: string, code: string) => {
 		const body = await result.json();
 		return body;
 	} catch (e) {
-		console.log(e);
-		return false;
+		return {
+			success: false,
+			error: ''
+		};
 	}
 };
 
 const verifyEmailConfirmationCode = async (email: string, code: string) => {
 	if (email == '' || code == '') {
-		return false;
+		return {
+			success: false,
+			error: 'CANNOT_VERIFY_EMAIL_CODE'
+		};
 	}
 	const key = await sha256(email.toLowerCase());
 	const options: RequestInit = {
@@ -286,8 +296,10 @@ const verifyEmailConfirmationCode = async (email: string, code: string) => {
 		const body = await result.json();
 		return body;
 	} catch (e) {
-		console.log(e);
-		return false;
+		return {
+			success: false,
+			error: ''
+		};
 	}
 };
 
