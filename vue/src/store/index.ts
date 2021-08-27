@@ -81,7 +81,9 @@ export interface RootState {
 	signMessage: any;
 	signResponse: any;
 	ethBalance: string;
-	unlocking: boolean
+	unlocking: boolean;
+	redirectPath: string;
+
 }
 
 /**
@@ -131,7 +133,8 @@ function initialState(): RootState {
 		signMessage: null,
 		signResponse: null,
 		ethBalance: '0',
-		unlocking: true
+		unlocking: true,
+		redirectPath: ''
 	} as RootState;
 }
 
@@ -154,6 +157,11 @@ const store: Store<RootState> = new Vuex.Store({
 				state.spinnerStatusText = '';
 				state.loading = false;
 			}
+		},
+		setRedirect(state: RootState, path: string) {
+			console.log('setRedirect', path)
+			state.redirectPath = path;
+			
 		},
 		delayedSpinnerMessage(state: RootState, statusMessage: string) {
 			state.loading = true;
@@ -259,7 +267,6 @@ const store: Store<RootState> = new Vuex.Store({
 		 * Fetch the user data from the database and attempt to unlock the wallet using the mail encrypted seed
 		 */
 		async fetchUser({ commit }, params: TypeFetchUser) {
-			console.log('fetchUser')
 			commit('updateUnlocking', true);
 			const email: string = params.email;
 			const password: string = params.password;
@@ -313,7 +320,6 @@ const store: Store<RootState> = new Vuex.Store({
 			});
 		},
 		fetchWalletFromRecovery({ state, commit }, params: TypeRecoveryParams) {
-			console.log('fetchWalletFromRecovery')
 			commit('updateUnlocking', true);
 			return new Promise((resolve, reject) => {
 				recoverSeedSocialRecovery(params.accessToken, state.email, params.recoveryTypeId)

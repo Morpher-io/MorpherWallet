@@ -93,14 +93,27 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
 	if (to.matched.some(record => record.meta.requiresAuth)) {
+		if (store.getters.isLoggedIn) {
+			if (store.state.redirectPath) {
+				const path = store.state.redirectPath;
+				store.commit('setRedirect', '')
+				next(path);
+			} else {
+				next();
+			}
+			
+			
+			return;
+		}
+		if (to.path && to.path !== '/') {
+			store.commit('setRedirect', to.path)
+		}
+
 		if (store.getters.twoFaRequired) {
 			next('/2fa');
 			return;
 		}
-		if (store.getters.isLoggedIn) {
-			next();
-			return;
-		}
+
 		if (store.getters.hasEncryptedKeystore && store.state.email) {
 			next('/unlock');
 			return;

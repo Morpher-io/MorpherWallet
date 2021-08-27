@@ -103,13 +103,9 @@ export default class SignTx extends mixins(Global, Authenticated) {
 		return 'Unknown'
 	}
 	copySrcETHAddress(text: string) {
-		console.log(1)
 		copyToClipboard(text, this);
-		console.log(2)
 		this.copyTextSrc = "Eth Address Copied"
-		console.log(3)
 		setTimeout(() => {
-			console.log(4)
 			this.copyTextSrc = 'Copy to clipboard';
 		}, 5000)
 	}
