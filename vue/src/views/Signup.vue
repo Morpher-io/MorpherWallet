@@ -2,7 +2,7 @@
 	<div>
 		<div class="container">
 			<h2 class="title">Sign Up</h2>
-			<p class="subtitle">Create a new Wallet</p>
+			<p class="subtitle">Create a new wallet.</p>
 			<form v-on:submit.prevent="signupExecute">
 				<div class="field">
 					<label class="label">Email</label>
@@ -33,30 +33,30 @@
 							data-cy="walletPassword"
 							v-model="walletPassword"
 						/>
-						<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial; margin-top: -8px" />
+						<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial" />
 						<div class="password-help">
-							<p>Must contain:</p>
+							<p>Requirements:</p>
 							<ul class="items">
 								<li :class="{
 									'done': passwordChecks.min === 'pass',
 									'fail': passwordChecks.min === 'fail'
-								}">Min 8. characters</li>
+								}">Min. 8 characters</li>
 								<li :class="{
 									'done': passwordChecks.lowercase === 'pass',
 									'fail': passwordChecks.lowercase === 'fail'
-								}">A lowercase</li>
+								}">Lowercase letter</li>
 								<li :class="{
 									'done': passwordChecks.uppercase === 'pass',
 									'fail': passwordChecks.uppercase === 'fail'
-								}">An uppercase</li>
+								}">Uppercase letter</li>
 								<li :class="{
 									'done': passwordChecks.number === 'pass',
 									'fail': passwordChecks.number === 'fail'
-								}">A number</li>
+								}">Number</li>
 								<li :class="{
 									'done': passwordChecks.match === 'pass',
 									'fail': passwordChecks.match === 'fail'
-								}">Matches repeat</li>
+								}">Passwords match</li>
 							</ul>
 						</div>
 
@@ -66,7 +66,7 @@
 					</div>
 				</div>
 				<div class="field">
-					<label class="label">Repeat Password</label>
+					<label class="label">Confirm Password</label>
 					<div class="control">
 						<input
 							type="password"

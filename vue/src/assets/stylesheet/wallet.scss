@@ -322,7 +322,7 @@ input[type='checkbox']:checked {
 }
 
 .password-input {
-	margin-bottom: 5px;
+	margin-bottom: 6px;
 }
 
 .container {
@@ -732,4 +732,9 @@ a.login-router {
 			}
 		}
 	}
+}
+
+.Password__strength-meter {
+	margin: 0!important;
+	margin-bottom: 10px!important;
 }

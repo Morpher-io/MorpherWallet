@@ -11,6 +11,6 @@ describe('Front Page', () => {
 	it('Open The register URL', () => {
 		cy.visit('/signup');
 		cy.contains('h2', 'Signup');
-		cy.contains('h4', 'Create a new Wallet');
+		cy.contains('h4', 'Create a new wallet.');
 	});
 });

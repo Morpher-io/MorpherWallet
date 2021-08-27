@@ -35,7 +35,7 @@
 								type="password"
 								name="newPassword"
 								data-cy="newPassword"
-								class="input is-primary"
+								class="input is-primary password-input"
 								v-model="walletPassword"
 							/>
 							<password
@@ -45,28 +45,28 @@
 								style="max-width: initial"
 							/>
 							<div class="password-help">
-								<p>Must contain:</p>
+							<p>Requirements:</p>
 								<ul class="items">
 									<li :class="{
 										'done': passwordChecks.min === 'pass',
 										'fail': passwordChecks.min === 'fail'
-									}">Min 8. characters</li>
+									}">Min. 8 characters</li>
 									<li :class="{
 										'done': passwordChecks.lowercase === 'pass',
 										'fail': passwordChecks.lowercase === 'fail'
-									}">A lowercase</li>
+									}">Lowercase letter</li>
 									<li :class="{
 										'done': passwordChecks.uppercase === 'pass',
 										'fail': passwordChecks.uppercase === 'fail'
-									}">An uppercase</li>
+									}">Uppercase letter</li>
 									<li :class="{
 										'done': passwordChecks.number === 'pass',
 										'fail': passwordChecks.number === 'fail'
-									}">A number</li>
+									}">Number</li>
 									<li :class="{
 										'done': passwordChecks.match === 'pass',
 										'fail': passwordChecks.match === 'fail'
-									}">Matches repeat</li>
+									}">Passwords match</li>
 								</ul>
 							</div>
 
@@ -76,7 +76,7 @@
 						</div>
 					</div>
 					<div class="field">
-						<label class="label">Repeat Password</label>
+						<label class="label">Confirm Password</label>
 						<div class="control">
 							<input
 								type="password"
