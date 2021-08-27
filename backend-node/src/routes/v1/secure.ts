@@ -25,5 +25,5 @@ module.exports = async function(req, res, next) {
         }
     }
 
-    return errorResponse(res, 'Auth Error - Aborting!', 503);
+    return errorResponse(res, 'AUTH_ERROR', 400);
 };

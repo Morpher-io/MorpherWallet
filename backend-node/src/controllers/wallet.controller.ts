@@ -25,7 +25,7 @@ import { Logger } from '../helpers/functions/winston';
 export async function saveEmailPassword(req: Request, res: Response) {
     // Get sequelize transactions to rollback changes in case of failure.
     const [err, transaction] = await to(getTransaction());
-    if (err) return errorResponse(res, err.message);
+    if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
 
     try {
         // Get variables from request body.
@@ -41,7 +41,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
             encryptedSeed.iv === undefined ||
             encryptedSeed.salt === undefined
         ) {
-            return errorResponse(res, 'Bad body data.');
+            return errorResponse(res, 'BAD_REQUEST', 400);
         }
 
         let userId;
@@ -83,10 +83,10 @@ export async function saveEmailPassword(req: Request, res: Response) {
         // If an error happened anywhere along the way, rollback all the changes.
         await transaction.rollback();
         Logger.info(error.message);
-        return errorResponse(res, 'Internal error', 500);
+        return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 
-    return errorResponse(res, 'User not found', 404);
+    return errorResponse(res, 'USER_NOT_FOUND', 404);
 }
 
 export async function getRecoveryMethods(req: Request, res: Response) {
@@ -131,7 +131,7 @@ export async function addRecoveryMethod(req: Request, res: Response) {
         });
     }
 
-    return errorResponse(res, 'Recovery Method already set!');
+    return errorResponse(res, 'RECOVERY_METHOD_ALREADY_SET');
 }
 
 // Function to save new email/password to the database.
@@ -162,10 +162,10 @@ export async function updatePassword(req: Request, res: Response) {
         }
     } catch (error) {
         Logger.info(error.message);
-        return errorResponse(res, 'Internal error', 500);
+        return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
     //error out in any other case
-    return errorResponse(res, 'Internal Error', 500);
+    return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
 }
 
 // Function to save new email/password to the database.
@@ -238,15 +238,15 @@ export async function updateEmail(req: Request, res: Response) {
             } else {
                 //user exists error
                 await transaction.rollback();
-                return errorResponse(res, 'Error: User with this Email address already exists.', 409);
+                return errorResponse(res, 'USER_ALREADY_EXISTS', 409);
             }
         }
         //any other error case
         await transaction.rollback();
-        return errorResponse(res, 'Error: Update Operation aborted.', 500);
+        return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     } catch (error) {
         Logger.info(error.message);
-        return errorResponse(res, 'Internal error', 500);
+        return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 }
 
@@ -273,7 +273,7 @@ export async function getEncryptedSeed(req, res) {
                 headers: req.headers,
                 body: req.body
             });
-            return errorResponse(res, 'Account not yet confirmed. Try again.');
+            return errorResponse(res, 'ACCOUNT_NOT_CONFIRMED', 400);
         }
 
         const email2FAVerified = await verifyEmail2FA(recovery.user_id, email2fa);
@@ -289,7 +289,7 @@ export async function getEncryptedSeed(req, res) {
                 headers: req.headers,
                 body: req.body
             });
-            return errorResponse(res, 'Either Email2FA or Authenticator2FA was wrong. Try again.');
+            return errorResponse(res, 'SOME_2FA_WRONG', 400);
         }
 
         const email2faStillValid = await isEmail2FaStillValid(recovery.user_id);
@@ -303,7 +303,7 @@ export async function getEncryptedSeed(req, res) {
                 headers: req.headers,
                 body: req.body
             });
-            return errorResponse(res, 'Email 2FA is expired. Logout/Login and enter Email 2FA within 15 minutes.');
+            return errorResponse(res, 'EMAIL_2FA_EXPIRED', 400);
         }
         
         //avoid replay attack, generate a new Email 2FA after it was validated and seed was sent
@@ -326,7 +326,7 @@ export async function getEncryptedSeed(req, res) {
     }
 
     // Otherwise return an error.
-    return errorResponse(res, 'There is no user with this key.');
+    return errorResponse(res, 'USER_NOT_FOUND', 404);
 }
 
 // Function to get encrypted seed from facebook recovery.
@@ -362,7 +362,7 @@ async function getFacebookEncryptedSeed(req, res) {
     }
     Logger.info({ method: arguments.callee.name, type: 'Failed Recover Encrypted Seed', headers: req.headers, body: req.body });
     // If user does not exist return an error.
-    return errorResponse(res, 'User not found.');
+    return errorResponse(res, 'USER_NOT_FOUND', 404);
 }
 
 // Function to get encrypted seed from google recovery.
@@ -409,7 +409,7 @@ async function getGoogleEncryptedSeed(req, res) {
 
     Logger.info({ method: arguments.callee.name, type: 'Failed Recover Encrypted Seed', headers: req.headers, body: req.body });
     // If user does not exist return an error.
-    return errorResponse(res, 'User not found.');
+    return errorResponse(res, 'USER_NOT_FOUND', 404);
 }
 
 // Function to get encrypted seed from vkontakte recovery.
@@ -447,7 +447,7 @@ async function getVKontakteEncryptedSeed(req, res) {
     }
     Logger.info({ method: arguments.callee.name, type: 'Failed Recover Encrypted Seed', headers: req.headers, body: req.body });
     // If user does not exist return an error.
-    return errorResponse(res, 'User not found.');
+    return errorResponse(res, 'USER_NOT_FOUND', 404);
 }
 
 export async function recoverSeedSocialRecovery(req: Request, res: Response) {
@@ -459,7 +459,7 @@ export async function recoverSeedSocialRecovery(req: Request, res: Response) {
         case 5:
             return await getVKontakteEncryptedSeed(req, res);
         default:
-            return errorResponse(res, 'The Recovery Method does not exist.', 500);
+            return errorResponse(res, 'RECOVERY_METHOD_NOT_EXIST', 500);
     }
 }
 
@@ -468,7 +468,7 @@ export async function getPayload(req, res) {
     const key = req.body.key;
     const recovery = await Recovery.findOne({ where: { key } });
     if (recovery == null) {
-        return errorResponse(res, 'User not found');
+        return errorResponse(res, 'USER_NOT_FOUND', 404);
     }
     const user = await User.findOne({ where: { id: recovery.user_id }, raw: true });
 
@@ -495,7 +495,7 @@ export async function getPayload(req, res) {
         Logger.info({ method: arguments.callee.name, type: 'Get Payload', user_id: user.id, user, headers: req.headers, body: req.body });
         return successResponse(res, payload);
     } else {
-        return errorResponse(res, '2FA methods could not be found');
+        return errorResponse(res, 'METHODS_2FA_NOT_FOUND', 404);
     }
 }
 
@@ -504,7 +504,7 @@ export async function getNonce(req, res) {
     const recovery = await Recovery.findOne({ where: { key } });
     if (recovery == null) {
         Logger.info({ method: arguments.callee.name, type: 'Error: User Not found', key, headers: req.headers, body: req.body });
-        return errorResponse(res, 'User not found');
+        return errorResponse(res, 'USER_NOT_FOUND', 404);
     }
     const user = await User.findOne({ where: { id: recovery.user_id }, raw: true });
 
@@ -512,7 +512,7 @@ export async function getNonce(req, res) {
         Logger.info({ method: arguments.callee.name, type: 'Get Nonce', user_id: user.id, user, headers: req.headers, body: req.body });
         return successResponse(res, { nonce: user.nonce });
     } else {
-        return errorResponse(res, 'Nonce could not be found');
+        return errorResponse(res, 'NONCE_NOT_FOUND', 404);
     }
 }
 
@@ -555,7 +555,7 @@ export async function change2FAMethods(req, res) {
         return successResponse(res, { message: 'User payload updated successfully.' });
     }
     //in any other case, return error
-    return errorResponse(res, 'Error: User not found.', 404);
+    return errorResponse(res, 'USER_NOT_FOUND', 404);
 }
 
 export async function generateAuthenticatorQR(req, res) {
@@ -586,12 +586,12 @@ export async function generateAuthenticatorQR(req, res) {
                     image: result
                 });
             } catch (e) {
-                return errorResponse(res, 'Could not generate QR code.');
+                return errorResponse(res, 'CANNOT_GENERATE_QR_CODE', 500);
             }
         }
     }
 
-    return errorResponse(res, 'User not found', 404);
+    return errorResponse(res, 'USER_NOT_FOUND', 404);
 }
 
 export async function verifyAuthenticatorCode(req, res) {
@@ -627,12 +627,12 @@ export async function verifyAuthenticatorCode(req, res) {
                     headers: req.headers,
                     body: req.body
                 });
-                return errorResponse(res, 'Could not verify authenticator code.', 500);
+                return errorResponse(res, 'CANNOT_VERIFY_AUTHENTICATOR', 500);
             }
         }
     }
     Logger.info({ method: arguments.callee.name, type: 'Error: User Not found', headers: req.headers, body: req.body });
-    return errorResponse(res, 'User not found, aborting');
+    return errorResponse(res, 'USER_NOT_FOUND', 404);
 }
 
 async function updateEmail2fa(user_id) {
@@ -675,7 +675,7 @@ export async function send2FAEmail(req, res) {
             headers: req.headers,
             body: req.body
         });
-        return errorResponse(res, 'There was a problem parsing the email');
+        return errorResponse(res, 'PROBLEM_SENDING_EMAIL', 500);
     }
 }
 
@@ -706,7 +706,7 @@ export async function verifyEmailCode(req, res) {
                         headers: req.headers,
                         body: req.body
                     });
-                    return errorResponse(res, 'Could not verify email code. Please try again!');
+                    return errorResponse(res, 'CANNOT_VERIFY_EMAIL_CODE', 400);
                 }
             } else {
                 Logger.info({
@@ -717,12 +717,12 @@ export async function verifyEmailCode(req, res) {
                     headers: req.headers,
                     body: req.body
                 });
-                return errorResponse(res, 'Email 2FA code expired. Logout and Login again.');
+                return errorResponse(res, 'EMAIL_2FA_EXPIRED', 400);
             }
         }
     }
 
-    return errorResponse(res, 'Could not find User!', 404);
+    return errorResponse(res, 'USER_NOT_FOUND', 404);
 }
 
 export async function verifyEmailConfirmationCode(req, res) {
@@ -755,12 +755,12 @@ export async function verifyEmailConfirmationCode(req, res) {
                     headers: req.headers,
                     body: req.body
                 });
-                return errorResponse(res, 'Could not verify email code. Please try again!');
+                return errorResponse(res, 'CANNOT_VERIFY_EMAIL_CODE', 400);
             }
         }
     }
 
-    return errorResponse(res, 'Could not find User!', 404);
+    return errorResponse(res, 'USER_NOT_FOUND', 404);
 }
 
 export async function resetRecovery(req, res) {
@@ -774,10 +774,10 @@ export async function resetRecovery(req, res) {
             return successResponse(res, true);
         }
 
-        return errorResponse(res, 'Could not find recovery!', 404);
+        return errorResponse(res, 'CANNOT_FIND_RECOVERY', 404);
     }
 
-    return errorResponse(res, 'Could not find User!', 404);
+    return errorResponse(res, 'USER_NOT_FOUND', 404);
 }
 
 export async function deleteAccount(req, res) {
@@ -793,11 +793,11 @@ export async function deleteAccount(req, res) {
             });
             return successResponse(res, true);
         } catch (e) {
-            return errorResponse(res, 'Could not delete User!', 500);
+            return errorResponse(res, 'CANNOT_DELETE_USER', 500);
         }
     }
 
-    return errorResponse(res, 'Could not find User!', 404);
+    return errorResponse(res, 'USER_NOT_FOUND', 404);
 }
 
 async function verifyEmail2FA(user_id: string, code: string): Promise<boolean> {
