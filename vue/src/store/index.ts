@@ -159,9 +159,7 @@ const store: Store<RootState> = new Vuex.Store({
 			}
 		},
 		setRedirect(state: RootState, path: string) {
-			console.log('setRedirect', path)
 			state.redirectPath = path;
-			
 		},
 		delayedSpinnerMessage(state: RootState, statusMessage: string) {
 			state.loading = true;
