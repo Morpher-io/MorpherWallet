@@ -15,6 +15,12 @@ $col_yellow: #b8b8b8;
 $col_white: #FFF;
 $col_black: #333333;
 
+$warning_light: #FAEEC0;
+$warning_dark: #F9DE6E;
+
+$green_ligher: #BDE4D8;
+$red_lighter: #EBB29E;
+
 $font1: 'Rubik', sans-serif;
 $font2: 'Roboto', sans-serif;
 $spacing_1: 15px;
@@ -245,6 +251,12 @@ input[type='checkbox']:checked {
 	}
 	&.is-grey:hover {
 		background-color: $col_grey_light;
+	}
+	&.is-light-green {
+		background-color: $green_ligher;
+	}
+	&.is-light-danger {
+		background-color: $red_lighter;
 	}
 }
 .button:focus {
@@ -539,6 +551,14 @@ input[type='checkbox']:checked {
 		background: transparent;
 		border: 1px solid;
 	}
+
+	&.is-small-button {
+		height: 34px;
+		display: flex;
+    	align-items: center;
+		padding-left: 1.2rem;
+		padding-right: 1.2rem;
+	}
 }
 
 .transition-faster {
@@ -657,9 +677,8 @@ a.login-router {
 .recovery-active {
 	background: rgba($col_green, 0.1);
     margin: 0 10px;
-    padding: 5px ;
-    color: $col_green;
-	border-radius: 0 0 10px 10px;
+    padding: 5px;
+	border-radius: 0 0 7px 7px;
 }
 
 .horizontal-buttons {
@@ -776,8 +795,34 @@ a.login-router {
 	height: 50px;
 	border-bottom: 1px solid $grey-light;
 	justify-content: center;
+	cursor: pointer;
 
 	.icon {
 		margin-left: auto;
+	}
+}
+
+.custom-card {
+	padding: 15px;
+	box-shadow: 0 1px 3px 0 rgba($col_black, 0.1);
+	border-radius: 13px;
+	border: 1px solid #EAE9ED;
+
+	.actions {
+		display: flex;
+		align-items: center;
+	}
+}
+
+.alert {
+	padding: 10px 15px;
+	border-radius: 5px;
+	border-width: 1px;
+	border-style: solid;
+	font-weight: 500;
+
+	&.warning {
+		border-color: $warning_dark;
+		background-color: $warning_light;
 	}
 }
