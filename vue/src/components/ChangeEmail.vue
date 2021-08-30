@@ -1,68 +1,50 @@
 <template>
 	<div class="card">
 		<form v-on:submit.prevent="formSubmitChangeEmail">
-			<div :class="{
-				'collapse': true,
-				'hide-border': activePage
-			}">
-				<div v-if="!activePage" class="is-flex is-align-items-center">
-					<span class="header" @click="changeActive">
-						Edit Email Address
-					</span>
-					<span :class="{
-						'icon collapseIcon header': true
-					}" @click="changeActive">
-						<i class="fas fa-chevron-right"></i>
-					</span>
-				</div>
-				<div :class="activePage === 'email' ? 'visible' : 'hidden'">
-					<div class="card-content">
-						<div class="content">
-							<div class="field">
-								<label class="label">New Email</label>
-								<div class="control">
-									<input
-										class="input is-primary"
-										name="newEmail"
-										data-cy="newEmail"
-										v-model="newEmail"
-										:disabled="twoFaSent"
-									/>
-								</div>
+			<div>
+				<div class="card-content">
+					<div class="content">
+						<div class="field">
+							<label class="label">New Email</label>
+							<div class="control">
+								<input class="input is-primary" name="newEmail" data-cy="newEmail" v-model="newEmail" :disabled="twoFaSent" />
 							</div>
-							<div class="field">
-								<label class="label">Password</label>
-								<div class="control">
-									<input
-										type="password"
-										class="input is-primary"
-										name="password"
-										data-cy="password"
-										v-model="password"
-										:disabled="twoFaSent"
-									/>
-								</div>
+						</div>
+						<div class="field">
+							<label class="label">Password</label>
+							<div class="control">
+								<input
+									type="password"
+									class="input is-primary"
+									name="password"
+									data-cy="password"
+									v-model="password"
+									:disabled="twoFaSent"
+								/>
 							</div>
-							<div class="field mb-0" v-if="twoFaSent">
-								<label class="label">2FA Code</label>
-								<div class="control">
-									<input type="number" class="input is-primary" data-cy="twoFa" name="twoFa" placeholder="Enter 2FA" v-model="twoFa" />
-								</div>
+						</div>
+						<div class="field mb-0" v-if="twoFaSent">
+							<label class="label">2FA Code</label>
+							<div class="control">
+								<input type="number" class="input is-primary" data-cy="twoFa" name="twoFa" placeholder="Enter 2FA" v-model="twoFa" />
 							</div>
 						</div>
 					</div>
+				</div>
 
-					<div class="error mt-3" v-if="logonError">
-						<p>
-							⚠️ <span v-html="logonError"></span>
-						</p>
-					</div>
+				<div class="error mt-3" v-if="logonError">
+					<p>⚠️ <span v-html="logonError"></span></p>
+				</div>
 
-					<div class="field is-grouped">
-						<button class="button is-green big-button is-login transition-faster" type="submit" data-cy="updateEmail" :disabled="!newEmail || !password">
-							<span>Update Email</span>
-						</button>
-					</div>
+				<div class="field is-grouped">
+					<button
+						class="button is-green big-button is-login transition-faster"
+						type="submit"
+						data-cy="updateEmail"
+						:disabled="!newEmail || !password"
+					>
+						<span>Update Email</span>
+					</button>
 				</div>
 			</div>
 		</form>
@@ -75,7 +57,6 @@ import { sha256 } from '../utils/cryptoFunctions';
 
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
-import { Emit, Prop } from 'vue-property-decorator';
 import { getDictionaryValue } from '../utils/dictionary';
 
 @Component({})
@@ -87,14 +68,6 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 	twoFa: any = null;
 	logonError = '';
 	success = false;
-
-	@Prop()
-	activePage!: string;
-
-	@Emit('changeActive')
-	changeActive() {
-		return;
-	}
 
 	async formSubmitChangeEmail() {
 		if (!this.newEmail) {

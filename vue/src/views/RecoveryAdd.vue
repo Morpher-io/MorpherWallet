@@ -11,7 +11,7 @@
 		<AddRecoveryVkontakte :walletEmail="store.email"></AddRecoveryVkontakte>
 
 		<div class="field is-grouped">
-			<router-link to="/" tag="button" class="button">
+			<router-link to="/" tag="button" class="button is-ghost is-blue big-button medium-text transition-faster">
 				<span>Cancel</span>
 			</router-link>
 		</div>

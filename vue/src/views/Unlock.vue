@@ -25,7 +25,7 @@
 			<button class="button is-green big-button is-login transition-faster mt-5" type="submit" data-cy="unlock" :disabled="!walletPassword">
 				<span>Unlock</span>
 			</button>
-			<button class="button mt-3" v-on:click="logout()">
+			<button v-on:click="logout()" class="button is-ghost is-blue big-button medium-text transition-faster">
 				<span>Cancel</span>
 			</button>
 		</form>

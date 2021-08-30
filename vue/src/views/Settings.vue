@@ -6,12 +6,57 @@
 					<i class="fas fa-chevron-left"></i>
 				</span>
 			</button>
-			<h2 class="title ml-4">{{
-				generateTitle()
-			}}</h2>
+			<h2 class="title ml-4">Settings</h2>
 		</div>
 
-		<ChangeEmail :activePage="activePage" @changeActive="activePage = 'email'"></ChangeEmail>
+		<div class="divider just-space"/>
+
+		<div class="settings-link is-flex is-align-items-center" @click="changeActive('email')">
+			<span class="text">
+				Edit Email Address
+			</span>
+			<span class="icon">
+				<i class="fas fa-chevron-right" />
+			</span>
+		</div>
+
+		<div class="settings-link is-flex is-align-items-center" @click="changeActive('password')">
+			<span class="text">
+				Change Password
+			</span>
+			<span class="icon">
+				<i class="fas fa-chevron-right" />
+			</span>
+		</div>
+
+		<div class="settings-link is-flex is-align-items-center" @click="changeActive('2FA')">
+			<span class="text">
+				Two-Factor Authentication
+			</span>
+			<span class="icon">
+				<i class="fas fa-chevron-right" />
+			</span>
+		</div>
+
+		<div class="settings-link is-flex is-align-items-center" @click="changeActive('keys')">
+			<span class="text">
+				Export Private Keys / Seed
+			</span>
+			<span class="icon">
+				<i class="fas fa-chevron-right" />
+			</span>
+		</div>
+
+		<div class="settings-link is-flex is-align-items-center" @click="changeActive('recovery')">
+			<span class="text">
+				Trusted Account Recovery
+			</span>
+			<span class="icon">
+				<i class="fas fa-chevron-right" />
+			</span>
+		</div>
+
+		<!-- <ChangeEmail :activePage="activePage" @changeActive="activePage = 'email'"></ChangeEmail>
 
 		<ChangePassword :activePage="activePage" @changeActive="activePage = 'password'"></ChangePassword>
 
@@ -19,7 +64,7 @@
 
 		<ExportWallet :activePage="activePage" @changeActive="activePage = 'keys'"></ExportWallet>
 
-		<AccountRecovery :activePage="activePage" @changeActive="activePage = 'recovery'"></AccountRecovery>
+		<AccountRecovery :activePage="activePage" @changeActive="activePage = 'recovery'"></AccountRecovery> -->
 	</div>
 </template>
 
@@ -52,32 +97,12 @@ import AccountRecovery from '../components/AccountRecovery.vue';
 	}
 })
 export default class Settings extends Vue {
-	activePage = '';
-
-	generateTitle() {
-		let title = 'Settings';
-
-		if (this.activePage === 'email') {
-			title = 'Email settings';
-		} else if (this.activePage === 'password') {
-			title = 'Password settings';
-		} else if (this.activePage === '2FA') {
-			title = 'Two-Factor settings';
-		} else if (this.activePage === 'keys') {
-			title = 'Keys settings';
-		} else if (this.activePage === 'recovery') {
-			title = 'Recovery settings';
-		}
-
-		return title;
+	redirectUser() {
+		this.$router.push('/');
 	}
 
-	redirectUser() {
-		if (!this.activePage) {
-			this.$router.push('/');
-		} else {
-			this.activePage = '';
-		}
+	changeActive(page: string) {
+		this.$router.push('/settings/' + page);
 	}
 }
 </script>

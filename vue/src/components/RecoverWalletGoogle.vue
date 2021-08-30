@@ -6,7 +6,7 @@
 			</span>
 			<span>Google</span>
 		</GoogleLogin>
-		<ChangePassword v-if="seedFound" :presetOldPassword="oldPassword" activePage="password"></ChangePassword>
+		<ChangePassword v-if="seedFound" :presetOldPassword="oldPassword"></ChangePassword>
 	</div>
 </template>
 

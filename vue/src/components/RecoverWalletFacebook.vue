@@ -14,7 +14,7 @@
 		>
 			<span slot="login">Facebook</span>
 		</v-facebook-login>
-		<ChangePassword v-if="seedFound" :presetOldPassword="oldPassword" activePage="password"></ChangePassword>
+		<ChangePassword v-if="seedFound" :presetOldPassword="oldPassword"></ChangePassword>
 	</div>
 </template>
 

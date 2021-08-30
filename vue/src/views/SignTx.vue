@@ -59,7 +59,7 @@
 
 			<div class="divider thick"></div>	
 
-			<button class="button" @click="cancel()">
+			<button @click="cancel()" class="button is-ghost is-blue big-button medium-text transition-faster">
 				<span>Cancel</span>
 			</button>
 		</div>
