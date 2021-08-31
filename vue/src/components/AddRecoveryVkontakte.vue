@@ -1,9 +1,13 @@
 <template>
 	<div class="field">
 		<div class="control is-expanded">
-			<button class="button is-grey big-button outlined-button is-thick facebook-button transition-faster" @click="doLogin" v-if="!hasRecoveryMethod">
-				<span class="icon vk-icon">
-					<i class="fab fa-vk"></i>
+			<button
+				class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
+				@click="doLogin"
+				v-if="!hasRecoveryMethod"
+			>
+				<span class="icon img">
+					<img src="@/assets/img/vk_logo.svg" alt="VKontakte Logo" />
 				</span>
 				<span>VKontakte</span>
 			</button>
@@ -11,10 +15,10 @@
 
 		<div class="control is-expanded has-text-centered" v-if="hasRecoveryMethod">
 			<button class="button big-button is-thick transition-faster vk-button" @click="doDelete">
-				<span class="icon">
-					<i class="fab fa-vk"></i>
+				<span class="icon img">
+					<img src="@/assets/img/vk_logo_white.svg" alt="VKontakte Logo" />
 				</span>
-				<span>Revoke VKontakte Access</span>
+				<span>Revoke Access</span>
 			</button>
 			<div class="recovery-active is-text-small">
 				<span class="icon">
@@ -31,25 +35,23 @@ import { sha256 } from './../utils/cryptoFunctions';
 
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
+import { Emit } from 'vue-property-decorator';
 
 @Component()
 export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) {
-	error = '';
 	hasRecoveryMethod = false;
 	clientId = process.env.VUE_APP_VK_APP_ID;
 	recoveryTypeId = 5;
 
 	callbackUrlForPopup = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '');
 
-	async mounted() {
-		this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
+	@Emit('processMethod')
+	processMethod(data) {
+		return data;
 	}
 
-	async resetRecovery() {
-		const success = await this.resetRecoveryMethod({ recoveryTypeId: this.recoveryTypeId });
-		if (success) {
-			this.hasRecoveryMethod = false;
-		}
+	async mounted() {
+		this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 	}
 
 	vkPopup(options) {
@@ -99,14 +101,31 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 						.then(async () => {
 							this.showSpinnerThenAutohide('Saved Successfully');
 							this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
+							this.processMethod({
+								success: true,
+								method: 'VKontakte',
+								enabled: true,
+								erorr: ''
+							});
 						})
 						.catch(e => {
 							this.showSpinnerThenAutohide('Error');
-							this.error = e.toString();
+							this.processMethod({
+								success: false,
+								method: 'VKontakte',
+								enabled: true,
+								erorr: ''
+							});
 						});
 				}
 			} catch (e) {
 				//win.close()
+				this.processMethod({
+					success: false,
+					method: 'VKontakte',
+					enabled: true,
+					erorr: ''
+				});
 			}
 		}, 100);
 	}
@@ -144,14 +163,31 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 						.then(async () => {
 							this.showSpinnerThenAutohide('Deleted Successfully');
 							this.hasRecoveryMethod = false;
+							this.processMethod({
+								success: true,
+								method: 'VKontakte',
+								enabled: false,
+								erorr: ''
+							});
 						})
 						.catch(e => {
 							this.showSpinnerThenAutohide('Error finding user');
-							this.error = e.toString();
+							this.processMethod({
+								success: false,
+								method: 'VKontakte',
+								enabled: false,
+								erorr: ''
+							});
 						});
 				}
 			} catch (e) {
 				//win.close()
+				this.processMethod({
+					success: false,
+					method: 'VKontakte',
+					enabled: false,
+					erorr: ''
+				});
 			}
 		}, 100);
 	}

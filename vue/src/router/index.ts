@@ -10,7 +10,6 @@ import Unlock from '../views/Unlock.vue';
 import SignTx from '../views/SignTx.vue';
 import SignMsg from '../views/SignMsg.vue';
 import Recovery from '../views/Recovery.vue';
-import RecoveryAdd from '../views/RecoveryAdd.vue';
 import EmailSettings from '../views/EmailSettings.vue';
 import PasswordSettings from '../views/PasswordSettings.vue';
 import TwoFactorSettings from '../views/TwoFactorSettings.vue';
@@ -83,14 +82,6 @@ const routes: Array<RouteConfig> = [
 		path: '/settings/delete',
 		name: 'DeleteSettings',
 		component: DeleteSettings,
-		meta: {
-			requiresAuth: true
-		}
-	},
-	{
-		path: '/addrecovery',
-		name: 'AddRecovery',
-		component: RecoveryAdd,
 		meta: {
 			requiresAuth: true
 		}

@@ -17,10 +17,10 @@
 		</div>
 
 		<button @click="setCode()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!authenticatorCode">
-			<span>Confirm</span>
+			<span>Submit</span>
 		</button>
 		<button v-on:click="pageBack()" class="button is-ghost is-blue big-button medium-text transition-faster">
-			<span>Back</span>
+			<span>Cancel</span>
 		</button>
 	</div>
 </template>

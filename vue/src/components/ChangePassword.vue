@@ -2,7 +2,9 @@
 	<div class="card">
 		<div v-if="currentPage === 0">
 			<h2 v-if="!hideOldPassword" class="title">Change Password</h2>
+			<h2 v-else class="title">Reset Your Password</h2>
 			<h4 v-if="!hideOldPassword" class="subtitle">Create a new account password.</h4>
+			<h4 v-else class="subtitle">Account recovered successfully! Please reset your password below.</h4>
 			<form v-on:submit.prevent="changePasswordExecute">
 				<div>
 					<div class="field" v-if="!hideOldPassword">
@@ -90,8 +92,8 @@
 						<span>Update Password</span>
 					</button>
 
-					<div class="mt-2" v-if="!hideOldPassword">
-						<button v-on:click="$router.push('/settings?email_password=true')" tag="button" type="button" class="button is-ghost is-blue big-button medium-text transition-faster">
+					<div class="mt-2">
+						<button v-on:click="$router.push(hideOldPassword ? '/login' : '/settings?email_password=true')" tag="button" type="button" class="button is-ghost is-blue big-button medium-text transition-faster">
 							<span>Cancel</span>
 						</button>
 					</div>

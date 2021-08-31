@@ -116,6 +116,7 @@ export default class Settings extends mixins(Authenticated, Global) {
 	redirectUser() {
 		if (this.activePage === 'email_password') {
 			this.isEmailPasswordPage = false;
+			this.activePage = '';
 			return;
 		}
 

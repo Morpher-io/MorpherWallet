@@ -2,7 +2,7 @@
 	<div class="card">
 		<div>
 			<div class="alert warning mb-5 is-size-7 has-text-left">
-				⚠ If you want to delete your account, please export a your seed in Export Wallet settings first.
+				⚠ If you want to delete your account, please export your seed in Export Wallet settings first.
 			</div>
 			<div class="field is-grouped">
 				<button @click="setNewPage" tag="button" class="button big-button is-danger transition-faster" :disabled="!store.seedExported">
