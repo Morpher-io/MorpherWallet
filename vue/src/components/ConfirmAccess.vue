@@ -11,6 +11,10 @@
 			</div>
 		</div>
 
+		<div class="error mt-3" v-if="logonError">
+			<p>⚠️ <span v-html="logonError"></span></p>
+		</div>
+
 		<button @click="setPassword()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!walletPassword">
 			<span>Continue</span>
 		</button>
@@ -22,12 +26,21 @@
 
 <script lang="ts">
 import Component, { mixins } from 'vue-class-component';
-import { Emit } from 'vue-property-decorator';
+import { Emit, Prop, Watch } from 'vue-property-decorator';
 import { Authenticated } from '../mixins/mixins';
 
 @Component({})
 export default class ConfirmAccess extends mixins(Authenticated) {
     walletPassword = '';
+	logonError = '';
+
+	@Prop()
+	error!: string;
+
+	@Watch('error')
+	handleErorrChange(newValue: string) {
+		if (newValue) this.logonError = newValue;
+	}
 
 	@Emit('setPassword')
 	setPassword() {

@@ -16,6 +16,7 @@ import PasswordSettings from '../views/PasswordSettings.vue';
 import TwoFactorSettings from '../views/TwoFactorSettings.vue';
 import KeysSettings from '../views/KeysSettings.vue';
 import RecoverySettings from '../views/RecoverySettings.vue';
+import DeleteSettings from '../views/DeleteSettings.vue';
 
 Vue.use(VueRouter);
 
@@ -74,6 +75,14 @@ const routes: Array<RouteConfig> = [
 		path: '/settings/recovery',
 		name: 'RecoverySettings',
 		component: RecoverySettings,
+		meta: {
+			requiresAuth: true
+		}
+	},
+	{
+		path: '/settings/delete',
+		name: 'DeleteSettings',
+		component: DeleteSettings,
 		meta: {
 			requiresAuth: true
 		}

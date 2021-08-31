@@ -592,7 +592,7 @@ input[type='checkbox']:checked {
 	font-size: 12px;
 }
 
-a.login-router {
+.login-router {
 	color: #228CDB!important;
 }
 
@@ -790,15 +790,58 @@ a.login-router {
 	font-size: 14px;
 }
 
-.settings-link {
-	font-size: 1.1rem;
-	height: 50px;
-	border-bottom: 1px solid $grey-light;
-	justify-content: center;
-	cursor: pointer;
+.settings-data {
+	border: 1px solid #EAE9ED;
+    border-radius: 13px;
+    box-shadow: 0px 2px 4px 0px rgba($col_black, 0.1);
 
-	.icon {
-		margin-left: auto;
+	.settings-link {
+		font-size: 1.1rem;
+		justify-content: center;
+		cursor: pointer;
+		padding: 15px;
+
+		+ .settings-link {
+			border-top: 2px solid #EAE9ED;
+		}
+
+		.text {
+			margin-left: 10px;
+		}
+
+		.icon {
+			margin-left: auto;
+		}
+
+		&.email-password {
+			justify-content: flex-start;
+
+			.data {
+				font-size: 1rem;
+				text-align: left;
+				justify-content: flex-start;
+				margin-right: 10px;
+				overflow: hidden;
+
+				p {
+					line-height: 1rem;
+					white-space: nowrap;
+					overflow: hidden;
+					text-overflow: ellipsis;
+				}
+			}
+
+			.link {
+				margin-left: auto;
+
+				> div {
+					> svg {
+						display: block;
+						font-size: 26px;
+					}
+				}
+			}
+		}
 	}
 }
 

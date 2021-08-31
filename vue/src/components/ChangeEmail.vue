@@ -1,13 +1,13 @@
 <template>
 	<div class="card">
-		<form v-on:submit.prevent="formSubmitChangeEmail">
+		<div>
 			<div>
 				<div class="card-content">
 					<div class="content">
 						<div class="field">
 							<label class="label">New Email</label>
 							<div class="control">
-								<input class="input is-primary" name="newEmail" data-cy="newEmail" v-model="newEmail" :disabled="twoFaSent" />
+								<input class="input" name="newEmail" v-model="newEmail" />
 							</div>
 						</div>
 						<div class="field">
@@ -15,18 +15,10 @@
 							<div class="control">
 								<input
 									type="password"
-									class="input is-primary"
+									class="input"
 									name="password"
-									data-cy="password"
 									v-model="password"
-									:disabled="twoFaSent"
 								/>
-							</div>
-						</div>
-						<div class="field mb-0" v-if="twoFaSent">
-							<label class="label">2FA Code</label>
-							<div class="control">
-								<input type="number" class="input is-primary" data-cy="twoFa" name="twoFa" placeholder="Enter 2FA" v-model="twoFa" />
 							</div>
 						</div>
 					</div>
@@ -36,18 +28,26 @@
 					<p>⚠️ <span v-html="logonError"></span></p>
 				</div>
 
-				<div class="field is-grouped">
+				<div class="mt-5">
 					<button
 						class="button is-green big-button is-login transition-faster"
-						type="submit"
-						data-cy="updateEmail"
 						:disabled="!newEmail || !password"
+						@click="setNewData({
+							email: newEmail,
+							password: password
+						})"
 					>
 						<span>Update Email</span>
 					</button>
 				</div>
+
+				<div class="mt-2">
+					<button v-on:click="$router.push('/settings?email_password=true')" tag="button" class="button is-ghost is-blue big-button medium-text transition-faster">
+						<span>Cancel</span>
+					</button>
+				</div>
 			</div>
-		</form>
+		</div>
 	</div>
 </template>
 
@@ -57,62 +57,50 @@ import { sha256 } from '../utils/cryptoFunctions';
 
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
-import { getDictionaryValue } from '../utils/dictionary';
+import { Emit, Prop, Watch } from 'vue-property-decorator';
 
 @Component({})
 export default class ChangeEmail extends mixins(Global, Authenticated) {
 	newEmail = '';
 	password = '';
-	error = '';
-	twoFaSent = false;
-	twoFa: any = null;
 	logonError = '';
-	success = false;
 
-	async formSubmitChangeEmail() {
-		if (!this.newEmail) {
-			return;
+	@Prop()
+	error!: string;
+
+	@Watch('error')
+	handleErorrChange(newValue: string) {
+		if (newValue) this.logonError = newValue;
+	}
+
+	@Emit('setNewData')
+	async setNewData(data: any) {
+		this.logonError = '';
+
+		if (!data.email) {
+			return { email: null, password: null };
 		}
 
-		const emailMessage = await validateInput('email', this.newEmail);
+		const emailMessage = await validateInput('email', data.email);
+
 		if (emailMessage) {
 			this.logonError = emailMessage;
-			return;
+			return { email: null, password: null };
 		}
 
-		const password = await sha256(this.password);
+		const newPassword = await sha256(data.password);
 
-		if (this.store.hashedPassword !== password) {
-			this.logonError = 'The password you entered is not correct!';
-			return;
+		if (this.store.hashedPassword !== newPassword) {
+			this.logonError = 'The password you entered is not correct.';
+			return { email: null, password: null };
 		}
 
 		if (this.store.email === this.newEmail) {
 			this.logonError = 'The Email Address you entered is the same as you already use.';
-			return;
+			return { email: null, password: null };
 		}
 
-		if (this.twoFaSent == true && this.twoFa == '') {
-			this.logonError = 'Two FA cannot be empty!';
-		}
-
-		try {
-			this.logonError = '';
-			await this.changeEmail({ newEmail: this.newEmail, password: password, twoFa: this.twoFa });
-			if (!this.twoFaSent) {
-				//we show the 2FA fields now
-				this.twoFaSent = true;
-			} else {
-				this.newEmail = '';
-				this.password = '';
-				this.twoFa = '';
-				this.twoFaSent = false;
-				this.logonError = '';
-				this.success = true;
-			}
-		} catch (e) {
-			this.logonError = getDictionaryValue(e.toString());
-		}
+		return { email: data.email, password: newPassword };
 	}
 }
 </script>

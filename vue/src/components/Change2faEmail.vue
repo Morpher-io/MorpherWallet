@@ -27,7 +27,7 @@
 
 <script lang="ts">
 import Component, { mixins } from 'vue-class-component';
-import { Emit } from 'vue-property-decorator';
+import { Emit, Prop, Watch } from 'vue-property-decorator';
 import { Authenticated } from '../mixins/mixins';
 import { verifyEmailCode } from '../utils/backupRestore';
 import { getDictionaryValue } from '../utils/dictionary';
@@ -37,8 +37,18 @@ export default class Change2faEmail extends mixins(Authenticated) {
 	authenticatorCode = '';
 	logonError = '';
 
+	@Prop()
+	error!: string;
+
+	@Watch('error')
+	handleErorrChange(newValue: string) {
+		if (newValue) this.logonError = newValue;
+	}
+
 	@Emit('setCode')
 	async setCode() {
+		this.logonError = '';
+
 		const isCodeValid = await this.confirmAuthenticator();
 		if (isCodeValid) return this.authenticatorCode;
 		else return null;

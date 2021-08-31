@@ -1,16 +1,5 @@
 <template>
 	<div class="container">
-		<div class="title-container has-text-left">
-			<button @click="redirectUser" tag="button" class="button is-grey big-button outlined-button is-thick transition-faster is-icon-only">
-				<span class="icon is-small">
-					<i class="fas fa-chevron-left"></i>
-				</span>
-			</button>
-			<h2 class="title ml-4">Password settings</h2>
-		</div>
-
-		<div class="divider just-space" />
-
 		<ChangePassword />
 	</div>
 </template>

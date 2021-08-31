@@ -807,18 +807,15 @@ const store: Store<RootState> = new Vuex.Store({
 						url: getBackendEndpoint() + '/v1/auth/deleteAccount'
 					})
 						.then(() => {
-							dispatch('showSpinnerThenAutohide', 'Wallet deleted successfully');
 							dispatch('logoutWallet').then(() => {
 								resolve(true);
 							});
 						})
 						.catch(e => {
-							dispatch('showSpinnerThenAutohide', e.toString());
-							reject();
+							reject(e.toString());
 						});
 				} else {
-					commit('delayedSpinnerMessage', 'Wrong password for account deletion');
-					reject();
+					reject('Wrong password for account deletion');
 				}
 			});
 		},
