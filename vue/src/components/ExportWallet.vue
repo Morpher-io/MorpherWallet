@@ -3,7 +3,6 @@
 		<div data-cy="exportHeader">
 			<div>
 				<div class="message-body">
-					<p class="header-text help warning">Before you delete your account, make sure you have exported your Seed Phrase.</p>
 					<div class="field">
 						<label class="label">Wallet Password</label>
 						<div class="control">
@@ -82,16 +81,6 @@
 							type="submit"
 						>
 							<span>Clear</span>
-						</button>
-					</div>
-					<div v-if="store.seedExported">
-						<div class="divider"></div>
-
-						<button data-cy="deleteAccount" class="button big-button is-danger transition-faster" type="submit" @click="deleteAccount()">
-							<span class="icon is-small">
-								<i class="fas fa-trash"></i>
-							</span>
-							<span>Delete Account</span>
 						</button>
 					</div>
 				</div>

@@ -5,7 +5,7 @@
 				⚠ If you want to delete your account, please export a your seed in Export Wallet settings first.
 			</div>
 			<div class="field is-grouped">
-				<button @click="setNewPage" tag="button" class="button is-danger big-button is-login transition-faster" :disabled="!store.seedExported">
+				<button @click="setNewPage" tag="button" class="button big-button is-danger transition-faster" :disabled="!store.seedExported">
 					<span class="icon is-small">
 						<i class="fas fa-ban"></i>
 					</span>

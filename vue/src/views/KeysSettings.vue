@@ -6,7 +6,7 @@
 					<i class="fas fa-chevron-left"></i>
 				</span>
 			</button>
-			<h2 class="title ml-4">Keys settings</h2>
+			<h2 class="title ml-4">Export Wallet settings</h2>
 		</div>
 
 		<div class="divider just-space" />

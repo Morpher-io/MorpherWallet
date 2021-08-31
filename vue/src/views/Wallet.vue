@@ -51,7 +51,7 @@
 				<p class="subtitle">
 					We strongly recommend you add 2FA verification to increase wallet security. Please turn on 2FA verification in settings.
 				</p>
-				<router-link to="/settings" tag="button" class="button is-light-purple big-button is-thick transition-faster">
+				<router-link to="/settings/2fa" tag="button" class="button is-light-purple big-button is-thick transition-faster">
 					Enable 2-Step
 				</router-link>
 			</div>
