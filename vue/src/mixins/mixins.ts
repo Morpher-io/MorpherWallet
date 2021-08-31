@@ -9,7 +9,7 @@ import {
 	TypeUnlockWithPassword,
 	TypeChangePassword,
 	TypeChangeEmail,
-	TypePayloadData,
+	Type2FAUpdateParams,
 	TypeRecoveryParams,
 	TypeAddRecoveryParams,
 	TypeResetRecovery,
@@ -225,7 +225,7 @@ export class Authenticated extends Global {
 	public generateQRCode!: () => Promise<unknown>;
 
 	@Action
-	public change2FAMethods!: (params: TypePayloadData) => Promise<unknown>;
+	public change2FAMethods!: (params: Type2FAUpdateParams) => Promise<unknown>;
 
 	@Action
 	public addRecoveryMethod!: (params: TypeAddRecoveryParams) => Promise<unknown>;

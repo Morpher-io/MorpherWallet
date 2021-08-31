@@ -28,6 +28,7 @@
 import Component, { mixins } from 'vue-class-component';
 import { Emit, Prop, Watch } from 'vue-property-decorator';
 import { Authenticated } from '../mixins/mixins';
+import { sha256 } from '../utils/cryptoFunctions';
 
 @Component({})
 export default class ConfirmAccess extends mixins(Authenticated) {
@@ -43,8 +44,15 @@ export default class ConfirmAccess extends mixins(Authenticated) {
 	}
 
 	@Emit('setPassword')
-	setPassword() {
-		return this.walletPassword;
+	async setPassword() {
+		const newPassword = await sha256(this.walletPassword);
+
+		if (this.store.hashedPassword !== newPassword) {
+			this.logonError = 'The password you entered is not correct.';
+			return null;
+		}
+	
+		return newPassword;
 	}
 
     @Emit('pageBack')

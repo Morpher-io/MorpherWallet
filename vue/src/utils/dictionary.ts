@@ -13,6 +13,7 @@ const dictionary: Dictionary = {
 	USER_ALREADY_EXISTS: 'Wallet for this mail already exists.',
 	ACCOUNT_NOT_CONFIRMED: 'Account not yet confirmed. Try again.',
 	SOME_2FA_WRONG: 'Either Email2FA or Authenticator2FA was wrong. Try again.',
+	EMAIL_2FA_WRONG: 'Incorrect Email 2FA code. Check your email and Try again.',
 	EMAIL_2FA_EXPIRED: 'Email 2FA is expired. Logout/Login and enter Email 2FA within 15 minutes.',
 	METHODS_2FA_NOT_FOUND: '2FA methods could not be found',
 	NONCE_NOT_FOUND: 'Nonce could not be found',

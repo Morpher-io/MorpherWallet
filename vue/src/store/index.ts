@@ -32,7 +32,7 @@ import {
 	TypeKeystoreUnlocked,
 	TypeRequestParams,
 	TypeChangeEmail,
-	TypePayloadData,
+	Type2FAUpdateParams,
 	TypeRecoveryParams,
 	TypeAddRecoveryParams,
 	TypeResetRecovery,
@@ -650,7 +650,7 @@ const store: Store<RootState> = new Vuex.Store({
 					.catch(reject);
 			});
 		},
-		change2FAMethods({ dispatch, commit }, params: TypePayloadData) {
+		change2FAMethods({ dispatch, commit }, params: Type2FAUpdateParams) {
 			return new Promise((resolve, reject) => {
 				dispatch('sendSignedRequest', {
 					body: params,
