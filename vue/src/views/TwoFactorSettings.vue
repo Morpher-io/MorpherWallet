@@ -56,6 +56,7 @@ import ChangeAuthenticator from '../components/ChangeAuthenticator.vue';
 import Change2faEmail from '../components/Change2faEmail.vue';
 import { Authenticated, Global } from '../mixins/mixins';
 import { getDictionaryValue } from '../utils/dictionary';
+import { Watch } from 'vue-property-decorator';
 
 @Component({
 	components: {
@@ -77,6 +78,7 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 	authenticatorConfirmed: any = false;
 	isEnabling = true;
 	updateError = '';
+	passwordTimeout: number | undefined = undefined;
 
 	async submitChange(type: 'email' | 'authenticator') {
 		try {
@@ -176,6 +178,14 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 		this.currentPage = 1;
 	}
 
+	
+	@Watch('currentPage')
+	currentPageChange(newValue: number) {
+		if (newValue !== 2 && this.passwordTimeout) {
+			clearTimeout(this.passwordTimeout)
+		}
+	}
+
 	setPassword(password: string) {
 		if (!password) {
 			return;
@@ -186,6 +196,12 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 			this.submitChange('email');
 			return;
 		}
+
+		if (this.passwordTimeout) clearTimeout(this.passwordTimeout)
+		this.passwordTimeout = window.setTimeout(() => {
+			clearTimeout(this.passwordTimeout)
+			this.currentPage = 0;
+		}, 600000)
 
 		if (!this.authenticator) {
 			this.generateQR();
