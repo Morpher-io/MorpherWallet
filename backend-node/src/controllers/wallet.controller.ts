@@ -518,14 +518,61 @@ export async function getNonce(req, res) {
 
 // Function to change 2FA methods from the database.
 export async function change2FAMethods(req, res) {
-    const toggleEmail = req.body.email;
-    const toggleAuthenticator = req.body.authenticator;
+    let toggleEmail = req.body.email;
+    let toggleAuthenticator = req.body.authenticator;
+    const email2faVerification = req.body.email2faVerification;
+    const authenticator2faVerification = req.body.authenticator2faVerification;
+
+    // only allow one
+    if (toggleAuthenticator) toggleEmail = false;
+    if (toggleEmail) toggleAuthenticator = false;
 
     const key = req.header('key');
 
     const recovery = await Recovery.findOne({ where: { key } });
     if (recovery != null) {
         const user = await User.findOne({ where: { id: recovery.user_id } });
+
+        if (toggleEmail) {
+            if (!email2faVerification) {
+    
+                const verificationCode = await updateEmail2fa(user.id);
+
+                await sendEmail2FA(verificationCode, user.email);
+                
+                Logger.info({
+                    method: arguments.callee.name,
+                    type: '2FA Email Sent',
+                    user_id: user.id,
+                    user,
+                    headers: req.headers,
+                    body: req.body
+                });
+    
+                return successResponse(res, 'sent 2fa code to email address');
+            } else {
+                // 2FA tokens in query params
+                // Attempt to get user from database.
+                if (user.email_verification_code !== Number(email2faVerification)) {
+                    return errorResponse(res, 'EMAIL_2FA_WRONG', 404);
+                }
+            }
+        }
+
+        if (toggleAuthenticator) {
+
+            if (!authenticator2faVerification || !await verifyGoogle2FA(user.id.toString(), authenticator2faVerification, false)) {
+                Logger.info({
+                    method: arguments.callee.name,
+                    type: 'Error: Authenticator Code Wrong',
+                    user_id: user.id,
+                    user,
+                    headers: req.headers,
+                    body: req.body
+                });
+                return errorResponse(res, 'CANNOT_VERIFY_AUTHENTICATOR', 500);
+            }
+        }
 
         Userhistory.create({
             user_id: user.id,

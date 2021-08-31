@@ -42,6 +42,9 @@
 				</div>
 			</div>
 		</div>
+		<div class="error mt-3" v-if="updateError">
+			<p>⚠️ <span v-html="updateError"></span></p>
+		</div>
 	</div>
 </template>
 
@@ -52,6 +55,7 @@ import ConfirmAccess from '../components/ConfirmAccess.vue';
 import ChangeAuthenticator from '../components/ChangeAuthenticator.vue';
 import Change2faEmail from '../components/Change2faEmail.vue';
 import { Authenticated, Global } from '../mixins/mixins';
+import { getDictionaryValue } from '../utils/dictionary';
 
 @Component({
 	components: {
@@ -72,45 +76,70 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 	authenticator = false;
 	authenticatorConfirmed: any = false;
 	isEnabling = true;
+	updateError = '';
 
 	async submitChange(type: 'email' | 'authenticator') {
-		if (type === 'email') {
-			this.showSpinner('Loading');
-			const email = !this.email;
-			const authenticator = !this.email ? false : this.authenticator;
-			const authenticatorConfirmed = !this.email ? false : this.authenticatorConfirmed;
+		try {
+			this.updateError = '';
+			if (type === 'email') {
+				this.showSpinner('Loading');
+				let email = true;
+				let authenticator = false;
+				
+				if (!this.isEnabling) {
+					email = false;
+					authenticator = this.authenticator;
+				}
 
-			await this.change2FAMethods({
-				email,
-				authenticator,
-				authenticatorConfirmed,
-			});
+				const result = await this.change2FAMethods({
+					email,
+					authenticator,
+					email2faVerification: this.emailCode,
+					authenticator2faVerification: this.authenticatorCode,
+				});
 
-			this.email = email;
-			this.authenticator = authenticator;
-			this.authenticatorConfirmed = authenticatorConfirmed;
-			this.isEnabling = email;
-			this.currentPage = 3;
-		} else if (type === 'authenticator') {
-			this.showSpinner('Loading');
-			const email = !this.authenticator ? false : this.email;
-			const authenticator = !this.authenticator;
-			const authenticatorConfirmed = !this.authenticator ? true : false;
+				if (this.isEnabling && !this.emailCode) {
+					this.email = false;
+					this.currentPage = 2;
+				} else {
 
-			await this.change2FAMethods({
-				email,
-				authenticator,
-				authenticatorConfirmed,
-			});
+					this.authenticatorConfirmed = true;
+					this.email = email;
+					this.authenticator = authenticator;
+					this.isEnabling = email;
+					this.currentPage = 3;
+				}
+			} else if (type === 'authenticator') {
+				this.showSpinner('Loading');
 
-			this.email = email;
-			this.authenticator = authenticator;
-			this.authenticatorConfirmed = authenticator;
-			this.isEnabling = authenticator;
-			this.currentPage = 3;
+				let email = false;
+				let authenticator = true;
+				
+				if (!this.isEnabling) {
+					email = this.email;
+					authenticator = false;
+				}
+
+				await this.change2FAMethods({
+					email,
+					authenticator,
+					email2faVerification: this.emailCode,
+					authenticator2faVerification: this.authenticatorCode,
+				});
+
+				this.email = email;
+				this.authenticator = authenticator;
+				this.authenticatorConfirmed = authenticator;
+				this.currentPage = 3;
+			}
+
+			this.hideSpinner();
+		} catch (err) {
+			this.hideSpinner();
+			this.updateError = getDictionaryValue(err.toString());
+
+
 		}
-
-		this.hideSpinner();
 	}
 
 	async generateQR() {
@@ -141,19 +170,20 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 		}
 	}
 
-	setCurrentMethod(method: string) {
-		this.currentMethod = method;
+	setCurrentMethod(method: any) {
+		this.isEnabling = method['isEnabling'];
+		this.currentMethod = method['method'];
 		this.currentPage = 1;
 	}
 
 	setPassword(password: string) {
+		if (!password) {
+			return;
+		}
 		this.usersPassword = password;
 		if (this.currentMethod === 'email') {
-			if (this.email) {
-				this.submitChange('email');
-			} else {
-				this.currentPage = 2;
-			}
+			this.emailCode = '';
+			this.submitChange('email');
 			return;
 		}
 

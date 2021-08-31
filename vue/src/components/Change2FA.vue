@@ -16,7 +16,7 @@
 								'button is-light-green is-small-button has-text-weight-bold transition-faster': true,
 								'is-light-danger': store.twoFaRequired.email
 							}"
-							@click="setCurrentMethod('email')"
+							@click="setCurrentMethod('email', !store.twoFaRequired.email)"
 						>
 							<span>{{ !store.twoFaRequired.email ? 'Enable' : 'Disable' }}</span>
 						</button>
@@ -47,7 +47,7 @@
 								'button is-light-green is-small-button has-text-weight-bold transition-faster': true,
 								'is-light-danger': store.twoFaRequired.authenticator
 							}"
-							@click="setCurrentMethod('authenticator')"
+							@click="setCurrentMethod('authenticator', !store.twoFaRequired.authenticator)"
 						>
 							<span>{{ !store.twoFaRequired.authenticator ? 'Enable' : 'Disable' }}</span>
 						</button>
@@ -75,8 +75,8 @@ import { Authenticated } from '../mixins/mixins';
 @Component({})
 export default class Change2FA extends mixins(Authenticated) {
 	@Emit('setCurrentMethod')
-	setCurrentMethod(method: string) {
-		return method;
+	setCurrentMethod(method: string, isEnabling: boolean) {
+		return {method, isEnabling};
 	}
 }
 </script>
