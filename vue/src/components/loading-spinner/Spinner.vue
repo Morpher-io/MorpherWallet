@@ -56,18 +56,18 @@ export default class Spinner extends Vue {
 }
 .overlay .overlay-frame {
 	background: #fff;
-    padding: 20px;
-    box-shadow: 0 0 15px 0 rgb(0 0 0 / 10%);
-    border-radius: 10px;
-    width: 60%;
-    text-align: center;
+	padding: 20px;
+	box-shadow: 0 0 15px 0 rgb(0 0 0 / 10%);
+	border-radius: 10px;
+	width: 60%;
+	text-align: center;
 }
 .status-text {
 	background: none;
-    padding: 0;
-    margin-top: 5px;
-    font-size: inherit;
-    font-weight: 300;
+	padding: 0;
+	margin-top: 5px;
+	font-size: inherit;
+	font-weight: 300;
 }
 .fade-enter-active,
 .fade-leave-active {

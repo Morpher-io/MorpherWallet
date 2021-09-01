@@ -13,12 +13,7 @@
 						<div class="field">
 							<label class="label">Password</label>
 							<div class="control">
-								<input
-									type="password"
-									class="input"
-									name="password"
-									v-model="password"
-								/>
+								<input type="password" class="input" name="password" v-model="password" />
 							</div>
 						</div>
 					</div>
@@ -32,17 +27,23 @@
 					<button
 						class="button is-green big-button is-login transition-faster"
 						:disabled="!newEmail || !password"
-						@click="setNewData({
-							email: newEmail,
-							password: password
-						})"
+						@click="
+							setNewData({
+								email: newEmail,
+								password: password
+							})
+						"
 					>
 						<span>Update Email</span>
 					</button>
 				</div>
 
 				<div class="mt-2">
-					<button v-on:click="$router.push('/settings?email_password=true')" tag="button" class="button is-ghost is-blue big-button medium-text transition-faster">
+					<button
+						v-on:click="$router.push('/settings?email_password=true')"
+						tag="button"
+						class="button is-ghost is-blue big-button medium-text transition-faster"
+					>
 						<span>Cancel</span>
 					</button>
 				</div>

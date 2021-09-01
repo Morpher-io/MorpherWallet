@@ -9,7 +9,13 @@
 			</figure>
 		</div>
 		<p class="is-size-7 mt-2">
-			Need an authenticator? Get <a href="https://authy.com/download/" target="__blank" class="login-router">Authy</a> or <a href="https://chrome.google.com/webstore/detail/authenticator/bhghoamapcdpbohphigoooaddinpkbai?hl=en" target="__blank" class="login-router">Google Authenticator</a>.
+			Need an authenticator? Get <a href="https://authy.com/download/" target="__blank" class="login-router">Authy</a> or
+			<a
+				href="https://chrome.google.com/webstore/detail/authenticator/bhghoamapcdpbohphigoooaddinpkbai?hl=en"
+				target="__blank"
+				class="login-router"
+				>Google Authenticator</a
+			>.
 		</p>
 
 		<div class="field">
@@ -68,7 +74,7 @@ export default class ChangeAuthenticator extends mixins(Authenticated) {
 			return true;
 		} else {
 			this.logonError = getDictionaryValue(confirmCode.error);
-			return false
+			return false;
 		}
 	}
 }
@@ -80,7 +86,7 @@ export default class ChangeAuthenticator extends mixins(Authenticated) {
 		width: 140px;
 		height: 140px;
 		border: 1px solid #ccc;
-    	margin: 0 auto;
+		margin: 0 auto;
 	}
 }
 </style>

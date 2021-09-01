@@ -81,7 +81,7 @@ export interface RootState {
 	signMessage: any;
 	signResponse: any;
 	ethBalance: string;
-	unlocking: boolean
+	unlocking: boolean;
 }
 
 /**
@@ -114,7 +114,7 @@ function initialState(): RootState {
 			email: false,
 			authenticator: false,
 			authenticatorConfirmed: false,
-			needConfirmation: false,
+			needConfirmation: false
 		},
 		token: '',
 		connection: null,
@@ -262,7 +262,7 @@ const store: Store<RootState> = new Vuex.Store({
 		 * Fetch the user data from the database and attempt to unlock the wallet using the mail encrypted seed
 		 */
 		async fetchUser({ commit }, params: TypeFetchUser) {
-			console.log('fetchUser')
+			console.log('fetchUser');
 			commit('updateUnlocking', true);
 			const email: string = params.email;
 			const password: string = params.password;
@@ -280,13 +280,14 @@ const store: Store<RootState> = new Vuex.Store({
 									send2FAEmail(email)
 										.then(() => {
 											commit('updateUnlocking', false);
-											resolve
+											resolve;
 										})
 										.catch(() => {
 											commit('updateUnlocking', false);
-											reject
+											reject;
 										});
 								}
+
 								if (!payload.email && !payload.authenticator && !payload.needConfirmation) {
 									getEncryptedSeedFromMail(email, '', '')
 										.then(encryptedSeed => {
@@ -296,7 +297,7 @@ const store: Store<RootState> = new Vuex.Store({
 										})
 										.catch(() => {
 											commit('updateUnlocking', false);
-											reject
+											reject;
 										});
 								} else {
 									commit('updateUnlocking', false);
@@ -311,12 +312,12 @@ const store: Store<RootState> = new Vuex.Store({
 					})
 					.catch(() => {
 						commit('updateUnlocking', false);
-						reject
+						reject;
 					});
 			});
 		},
 		fetchWalletFromRecovery({ state, commit }, params: TypeRecoveryParams) {
-			console.log('fetchWalletFromRecovery')
+			console.log('fetchWalletFromRecovery');
 			commit('updateUnlocking', true);
 			return new Promise((resolve, reject) => {
 				recoverSeedSocialRecovery(params.accessToken, state.email, params.recoveryTypeId)
@@ -338,9 +339,8 @@ const store: Store<RootState> = new Vuex.Store({
 					})
 					.catch(() => {
 						commit('updateUnlocking', false);
-						reject(false)
-					}
-						);
+						reject(false);
+					});
 			});
 		},
 		addRecoveryMethod({ state, dispatch }, params: TypeAddRecoveryParams) {
@@ -507,7 +507,7 @@ const store: Store<RootState> = new Vuex.Store({
 							commit('updateUnlocking', false);
 							resolve(true);
 						})
-						.catch((e) => {
+						.catch(() => {
 							commit('updateUnlocking', false);
 							reject(false);
 						});
@@ -517,7 +517,7 @@ const store: Store<RootState> = new Vuex.Store({
 				}
 			});
 		},
-		unlockUpdate({ commit, state, dispatch }, params: TypeUnlockWithPassword) {
+		unlockUpdate({ commit }) {
 			commit('updateUnlocking', false);
 		},
 		/**
@@ -794,7 +794,7 @@ const store: Store<RootState> = new Vuex.Store({
 		clearSeedPhrase({ commit }) {
 			commit('updateSeedPhrase', { seedPhrase: '' });
 		},
-		deleteWalletAccount({ commit, dispatch, state }, params: TypeShowPhraseKeyVariables) {
+		deleteWalletAccount({ dispatch, state }, params: TypeShowPhraseKeyVariables) {
 			return new Promise(async (resolve, reject) => {
 				const storedPassword = state.hashedPassword;
 
@@ -821,14 +821,17 @@ const store: Store<RootState> = new Vuex.Store({
 		},
 		setUsersEmail({ commit }, email: string) {
 			commit('updateEmail', email);
-		},
+		}
 	},
 	getters: {
 		isLoggedIn: state => {
 			return state.keystore !== undefined && state.keystore !== null;
 		},
 		twoFaRequired: state => {
-			return (state.twoFaRequired.email || state.twoFaRequired.authenticator || state.twoFaRequired.needConfirmation) && state.encryptedSeed.ciphertext === undefined;
+			return (
+				(state.twoFaRequired.email || state.twoFaRequired.authenticator || state.twoFaRequired.needConfirmation) &&
+				state.encryptedSeed.ciphertext === undefined
+			);
 		},
 		authStatus: state => state.status,
 		walletEmail: state => state.email,
@@ -864,37 +867,34 @@ if (isIframe()) {
 					try {
 						if (store.state.keystore !== null) {
 							if (config?.confirm_transaction || Number(txObj.chainId) !== 21) {
-
-								if (txObj.amount && ! txObj.value) {
-									txObj.value = txObj.amount
+								if (txObj.amount && !txObj.value) {
+									txObj.value = txObj.amount;
 								}
 								store.state.transactionDetails = txObj;
 								store.state.signResponse = null;
 								router.push('/signtx');
-								const interval = setInterval(() => { 
-									if (store.state.signResponse ) {
-										clearInterval(interval)
-										if (store.state.signResponse === 'confirm' ) {
+								const interval = setInterval(() => {
+									if (store.state.signResponse) {
+										clearInterval(interval);
+										if (store.state.signResponse === 'confirm') {
 											store.state.signResponse = null;
-										
+
 											if (store.state.keystore !== null) {
 												store.state.keystore[0]
-												.signTransaction(txObj)
-												.then((tran: SignedTransaction) => {
-													resolve(tran.rawTransaction);
-												})
-												.catch(reject);
+													.signTransaction(txObj)
+													.then((tran: SignedTransaction) => {
+														resolve(tran.rawTransaction);
+													})
+													.catch(reject);
 											} else {
-												resolve(null);		
+												resolve(null);
 											}
 										} else {
 											store.state.signResponse = null;
 											resolve(null);
 										}
 									}
-									
-								}, 500 )
-
+								}, 500);
 							} else {
 								store.state.keystore[0]
 									.signTransaction(txObj)
@@ -917,29 +917,27 @@ if (isIframe()) {
 						if (store.state.keystore !== null) {
 							if (config?.confirm_message) {
 								const Web3Utils = require('web3-utils');
-								store.state.messageDetails = Web3Utils.toAscii(txObj.data)
+								store.state.messageDetails = Web3Utils.toAscii(txObj.data);
 								store.state.signResponse = null;
 								router.push('/signmsg');
 
-								const interval = setInterval(() => { 
-									if (store.state.signResponse ) {
-
-										clearInterval(interval)
-										if (store.state.signResponse === 'confirm' ) {
+								const interval = setInterval(() => {
+									if (store.state.signResponse) {
+										clearInterval(interval);
+										if (store.state.signResponse === 'confirm') {
 											store.state.signResponse = null;
 											if (store.state.keystore !== null) {
 												const signedData = store.state.keystore[0].sign(txObj.data); //
 												resolve(signedData.signature);
 											} else {
-												resolve(null);		
+												resolve(null);
 											}
 										} else {
 											store.state.signResponse = null;
 											resolve(null);
 										}
 									}
-									
-								}, 500 )
+								}, 500);
 							} else {
 								const signedData = store.state.keystore[0].sign(txObj.data); //
 
@@ -965,13 +963,12 @@ if (isIframe()) {
 
 				const waitForUnlock = () => {
 					return new Promise(resolve => {
-						setTimeout(resolve, 200)
-							
+						setTimeout(resolve, 200);
 					});
 				};
 				// wait for the store to finish unlocking if it is in progress
 				while (store.state.unlocking && counter < 50) {
-					counter +=1
+					counter += 1;
 					// wait for the wallet to finish unlocking
 					await waitForUnlock();
 				}
@@ -987,7 +984,7 @@ if (isIframe()) {
 			hasSocialRecoveryMethods() {
 				if (store.state.recoveryMethods.length == 1) {
 					return false;
-				} 
+				}
 				return true;
 			},
 			logout() {

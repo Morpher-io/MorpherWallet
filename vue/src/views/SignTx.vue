@@ -4,34 +4,42 @@
 		<div class="container">
 			<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 			<h2 class="title">Confirm Transaction</h2>
-			<p class="subtitle" v-if="store.transactionDetails">{{ chainName  }}</p>
+			<p class="subtitle" v-if="store.transactionDetails">{{ chainName }}</p>
 			<div class="card">
-				
-				<div class="layout split first eth-address-copy" :data-tooltip="copyTextSrc" @click="copySrcETHAddress(store.transactionDetails.from)">
+				<div
+					class="layout split first eth-address-copy"
+					:data-tooltip="copyTextSrc"
+					@click="copySrcETHAddress(store.transactionDetails.from)"
+				>
 					{{ formatEthAddress(store.transactionDetails.from) }}
 				</div>
-				<i class="fas fa-arrow-right transfer-icon" ></i>
-				<div class="layout split second eth-address-copy" :data-tooltip="copyTextDest" @click="copyDestETHAddress(store.transactionDetails.to)">
-					 <div class=has-text-right>{{ formatEthAddress(store.transactionDetails.to) }}</div>
+				<i class="fas fa-arrow-right transfer-icon"></i>
+				<div
+					class="layout split second eth-address-copy"
+					:data-tooltip="copyTextDest"
+					@click="copyDestETHAddress(store.transactionDetails.to)"
+				>
+					<div class="has-text-right">{{ formatEthAddress(store.transactionDetails.to) }}</div>
 				</div>
-
 			</div>
 
 			<div class="divider thick"></div>
 
 			<div class="card column">
-					<p>Balance: </p>
-					<p class='eth_balance'>{{ roundFormatter(Number(store.ethBalance)/ Math.pow(10,18)) }} ETH</p>
+				<p>Balance:</p>
+				<p class="eth_balance">{{ roundFormatter(Number(store.ethBalance) / Math.pow(10, 18)) }} ETH</p>
 			</div>
 
 			<div class="payment-description">
-				<div class="details-group" v-if="true" >
+				<div class="details-group" v-if="true">
 					<p class="subtitle"><b>Gas Fee</b></p>
-					<p class="text">{{ roundFormatter(Number(store.transactionDetails.gasPrice) * Number(store.transactionDetails.gas) / Math.pow(10,18)) }} ETH</p>
+					<p class="text">
+						{{ roundFormatter((Number(store.transactionDetails.gasPrice) * Number(store.transactionDetails.gas)) / Math.pow(10, 18)) }} ETH
+					</p>
 				</div>
 				<div class="details-group small">
 					<p class="subtitle">Gas Price</p>
-					<p class="text">{{ roundFormatter(Number(store.transactionDetails.gasPrice) / Math.pow(10,9)) }} gwei</p>
+					<p class="text">{{ roundFormatter(Number(store.transactionDetails.gasPrice) / Math.pow(10, 9)) }} gwei</p>
 				</div>
 				<div class="details-group small">
 					<p class="subtitle">Gas Limit</p>
@@ -39,17 +47,25 @@
 				</div>
 
 				<div class="divider thick"></div>
-		
-				<div class="details-group" v-if="store.transactionDetails.value" >
+
+				<div class="details-group" v-if="store.transactionDetails.value">
 					<p class="subtitle"><b>ETH</b></p>
-					<p class="text">{{ roundFormatter(store.transactionDetails.value / Math.pow(10,18)) }} ETH</p>
+					<p class="text">{{ roundFormatter(store.transactionDetails.value / Math.pow(10, 18)) }} ETH</p>
 				</div>
 
 				<div class="divider thick"></div>
 
-				<div class="details-group" v-if="store.transactionDetails.value" >
+				<div class="details-group" v-if="store.transactionDetails.value">
 					<p class="subtitle"><b>Total</b></p>
-					<p class="text">{{ roundFormatter(Number(store.transactionDetails.value || 0)/ Math.pow(10,18) + (Number(store.transactionDetails.gasPrice) * Number(store.transactionDetails.gas)) / Math.pow(10,18)) }} ETH</p>
+					<p class="text">
+						{{
+							roundFormatter(
+								Number(store.transactionDetails.value || 0) / Math.pow(10, 18) +
+									(Number(store.transactionDetails.gasPrice) * Number(store.transactionDetails.gas)) / Math.pow(10, 18)
+							)
+						}}
+						ETH
+					</p>
 				</div>
 			</div>
 
@@ -57,7 +73,7 @@
 				<span>Confirm</span>
 			</button>
 
-			<div class="divider thick"></div>	
+			<div class="divider thick"></div>
 
 			<button @click="cancel()" class="button is-ghost is-blue big-button medium-text transition-faster">
 				<span>Cancel</span>
@@ -69,11 +85,10 @@
 <script lang="ts">
 import Component, { mixins } from 'vue-class-component';
 import { Global, Authenticated } from '../mixins/mixins';
-import { copyToClipboard } from '../utils/utils'
+import { copyToClipboard } from '../utils/utils';
 
 @Component({})
 export default class SignTx extends mixins(Global, Authenticated) {
-	
 	copyTextSrc = 'Copy to Clipboard';
 	copyTextDest = 'Copy to Clipboard';
 	copyToClipboard = copyToClipboard;
@@ -88,40 +103,37 @@ export default class SignTx extends mixins(Global, Authenticated) {
 	}
 	get chainName() {
 		if (this.store.transactionDetails && Number(this.store.transactionDetails.chainId) === 21) {
-			return 'Morpher Sidechain'	
+			return 'Morpher Sidechain';
 		}
 
 		if (this.store.transactionDetails && Number(this.store.transactionDetails.chainId) === 1) {
-			return 'Etherum Mainchain'	
-		}		
+			return 'Etherum Mainchain';
+		}
 
 		if (this.store.transactionDetails && Number(this.store.transactionDetails.chainId) === 42) {
-			return 'Kovan Testnet'	
-		}		
+			return 'Kovan Testnet';
+		}
 
-		
-		return 'Unknown'
+		return 'Unknown';
 	}
 	copySrcETHAddress(text: string) {
-		console.log(1)
-		copyToClipboard(text, this);
-		console.log(2)
-		this.copyTextSrc = "Eth Address Copied"
-		console.log(3)
+		console.log(1);
+		copyToClipboard(text);
+		console.log(2);
+		this.copyTextSrc = 'Eth Address Copied';
+		console.log(3);
 		setTimeout(() => {
-			console.log(4)
+			console.log(4);
 			this.copyTextSrc = 'Copy to clipboard';
-		}, 5000)
+		}, 5000);
 	}
 	copyDestETHAddress(text: string) {
-		copyToClipboard(text, this);
-		this.copyTextDest = "Eth Address Copied"
+		copyToClipboard(text);
+		this.copyTextDest = 'Eth Address Copied';
 		setTimeout(() => {
 			this.copyTextDest = 'Copy to clipboard';
-		}, 5000)
-
+		}, 5000);
 	}
-
 }
 </script>
 
@@ -130,10 +142,10 @@ export default class SignTx extends mixins(Global, Authenticated) {
 	font-size: 21px;
 }
 .transaction-breakdown {
-font-size: 20px;
+	font-size: 20px;
 }
 .section-no-header {
-    padding: 1rem 1.5rem;
+	padding: 1rem 1.5rem;
 }
 .source-dest-output {
 	border-bottom: 1px solid grey;
@@ -150,13 +162,13 @@ font-size: 20px;
 
 .card {
 	display: flex;
-    padding: 10px 20px;
-    border-radius: 10px;
-    align-items: center;
-    justify-content: center;
+	padding: 10px 20px;
+	border-radius: 10px;
+	align-items: center;
+	justify-content: center;
 	background-color: rgba(0, 195, 134, 0.1);
 	border: 1px solid #00c386;
-    box-shadow: 0 1px 2px 0 rgb(0 195 134 / 20%), 0 5px 12px 0 rgb(0 0 0 / 10%);
+	box-shadow: 0 1px 2px 0 rgb(0 195 134 / 20%), 0 5px 12px 0 rgb(0 0 0 / 10%);
 	position: relative;
 	z-index: 1;
 
@@ -167,10 +179,10 @@ font-size: 20px;
 
 .payment-description {
 	padding: 20px;
-    background: #f9f9f9;
-    margin: 0 10px;
-    position: relative;
-    border-radius: 0 0 10px 10px;
+	background: #f9f9f9;
+	margin: 0 10px;
+	position: relative;
+	border-radius: 0 0 10px 10px;
 
 	.details-group {
 		display: flex;

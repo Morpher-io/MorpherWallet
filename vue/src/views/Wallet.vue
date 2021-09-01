@@ -1,23 +1,21 @@
 <template>
 	<div class="container">
-		<h2 class="subtitle" data-cy="subtitle">Hello <b>{{ walletEmail }}</b></h2>
+		<h2 class="subtitle" data-cy="subtitle">
+			Hello <b>{{ walletEmail }}</b>
+		</h2>
 
 		<div class="field">
-				<div class="card-content">
-					<div class="content">
-						<div class="user-data data">
-							<div ref="userImage" class="jazz-icon" />
-							{{ formatEthAddress(accounts[0]) }}
-							<button
-								class="button is-icon-only copy-button"
-								@click="copyETHAddress(accounts[0])"
-								title="Copy ETH Address"
-							>
-								<i class="fas fa-copy" />
-							</button>
-						</div>
+			<div class="card-content">
+				<div class="content">
+					<div class="user-data data">
+						<div ref="userImage" class="jazz-icon" />
+						{{ formatEthAddress(accounts[0]) }}
+						<button class="button is-icon-only copy-button" @click="copyETHAddress(accounts[0])" title="Copy ETH Address">
+							<i class="fas fa-copy" />
+						</button>
 					</div>
 				</div>
+			</div>
 		</div>
 		<div class="buttons horizontal-buttons">
 			<router-link to="/send" tag="button" class="button is-purple big-button is-thick transition-faster" disabled>
@@ -76,7 +74,7 @@
 <script lang="ts">
 import Component, { mixins } from 'vue-class-component';
 import { Global, Authenticated } from '../mixins/mixins';
-import jazzicon from "@metamask/jazzicon";
+import jazzicon from '@metamask/jazzicon';
 import { copyToClipboard } from '../utils/utils';
 
 @Component
@@ -123,7 +121,7 @@ export default class Wallet extends mixins(Global, Authenticated) {
 			}
 			return;
 		}
-		ref.innerHTML = "";
+		ref.innerHTML = '';
 		if (!ethAddress) {
 			return;
 		}
@@ -134,7 +132,7 @@ export default class Wallet extends mixins(Global, Authenticated) {
 	}
 
 	copyETHAddress(ethAddress: string): void {
-		copyToClipboard(ethAddress, this);
+		copyToClipboard(ethAddress);
 	}
 
 	logout() {
@@ -161,12 +159,12 @@ a {
 }
 .user-data {
 	display: flex;
-    padding: 10px 20px;
-    background: #eee;
-    border-radius: 10px;
-    align-items: center;
-    justify-content: center;
-	
+	padding: 10px 20px;
+	background: #eee;
+	border-radius: 10px;
+	align-items: center;
+	justify-content: center;
+
 	.jazz-icon {
 		height: 36px;
 		width: 36px;

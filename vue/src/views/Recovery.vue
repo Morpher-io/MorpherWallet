@@ -7,7 +7,8 @@
 				<p class="subtitle">Forgot your password? Login with your recovery account to unlock your wallet.</p>
 
 				<div class="error alert warning is-size-7" v-if="logonError">
-					<p data-cy="loginError">⚠️ <span v-html="logonError"></span></p> <a v-if="showMore" href="#" class="login-router"><span>Learn more</span></a>
+					<p data-cy="loginError">⚠️ <span v-html="logonError"></span></p>
+					<a v-if="showMore" href="#" class="login-router"><span>Learn more</span></a>
 				</div>
 
 				<div class="field is-grouped">

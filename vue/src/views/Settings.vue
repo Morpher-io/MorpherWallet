@@ -10,7 +10,7 @@
 			<h2 v-if="isEmailPasswordPage" class="title ml-4">Email & Password</h2>
 		</div>
 
-		<div class="divider just-space"/>
+		<div class="divider just-space" />
 
 		<div v-if="!isEmailPasswordPage" class="settings-data">
 			<div key="email_passowrd" class="settings-link is-flex is-align-items-center" @click="changeActive('email_password')">
@@ -106,7 +106,7 @@ import { Authenticated, Global } from '../mixins/mixins';
 		ChangeEmail,
 		Change2FA,
 		ExportWallet,
-		AccountRecovery,
+		AccountRecovery
 	}
 })
 export default class Settings extends mixins(Authenticated, Global) {
@@ -138,7 +138,7 @@ export default class Settings extends mixins(Authenticated, Global) {
 		if (this.$route.query.email_password) {
 			this.isEmailPasswordPage = true;
 			this.activePage = 'email_password';
-			this.$router.replace({query: {}});
+			this.$router.replace({ query: {} });
 		}
 	}
 }
@@ -162,7 +162,7 @@ a {
 
 .title-container {
 	display: flex;
-    align-items: center;
+	align-items: center;
 
 	.title {
 		margin: 0;

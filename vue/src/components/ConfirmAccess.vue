@@ -32,7 +32,7 @@ import { sha256 } from '../utils/cryptoFunctions';
 
 @Component({})
 export default class ConfirmAccess extends mixins(Authenticated) {
-    walletPassword = '';
+	walletPassword = '';
 	logonError = '';
 
 	@Prop()
@@ -51,11 +51,11 @@ export default class ConfirmAccess extends mixins(Authenticated) {
 			this.logonError = 'The password you entered is not correct.';
 			return null;
 		}
-	
+
 		return newPassword;
 	}
 
-    @Emit('pageBack')
+	@Emit('pageBack')
 	pageBack() {
 		return;
 	}

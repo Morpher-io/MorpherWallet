@@ -16,13 +16,7 @@
 					<div class="field">
 						<label class="label">New Password</label>
 						<div class="control">
-							<input
-								type="password"
-								name="newPassword"
-								data-cy="newPassword"
-								class="input password-input"
-								v-model="walletPassword"
-							/>
+							<input type="password" name="newPassword" data-cy="newPassword" class="input password-input" v-model="walletPassword" />
 							<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial" />
 							<div class="password-help">
 								<p>Requirements:</p>
@@ -74,13 +68,7 @@
 					<div class="field">
 						<label class="label">Confirm Password</label>
 						<div class="control">
-							<input
-								type="password"
-								class="input"
-								name="newPasswordRepeat"
-								data-cy="newPasswordRepeat"
-								v-model="walletPasswordRepeat"
-							/>
+							<input type="password" class="input" name="newPasswordRepeat" data-cy="newPasswordRepeat" v-model="walletPasswordRepeat" />
 						</div>
 					</div>
 
@@ -93,7 +81,12 @@
 					</button>
 
 					<div class="mt-2">
-						<button v-on:click="$router.push(hideOldPassword ? '/login' : '/settings?email_password=true')" tag="button" type="button" class="button is-ghost is-blue big-button medium-text transition-faster">
+						<button
+							v-on:click="$router.push(hideOldPassword ? '/login' : '/settings?email_password=true')"
+							tag="button"
+							type="button"
+							class="button is-ghost is-blue big-button medium-text transition-faster"
+						>
 							<span>Cancel</span>
 						</button>
 					</div>
@@ -122,7 +115,7 @@ import { sha256 } from '../utils/cryptoFunctions';
 
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
-import { Emit, Prop, Watch } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import { getDictionaryValue } from '../utils/dictionary';
 
 @Component({

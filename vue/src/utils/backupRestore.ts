@@ -227,12 +227,12 @@ const verifyAuthenticatorCode = async (email: string, code: string) => {
 		const result = await fetch(getBackendEndpoint() + '/v1/verifyAuthenticatorCode', options);
 		//it will throw an exception if it fails
 		const response = await result.json();
-		
-		return response
+
+		return response;
 	} catch (e) {
 		return {
 			success: false,
-			error: '',
+			error: ''
 		};
 	}
 };

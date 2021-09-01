@@ -24,7 +24,9 @@
 			<div>
 				<img src="@/assets/img/checkmark.svg" alt="Checkmark image" class="mb-3" />
 				<h2 class="title">2-Step {{ isEnabling ? 'Activated' : 'Deactivated' }}</h2>
-				<p v-if="isEnabling" class="subtitle">All done, 2-step verification has been added to your account. Your account is now more secure!</p>
+				<p v-if="isEnabling" class="subtitle">
+					All done, 2-step verification has been added to your account. Your account is now more secure!
+				</p>
 				<p v-else class="subtitle">2-step verification has been removed from your account.</p>
 
 				<div v-if="!isEnabling" class="alert warning mt-3 is-size-7 has-text-left mb-5">
@@ -38,7 +40,10 @@
 				<div v-if="isEnabling">
 					<div class="divider"></div>
 					<p class="has-text-left has-text-weight-bold mb-0">KYC Recovery</p>
-					<p class="has-text-left subtitle mt-0">Please complete KYC in the Morpher app if you want to be able to restore your account. If you lose 2FA access and we cannot verify your identity, your wallet will be lost.</p>
+					<p class="has-text-left subtitle mt-0">
+						Please complete KYC in the Morpher app if you want to be able to restore your account. If you lose 2FA access and we cannot
+						verify your identity, your wallet will be lost.
+					</p>
 				</div>
 			</div>
 		</div>
@@ -87,24 +92,23 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 				this.showSpinner('Loading');
 				let email = true;
 				let authenticator = false;
-				
+
 				if (!this.isEnabling) {
 					email = false;
 					authenticator = this.authenticator;
 				}
 
-				const result = await this.change2FAMethods({
+				await this.change2FAMethods({
 					email,
 					authenticator,
 					email2faVerification: this.emailCode,
-					authenticator2faVerification: this.authenticatorCode,
+					authenticator2faVerification: this.authenticatorCode
 				});
 
 				if (this.isEnabling && !this.emailCode) {
 					this.email = false;
 					this.currentPage = 2;
 				} else {
-
 					this.authenticatorConfirmed = true;
 					this.email = email;
 					this.authenticator = authenticator;
@@ -116,7 +120,7 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 
 				let email = false;
 				let authenticator = true;
-				
+
 				if (!this.isEnabling) {
 					email = this.email;
 					authenticator = false;
@@ -126,7 +130,7 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 					email,
 					authenticator,
 					email2faVerification: this.emailCode,
-					authenticator2faVerification: this.authenticatorCode,
+					authenticator2faVerification: this.authenticatorCode
 				});
 
 				this.email = email;
@@ -139,8 +143,6 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 		} catch (err) {
 			this.hideSpinner();
 			this.updateError = getDictionaryValue(err.toString());
-
-
 		}
 	}
 
@@ -178,11 +180,10 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 		this.currentPage = 1;
 	}
 
-	
 	@Watch('currentPage')
 	currentPageChange(newValue: number) {
 		if (newValue !== 2 && this.passwordTimeout) {
-			clearTimeout(this.passwordTimeout)
+			clearTimeout(this.passwordTimeout);
 		}
 	}
 
@@ -197,11 +198,11 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 			return;
 		}
 
-		if (this.passwordTimeout) clearTimeout(this.passwordTimeout)
+		if (this.passwordTimeout) clearTimeout(this.passwordTimeout);
 		this.passwordTimeout = window.setTimeout(() => {
-			clearTimeout(this.passwordTimeout)
+			clearTimeout(this.passwordTimeout);
 			this.currentPage = 0;
-		}, 600000)
+		}, 600000);
 
 		if (!this.authenticator) {
 			this.generateQR();

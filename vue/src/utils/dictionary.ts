@@ -24,8 +24,8 @@ const dictionary: Dictionary = {
 	CANNOT_VERIFY_EMAIL_CODE: 'Could not verify email code. Please try again.',
 	CANNOT_FIND_RECOVERY: 'Could not find recovery!',
 	AUTH_ERROR: 'Auth Error - Aborting!',
-    // Frontend
-    DECRYPT_FAILED: 'Password provided failed to decrypt your account.',
+	// Frontend
+	DECRYPT_FAILED: 'Password provided failed to decrypt your account.'
 };
 
 const getDictionaryValue = (key: string): string => {

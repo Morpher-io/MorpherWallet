@@ -5,7 +5,7 @@
 			<div class="header">
 				<img src="@/assets/img/wallet_logo.svg" class="headerImage" />
 				<span class="icon closeButton" v-if="iFrameDisplay" @click="closeWallet">
-					<i class="fa fa-times"/>
+					<i class="fa fa-times" />
 				</span>
 			</div>
 			<transition name="fade" mode="out-in">
@@ -37,9 +37,7 @@ import Spinner from './components/loading-spinner/Spinner.vue';
 			loading: (state: any) => state.loading,
 			spinnerStatusText: (state: any) => state.spinnerStatusText,
 			unlocking: (state: any) => state.unlocking
-		}
-					
-		)
+		})
 	}
 })
 export default class App extends Vue {

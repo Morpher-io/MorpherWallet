@@ -109,8 +109,7 @@ export class Global extends Vue {
 
 	router: VueRouter = this.$router;
 
-	
-	roundFormatter(param:any) {
+	roundFormatter(param: any) {
 		const price = parseFloat(param);
 		const abs = Math.abs(price);
 		let round = 0;
@@ -122,7 +121,6 @@ export class Global extends Vue {
 		return price ? price.toFixed(round) : 0;
 	}
 
-	
 	formatEthAddress(ethAddress: string) {
 		if (!ethAddress) return '';
 		if (ethAddress.length <= 11) return ethAddress;
@@ -150,13 +148,15 @@ export class Global extends Vue {
 	}
 
 	checkPassword(newValue: string, checkErrors: boolean, oldChecks: any, comparePassword: string, checkRepeatOnly = false) {
-		let updatedChecks = checkRepeatOnly ? oldChecks : {
-			min: '',
-			uppercase: '',
-			lowercase: '',
-			number: '',
-			match: '',
-		};
+		let updatedChecks = checkRepeatOnly
+			? oldChecks
+			: {
+					min: '',
+					uppercase: '',
+					lowercase: '',
+					number: '',
+					match: ''
+			  };
 
 		if (checkErrors) {
 			updatedChecks = {
@@ -164,7 +164,7 @@ export class Global extends Vue {
 				uppercase: 'fail',
 				lowercase: 'fail',
 				number: 'fail',
-				match: 'fail',
+				match: 'fail'
 			};
 		}
 
@@ -186,9 +186,9 @@ export class Global extends Vue {
 					updatedChecks.number = 'pass';
 				} else if (checkErrors) updatedChecks.number = 'fail';
 			}
-			
+
 			if (comparePassword) {
-				if(newValue === comparePassword) {
+				if (newValue === comparePassword) {
 					updatedChecks.match = 'pass';
 				} else updatedChecks.match = 'fail';
 			} else {
@@ -235,4 +235,7 @@ export class Authenticated extends Global {
 
 	@Action
 	public setUsersEmail!: (email: string) => void;
+
+	@Action
+	public updateRecoveryMethods!: () => void;
 }

@@ -76,7 +76,7 @@ import { Authenticated } from '../mixins/mixins';
 export default class Change2FA extends mixins(Authenticated) {
 	@Emit('setCurrentMethod')
 	setCurrentMethod(method: string, isEnabling: boolean) {
-		return {method, isEnabling};
+		return { method, isEnabling };
 	}
 }
 </script>

@@ -67,7 +67,7 @@ export default class Change2faEmail extends mixins(Authenticated) {
 			return true;
 		} else {
 			this.logonError = getDictionaryValue(confirmCode.error);
-			return false
+			return false;
 		}
 	}
 }

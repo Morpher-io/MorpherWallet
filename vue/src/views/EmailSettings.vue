@@ -77,7 +77,7 @@ export default class EmailSettings extends mixins(Authenticated, Global) {
 	}
 
 	pageBack() {
-		if(this.currentPage > 0) this.currentPage -= 1;
+		if (this.currentPage > 0) this.currentPage -= 1;
 	}
 
 	redirectUser() {

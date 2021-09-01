@@ -23,7 +23,11 @@
 
 				<AddRecoveryFacebook v-if="whatRecovery.facebook" :walletEmail="store.email" @processMethod="processMethod"></AddRecoveryFacebook>
 
-				<AddRecoveryVkontakte v-if="whatRecovery.vkontakte" :walletEmail="store.email" @processMethod="processMethod"></AddRecoveryVkontakte>
+				<AddRecoveryVkontakte
+					v-if="whatRecovery.vkontakte"
+					:walletEmail="store.email"
+					@processMethod="processMethod"
+				></AddRecoveryVkontakte>
 			</div>
 
 			<div v-if="!whatRecovery.google || !whatRecovery.facebook || !whatRecovery.vkontakte">
@@ -35,7 +39,11 @@
 
 				<AddRecoveryFacebook v-if="!whatRecovery.facebook" :walletEmail="store.email" @processMethod="processMethod"></AddRecoveryFacebook>
 
-				<AddRecoveryVkontakte v-if="!whatRecovery.vkontakte" :walletEmail="store.email" @processMethod="processMethod"></AddRecoveryVkontakte>
+				<AddRecoveryVkontakte
+					v-if="!whatRecovery.vkontakte"
+					:walletEmail="store.email"
+					@processMethod="processMethod"
+				></AddRecoveryVkontakte>
 			</div>
 
 			<div class="error mt-3" v-if="logonError">
@@ -150,7 +158,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 		this.whatRecovery = {
 			facebook,
 			google,
-			vkontakte,
+			vkontakte
 		};
 	}
 }

@@ -70,7 +70,7 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 					erorr: ''
 				});
 			})
-			.catch(e => {
+			.catch(() => {
 				this.showSpinnerThenAutohide('Error');
 				this.processMethod({
 					success: false,
@@ -97,7 +97,7 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 					erorr: ''
 				});
 			})
-			.catch(e => {
+			.catch(() => {
 				this.showSpinnerThenAutohide('Error finding user');
 				this.processMethod({
 					success: false,

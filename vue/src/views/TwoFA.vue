@@ -1,12 +1,22 @@
 <template>
 	<div class="container">
-		<img v-if="(twoFaRequired.email || twoFaRequired.needConfirmation) && !twoFaRequired.authenticator" src="@/assets/img/email_verification.svg" alt="Email 2FA image" class="mb-3" />
+		<img
+			v-if="(twoFaRequired.email || twoFaRequired.needConfirmation) && !twoFaRequired.authenticator"
+			src="@/assets/img/email_verification.svg"
+			alt="Email 2FA image"
+			class="mb-3"
+		/>
 		<img v-if="twoFaRequired.authenticator" src="@/assets/img/authenticator.svg" alt="Phone authenticator image" class="mb-3" />
 		<h2 class="title">2-Step Verification</h2>
-		<p v-if="(twoFaRequired.email || twoFaRequired.needConfirmation) && !twoFaRequired.authenticator" class="subtitle">Please enter the code we sent to your email.
+		<p v-if="(twoFaRequired.email || twoFaRequired.needConfirmation) && !twoFaRequired.authenticator" class="subtitle">
+			Please enter the code we sent to your email.
 		</p>
-		<p v-if="twoFaRequired.authenticator && !twoFaRequired.email && !twoFaRequired.needConfirmation" class="subtitle">Please enter the code from your authenticator app.</p>
-		<p v-if="twoFaRequired.email && twoFaRequired.authenticator" class="subtitle">Please input both code we sent you over the email and two FA Authenticator code.</p>
+		<p v-if="twoFaRequired.authenticator && !twoFaRequired.email && !twoFaRequired.needConfirmation" class="subtitle">
+			Please enter the code from your authenticator app.
+		</p>
+		<p v-if="twoFaRequired.email && twoFaRequired.authenticator" class="subtitle">
+			Please input both code we sent you over the email and two FA Authenticator code.
+		</p>
 		<form v-on:submit.prevent="validateCode" novalidate>
 			<div class="field" v-if="twoFaRequired.email || twoFaRequired.needConfirmation">
 				<label class="label">Email Code</label>
@@ -40,9 +50,7 @@
 			</div>
 
 			<div class="error" v-if="logonError">
-				<p>
-					⚠️ <span v-html="logonError"></span>
-				</p>
+				<p>⚠️ <span v-html="logonError"></span></p>
 			</div>
 
 			<button class="button is-green big-button is-login transition-faster mt-5" type="submit" data-cy="unlock">
@@ -58,7 +66,8 @@
 
 		<p class="mt-3 has-text-left password-help">
 			<strong>Lost 2FA Access?</strong>
-			<br/>Please email <a href="mailto:contact@help.morpher.com" class="login-router">contact@help.morpher.com</a>. Users that completed KYC in the app are more likely to have their account restored.
+			<br />Please email <a href="mailto:contact@help.morpher.com" class="login-router">contact@help.morpher.com</a>. Users that completed
+			KYC in the app are more likely to have their account restored.
 		</p>
 	</div>
 </template>
@@ -79,18 +88,18 @@ export default class TwoFA extends mixins(Global) {
 
 	mounted() {
 		window.setTimeout(() => {
-					const email: any = this.$refs.email_code
-					const auth: any = this.$refs.email_code
-					if(email) email.focus();
-					else if (auth) auth.focus();
-				}, 100);
+			const email: any = this.$refs.email_code;
+			const auth: any = this.$refs.email_code;
+			if (email) email.focus();
+			else if (auth) auth.focus();
+		}, 100);
 		//
 	}
 
 	@Watch('authenticatorCode')
 	authenticatorCodeChanged(value: any) {
 		if (value.length === 6) {
-			this.validateCode()
+			this.validateCode();
 		}
 	}
 	/**

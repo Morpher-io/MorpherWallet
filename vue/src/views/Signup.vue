@@ -7,13 +7,7 @@
 				<div class="field">
 					<label class="label">Email</label>
 					<div class="control">
-						<input
-							type="email"
-							class="input"
-							name="walletEmail"
-							data-cy="walletEmail"
-							v-model="walletEmail"
-						/>
+						<input type="email" class="input" name="walletEmail" data-cy="walletEmail" v-model="walletEmail" />
 					</div>
 				</div>
 
@@ -21,37 +15,51 @@
 					<label class="label">Password</label>
 
 					<div class="control">
-						<input
-							type="password"
-							class="input password-input"
-							name="walletPassword"
-							data-cy="walletPassword"
-							v-model="walletPassword"
-						/>
+						<input type="password" class="input password-input" name="walletPassword" data-cy="walletPassword" v-model="walletPassword" />
 						<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial" />
 						<div class="password-help">
 							<p>Requirements:</p>
 							<ul class="items">
-								<li :class="{
-									'done': passwordChecks.min === 'pass',
-									'fail': passwordChecks.min === 'fail'
-								}">Min. 8 characters</li>
-								<li :class="{
-									'done': passwordChecks.lowercase === 'pass',
-									'fail': passwordChecks.lowercase === 'fail'
-								}">Lowercase letter</li>
-								<li :class="{
-									'done': passwordChecks.uppercase === 'pass',
-									'fail': passwordChecks.uppercase === 'fail'
-								}">Uppercase letter</li>
-								<li :class="{
-									'done': passwordChecks.number === 'pass',
-									'fail': passwordChecks.number === 'fail'
-								}">Number</li>
-								<li :class="{
-									'done': passwordChecks.match === 'pass',
-									'fail': passwordChecks.match === 'fail'
-								}">Passwords match</li>
+								<li
+									:class="{
+										done: passwordChecks.min === 'pass',
+										fail: passwordChecks.min === 'fail'
+									}"
+								>
+									Min. 8 characters
+								</li>
+								<li
+									:class="{
+										done: passwordChecks.lowercase === 'pass',
+										fail: passwordChecks.lowercase === 'fail'
+									}"
+								>
+									Lowercase letter
+								</li>
+								<li
+									:class="{
+										done: passwordChecks.uppercase === 'pass',
+										fail: passwordChecks.uppercase === 'fail'
+									}"
+								>
+									Uppercase letter
+								</li>
+								<li
+									:class="{
+										done: passwordChecks.number === 'pass',
+										fail: passwordChecks.number === 'fail'
+									}"
+								>
+									Number
+								</li>
+								<li
+									:class="{
+										done: passwordChecks.match === 'pass',
+										fail: passwordChecks.match === 'fail'
+									}"
+								>
+									Passwords match
+								</li>
 							</ul>
 						</div>
 					</div>
@@ -70,9 +78,7 @@
 				</div>
 
 				<div class="error" v-if="logonError">
-					<p>
-						⚠️ <span v-html="logonError"></span>
-					</p>
+					<p>⚠️ <span v-html="logonError"></span></p>
 				</div>
 
 				<button type="submit" data-cy="createNewWallet" class="button is-green big-button is-login transition-faster">
@@ -121,7 +127,7 @@ export default class Signup extends mixins(Global) {
 		uppercase: '',
 		lowercase: '',
 		number: '',
-		match: '',
+		match: ''
 	};
 
 	@Watch('walletPassword')

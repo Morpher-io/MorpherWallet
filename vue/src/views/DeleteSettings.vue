@@ -22,7 +22,6 @@ import AccountDeletion from '../components/AccountDeletion.vue';
 import ConfirmAccess from '../components/ConfirmAccess.vue';
 import { Authenticated, Global } from '../mixins/mixins';
 import { sha256 } from '../utils/cryptoFunctions';
-import { getDictionaryValue } from '../utils/dictionary';
 
 @Component({
 	components: {
@@ -43,7 +42,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 	}
 
 	pageBack() {
-		if(this.currentPage > 0) this.currentPage -= 1;
+		if (this.currentPage > 0) this.currentPage -= 1;
 	}
 
 	async setPassword(password: string) {
