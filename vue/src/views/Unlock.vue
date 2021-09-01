@@ -2,33 +2,41 @@
 	<div class="container">
 		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 
-		<h2 class="title">Login</h2>
-		<h4 class="subtitle">Unlock your Morpher Wallet</h4>
-		<form v-on:submit.prevent="login">
-			<h5>Hi {{ walletEmail }}!</h5>
-			Enter the password to unlock your wallet!<br />
+		<h2 class="title">👋 Welcome Back</h2>
+		<p class="subtitle">Unlock your crypto wallet.</p>
 
-			<div class="field">
-				<label class="label">Password</label>
-
-				<div class="control">
-					<input type="password" class="input" name="walletPassword" v-model="walletPassword" />
-					<div v-if="showRecovery">
-						<p class="help is-danger">
-							The Password you provided can't be used to de-crypt your wallet.
-							<router-link to="/recovery">Do you want to restore your Account?</router-link>
-						</p>
+		<div class="user-details settings-data">
+			<div class="details">
+				<div class="is-flex has-text-left">
+					<div ref="userImage" class="jazz-icon" />
+					<div class="ml-3">
+						<p>{{ walletEmail }}</p>
+						<div @click="logout()" class="login-router">Switch account</div>
 					</div>
 				</div>
 			</div>
+		</div>
 
-			<button class="button is-green big-button is-login transition-faster mt-5" type="submit" data-cy="unlock" :disabled="!walletPassword">
-				<span>Unlock</span>
-			</button>
-			<button v-on:click="logout()" class="button is-ghost is-blue big-button medium-text transition-faster">
-				<span>Cancel</span>
-			</button>
-		</form>
+		<div class="field">
+			<label class="label">Password</label>
+
+			<div class="control">
+				<input type="password" class="input" name="walletPassword" v-model="walletPassword" />
+				<div v-if="showRecovery">
+					<p class="help is-danger">
+						The Password you provided can't be used to de-crypt your wallet.
+						<router-link to="/recovery">Do you want to restore your Account?</router-link>
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<button @click="login()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!walletPassword">
+			<span>Log In</span>
+		</button>
+		<p class="forgot-password">
+			Forgot password? <router-link to="/recovery" class="login-router"><span>Recover your wallet</span></router-link>
+		</p>
 	</div>
 </template>
 
@@ -36,23 +44,22 @@
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 import { sha256 } from '../utils/cryptoFunctions';
-import Password from 'vue-password-strength-meter';
+import jazzicon from '@metamask/jazzicon';
 
-@Component({
-	components: {
-		Password
-	}
-})
+@Component({})
 export default class Unlock extends mixins(Global) {
 	// Component properties
 	walletPassword = '';
 	walletEmail = this.$store.getters.walletEmail;
+	iconSeed = this.$store.getters.iconSeed;
 	showRecovery = false;
 
 	/**
 	 * Cmponent mounted lifestyle hook
 	 */
 	mounted() {
+		const iconSeed = localStorage.getItem('iconSeed') || '';
+		this.generateImage(iconSeed);
 		this.showSpinner('Loading User...');
 		// Check if the wallet can be unlocked using the local-storage stored password
 		this.unlockWithStoredPassword()
@@ -80,7 +87,7 @@ export default class Unlock extends mixins(Global) {
 		this.unlockWithPassword({ password })
 			.then(() => {
 				// open root page after logon success
-				this.router.push('/');
+				this.$router.push('/');
 			})
 			.catch(error => {
 				console.log(error);
@@ -90,7 +97,27 @@ export default class Unlock extends mixins(Global) {
 
 	logout() {
 		this.logoutWallet();
-		this.router.push('/login');
+		this.$router.push('/login');
+	}
+
+	generateImage(seed: any): void {
+		if (!seed) {
+			return;
+		}
+
+		const ref: any = this.$refs.userImage;
+		if (!ref) {
+			if (seed) {
+				setTimeout(() => {
+					this.generateImage(seed);
+				}, 100);
+			}
+			return;
+		}
+		ref.innerHTML = '';
+
+		const image = jazzicon(32, seed);
+		ref.append(image);
 	}
 }
 </script>

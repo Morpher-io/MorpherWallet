@@ -1,73 +1,110 @@
 <template>
 	<div class="container">
-		<h2 class="subtitle" data-cy="subtitle">
-			Hello <b>{{ walletEmail }}</b>
-		</h2>
-
-		<div class="field">
-			<div class="card-content">
-				<div class="content">
-					<div class="user-data data">
-						<div ref="userImage" class="jazz-icon" />
-						{{ formatEthAddress(accounts[0]) }}
-						<button class="button is-icon-only copy-button" @click="copyETHAddress(accounts[0])" title="Copy ETH Address">
-							<i class="fas fa-copy" />
-						</button>
+		<div class="user-details settings-data">
+			<div class="details">
+				<div class="is-flex has-text-left">
+					<div ref="userImage" class="jazz-icon" />
+					<div class="ml-3">
+						<p class="medium-text has-text-weight-bold">
+							{{ formatEthAddress(accounts[0]) }}
+							<span class="copy-icon" @click="copyETHAddress(accounts[0])"><i class="fas fa-copy" /></span>
+						</p>
+						<p>{{ store.email }}</p>
 					</div>
+				</div>
+				<div class="buttons horizontal-buttons mt-2">
+					<button tag="button" class="button is-light-purple is-small-button has-text-weight-bold transition-faster cursor-not-allowed">
+						<span class="icon is-small">
+							<i class="fas fa-paper-plane"></i>
+						</span>
+						<span>Send</span>
+						<div class="tooltip">
+							Sending on Ethereum only available when using wallet inside the Morpher app.
+						</div>
+					</button>
+					<router-link to="/settings" tag="button" class="button is-light-blue is-small-button has-text-weight-bold transition-faster">
+						<span class="icon is-small">
+							<i class="fas fa-cog"></i>
+						</span>
+						<span>Settings</span>
+					</router-link>
 				</div>
 			</div>
 		</div>
-		<div class="buttons horizontal-buttons">
-			<router-link to="/send" tag="button" class="button is-purple big-button is-thick transition-faster" disabled>
-				<span class="icon is-small">
-					<i class="fas fa-paper-plane"></i>
-				</span>
-				<span data-cy="settings">Send</span>
-			</router-link>
-			<router-link to="/settings" tag="button" class="button is-blue big-button is-thick transition-faster">
-				<span class="icon is-small">
-					<i class="fas fa-cog"></i>
-				</span>
-				<span data-cy="settings">Settings</span>
-			</router-link>
-		</div>
-		<div class="divider"></div>
-		<h2 class="title has-text-left">Account Status</h2>
-		<div class="has-text-left" v-if="noRecoveryMethods">
-			<div>
-				<p class="subtitle">
-					Your account is currently at risk. <b>Losing your password means losing your funds.</b> Please add a trusted account backup.
+
+		<div class="mt-5 user-details settings-data">
+			<div v-if="noRecoveryMethods" class="details has-text-left">
+				<p class="has-text-weight-medium is-flex is-align-items-center"><i class="fas fa-life-ring is-size-6 mr-1"></i> Recovery Missing</p>
+				<p class="mt-1">
+					Your account is at risk, <b>losing your password means losing all your funds</b>. We recommend adding a trusted recovery account.
 				</p>
-				<router-link to="/addrecovery" tag="button" class="button is-green big-button is-thick transition-faster">
-					Add Trusted Account
+				<router-link to="/settings/recovery" tag="button" class="button is-light-green is-small-button has-text-weight-bold transition-faster mt-3">
+					<span>Add Recovery Account</span>
 				</router-link>
 			</div>
-		</div>
-		<div class="divider thick"></div>
-		<div class="has-text-left" v-if="!twoFactorActive && !twoFactorEmailActive">
-			<div>
-				<p class="subtitle">
-					We strongly recommend you add 2FA verification to increase wallet security. Please turn on 2FA verification in settings.
+			<div v-else class="details has-text-left">
+				<p class="has-text-weight-medium is-flex is-align-items-center"><i class="fas fa-life-ring is-size-6 mr-1"></i> Recovery</p>
+				<div class="protection-enabled mt-1" v-if="whatRecovery.google">
+					<span class="icon img mr-1">
+						<img src="@/assets/img/google_logo.svg" alt="Google Logo" />
+					</span>
+					<p class="mr-1">Google Recovery</p>
+					<span class="is-size-7 enabled">Enabled</span>
+				</div>
+				<div class="protection-enabled mt-1" v-if="whatRecovery.facebook">
+					<span class="icon img mr-1">
+						<img src="@/assets/img/fb_logo.svg" alt="Facebook Logo" />
+					</span>
+					<p class="mr-1">Facebook Recovery</p>
+					<span class="is-size-7 enabled">Enabled</span>
+				</div>
+				<div class="protection-enabled mt-1" v-if="whatRecovery.vkontakte">
+					<span class="icon img mr-1">
+						<img src="@/assets/img/vk_logo.svg" alt="VKontakte Logo" />
+					</span>
+					<p class="mr-1">VKontakte Recovery</p>
+					<span class="is-size-7 enabled">Enabled</span>
+				</div>
+			</div>
+			<div v-if="!twoFactorActive && !twoFactorEmailActive" class="details has-text-left">
+				<p class="has-text-weight-medium is-flex is-align-content-center"><i class="fas fa-shield-alt is-size-6 mr-1"></i> Security</p>
+				<p class="mt-1">
+					Please add 2-step verification to increase wallet security. <router-link to="/settings/2fa" class="login-router">Enable in Settings</router-link>
 				</p>
-				<router-link to="/settings/2fa" tag="button" class="button is-light-purple big-button is-thick transition-faster">
-					Enable 2-Step
-				</router-link>
+			</div>
+			<div v-else class="details has-text-left">
+				<p class="has-text-weight-medium is-flex is-align-content-center"><i class="fas fa-shield-alt is-size-6 mr-1"></i> Security</p>
+				<div class="protection-enabled mt-1" v-if="twoFactorEmailActive">
+					<i class="fas fa-envelope mr-1 is-size-6"></i>
+					<p class="mr-1">Email</p>
+					<span class="is-size-7 enabled">Enabled</span>
+				</div>
+				<div class="protection-enabled mt-1" v-if="twoFactorActive">
+					<i class="fas fa-mobile-alt mr-1 is-size-6"></i>
+					<p class="mr-1">2-Step Authenticator</p>
+					<span class="is-size-7 enabled">Enabled</span>
+				</div>
 			</div>
 		</div>
-		<div class="has-text-left protection-enabled" v-if="twoFactorEmailActive">
-			<i class="fas fa-envelope"></i>
-			<p>2FA Email</p>
-			<span class="enabled">Enabled</span>
+
+		<div v-if="!twoFactorActive && !twoFactorEmailActive" class="mt-2 has-text-left is-size-7">
+			<p class="has-text-weight-medium">2-Step Recommendation</p>
+			<p>Complete KYC on Morpher to avoid losing wallet after losing 2FA device.</p>
 		</div>
-		<div class="has-text-left protection-enabled mt-5" v-if="twoFactorActive">
-			<i class="fas fa-mobile-alt"></i>
-			<p>2FA Authenticator</p>
-			<span class="enabled">Enabled</span>
+
+		<div class="divider just-space"></div>
+
+		<div class="links is-flex is-align-items-center is-justify-content-center">
+			<div class="link is-flex has-text-weight-medium is-align-items-center">
+				<i class="fas fa-question-circle mr-1 is-size-6"></i>
+				<a href="#" class="login-router">Support</a>
+			</div>
+			<div class="divider vertical"></div>
+			<div class="link is-flex has-text-weight-medium is-align-items-center">
+				<i class="fas fa-door-open mr-1 is-size-6"></i>
+				<div @click="logout()" class="login-router">Logout</div>
+			</div>
 		</div>
-		<div class="divider"></div>
-		<button class="button is-danger big-button is-thick transition-faster" @click="logout" type="submit" data-cy="logout">
-			<span>Logout</span>
-		</button>
 	</div>
 </template>
 
@@ -84,6 +121,11 @@ export default class Wallet extends mixins(Global, Authenticated) {
 	noRecoveryMethods = false;
 	twoFactorActive = false;
 	twoFactorEmailActive = false;
+	whatRecovery = {
+		facebook: false,
+		google: false,
+		vkontakte: false
+	};
 
 	async mounted() {
 		if (this.isIframe() && !this.store.loginComplete) {
@@ -105,6 +147,17 @@ export default class Wallet extends mixins(Global, Authenticated) {
 		if (this.store.accounts && this.store.accounts[0]) {
 			this.generateImage(this.store.accounts[0]);
 		}
+
+		const facebook = await this.hasRecovery(2);
+		const google = await this.hasRecovery(3);
+		const vkontakte = await this.hasRecovery(5);
+
+		this.whatRecovery = {
+			facebook,
+			google,
+			vkontakte
+		};
+
 		this.store.loginComplete = true;
 	}
 
@@ -127,7 +180,7 @@ export default class Wallet extends mixins(Global, Authenticated) {
 		}
 		const seed = parseInt(ethAddress.slice(2, 10), 16);
 		if (!seed) return;
-		const image = jazzicon(36, seed);
+		const image = jazzicon(32, seed);
 		ref.append(image);
 	}
 

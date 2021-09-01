@@ -60,6 +60,7 @@ export interface RootState {
 	spinnerStatusText: string;
 	message: string;
 	email: string;
+	iconSeed: number;
 	hashedPassword: string;
 	encryptedSeed: TypeEncryptedSeed;
 	encryptedWallet: string;
@@ -89,6 +90,7 @@ export interface RootState {
  */
 function initialState(): RootState {
 	const email = localStorage.getItem('email') || '';
+	const iconSeed = parseInt(localStorage.getItem('iconSeed') || '') || null;
 	const hashedPassword = window.sessionStorage.getItem('password') || '';
 	let encryptedSeed: TypeEncryptedSeed = {};
 	if (localStorage.getItem('encryptedSeed')) {
@@ -105,6 +107,7 @@ function initialState(): RootState {
 		spinnerStatusText: '',
 		message: '',
 		email,
+		iconSeed,
 		hashedPassword,
 		encryptedSeed,
 		encryptedWallet: '',
@@ -202,10 +205,12 @@ const store: Store<RootState> = new Vuex.Store({
 			(state.status = 'error'), (state.message = message);
 			localStorage.removeItem('encryptedSeed');
 			localStorage.removeItem('email');
+			localStorage.removeItem('iconSeed');
 			sessionStorage.removeItem('password');
 		},
 		logout(state: RootState) {
 			localStorage.removeItem('email');
+			localStorage.removeItem('iconSeed');
 			sessionStorage.removeItem('password');
 			localStorage.removeItem('encryptedSeed');
 
@@ -230,6 +235,8 @@ const store: Store<RootState> = new Vuex.Store({
 			state.keystore = payload.keystore;
 			state.accounts = payload.accounts;
 			state.hashedPassword = payload.hashedPassword;
+
+			if (payload.accounts && payload.accounts[0]) window.localStorage.setItem('iconSeed', parseInt(payload.accounts[0].slice(2, 10), 16).toString());
 			sessionStorage.setItem('password', payload.hashedPassword);
 		},
 		seedExported(state: RootState) {

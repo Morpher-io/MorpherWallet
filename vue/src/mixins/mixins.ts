@@ -124,7 +124,7 @@ export class Global extends Vue {
 	formatEthAddress(ethAddress: string) {
 		if (!ethAddress) return '';
 		if (ethAddress.length <= 11) return ethAddress;
-		return ethAddress ? ethAddress.substr(0, 5) + '...' + ethAddress.substr(ethAddress.length - 3) : '';
+		return ethAddress ? ethAddress.substr(0, 5) + '...' + ethAddress.substr(ethAddress.length - 5) : '';
 	}
 
 	// map libraries
