@@ -87,7 +87,7 @@
 			</div>
 		</div>
 
-		<div v-if="!twoFactorActive && !twoFactorEmailActive" class="mt-2 has-text-left is-size-7">
+		<div v-if="twoFactorActive || twoFactorEmailActive" class="mt-2 has-text-left is-size-7">
 			<p class="has-text-weight-medium">2-Step Recommendation</p>
 			<p>Complete KYC on Morpher to avoid losing wallet after losing 2FA device.</p>
 		</div>

@@ -74,7 +74,6 @@ import { Watch } from 'vue-property-decorator';
 export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 	currentPage = 0;
 	currentMethod = '';
-	usersPassword = '';
 	qrCode = '';
 	authenticatorCode = '';
 	emailCode = '';
@@ -191,7 +190,7 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 		if (!password) {
 			return;
 		}
-		this.usersPassword = password;
+
 		if (this.currentMethod === 'email') {
 			this.emailCode = '';
 			this.submitChange('email');
@@ -215,7 +214,6 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 	resetData() {
 		this.currentPage = 0;
 		this.currentMethod = '';
-		this.usersPassword = '';
 	}
 
 	setCode(code: string) {
