@@ -79,7 +79,13 @@ export class Global extends Vue {
 	public showPrivateKey!: (params: TypeShowPhraseKeyVariables) => Promise<unknown>;
 
 	@Action
+	public showPrivateKeyBackground!: (params: TypeShowPhraseKeyVariables) => Promise<unknown>;
+
+	@Action
 	public showSeedPhrase!: (params: TypeShowPhraseKeyVariables) => Promise<unknown>;
+
+	@Action
+	public showSeedPhraseBackground!: (params: TypeShowPhraseKeyVariables) => Promise<unknown>;
 
 	@Action
 	public exportSeedPhrase!: (params: TypeExportPhraseKeyVariables) => Promise<unknown>;

@@ -736,24 +736,30 @@ const store: Store<RootState> = new Vuex.Store({
 				commit('delayedSpinnerMessage', 'Wrong password for private key');
 			}
 		},
+		showPrivateKeyBackground({ commit, state }, params: TypeShowPhraseKeyVariables) {
+			const storedPassword = state.hashedPassword;
+
+			if (storedPassword === params.password) {
+				if (state.keystore !== null) {
+					const privateKey = state.keystore[0].privateKey.substring(2);
+					return privateKey;
+				}
+			}
+
+			return null
+		},
 		exportKeystore({ commit, state }, params: TypeExportPhraseKeyVariables) {
 			const storedPassword = state.hashedPassword;
 
-			sha256(params.password)
-				.then(hashedPassword => {
-					if (storedPassword === hashedPassword) {
-						if (state.keystore !== null) {
-							downloadEncryptedKeystore(state.keystore[0].encrypt(params.password), params.account);
-							commit('delayedSpinnerMessage', 'Keystore exported successfully');
-							commit('keystoreExported');
-						}
-					} else {
-						commit('delayedSpinnerMessage', 'Wrong password for Keystore');
-					}
-				})
-				.catch(() => {
-					commit('delayedSpinnerMessage', 'Something went wrong, please try again');
-				});
+			if (storedPassword === params.password) {
+				if (state.keystore !== null) {
+					downloadEncryptedKeystore(state.keystore[0].encrypt(params.password), params.account);
+					commit('delayedSpinnerMessage', 'Keystore exported successfully');
+					commit('keystoreExported');
+				}
+			} else {
+				commit('delayedSpinnerMessage', 'Wrong password for Keystore');
+			}
 		},
 		showSeedPhrase({ commit, state }, params: TypeShowPhraseKeyVariables) {
 			const storedPassword = state.hashedPassword;
@@ -773,6 +779,22 @@ const store: Store<RootState> = new Vuex.Store({
 			} else {
 				commit('delayedSpinnerMessage', 'Wrong password for Seed Phrase');
 			}
+		},
+		async showSeedPhraseBackground({ commit, state }, params: TypeShowPhraseKeyVariables) {
+			const storedPassword = state.hashedPassword;
+
+			if (storedPassword === params.password) {
+				if (state.keystore !== null) {
+					const seed = state.encryptedSeed;
+					if (seed.ciphertext !== undefined && seed.iv !== undefined && seed.salt !== undefined) {
+						const mnemonic = cryptoDecrypt(params.password, seed.ciphertext, seed.iv, seed.salt);
+
+						return mnemonic;
+					}
+				}
+			}
+
+			return null;
 		},
 		exportSeedPhrase({ commit, state }, params: TypeExportPhraseKeyVariables) {
 			const storedPassword = state.hashedPassword;

@@ -96,7 +96,6 @@ import Component, { mixins } from 'vue-class-component';
 import ChangePassword from '../components/ChangePassword.vue';
 import ChangeEmail from '../components/ChangeEmail.vue';
 import Change2FA from '../components/Change2FA.vue';
-import ExportWallet from '../components/ExportWallet.vue';
 import AccountRecovery from '../components/AccountRecovery.vue';
 import { Authenticated, Global } from '../mixins/mixins';
 
@@ -105,7 +104,6 @@ import { Authenticated, Global } from '../mixins/mixins';
 		ChangePassword,
 		ChangeEmail,
 		Change2FA,
-		ExportWallet,
 		AccountRecovery
 	}
 })

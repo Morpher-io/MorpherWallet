@@ -1,5 +1,6 @@
 <template>
 	<div>
+		<img src="@/assets/img/password.svg" alt="Recover wallet image" class="mb-3" />
 		<h2 class="title">Confirm Access</h2>
 		<p class="subtitle">Please enter your password before making changes.</p>
 
