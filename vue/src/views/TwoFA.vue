@@ -89,7 +89,7 @@ export default class TwoFA extends mixins(Global) {
 	mounted() {
 		window.setTimeout(() => {
 			const email: any = this.$refs.email_code;
-			const auth: any = this.$refs.email_code;
+			const auth: any = this.$refs.auth_code;
 			if (email) email.focus();
 			else if (auth) auth.focus();
 		}, 100);
@@ -98,7 +98,7 @@ export default class TwoFA extends mixins(Global) {
 
 	@Watch('authenticatorCode')
 	authenticatorCodeChanged(value: any) {
-		if (value.length === 6) {
+		if (this.authenticatorCode.length === 6) {
 			this.validateCode();
 		}
 	}

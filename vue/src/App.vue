@@ -43,7 +43,7 @@ import Spinner from './components/loading-spinner/Spinner.vue';
 export default class App extends Vue {
 	iFrameDisplay = isIframe();
 	connection = this.$store.state.connection;
-
+	
 	async closeWallet() {
 		if (this.iFrameDisplay) {
 			if (this.connection && this.connection !== null) {
@@ -52,7 +52,13 @@ export default class App extends Vue {
 				(await promise).hideWallet();
 				(await promise).onClose();
 
-				this.$router.push('/');
+				if (this.$store.getters.isLoggedIn) {
+					if (this.$router.currentRoute.path !== '/')
+						this.$router.push('/');
+				} else {
+					if (this.$router.currentRoute.path !== '/login')
+						this.$router.push('/login');
+				}
 			}
 		}
 	}
