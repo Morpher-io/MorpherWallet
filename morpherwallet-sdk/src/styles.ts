@@ -1,5 +1,5 @@
 export const  styles =  `
-.zerowallet-container {
+.morpherwallet-container {
   position: fixed;
   width: 0px;
   height: 0px;
@@ -10,12 +10,12 @@ export const  styles =  `
   z-index: 123123123123;
 }
 @media (max-width: 576px) {
-  .zerowallet-container {
+  .morpherwallet-container {
     bottom: 0;
     top: auto;
   }
 }
-.zerowallet-widget-frame {
+.morpherwallet-widget-frame {
 	display: block;
 	max-width: 414px;
 	height: 600px!important;
@@ -34,12 +34,12 @@ export const  styles =  `
   z-index: 123123123123;
 }
 @media (max-width: 576px) {
-  .zerowallet-widget-frame {
+  .morpherwallet-widget-frame {
     width: 90%;
   }
 }
 @media (max-height: 600px) {
-  .zerowallet-widget-frame {
+  .morpherwallet-widget-frame {
     height: 90%!important;
   }
 }

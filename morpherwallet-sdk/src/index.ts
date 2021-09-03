@@ -18,23 +18,23 @@ import { connectToChild } from 'penpal';
 
 
 let WIDGET_URL: string;
-const ZEROWALLET_IFRAME_CLASS = 'zerowallet-widget-frame';
-const ZEROWALLET_CONTAINER_CLASS = 'zerowallet-container';
-let zeroWalletIframe: HTMLIFrameElement;
-let zeroWalletContainer: HTMLDivElement;
+const ZEROWALLET_IFRAME_CLASS = 'morpherwallet-widget-frame';
+const ZEROWALLET_CONTAINER_CLASS = 'morpherwallet-container';
+let morpherWalletIframe: HTMLIFrameElement;
+let morpherWalletContainer: HTMLDivElement;
 
 if (document.getElementById('zero_wallet_sdk_iframe')) {
-	zeroWalletIframe = (document.getElementById('zero_wallet_sdk_iframe') as HTMLIFrameElement);
+	morpherWalletIframe = (document.getElementById('zero_wallet_sdk_iframe') as HTMLIFrameElement);
 } else {
-	zeroWalletIframe = document.createElement('iframe');
-	zeroWalletIframe.id= 'zero_wallet_sdk_iframe';
-	zeroWalletIframe.className = ZEROWALLET_IFRAME_CLASS;
-	zeroWalletIframe.scrolling="no";
-	zeroWalletIframe.style.overflow="hidden";
+	morpherWalletIframe = document.createElement('iframe');
+	morpherWalletIframe.id= 'zero_wallet_sdk_iframe';
+	morpherWalletIframe.className = ZEROWALLET_IFRAME_CLASS;
+	morpherWalletIframe.scrolling="no";
+	morpherWalletIframe.style.overflow="hidden";
 }
 
 
-export type ZeroWalletConfig = {
+export type MorpherWalletConfig = {
 	__typename?: "Type2FARequired";
 	env: string;
   show_transaction: boolean;
@@ -45,7 +45,7 @@ export type ZeroWalletConfig = {
 
 let iframeLoadedFired = false;
 
-export default class ZeroWallet {
+export default class MorpherWallet {
 
 	wsRPCEndpointUrl: string;
 	chainId: number;
@@ -56,10 +56,10 @@ export default class ZeroWallet {
 	_onCloseCallback: any;
 	_onActiveWalletChangedCallback: any;
 	_onErrorCallback: any;
-	config: ZeroWalletConfig;
+	config: MorpherWalletConfig;
 	_selectedAddress: any;
   
-  constructor(wsRPCEndpointUrl: string, chainId: number, config: ZeroWalletConfig = null) {
+  constructor(wsRPCEndpointUrl: string, chainId: number, config: MorpherWalletConfig = null) {
 		if (config === null) {
 			config = {
 				show_transaction: false,
@@ -87,7 +87,7 @@ export default class ZeroWallet {
 		this.provider = this._initProvider();
 
 		
-    //window.zerowallet = this;
+    //window.morpherwallet = this;
   }
 
   getProvider() {
@@ -98,7 +98,7 @@ export default class ZeroWallet {
     return this.chainId;
   }
 
-  async showZeroWallet() {
+  async showMorpherWallet() {
 		this.showWallet()
     const widgetCommunication = (await this.widget).communication;
     return widgetCommunication.showPage('wallet');
@@ -158,24 +158,24 @@ export default class ZeroWallet {
 
 	async showWallet() {
 		
-    zeroWalletContainer.style.position = 'absolute';
-    zeroWalletContainer.style.height = '100%';
-    zeroWalletContainer.style.width = '100%';
-    zeroWalletContainer.style.top='0';
-    zeroWalletContainer.style.left='0';
-		zeroWalletContainer.style.display = 'inline';
-		zeroWalletContainer.style.visibility = 'visible';
+    morpherWalletContainer.style.position = 'absolute';
+    morpherWalletContainer.style.height = '100%';
+    morpherWalletContainer.style.width = '100%';
+    morpherWalletContainer.style.top='0';
+    morpherWalletContainer.style.left='0';
+		morpherWalletContainer.style.display = 'inline';
+		morpherWalletContainer.style.visibility = 'visible';
 	
 	}
 
 	async hideWallet() {
-		zeroWalletContainer.style.position = 'absolute';
-		zeroWalletContainer.style.width = '0';
-		zeroWalletContainer.style.height = '0';
-		zeroWalletContainer.style.display = 'none';
-		zeroWalletContainer.style.visibility = 'invisible';
-		zeroWalletContainer.style.top = '-999px';
-		zeroWalletContainer.style.left = '-999px';		
+		morpherWalletContainer.style.position = 'absolute';
+		morpherWalletContainer.style.width = '0';
+		morpherWalletContainer.style.height = '0';
+		morpherWalletContainer.style.display = 'none';
+		morpherWalletContainer.style.visibility = 'invisible';
+		morpherWalletContainer.style.top = '-999px';
+		morpherWalletContainer.style.left = '-999px';		
 	}
 
   async isLoggedIn() {
@@ -204,7 +204,7 @@ export default class ZeroWallet {
         resolve(true);
       }
 
-      zeroWalletIframe.onload = () => {
+      morpherWalletIframe.onload = () => {
         iframeLoadedFired = true;
         resolve(true);
       };
@@ -212,9 +212,9 @@ export default class ZeroWallet {
   }
 
   async _initWidget() {
-		zeroWalletIframe.src = WIDGET_URL;
+		morpherWalletIframe.src = WIDGET_URL;
 		
-		zeroWalletIframe.onload = () => {
+		morpherWalletIframe.onload = () => {
 			iframeLoadedFired = true;
 		};
     
@@ -223,27 +223,27 @@ export default class ZeroWallet {
     style.innerHTML = styles;
 
 		if (document.getElementById('zero_wallet_sdk_container')) {
-			zeroWalletContainer = (document.getElementById('zero_wallet_sdk_container') as HTMLDivElement);
+			morpherWalletContainer = (document.getElementById('zero_wallet_sdk_container') as HTMLDivElement);
 		} else {
-			zeroWalletContainer = document.createElement('div');
-			zeroWalletContainer.id= 'zero_wallet_sdk_container';
-			zeroWalletContainer.className = ZEROWALLET_CONTAINER_CLASS;
-			zeroWalletContainer.style.width = '0';
-			zeroWalletContainer.style.height = '0';
-			zeroWalletContainer.style.border = 'none';
-			zeroWalletContainer.style.display = 'none';
-			zeroWalletContainer.style.visibility = 'invisible';
-			zeroWalletContainer.style.position = 'absolute';
-			zeroWalletContainer.style.top = '-999px';
-			zeroWalletContainer.style.left = '-999px';
-			zeroWalletContainer.appendChild(zeroWalletIframe);
-			document.body.appendChild(zeroWalletContainer);
+			morpherWalletContainer = document.createElement('div');
+			morpherWalletContainer.id= 'zero_wallet_sdk_container';
+			morpherWalletContainer.className = ZEROWALLET_CONTAINER_CLASS;
+			morpherWalletContainer.style.width = '0';
+			morpherWalletContainer.style.height = '0';
+			morpherWalletContainer.style.border = 'none';
+			morpherWalletContainer.style.display = 'none';
+			morpherWalletContainer.style.visibility = 'invisible';
+			morpherWalletContainer.style.position = 'absolute';
+			morpherWalletContainer.style.top = '-999px';
+			morpherWalletContainer.style.left = '-999px';
+			morpherWalletContainer.appendChild(morpherWalletIframe);
+			document.body.appendChild(morpherWalletContainer);
 			document.head.appendChild(style);
 	
 		}
 
     const connection = connectToChild({
-      iframe: zeroWalletIframe,
+      iframe: morpherWalletIframe,
       methods: {
         setHeight: this._setHeight.bind(this),
         getWindowSize: this._getWindowSize.bind(this),
@@ -260,7 +260,7 @@ export default class ZeroWallet {
     const communication = await connection.promise;
     //communication.retrieveSession();
 
-    return { communication: (communication as any), iframe: zeroWalletIframe };
+    return { communication: (communication as any), iframe: morpherWalletIframe };
   }
 
   _initProvider() {

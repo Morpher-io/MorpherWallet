@@ -26,7 +26,7 @@ import {
 	TypeUnlock2fa,
 	TypeUserFoundData,
 	TypeUnlockWithPassword,
-	ZeroWalletConfig,
+	MorpherWalletConfig,
 	TypeChangePassword,
 	TypeEncryptedSeed,
 	TypeKeystoreUnlocked,
@@ -887,7 +887,7 @@ if (isIframe()) {
 					return [];
 				}
 			},
-			async signTransaction(txObj: any, config: ZeroWalletConfig) {
+			async signTransaction(txObj: any, config: MorpherWalletConfig) {
 				if (txObj.eth_balance) {
 					store.state.ethBalance = txObj.eth_balance;
 				}
@@ -943,7 +943,7 @@ if (isIframe()) {
 				});
 				return signedTx;
 			},
-			async signMessage(txObj: any, config: ZeroWalletConfig) {
+			async signMessage(txObj: any, config: MorpherWalletConfig) {
 				const signedTx = await new Promise((resolve, reject) => {
 					//see if we are logged in?!
 					try {

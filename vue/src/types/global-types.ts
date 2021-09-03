@@ -118,7 +118,7 @@ export type WalletSign = {
 	sign: any;
 };
 
-export type ZeroWalletConfig = {
+export type MorpherWalletConfig = {
 	__typename?: 'Type2FARequired';
 	show_transaction: boolean;
 	confirm_transaction: boolean;

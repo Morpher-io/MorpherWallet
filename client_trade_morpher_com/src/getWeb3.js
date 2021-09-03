@@ -27,10 +27,10 @@ const getWeb3 = () =>
       //   resolve(web3);
       // }
       // //detect if Morphers Zerowallet is in use
-      // else if (window.zerowallet) {
-      //   const web3 = new Web3(window.zerowallet.getProvider());
+      // else if (window.morpherwallet) {
+      //   const web3 = new Web3(window.morpherwallet.getProvider());
       //   try {
-      //     await window.zerowallet.enable();
+      //     await window.morpherwallet.enable();
       //     resolve(web3);
       //   } catch (error) {
       //     reject(error);

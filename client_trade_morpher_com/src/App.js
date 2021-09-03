@@ -3,7 +3,7 @@
  */
 import React, { Component } from "react";
 //import getWeb3 from "./getWeb3";
-import ZeroWallet from "zerowallet-sdk";
+import MorpherWallet from "morpherwallet-sdk";
 import "./App.css";
 //import { connectToChild } from 'penpal';
 
@@ -32,15 +32,15 @@ class App extends Component {
 
   async componentDidMount() {
 
-    this.zeroWallet = new ZeroWallet("ws://127.0.0.1:7545", 5777);
+    this.morpherWallet = new MorpherWallet("ws://127.0.0.1:7545", 5777);
 
-    //let web3 = await this.zeroWallet.getProvider();
+    //let web3 = await this.morpherWallet.getProvider();
 
-    let res = await this.zeroWallet.isLoggedIn();
+    let res = await this.morpherWallet.isLoggedIn();
     if (res.isLoggedIn === true) {
       this.setState({ walletEmail: res.walletEmail });
       //let web3 = await getWeb3();
-      let web3 = new Web3(await this.zeroWallet.getProvider());
+      let web3 = new Web3(await this.morpherWallet.getProvider());
       let accounts = await web3.eth.getAccounts();
       this.setState({ isAuthenticated: true, web3 });
     } else {
@@ -48,11 +48,11 @@ class App extends Component {
       this.setState({ showWallet: false });
     }
 
-    this.zeroWallet.onLogin(async (walletAddress, walletEmail) => {
+    this.morpherWallet.onLogin(async (walletAddress, walletEmail) => {
       this.setState({ walletEmail: walletEmail });
       this.setState({ walletAddress: walletAddress });
       //let web3 = await getWeb3();
-      let web3 = new Web3(await this.zeroWallet.getProvider());
+      let web3 = new Web3(await this.morpherWallet.getProvider());
       let accounts = await web3.eth.getAccounts();
       this.setState({ isAuthenticated: true, web3 });
       let balance = web3.utils.fromWei(await web3.eth.getBalance(accounts[0]), "ether");
@@ -61,7 +61,7 @@ class App extends Component {
 
     });
 
-    this.zeroWallet.onLogout(() => {
+    this.morpherWallet.onLogout(() => {
       this.setState({ walletEmail: "" });
       this.setState({ walletAddress: "" });
       this.setState({ isAuthenticated: false });
@@ -88,11 +88,11 @@ class App extends Component {
 
   toggleWallet = async () => {
     if (this.state.showWallet) {
-      await this.zeroWallet.hideWallet();
+      await this.morpherWallet.hideWallet();
       this.setState({ showWallet: false });
 
     } else {
-      await this.zeroWallet.showWallet();
+      await this.morpherWallet.showWallet();
       
       this.setState({ showWallet: true });
 
