@@ -984,7 +984,7 @@ if (isIframe()) {
 				return signedTx;
 			},
 			showPage(pageName: string) {
-				if (pageName === 'wallet' || pageName === 'settings' || pageName === 'register' || pageName === 'addrecovery' || pageName === 'addrecovery') {
+				if (pageName) {
 					store.state.openPage = pageName;
 					return true;
 				}

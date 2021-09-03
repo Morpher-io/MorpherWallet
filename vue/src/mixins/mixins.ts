@@ -149,8 +149,10 @@ export class Global extends Vue {
 			if (value === 'wallet') this.$router.push('/');
 			if (value === 'settings') this.$router.push('/settings');
 			if (value === 'register') this.$router.push('/signup');
-			if (value === '2fa') this.$router.push('/2fs');
-			if (value === 'addrecovery') this.$router.push('/addrecovery');
+			if (value === '2fa') this.$router.push('/settings/2FA');
+			if (value === 'recovery') this.$router.push('/settings/recovery');
+			if (value === 'email') this.$router.push('/settings/email');
+
 			this.clearPage();
 		}
 	}

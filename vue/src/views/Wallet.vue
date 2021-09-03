@@ -13,12 +13,12 @@
 					</div>
 				</div>
 				<div class="buttons horizontal-buttons mt-2">
-					<button tag="button" @click="sendInApp" class="button is-light-purple is-small-button has-text-weight-bold transition-faster cursor-not-allowed">
+					<button tag="button" :class="{ 'cursor-not-allowed': !this.isIframe() }"  @click="sendInApp" class="button is-light-purple is-small-button has-text-weight-bold transition-faster">
 						<span class="icon is-small">
 							<i class="fas fa-paper-plane"></i>
 						</span>
 						<span>Send</span>
-						<div class="tooltip">
+						<div class="tooltip" v-if="!this.isIframe()">
 							Sending on Ethereum only available when using wallet inside the Morpher app.
 						</div>
 					</button>
