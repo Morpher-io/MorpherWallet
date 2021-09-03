@@ -13,7 +13,7 @@
 					</div>
 				</div>
 				<div class="buttons horizontal-buttons mt-2">
-					<button tag="button" class="button is-light-purple is-small-button has-text-weight-bold transition-faster cursor-not-allowed">
+					<button tag="button" @click="sendInApp" class="button is-light-purple is-small-button has-text-weight-bold transition-faster cursor-not-allowed">
 						<span class="icon is-small">
 							<i class="fas fa-paper-plane"></i>
 						</span>
@@ -182,6 +182,15 @@ export default class Wallet extends mixins(Global, Authenticated) {
 		if (!seed) return;
 		const image = jazzicon(32, seed);
 		ref.append(image);
+	}
+
+	async sendInApp() {
+		if (this.isIframe()) {
+			if (this.store.connection && this.store.connection !== null) {
+				const promise = this.store.connection.promise;
+				(await promise).openSendInApp();
+			}
+		}
 	}
 
 	copyETHAddress(ethAddress: string): void {

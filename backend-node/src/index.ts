@@ -70,6 +70,15 @@ process.on('unhandledRejection', (error: any, promise) => {
     Logger.info(error.stack || error);
 });
 
+async function quitBackend() {
+    Logger.info('Backend exiting. Thanks.');
+    process.exit(0);
+}
+
+process.on('SIGINT', quitBackend);
+process.on('SIGTERM', quitBackend);
+
+
 if (!module.parent) {
     // Listen to the server ports.
     httpServer.listen(process.env.PORT, async () => {

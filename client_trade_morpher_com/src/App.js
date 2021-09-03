@@ -42,7 +42,6 @@ class App extends Component {
       //let web3 = await getWeb3();
       let web3 = new Web3(await this.zeroWallet.getProvider());
       let accounts = await web3.eth.getAccounts();
-      console.log(accounts);
       this.setState({ isAuthenticated: true, web3 });
     } else {
       
