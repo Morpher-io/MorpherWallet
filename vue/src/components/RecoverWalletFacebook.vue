@@ -4,6 +4,9 @@
 			:logo-style="{
 				color: '#4267B2',
 				marginRight: '5px',
+				borderRadius: '100px',
+				width: '24px',
+				height: '24px'
 			}"
 			type="button"
 			class="button is-grey big-button outlined-button is-thick transition-faster facebook-button"
@@ -14,7 +17,6 @@
 		>
 			<span slot="login">Facebook</span>
 		</v-facebook-login>
-		<ChangePassword v-if="seedFound" :presetOldPassword="oldPassword" activePage="password"></ChangePassword>
 	</div>
 </template>
 
@@ -24,6 +26,7 @@ import ChangePassword from './ChangePassword.vue';
 
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
+import { Emit } from 'vue-property-decorator';
 
 @Component({
 	components: {
@@ -40,8 +43,11 @@ export default class RecoverWalletFacebook extends mixins(Global) {
 	};
 	clientId = process.env.VUE_APP_FACEBOOK_APP_ID;
 	recoveryTypeId = 2;
-	seedFound = false; //if seed was found, the user can enter a new password
-	oldPassword = '';
+
+	@Emit('setPassword')
+	setPassword(data) {
+		return data;
+	}
 
 	handleSdkInit({ FB, scope }) {
 		this.facebook.scope = scope;
@@ -59,8 +65,10 @@ export default class RecoverWalletFacebook extends mixins(Global) {
 					this.facebook.FB.api('/me/permissions', 'DELETE', async () => {
 						this.facebook.scope.logout();
 						this.hideSpinner();
-						this.seedFound = true;
-						this.oldPassword = userID;
+						this.setPassword({
+							success: true,
+							oldPassword: userID
+						});
 					});
 				})
 				.catch(error => {
@@ -68,12 +76,21 @@ export default class RecoverWalletFacebook extends mixins(Global) {
 						this.facebook.scope.logout();
 						this.showSpinnerThenAutohide('No recovery found...');
 						this.recoveryError = error;
+						this.setPassword({
+							success: false,
+							oldPassword: null,
+							error: error
+						});
 					});
 				});
 		} catch (e) {
 			this.showSpinnerThenAutohide('Your Account was not found');
 			this.recoveryError = 'Your Account was not found.';
-			console.error(e);
+			this.setPassword({
+				success: false,
+				oldPassword: null,
+				error: 'Your account was not found.'
+			});
 		}
 	}
 }
@@ -82,6 +99,6 @@ export default class RecoverWalletFacebook extends mixins(Global) {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .facebook-button {
-	border-radius: 7px!important;
+	border-radius: 7px !important;
 }
 </style>

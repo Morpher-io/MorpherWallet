@@ -114,7 +114,7 @@ describe('Wallet controller test cases', async () => {
             .set('Accept', 'application/json');
 
         expect(walletResponse.status).toEqual(404);
-        expect(walletResponse.body.error).toEqual('User not found');
+        expect(walletResponse.body.error).toEqual('USER_NOT_FOUND');
     });
 
     it('returns error if bad body key', async () => {
@@ -123,8 +123,8 @@ describe('Wallet controller test cases', async () => {
             .send(badBodyKey)
             .set('Accept', 'application/json');
 
-        expect(walletResponse.status).toEqual(404);
-        expect(walletResponse.body.error).toEqual('Bad body data.');
+        expect(walletResponse.status).toEqual(400);
+        expect(walletResponse.body.error).toEqual('BAD_REQUEST');
     });
 
     it('returns error if bad body encryptedSeed', async () => {
@@ -133,8 +133,8 @@ describe('Wallet controller test cases', async () => {
             .send(badBodyEncryptedSeed)
             .set('Accept', 'application/json');
 
-        expect(walletResponse.status).toEqual(404);
-        expect(walletResponse.body.error).toEqual('Bad body data.');
+        expect(walletResponse.status).toEqual(400);
+        expect(walletResponse.body.error).toEqual('BAD_REQUEST');
     });
 
     it('returns encryptedSeed', async () => {
@@ -186,8 +186,8 @@ describe('Wallet controller test cases', async () => {
             .send(encryptedSeedData)
             .set('Accept', 'application/json');
 
-        expect(walletResponse.status).toEqual(404);
-        expect(walletResponse.body.error).toEqual('Account not yet confirmed. Try again.');
+        expect(walletResponse.status).toEqual(400);
+        expect(walletResponse.body.error).toEqual('ACCOUNT_NOT_CONFIRMED');
     });
 
     it('returns error if no email verification code', async () => {
@@ -252,8 +252,8 @@ describe('Wallet controller test cases', async () => {
             .send(encryptedSeedData)
             .set('Accept', 'application/json');
 
-        expect(walletResponse.status).toEqual(404);
-        expect(walletResponse.body.error).toEqual('Either Email2FA or Authenticator2FA was wrong. Try again.');
+        expect(walletResponse.status).toEqual(400);
+        expect(walletResponse.body.error).toEqual('SOME_2FA_WRONG');
     });
 
     it('returns user payload', async () => {
@@ -290,7 +290,7 @@ describe('Wallet controller test cases', async () => {
             .set('Accept', 'application/json');
 
         expect(walletResponse.status).toEqual(404);
-        expect(walletResponse.body.error).toEqual('User not found');
+        expect(walletResponse.body.error).toEqual('USER_NOT_FOUND');
     });
 
     it('returns user nonce', async () => {
@@ -324,7 +324,7 @@ describe('Wallet controller test cases', async () => {
             .set('Accept', 'application/json');
 
         expect(walletResponse.status).toEqual(404);
-        expect(walletResponse.body.error).toEqual('User not found');
+        expect(walletResponse.body.error).toEqual('USER_NOT_FOUND');
     });
 
     // The logic is the same for the other recovery methods,
@@ -481,8 +481,8 @@ describe('Wallet controller test cases', async () => {
             .set('Signature', JSON.stringify(signature))
             .set('key', bodyData.key);
 
-        expect(response.status).toEqual(503);
-        expect(response.body).not.toEqual('Auth Error - Aborting!');
+        expect(response.status).toEqual(400);
+        expect(response.body).not.toEqual('AUTH_ERROR');
     });
 
     it('tests change 2fa methods', async () => {
@@ -627,8 +627,8 @@ describe('Wallet controller test cases', async () => {
             .send(data)
             .set('Accept', 'application/json');
 
-        expect(response.status).toEqual(404);
-        expect(response.body.error).toEqual('Could not verify email code. Please try again!');
+        expect(response.status).toEqual(400);
+        expect(response.body.error).toEqual('CANNOT_VERIFY_EMAIL_CODE');
     });
 
     // Create account with private key that corresponds to eth wallet in user database.

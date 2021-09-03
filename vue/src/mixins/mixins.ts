@@ -9,7 +9,7 @@ import {
 	TypeUnlockWithPassword,
 	TypeChangePassword,
 	TypeChangeEmail,
-	TypePayloadData,
+	Type2FAUpdateParams,
 	TypeRecoveryParams,
 	TypeAddRecoveryParams,
 	TypeResetRecovery,
@@ -79,7 +79,13 @@ export class Global extends Vue {
 	public showPrivateKey!: (params: TypeShowPhraseKeyVariables) => Promise<unknown>;
 
 	@Action
+	public showPrivateKeyBackground!: (params: TypeShowPhraseKeyVariables) => Promise<unknown>;
+
+	@Action
 	public showSeedPhrase!: (params: TypeShowPhraseKeyVariables) => Promise<unknown>;
+
+	@Action
+	public showSeedPhraseBackground!: (params: TypeShowPhraseKeyVariables) => Promise<unknown>;
 
 	@Action
 	public exportSeedPhrase!: (params: TypeExportPhraseKeyVariables) => Promise<unknown>;
@@ -109,8 +115,7 @@ export class Global extends Vue {
 
 	router: VueRouter = this.$router;
 
-	
-	roundFormatter(param:any) {
+	roundFormatter(param: any) {
 		const price = parseFloat(param);
 		const abs = Math.abs(price);
 		let round = 0;
@@ -122,11 +127,10 @@ export class Global extends Vue {
 		return price ? price.toFixed(round) : 0;
 	}
 
-	
 	formatEthAddress(ethAddress: string) {
 		if (!ethAddress) return '';
 		if (ethAddress.length <= 11) return ethAddress;
-		return ethAddress ? ethAddress.substr(0, 5) + '...' + ethAddress.substr(ethAddress.length - 3) : '';
+		return ethAddress ? ethAddress.substr(0, 5) + '...' + ethAddress.substr(ethAddress.length - 5) : '';
 	}
 
 	// map libraries
@@ -152,13 +156,15 @@ export class Global extends Vue {
 	}
 
 	checkPassword(newValue: string, checkErrors: boolean, oldChecks: any, comparePassword: string, checkRepeatOnly = false) {
-		let updatedChecks = checkRepeatOnly ? oldChecks : {
-			min: '',
-			uppercase: '',
-			lowercase: '',
-			number: '',
-			match: '',
-		};
+		let updatedChecks = checkRepeatOnly
+			? oldChecks
+			: {
+					min: '',
+					uppercase: '',
+					lowercase: '',
+					number: '',
+					match: ''
+			  };
 
 		if (checkErrors) {
 			updatedChecks = {
@@ -166,7 +172,7 @@ export class Global extends Vue {
 				uppercase: 'fail',
 				lowercase: 'fail',
 				number: 'fail',
-				match: 'fail',
+				match: 'fail'
 			};
 		}
 
@@ -188,9 +194,9 @@ export class Global extends Vue {
 					updatedChecks.number = 'pass';
 				} else if (checkErrors) updatedChecks.number = 'fail';
 			}
-			
+
 			if (comparePassword) {
-				if(newValue === comparePassword) {
+				if (newValue === comparePassword) {
 					updatedChecks.match = 'pass';
 				} else updatedChecks.match = 'fail';
 			} else {
@@ -227,11 +233,17 @@ export class Authenticated extends Global {
 	public generateQRCode!: () => Promise<unknown>;
 
 	@Action
-	public change2FAMethods!: (params: TypePayloadData) => Promise<unknown>;
+	public change2FAMethods!: (params: Type2FAUpdateParams) => Promise<unknown>;
 
 	@Action
 	public addRecoveryMethod!: (params: TypeAddRecoveryParams) => Promise<unknown>;
 
 	@Action
 	public hasRecovery!: (id: number) => boolean;
+
+	@Action
+	public setUsersEmail!: (email: string) => void;
+
+	@Action
+	public updateRecoveryMethods!: () => void;
 }

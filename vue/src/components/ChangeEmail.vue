@@ -1,71 +1,54 @@
 <template>
 	<div class="card">
-		<form v-on:submit.prevent="formSubmitChangeEmail">
-			<div :class="{
-				'collapse': true,
-				'hide-border': activePage
-			}">
-				<div v-if="!activePage" class="is-flex is-align-items-center">
-					<span class="header" @click="changeActive">
-						Edit Email Address
-					</span>
-					<span :class="{
-						'icon collapseIcon header': true
-					}" @click="changeActive">
-						<i class="fas fa-chevron-right"></i>
-					</span>
-				</div>
-				<div :class="activePage === 'email' ? 'visible' : 'hidden'">
-					<div class="card-content">
-						<div class="content">
-							<div class="field">
-								<label class="label">New Email</label>
-								<div class="control">
-									<input
-										class="input is-primary"
-										name="newEmail"
-										data-cy="newEmail"
-										v-model="newEmail"
-										:disabled="twoFaSent"
-									/>
-									<p class="help is-danger" v-if="invalidEmail" data-cy="invalidMessage">
-										{{ invalidEmail }}
-									</p>
-								</div>
+		<div>
+			<div>
+				<div class="card-content">
+					<div class="content">
+						<div class="field">
+							<label class="label">New Email</label>
+							<div class="control">
+								<input class="input" name="newEmail" v-model="newEmail" />
 							</div>
-							<div class="field">
-								<label class="label">Password</label>
-								<div class="control">
-									<input
-										type="password"
-										class="input is-primary"
-										name="password"
-										data-cy="password"
-										v-model="password"
-										:disabled="twoFaSent"
-									/>
-								</div>
-							</div>
-							<div class="field" v-if="twoFaSent">
-								<label class="label">2FA Code</label>
-								<div class="control">
-									<input type="number" class="input is-primary" data-cy="twoFa" name="twoFa" placeholder="Enter 2FA" v-model="twoFa" />
-									<p class="help is-danger" v-if="invalid2FA">
-										{{ invalid2FA }}
-									</p>
-								</div>
+						</div>
+						<div class="field">
+							<label class="label">Password</label>
+							<div class="control">
+								<input type="password" class="input" name="password" v-model="password" />
 							</div>
 						</div>
 					</div>
+				</div>
 
-					<div class="field is-grouped">
-						<button class="button is-green big-button is-login transition-faster" type="submit" data-cy="updateEmail" :disabled="!newEmail || !password">
-							<span> Update Email </span>
-						</button>
-					</div>
+				<div class="error mt-3" v-if="logonError">
+					<p>⚠️ <span v-html="logonError"></span></p>
+				</div>
+
+				<div class="mt-5">
+					<button
+						class="button is-green big-button is-login transition-faster"
+						:disabled="!newEmail || !password"
+						@click="
+							setNewData({
+								email: newEmail,
+								password: password
+							})
+						"
+					>
+						<span>Update Email</span>
+					</button>
+				</div>
+
+				<div class="mt-2">
+					<button
+						v-on:click="$router.push('/settings?email_password=true')"
+						tag="button"
+						class="button is-ghost is-blue big-button medium-text transition-faster"
+					>
+						<span>Cancel</span>
+					</button>
 				</div>
 			</div>
-		</form>
+		</div>
 	</div>
 </template>
 
@@ -75,76 +58,50 @@ import { sha256 } from '../utils/cryptoFunctions';
 
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
-import { Emit, Prop } from 'vue-property-decorator';
+import { Emit, Prop, Watch } from 'vue-property-decorator';
 
 @Component({})
 export default class ChangeEmail extends mixins(Global, Authenticated) {
 	newEmail = '';
 	password = '';
-	error = '';
-	twoFaSent = false;
-	twoFa: any = null;
-	invalidEmail: any = false;
-	invalid2FA: any = false;
-	success = false;
+	logonError = '';
 
 	@Prop()
-	activePage!: string;
+	error!: string;
 
-	@Emit('changeActive')
-	changeActive() {
-		return;
+	@Watch('error')
+	handleErorrChange(newValue: string) {
+		if (newValue) this.logonError = newValue;
 	}
 
-	async formSubmitChangeEmail() {
-		if (!this.newEmail) {
-			return;
+	@Emit('setNewData')
+	async setNewData(data: any) {
+		this.logonError = '';
+
+		if (!data.email) {
+			return { email: null, password: null };
 		}
 
-		const emailMessage = await validateInput('email', this.newEmail);
+		const emailMessage = await validateInput('email', data.email);
+
 		if (emailMessage) {
-			this.invalidEmail = emailMessage;
-			return;
+			this.logonError = emailMessage;
+			return { email: null, password: null };
 		}
 
-		const password = await sha256(this.password);
+		const newPassword = await sha256(data.password);
 
-		if (this.store.hashedPassword !== password) {
-			this.invalidEmail = 'The password you entered is not correct!';
-			return;
+		if (this.store.hashedPassword !== newPassword) {
+			this.logonError = 'The password you entered is not correct.';
+			return { email: null, password: null };
 		}
 
 		if (this.store.email === this.newEmail) {
-			this.invalidEmail = 'The Email Address you entered is the same as you already use.';
-			return;
+			this.logonError = 'The Email Address you entered is the same as you already use.';
+			return { email: null, password: null };
 		}
 
-		if (this.twoFaSent == true && this.twoFa == '') {
-			this.invalid2FA = 'Two FA cannot be empty!';
-		}
-
-		try {
-			this.invalid2FA = false;
-			this.invalidEmail = false;
-			await this.changeEmail({ newEmail: this.newEmail, password: password, twoFa: this.twoFa });
-			if (!this.twoFaSent) {
-				//we show the 2FA fields now
-				this.twoFaSent = true;
-			} else {
-				this.newEmail = '';
-				this.password = '';
-				this.twoFa = '';
-				this.twoFaSent = false;
-				this.invalid2FA = false;
-				this.invalidEmail = false;
-				this.success = true;
-			}
-		} catch (e) {
-			this.invalidEmail = e.toString();
-		}
+		return { email: data.email, password: newPassword };
 	}
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped></style>

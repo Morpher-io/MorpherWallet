@@ -2,71 +2,70 @@
 	<div>
 		<div class="container">
 			<h2 class="title">Sign Up</h2>
-			<p class="subtitle">Create a new Wallet</p>
-			<form v-on:submit.prevent="signupExecute">
+			<p class="subtitle">Create a new wallet.</p>
+			<form v-on:submit.prevent="signupExecute" novalidate>
 				<div class="field">
 					<label class="label">Email</label>
 					<div class="control">
-						<input
-							type="email"
-							class="input"
-							name="walletEmail"
-							data-cy="walletEmail"
-							v-model="walletEmail"
-						/>
+						<input type="email" class="input" name="walletEmail" data-cy="walletEmail" v-model="walletEmail" />
 					</div>
-
-					<!-- <p class="help">Use this Email-Address for Wallet Recovery</p> -->
-					<p class="help is-danger" v-if="invalidEmail">
-						Error: {{ invalidEmail }}
-					</p>
 				</div>
 
 				<div class="field">
 					<label class="label">Password</label>
 
 					<div class="control">
-						<input
-							type="password"
-							class="input password-input"
-							name="walletPassword"
-							data-cy="walletPassword"
-							v-model="walletPassword"
-						/>
-						<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial; margin-top: -8px" />
+						<input type="password" class="input password-input" name="walletPassword" data-cy="walletPassword" v-model="walletPassword" />
+						<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial" />
 						<div class="password-help">
-							<p>Must contain:</p>
+							<p>Requirements:</p>
 							<ul class="items">
-								<li :class="{
-									'done': passwordChecks.min === 'pass',
-									'fail': passwordChecks.min === 'fail'
-								}">Min 8. characters</li>
-								<li :class="{
-									'done': passwordChecks.lowercase === 'pass',
-									'fail': passwordChecks.lowercase === 'fail'
-								}">A lowercase</li>
-								<li :class="{
-									'done': passwordChecks.uppercase === 'pass',
-									'fail': passwordChecks.uppercase === 'fail'
-								}">An uppercase</li>
-								<li :class="{
-									'done': passwordChecks.number === 'pass',
-									'fail': passwordChecks.number === 'fail'
-								}">A number</li>
-								<li :class="{
-									'done': passwordChecks.match === 'pass',
-									'fail': passwordChecks.match === 'fail'
-								}">Matches repeat</li>
+								<li
+									:class="{
+										done: passwordChecks.min === 'pass',
+										fail: passwordChecks.min === 'fail'
+									}"
+								>
+									Min. 8 characters
+								</li>
+								<li
+									:class="{
+										done: passwordChecks.lowercase === 'pass',
+										fail: passwordChecks.lowercase === 'fail'
+									}"
+								>
+									Lowercase letter
+								</li>
+								<li
+									:class="{
+										done: passwordChecks.uppercase === 'pass',
+										fail: passwordChecks.uppercase === 'fail'
+									}"
+								>
+									Uppercase letter
+								</li>
+								<li
+									:class="{
+										done: passwordChecks.number === 'pass',
+										fail: passwordChecks.number === 'fail'
+									}"
+								>
+									Number
+								</li>
+								<li
+									:class="{
+										done: passwordChecks.match === 'pass',
+										fail: passwordChecks.match === 'fail'
+									}"
+								>
+									Passwords match
+								</li>
 							</ul>
 						</div>
-
-						<p class="help is-danger" v-if="invalidPassword">
-							Error: {{ invalidPassword }}
-						</p>
 					</div>
 				</div>
 				<div class="field">
-					<label class="label">Repeat Password</label>
+					<label class="label">Confirm Password</label>
 					<div class="control">
 						<input
 							type="password"
@@ -78,20 +77,21 @@
 					</div>
 				</div>
 
+				<div class="error" v-if="logonError">
+					<p>⚠️ <span v-html="logonError"></span></p>
+				</div>
+
 				<button type="submit" data-cy="createNewWallet" class="button is-green big-button is-login transition-faster">
 					<span>Create Wallet</span>
 				</button>
 
 				<div class="divider"></div>
 
-				<div class="subtitle login-link">
+				<div class="login-link">
 					<span>Already have a wallet?</span>
 					<router-link to="/login" class="login-router">
 						<span>
 							Log In
-							<span class="icon is-small">
-								<i class="fas fa-chevron-right"></i>
-							</span>
 						</span>
 					</router-link>
 				</div>
@@ -108,6 +108,7 @@ import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 
 import { Watch } from 'vue-property-decorator';
+import { getDictionaryValue } from '../utils/dictionary';
 
 @Component({
 	components: {
@@ -120,14 +121,13 @@ export default class Signup extends mixins(Global) {
 	walletPassword = '';
 	walletPasswordRepeat = '';
 	signup = false;
-	invalidEmail = '';
-	invalidPassword = '';
+	logonError = '';
 	passwordChecks: any = {
 		min: '',
 		uppercase: '',
 		lowercase: '',
 		number: '',
-		match: '',
+		match: ''
 	};
 
 	@Watch('walletPassword')
@@ -143,8 +143,7 @@ export default class Signup extends mixins(Global) {
 	// Methods
 	async signupExecute(e: any) {
 		e.preventDefault();
-		this.invalidEmail = '';
-		this.invalidPassword = '';
+		this.logonError = '';
 
 		this.passwordChecks = this.checkPassword(this.walletPassword, true, this.passwordChecks, this.walletPasswordRepeat);
 
@@ -159,7 +158,7 @@ export default class Signup extends mixins(Global) {
 		const emailMessage = await validateInput('email', this.walletEmail);
 		if (emailMessage) {
 			this.hideSpinner();
-			this.invalidEmail = emailMessage;
+			this.logonError = emailMessage;
 			return;
 		}
 
@@ -171,7 +170,7 @@ export default class Signup extends mixins(Global) {
 		const passwordMessage = await validateInput('password', this.walletPassword);
 		if (passwordMessage) {
 			this.hideSpinner();
-			this.invalidPassword = passwordMessage;
+			this.logonError = passwordMessage;
 			return;
 		}
 
@@ -190,7 +189,7 @@ export default class Signup extends mixins(Global) {
 			})
 			.catch(e => {
 				this.hideSpinner();
-				this.invalidEmail = e.toString();
+				this.logonError = getDictionaryValue(e.toString());
 			});
 	}
 }

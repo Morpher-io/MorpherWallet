@@ -1,12 +1,11 @@
 <template>
 	<div class="control is-expanded">
 		<GoogleLogin class="button is-grey big-button outlined-button is-thick transition-faster" :params="{ clientId }" :onSuccess="onLogin">
-			<span class="icon google-icon">
-				<i class="fab fa-google"></i>
+			<span class="icon img">
+				<img src="@/assets/img/google_logo.svg" alt="Google Logo" />
 			</span>
 			<span>Google</span>
 		</GoogleLogin>
-		<ChangePassword v-if="seedFound" :presetOldPassword="oldPassword" activePage="password"></ChangePassword>
 	</div>
 </template>
 
@@ -16,6 +15,7 @@ import ChangePassword from './ChangePassword.vue';
 
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
+import { Emit } from 'vue-property-decorator';
 
 @Component({
 	components: {
@@ -24,12 +24,13 @@ import { Global } from '../mixins/mixins';
 	}
 })
 export default class RecoverWalletGoogle extends mixins(Global) {
-	isLoggedIn = false;
-	recoveryError = '';
-	seedFound = false; //if seed was found, the user can enter a new password
-	oldPassword = '';
 	clientId = process.env.VUE_APP_GOOGLE_APP_ID;
 	recoveryTypeId = 3;
+
+	@Emit('setPassword')
+	setPassword(data) {
+		return data;
+	}
 
 	onLogin(googleUser) {
 		this.showSpinner('Trying to Login...');
@@ -41,18 +42,25 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 				.then(() => {
 					googleUser.disconnect();
 					this.hideSpinner();
-					this.seedFound = true;
-					this.oldPassword = userID;
+					this.setPassword({
+						success: true,
+						oldPassword: userID
+					});
 				})
-				.catch(error => {
+				.catch(() => {
 					googleUser.disconnect();
-					this.showSpinnerThenAutohide('No recovery found...');
-					this.recoveryError = error;
+					this.showSpinnerThenAutohide('No recovery found');
+					this.setPassword({
+						success: false,
+						error: 'No recovery found'
+					});
 				});
 		} catch (e) {
-			this.showSpinnerThenAutohide('No recovery found...');
-			this.recoveryError = e.toString();
-			console.error(e);
+			this.showSpinnerThenAutohide('No recovery found');
+			this.setPassword({
+				success: false,
+				error: 'No recovery found'
+			});
 		}
 	}
 }
