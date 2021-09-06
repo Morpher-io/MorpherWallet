@@ -877,7 +877,7 @@ initialize the iframe parent connection
 */
 if (isIframe()) {
 	store.state.connection = connectToParent({
-		//parentOrigin: 'http://localhost:8081',
+		parentOrigin: /(?=.*morpher.com)^(\/www\.|https:\/\/www\.|https:\/\/)?[a-z 0-9]+([-.]{1}[a-z 0-9]+)*\.[a-z]{2,5}?(\/.*)?$/gm,
 		// Methods child is exposing to parent
 		methods: {
 			async getAccounts() {
