@@ -124,6 +124,10 @@ body {
 	overflow-y: auto;
 	display: flex;
 	flex-direction: column;
+
+	&.dev-border {
+		border: 3px solid $col_green_light;
+	}
 }
 
 .header {
