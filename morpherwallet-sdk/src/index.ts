@@ -198,7 +198,7 @@ export default class MorpherWallet {
     morpherWalletIframe.style.width = '';
     morpherWalletIframe.style.height = '';
     
-    if (this.config?.env === 'dev') {
+    if (this.config && this.config.env === 'dev') {
       morpherWalletIframe.style.border = '3px solid #00d492';
     }
 	}
