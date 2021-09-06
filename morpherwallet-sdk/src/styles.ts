@@ -23,7 +23,7 @@ export const  styles =  `
 	position: fixed;
 	left: 50%;
 	transform: translate(-50%, 0);
-	top: 20px;
+	top: 80px;
 
   box-shadow: 0 0 30px rgba(0,0,0,.3);
   border-radius: 14px;
@@ -41,6 +41,11 @@ export const  styles =  `
 @media (max-height: 600px) {
   .morpherwallet-widget-frame {
     height: 90%!important;
+  }
+}
+@media (max-width: 768px) {
+  .morpherwallet-widget-frame {
+    top: 20px;
   }
 }
 `;
