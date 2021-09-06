@@ -89,7 +89,7 @@
 
 				<div class="login-link">
 					<span>Already have a wallet?</span>
-					<router-link to="/login" class="login-router">
+					<router-link to="/login" class="login-router transition-faster">
 						<span>
 							Log In
 						</span>

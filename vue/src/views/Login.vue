@@ -22,7 +22,7 @@
 				<div class="error" v-if="logonError">
 					<p data-cy="loginError">
 						⚠️ <span v-html="logonError"></span>
-						<router-link v-if="showRecovery" to="/recovery" class="login-router"><span>Recover your wallet?</span></router-link>
+						<router-link v-if="showRecovery" to="/recovery" class="login-router transition-faster"><span>Recover your wallet?</span></router-link>
 					</p>
 				</div>
 
@@ -31,14 +31,14 @@
 				</button>
 
 				<p class="forgot-password">
-					Forgot password? <router-link to="/recovery" class="login-router"><span>Recover your wallet</span></router-link>
+					Forgot password? <router-link to="/recovery" class="login-router transition-faster"><span>Recover your wallet</span></router-link>
 				</p>
 
 				<div class="divider"></div>
 
 				<div class="login-link">
 					<span>Don't have a wallet?</span>
-					<router-link to="/signup" class="login-router">
+					<router-link to="/signup" class="login-router transition-faster">
 						<span>
 							Sign up
 						</span>

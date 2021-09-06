@@ -64,11 +64,7 @@
 			</div>
 		</form>
 
-		<p class="mt-3 has-text-left password-help">
-			<strong>Lost 2FA Access?</strong>
-			<br />Please email <a href="mailto:contact@help.morpher.com" class="login-router">contact@help.morpher.com</a>. Users that completed
-			KYC in the app are more likely to have their account restored.
-		</p>
+		<p class="mt-3 transition-faster">Having problems? <a href="https://support.morpher.com/en/article/2fa-2-step-verification-troubleshooting-ejmssf/" target="__blank" class="login-router">2-Step Support</a></p>
 	</div>
 </template>
 

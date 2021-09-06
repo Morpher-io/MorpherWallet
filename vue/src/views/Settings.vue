@@ -6,8 +6,8 @@
 					<i class="fas fa-chevron-left"></i>
 				</span>
 			</button>
-			<h2 v-if="!isEmailPasswordPage" class="title ml-4">Settings</h2>
-			<h2 v-if="isEmailPasswordPage" class="title ml-4">Email & Password</h2>
+			<h2 v-if="!isEmailPasswordPage" class="title ml-3">Settings</h2>
+			<h2 v-if="isEmailPasswordPage" class="title ml-3">Email & Password</h2>
 		</div>
 
 		<div class="divider just-space" />
@@ -65,24 +65,24 @@
 		</div>
 
 		<div v-else class="settings-data">
-			<div key="email" class="settings-link email-password is-flex is-align-items-center">
+			<div key="email" class="settings-link email-password is-flex is-align-items-center reset-cursor">
 				<div class="data">
 					<p class="has-text-weight-bold">Email</p>
 					<p>{{ store.email }}</p>
 				</div>
 				<div class="link">
-					<div class="login-router" @click="changeActive('email')">
+					<div class="login-router transition-faster" @click="changeActive('email')">
 						<i class="fas fa-pen-square" />
 					</div>
 				</div>
 			</div>
-			<div key="password" class="settings-link email-password is-flex is-align-items-center">
+			<div key="password" class="settings-link email-password is-flex is-align-items-center reset-cursor">
 				<div class="data">
 					<p class="has-text-weight-bold">Password</p>
 					<p>********</p>
 				</div>
 				<div class="link">
-					<div class="login-router" @click="changeActive('password')">
+					<div class="login-router transition-faster" @click="changeActive('password')">
 						<i class="fas fa-pen-square" />
 					</div>
 				</div>

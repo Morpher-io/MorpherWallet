@@ -11,21 +11,21 @@
 						<i class="fas fa-chevron-left"></i>
 					</span>
 				</button>
-				<h2 class="title ml-4">Export Wallet</h2>
+				<h2 class="title ml-3">Export Wallet</h2>
 			</div>
 
-			<p class="has-text-left mt-2">
+			<p class="has-text-left mt-2 transition-faster">
 				<span class="has-text-weight-medium">For advanced users only!</span> Export wallet seed phrase & private key for backup or to change
-				wallets. <a href="#" class="login-router">Learn more</a>
+				wallets. <a href="https://support.morpher.com/en/article/export-morpher-wallet-d6wr6g/" target="__blank" class="login-router">Learn more</a>
 			</p>
 
-			<div class="divider just-space" />
-
-			<button class="button is-blue big-button is-login transition-faster" data-cy="exportSeed" type="submit" @click="setExport('seed')">
+			<button class="mt-3 button is-blue big-button is-login transition-faster" data-cy="exportSeed" type="submit" @click="setExport('seed')">
 				<span>Export Seed Phrase</span>
 			</button>
 
-			<p class="mt-5 has-text-left">Additional options:</p>
+			<div class="divider just-space" />
+
+			<p class="mt-4 has-text-left">Additional options:</p>
 			<button @click="setExport('key')" tag="button" class="button outlined-button is-thick big-button transition-faster mt-2">
 				<span>Export Private Key</span>
 			</button>
@@ -46,7 +46,7 @@
 			<div class="links is-flex is-align-items-center is-justify-content-center mt-2">
 				<div class="link is-flex has-text-weight-medium is-align-items-center">
 					<i class="fas fa-copy mr-1"></i>
-					<div @click="copyToClipboard(store.seedPhrase)" class="login-router is-size-7">Copy to Clipboard</div>
+					<div @click="copyToClipboard(store.seedPhrase)" class="login-router is-size-7 transition-faster">Copy to Clipboard</div>
 				</div>
 			</div>
 
@@ -68,7 +68,7 @@
 			<div class="links is-flex is-align-items-center is-justify-content-center mt-2">
 				<div class="link is-flex has-text-weight-medium is-align-items-center">
 					<i class="fas fa-copy mr-1"></i>
-					<div @click="copyToClipboard(store.privateKey)" class="login-router is-size-7">Copy to Clipboard</div>
+					<div @click="copyToClipboard(store.privateKey)" class="login-router is-size-7 transition-faster">Copy to Clipboard</div>
 				</div>
 			</div>
 

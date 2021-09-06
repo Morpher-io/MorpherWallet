@@ -8,7 +8,7 @@
 			<label class="label">Password</label>
 
 			<div class="control">
-				<input type="password" class="input" name="walletPassword" v-model="walletPassword" />
+				<input type="password" class="input" name="walletPassword" v-model="walletPassword" @keyup.enter="setPassword()" />
 			</div>
 		</div>
 

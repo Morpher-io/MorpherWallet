@@ -11,7 +11,7 @@
 					<div ref="userImage" class="jazz-icon" />
 					<div class="ml-3">
 						<p>{{ walletEmail }}</p>
-						<div @click="logout()" class="login-router">Switch account</div>
+						<div @click="logout()" class="login-router transition-faster reset-line-height">Switch account</div>
 					</div>
 				</div>
 			</div>
@@ -35,7 +35,7 @@
 			<span>Log In</span>
 		</button>
 		<p class="forgot-password">
-			Forgot password? <router-link to="/recovery" class="login-router"><span>Recover your wallet</span></router-link>
+			Forgot password? <router-link to="/recovery" class="login-router transition-faster"><span>Recover your wallet</span></router-link>
 		</p>
 	</div>
 </template>

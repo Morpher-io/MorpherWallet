@@ -3,34 +3,37 @@
 		<div class="control is-expanded" v-if="!hasRecoveryMethod">
 			<v-facebook-login
 				:logo-style="{
-					color: '#4267B2',
-					marginRight: '5px',
-					borderRadius: '100px',
-					width: '24px',
-					height: '24px'
+					display: 'none',
 				}"
 				class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
 				:appId="clientId"
 				@sdk-init="handleSdkInit"
 				@login="onLogin"
 				v-model="facebook.model"
-				><span slot="login">Facebook</span>
+				><span class="is-flex is-align-items-center" slot="login">
+					<span class="icon img">
+						<img src="@/assets/img/fb_logo.svg" alt="Facebook Logo" />
+					</span>
+					<span>Facebook</span>
+				</span>
 			</v-facebook-login>
 		</div>
 		<div class="control is-expanded has-text-centered" v-if="hasRecoveryMethod">
 			<v-facebook-login
 				:logo-style="{
-					marginRight: '5px',
-					borderRadius: '100px',
-					width: '24px',
-					height: '24px'
+					display: 'none',
 				}"
 				class="button is-danger big-button is-thick transition-faster facebook-button"
 				:appId="clientId"
 				@sdk-init="handleSdkInit"
 				@login="deleteRecovery"
 				v-model="facebook.model"
-				><span slot="login">Revoke Access</span>
+				><span class="is-flex is-align-items-center" slot="login">
+					<span class="icon img">
+						<img src="@/assets/img/fb_logo_white.svg" alt="Facebook Logo" />
+					</span>
+					<span>Revoke Access</span>
+				</span>
 			</v-facebook-login>
 			<div class="recovery-active is-text-small">
 				<span class="icon">
@@ -173,5 +176,6 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 <style scoped>
 .facebook-button {
 	border-radius: 7px !important;
+	align-items: center;
 }
 </style>

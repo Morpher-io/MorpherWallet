@@ -8,10 +8,10 @@
 				<img v-bind:src="qrCode" alt="QR Code" />
 			</figure>
 		</div>
-		<p class="is-size-7 mt-2">
+		<p class="is-size-7 mt-2 transition-faster">
 			Need an authenticator? Get <a href="https://authy.com/download/" target="__blank" class="login-router">Authy</a> or
 			<a
-				href="https://chrome.google.com/webstore/detail/authenticator/bhghoamapcdpbohphigoooaddinpkbai?hl=en"
+				href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US"
 				target="__blank"
 				class="login-router"
 				>Google Authenticator</a
@@ -85,8 +85,7 @@ export default class ChangeAuthenticator extends mixins(Authenticated) {
 	img {
 		width: 140px;
 		height: 140px;
-		border: 1px solid #ccc;
-		margin: 0 auto;
+		margin: -10px auto;
 	}
 }
 </style>

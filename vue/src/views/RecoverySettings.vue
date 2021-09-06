@@ -12,11 +12,9 @@
 						<i class="fas fa-chevron-left"></i>
 					</span>
 				</button>
-				<h2 class="title ml-4">Account Recovery</h2>
+				<h2 class="title ml-3">Account Recovery</h2>
 			</div>
-			<p class="subtitle">Add a trusted online account as the recovery method for your wallet (in case you forget your wallet password).</p>
-
-			<div class="divider just-space" />
+			<p class="subtitle has-text-left">Add a trusted online account as the recovery method for your wallet (in case you forget your wallet password).</p>
 
 			<div>
 				<AddRecoveryGoogle v-if="whatRecovery.google" @processMethod="processMethod"></AddRecoveryGoogle>
@@ -49,6 +47,8 @@
 			<div class="error mt-3" v-if="logonError">
 				<p>⚠️ <span v-html="logonError"></span></p>
 			</div>
+
+			<div class="divider just-space" />
 
 			<div class="has-text-left mt-5 is-size-7">
 				<p class="has-text-weight-bold"><i class="fas fa-shield-alt"></i> Fully Encrypted Backup</p>

@@ -8,7 +8,7 @@
 
 				<div class="error alert warning is-size-7" v-if="logonError">
 					<p data-cy="loginError">⚠️ <span v-html="logonError"></span></p>
-					<a v-if="showMore" href="#" class="login-router"><span>Learn more</span></a>
+					<a v-if="showMore" href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/" target="__blank" class="login-router transition-faster"><span>Learn more</span></a>
 				</div>
 
 				<div class="field is-grouped">
@@ -25,7 +25,7 @@
 					<span>Cancel</span>
 				</router-link>
 
-				<p class="is-size-7 mt-5">Need help with recovery? <a href="#" class="login-router">Learn more</a></p>
+				<p class="is-size-7 mt-5 transition-faster">Need help with recovery? <a href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/" target="__blank" class="login-router">Learn more</a></p>
 			</div>
 			<div v-else class="container">
 				<img src="@/assets/img/recover_wallet.svg" alt="Recover wallet image" class="mb-3" />
@@ -54,7 +54,7 @@
 					</router-link>
 				</div>
 
-				<p class="is-size-7 mt-5">Need help with recovery? <a href="#" class="login-router">Learn more</a></p>
+				<p class="is-size-7 mt-5 transition-faster">Need help with recovery? <a href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/" target="__blank" class="login-router">Learn more</a></p>
 			</div>
 		</div>
 		<div class="container">

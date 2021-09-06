@@ -11,20 +11,22 @@
 						<i class="fas fa-chevron-left"></i>
 					</span>
 				</button>
-				<h2 class="title ml-4">Delete Account</h2>
+				<h2 class="title ml-3">Delete Account</h2>
 			</div>
 			<div class="divider just-space" />
 			<p class="has-text-left reset-line-height">
 				<span class="has-text-weight-medium"
-					>Please <router-link to="/settings/keys" class="login-router">export your wallet</router-link> first.</span
+					>Please <router-link to="/settings/keys" class="login-router transition-faster">export your wallet</router-link> first.</span
 				>
 				You need to verify ownership with the seed phrase or private key before your account can be removed.
 			</p>
-			<div class="field is-grouped">
+			<div class="field is-grouped mb-5">
 				<button @click="setNewPage()" tag="button" class="button big-button is-danger transition-faster">
 					<span>Delete Account</span>
 				</button>
 			</div>
+
+			<div class="divider" />
 
 			<div class="has-text-left mt-5 reset-line-height">
 				<p class="has-text-weight-medium">
