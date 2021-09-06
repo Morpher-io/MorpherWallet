@@ -197,7 +197,10 @@ export default class MorpherWallet {
     morpherWalletContainer.style.visibility = 'visible';
     morpherWalletIframe.style.width = '';
     morpherWalletIframe.style.height = '';
-	
+    
+    if (this.config?.env === 'dev') {
+      morpherWalletIframe.style.border = '3px solid #00d492';
+    }
 	}
 
 	async hideWallet() {
@@ -209,6 +212,7 @@ export default class MorpherWallet {
     morpherWalletContainer.style.left = '-999px';
     morpherWalletIframe.style.width = '0';
     morpherWalletIframe.style.height = '0';
+    morpherWalletIframe.style.border = 'none';
 	}
 
   async isLoggedIn() {
