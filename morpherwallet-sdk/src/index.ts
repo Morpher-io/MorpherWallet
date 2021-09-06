@@ -18,19 +18,21 @@ import { connectToChild } from 'penpal';
 
 
 let WIDGET_URL: string;
-const ZEROWALLET_IFRAME_CLASS = 'morpherwallet-widget-frame';
-const ZEROWALLET_CONTAINER_CLASS = 'morpherwallet-container';
+const MORPHERWALLET_IFRAME_CLASS = 'morpherwallet-widget-frame';
+const MORPHERWALLET_CONTAINER_CLASS = 'morpherwallet-container';
 let morpherWalletIframe: HTMLIFrameElement;
 let morpherWalletContainer: HTMLDivElement;
 
-if (document.getElementById('zero_wallet_sdk_iframe')) {
-	morpherWalletIframe = (document.getElementById('zero_wallet_sdk_iframe') as HTMLIFrameElement);
+if (document.getElementById('morpher_wallet_sdk_iframe')) {
+	morpherWalletIframe = (document.getElementById('morpher_wallet_sdk_iframe') as HTMLIFrameElement);
 } else {
-	morpherWalletIframe = document.createElement('iframe');
-	morpherWalletIframe.id= 'zero_wallet_sdk_iframe';
-	morpherWalletIframe.className = ZEROWALLET_IFRAME_CLASS;
-	morpherWalletIframe.scrolling="no";
-	morpherWalletIframe.style.overflow="hidden";
+  morpherWalletIframe = document.createElement('iframe');
+  morpherWalletIframe.id = 'morpher_wallet_sdk_iframe';
+  morpherWalletIframe.className = MORPHERWALLET_IFRAME_CLASS;
+  morpherWalletIframe.scrolling = "no";
+  morpherWalletIframe.style.overflow = "hidden";
+  morpherWalletIframe.style.width = "0";
+  morpherWalletIframe.style.height = "0";
 }
 
 
@@ -56,6 +58,7 @@ export default class MorpherWallet {
 	_onCloseCallback: any;
 	_onActiveWalletChangedCallback: any;
 	_onErrorCallback: any;
+  _onSendCallback: any;
 	config: MorpherWalletConfig;
 	_selectedAddress: any;
   
@@ -128,6 +131,15 @@ export default class MorpherWallet {
   onError(callback: any) {
     this._onErrorCallback = callback;
 	}
+  onSend(callback: any) {
+    this._onSendCallback = callback;
+  }
+  async openSendInApp() {
+    this.hideWallet()
+    if (this._onSendCallback) {
+      this._onSendCallback();
+    }
+  }
 	
 	async loginWallet() {
 		const loggedInResult = await this.isLoggedIn();
@@ -150,6 +162,24 @@ export default class MorpherWallet {
     return widgetCommunication.showPage('settings');
 	}
 
+  async showWallet2fa() {
+    this.showWallet();
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.showPage('2fa');
+  }    
+
+  async showWalletRecovery() {
+    this.showWallet();
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.showPage('recovery');
+  }    
+
+  async showWalletEmail() {
+    this.showWallet();
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.showPage('email');
+  } 
+
 	async showWalletRegister() {
 		this.showWallet()
     const widgetCommunication = (await this.widget).communication;
@@ -158,24 +188,26 @@ export default class MorpherWallet {
 
 	async showWallet() {
 		
-    morpherWalletContainer.style.position = 'absolute';
     morpherWalletContainer.style.height = '100%';
     morpherWalletContainer.style.width = '100%';
-    morpherWalletContainer.style.top='0';
-    morpherWalletContainer.style.left='0';
-		morpherWalletContainer.style.display = 'inline';
-		morpherWalletContainer.style.visibility = 'visible';
+    morpherWalletContainer.style.top = '0';
+    morpherWalletContainer.style.left = '0';
+    morpherWalletContainer.style.display = 'inline';
+    morpherWalletContainer.style.visibility = 'visible';
+    morpherWalletIframe.style.width = '';
+    morpherWalletIframe.style.height = '';
 	
 	}
 
 	async hideWallet() {
-		morpherWalletContainer.style.position = 'absolute';
-		morpherWalletContainer.style.width = '0';
-		morpherWalletContainer.style.height = '0';
-		morpherWalletContainer.style.display = 'none';
-		morpherWalletContainer.style.visibility = 'invisible';
-		morpherWalletContainer.style.top = '-999px';
-		morpherWalletContainer.style.left = '-999px';		
+    morpherWalletContainer.style.width = '0';
+    morpherWalletContainer.style.height = '0';
+    morpherWalletContainer.style.display = 'block';
+    morpherWalletContainer.style.visibility = 'invisible';
+    morpherWalletContainer.style.top = '-999px';
+    morpherWalletContainer.style.left = '-999px';
+    morpherWalletIframe.style.width = '0';
+    morpherWalletIframe.style.height = '0';
 	}
 
   async isLoggedIn() {
@@ -222,18 +254,17 @@ export default class MorpherWallet {
     const style = document.createElement('style');
     style.innerHTML = styles;
 
-		if (document.getElementById('zero_wallet_sdk_container')) {
-			morpherWalletContainer = (document.getElementById('zero_wallet_sdk_container') as HTMLDivElement);
+		if (document.getElementById('morpher_wallet_sdk_container')) {
+			morpherWalletContainer = (document.getElementById('morpher_wallet_sdk_container') as HTMLDivElement);
 		} else {
 			morpherWalletContainer = document.createElement('div');
-			morpherWalletContainer.id= 'zero_wallet_sdk_container';
-			morpherWalletContainer.className = ZEROWALLET_CONTAINER_CLASS;
+			morpherWalletContainer.id= 'morpher_wallet_sdk_container';
+			morpherWalletContainer.className = MORPHERWALLET_CONTAINER_CLASS;
 			morpherWalletContainer.style.width = '0';
 			morpherWalletContainer.style.height = '0';
 			morpherWalletContainer.style.border = 'none';
-			morpherWalletContainer.style.display = 'none';
+      morpherWalletContainer.style.overflow = 'hidden';
 			morpherWalletContainer.style.visibility = 'invisible';
-			morpherWalletContainer.style.position = 'absolute';
 			morpherWalletContainer.style.top = '-999px';
 			morpherWalletContainer.style.left = '-999px';
 			morpherWalletContainer.appendChild(morpherWalletIframe);
@@ -253,6 +284,7 @@ export default class MorpherWallet {
         onActiveWalletChanged: this._onActiveWalletChanged.bind(this),
 				onError: this._onError.bind(this),
 				hideWallet: this.hideWallet,
+        openSendInApp: this.openSendInApp,
         showWallet: this.showWallet
       },
     });

@@ -46,7 +46,7 @@ services:
         build:
             context: ./vue
             dockerfile: Dockerfile
-        image: morpher/zerowallet-frontend-vue
+        image: morpher/morpherwallet-frontend-vue
         restart: always
         volumes:
             - ./vue:/usr/src/app

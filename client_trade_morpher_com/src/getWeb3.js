@@ -4,7 +4,7 @@ const getWeb3 = () =>
   new Promise((resolve, reject) => {
     // Wait for loading completion to avoid race conditions with web3 injection timing.
     if (['loaded', 'interactive', 'complete'].indexOf(document.readyState) > -1) {
-      const web3 = new Web3(window.zerowallet.getProvider());
+      const web3 = new Web3(window.morpherwallet.getProvider());
       resolve(web3);
        
       // // Modern dapp browsers...
