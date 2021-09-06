@@ -22,6 +22,8 @@ const MORPHERWALLET_IFRAME_CLASS = 'morpherwallet-widget-frame';
 const MORPHERWALLET_CONTAINER_CLASS = 'morpherwallet-container';
 let morpherWalletIframe: HTMLIFrameElement;
 let morpherWalletContainer: HTMLDivElement;
+let _onSendCallback:any = null;
+
 
 if (document.getElementById('morpher_wallet_sdk_iframe')) {
 	morpherWalletIframe = (document.getElementById('morpher_wallet_sdk_iframe') as HTMLIFrameElement);
@@ -58,7 +60,6 @@ export default class MorpherWallet {
 	_onCloseCallback: any;
 	_onActiveWalletChangedCallback: any;
 	_onErrorCallback: any;
-  _onSendCallback: any;
 	config: MorpherWalletConfig;
 	_selectedAddress: any;
   
@@ -132,12 +133,12 @@ export default class MorpherWallet {
     this._onErrorCallback = callback;
 	}
   onSend(callback: any) {
-    this._onSendCallback = callback;
+    _onSendCallback = callback;
   }
   async openSendInApp() {
     this.hideWallet()
-    if (this._onSendCallback) {
-      this._onSendCallback();
+    if (_onSendCallback) {
+      _onSendCallback();
     }
   }
 	

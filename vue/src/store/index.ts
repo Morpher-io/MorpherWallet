@@ -877,7 +877,8 @@ initialize the iframe parent connection
 */
 if (isIframe()) {
 	store.state.connection = connectToParent({
-		parentOrigin: /(?=.*morpher.com)^(\/www\.|https:\/\/www\.|https:\/\/)?[a-z 0-9]+([-.]{1}[a-z 0-9]+)*\.[a-z]{2,5}?(\/.*)?$/gm,
+		parentOrigin: process.env.NODE_ENV === 'production' ? /(?=.*morpher.com)^(\/www\.|https:\/\/www\.|https:\/\/)?[a-z 0-9]+([-.]{1}[a-z 0-9]+)*\.[a-z]{2,5}?(\/.*)?$/gm : undefined,
+		
 		// Methods child is exposing to parent
 		methods: {
 			async getAccounts() {
