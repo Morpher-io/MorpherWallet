@@ -5,7 +5,7 @@ This is the repository for the core Morpher Wallet components of https://wallet.
 
 Instead of being a full-blown wallet, its a keystore that can be integrated in virtually any DApp which needs zero installation and zero configuration.
 
-![](https://img.shields.io/github/last-commit/Morpher-io/MorpherWallet) ![](https://img.shields.io/github/license/Morpher-io/MorpherProtocol)
+![](https://img.shields.io/github/last-commit/Morpher-io/MorpherWallet) ![](https://img.shields.io/github/license/Morpher-io/MorpherProtocol) ![](https://img.shields.io/discord/859752396112396348) ![](https://img.shields.io/twitter/follow/morpher_io?style=social)
 
 # Prerequisites Quickstart
 * Install Docker https://docs.docker.com/get-docker/ and configure it correctly.
