@@ -4,6 +4,7 @@ env:
     variables:
         NODE_ENV: 'production'
         VUE_APP_BACKEND_ENDPOINT: 'https://wallet-api.morpher.com'
+        VUE_APP_MORPHER_TOKEN_MAINCHAIN: '0x6369c3DadfC00054A42BA8B2c09c48131dd4Aa38'
     secrets-manager:
         VUE_APP_GOOGLE_APP_ID: "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:WALLET_GOOGLE_APP_ID::"
         VUE_APP_FACEBOOK_APP_ID: "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:WALLET_FACEBOOK_APP_ID::"

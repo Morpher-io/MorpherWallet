@@ -15,7 +15,7 @@
 					<label class="label">Password</label>
 
 					<div class="control">
-						<input type="password" class="input" data-cy="walletPassword" name="walletPassword" v-model="walletPassword" />
+						<input type="password" class="input" data-cy="walletPassword" name="walletPassword" v-model="walletPassword" @keydown="checkKeyPress" />
 					</div>
 				</div>
 
@@ -90,6 +90,12 @@ export default class Login extends mixins(Global) {
 		} else {
 			this.unlockUpdate();
 		}
+	}
+
+	checkKeyPress(e:any) {
+		if (e.keyCode === 13) {
+        	this.login()
+      }
 	}
 
 	/**
