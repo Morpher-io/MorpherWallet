@@ -3,21 +3,21 @@
 		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 		<div class="container">
 			<spinner v-model="showSpinner" v-bind:status="status"></spinner>
-			<h2 class="title">Sign Message</h2>
+			<h2 class="title">Sign Transaction</h2>
 			<p class="subtitle">Your signature is being requested</p>
 
 			<div class="field">
-				<label class="label">You are signing:</label>
-				<div class="card">
-					{{ store.messageDetails }}
+				<label class="label">Message</label>
+				<div class="settings-data user-details">
+					<div class="details">
+						{{ store.messageDetails }}
+					</div>
 				</div>
 			</div>
 
 			<button class="button is-green big-button is-login transition-faster mt-5" @click="sign()">
 				<span>Sign</span>
 			</button>
-
-			<div class="divider thick"></div>
 
 			<button @click="cancel()" class="button is-ghost is-blue big-button medium-text transition-faster">
 				<span>Cancel</span>
