@@ -57,14 +57,17 @@
 				<span>Submit</span>
 			</button>
 
-			<div class="mt-2 is-grouped">
-				<button v-on:click="logout()" tag="button" class="button is-ghost is-blue big-button medium-text transition-faster">
-					<span>Cancel</span>
-				</button>
-			</div>
+			<button v-on:click="logout()" tag="button" class="button is-ghost is-blue big-button medium-text transition-faster">
+				<span>Cancel</span>
+			</button>
 		</form>
 
-		<p class="mt-3 transition-faster">Having problems? <a href="https://support.morpher.com/en/article/2fa-2-step-verification-troubleshooting-ejmssf/" target="__blank" class="login-router">2-Step Support</a></p>
+		<p class="mt-5 transition-faster">
+			Having problems?
+			<a href="https://support.morpher.com/en/article/2fa-2-step-verification-troubleshooting-ejmssf/" target="__blank" class="login-router"
+				>2-Step Support</a
+			>
+		</p>
 	</div>
 </template>
 

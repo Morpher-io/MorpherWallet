@@ -21,7 +21,7 @@
 			<label class="label">Password</label>
 
 			<div class="control">
-				<input type="password" class="input" name="walletPassword" v-model="walletPassword" @keydown="checkKeyPress"  />
+				<input type="password" class="input" name="walletPassword" v-model="walletPassword"  @keypress="handleKeyPress"/>
 				<div v-if="showRecovery">
 					<p class="help is-danger">
 						The Password you provided can't be used to de-crypt your wallet.
@@ -76,12 +76,6 @@ export default class Unlock extends mixins(Global) {
 			});
 	}
 
-	checkKeyPress(e:any) {
-		if (e.keyCode === 13) {
-        	this.login()
-      }
-	}
-
 	/**
 	 * Execute the logon
 	 */
@@ -124,6 +118,14 @@ export default class Unlock extends mixins(Global) {
 
 		const image = jazzicon(32, seed);
 		ref.append(image);
+	}
+
+	handleKeyPress(e: any) {
+		const key = e.which || e.charCode || e.keyCode || 0;
+
+		if (key === 13) {
+			this.login();
+		}
 	}
 }
 </script>

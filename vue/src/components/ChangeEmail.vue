@@ -36,9 +36,6 @@
 					>
 						<span>Update Email</span>
 					</button>
-				</div>
-
-				<div class="mt-2">
 					<button
 						v-on:click="$router.push('/settings?email_password=true')"
 						tag="button"
