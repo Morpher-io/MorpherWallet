@@ -29,7 +29,8 @@
 
 			<div class="card column">
 				<p class="has-text-weight-medium">Send</p>
-				<p class="eth_balance">{{ roundFormatter(store.transactionDetails.value / Math.pow(10, 18)) }} {{ isMPH ? 'MPH' : 'ETH' }}</p>
+				<p v-if=isMPH class="eth_balance">{{ roundFormatter(mphValue) }} MPH</p>
+				<p v-else class="eth_balance">{{ roundFormatter(store.transactionDetails.value / Math.pow(10, 18)) }} ETH </p>
 			</div>
 
 			<div class="payment-description">
@@ -122,8 +123,16 @@ export default class SignTx extends mixins(Global, Authenticated) {
 
 		return 'Unknown';
 	}
+	get mphValue() {
+		if (this.store.transactionDetails && this.store.transactionDetails.mph_value) {
+			return Number(this.store.transactionDetails.mph_value) / Math.pow(10,18)
+		} else {
+			return 0;
+		}
+	}
+	
 	get isMPH() {
-		return this.store.transactionDetails && Number(this.store.transactionDetails.chainId) === 21;
+		return process.env.VUE_APP_MORPHER_TOKEN_MAINCHAIN && this.store.transactionDetails && this.store.transactionDetails.to.toLowerCase() === process.env.VUE_APP_MORPHER_TOKEN_MAINCHAIN.toLowerCase();
 	}
 	copySrcETHAddress(text: string) {
 		copyToClipboard(text);
