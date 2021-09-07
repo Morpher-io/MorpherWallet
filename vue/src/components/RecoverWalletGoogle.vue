@@ -1,12 +1,13 @@
 <template>
-	<div class="control is-expanded">
-		<GoogleLogin class="button is-grey big-button outlined-button is-thick transition-faster" :params="{ clientId }" :onSuccess="onLogin" :onCurrentUser="onLogin" :onFailure="onError">
+	<div class="control is-expanded" v-if="clientId">
+		<GoogleLogin class="button is-grey big-button outlined-button is-thick transition-faster" :params="{ client_id: clientId }" :onSuccess="onLogin" :onCurrentUser="onLogin" :onFailure="onError" >
 			<span class="icon img">
 				<img src="@/assets/img/google_logo.svg" alt="Google Logo" />
 			</span>
 			<span>Google</span>
 		</GoogleLogin>
 	</div>
+
 </template>
 
 <script>
@@ -24,6 +25,7 @@ import { Emit } from 'vue-property-decorator';
 	}
 })
 export default class RecoverWalletGoogle extends mixins(Global) {
+
 	clientId = process.env.VUE_APP_GOOGLE_APP_ID;
 	
 	recoveryTypeId = 3;
@@ -34,11 +36,16 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 	}
 
 	onError(error) {
-		console.log('google login error', error)
-		this.setPassword({
-				success: false,
-				error: 'Google Access Error'
-			});
+		let errorText = error.error || error.err || 'Google login Error'
+		
+		if (String(errorText.toLowerCase()).includes('script not loaded correctly')) {
+			errorText = 'google_script_blocked'
+		}
+
+		 this.setPassword({
+		 		success: false,
+		 		error: errorText
+		 	});
 	}
 
 	onLogin(googleUser) {

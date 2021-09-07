@@ -9,7 +9,6 @@
 	</div>
 </template>
 <script>
-import GoogleLogin from 'vue-google-login';
 import ChangePassword from './ChangePassword.vue';
 
 import Component, { mixins } from 'vue-class-component';
@@ -18,7 +17,6 @@ import { Emit } from 'vue-property-decorator';
 
 @Component({
 	components: {
-		GoogleLogin,
 		ChangePassword
 	}
 })

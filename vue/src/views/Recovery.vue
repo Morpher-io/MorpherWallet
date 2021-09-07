@@ -118,7 +118,13 @@ export default class Recovery extends mixins(Authenticated, Global) {
 			this.oldPassword = data.oldPassword;
 			this.currentPage = 1;
 		} else {
-			this.logonError = 'Unable to unlock your wallet. This may be because you used a different account or never set up account recovery. ';
+			if (data.error === 'popup_closed_by_user') {
+				this.logonError = getDictionaryValue('GOOGLE_COOKIES_BLOCKED');
+			} else if (data.error === 'google_script_blocked') {
+				this.logonError = getDictionaryValue('GOOGLE_SCRIPT_BLOCKED')
+			} else {
+				this.logonError = getDictionaryValue('RECOVERY_UNLOCK_ERROR')
+			}
 			this.currentPage = 0;
 		}
 	}

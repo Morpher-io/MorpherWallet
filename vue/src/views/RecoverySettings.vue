@@ -141,7 +141,13 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 			this.isEnabled = data.enabled;
 			this.currentPage = 2;
 		} else {
-			this.logonError = data.method + ': ' + getDictionaryValue(data.error);
+			if (data.error === 'popup_closed_by_user') {
+				this.logonError = getDictionaryValue('GOOGLE_COOKIES_BLOCKED');
+			} else if (data.error === 'google_script_blocked') {
+				this.logonError = getDictionaryValue('GOOGLE_SCRIPT_BLOCKED')
+			} else {
+				this.logonError = data.method + ': ' + getDictionaryValue(data.error);
+			}
 		}
 	}
 
