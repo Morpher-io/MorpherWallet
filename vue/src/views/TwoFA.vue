@@ -106,7 +106,7 @@ export default class TwoFA extends mixins(Global) {
 	 */
 	async validateCode() {
 		this.logonError = '';
-		this.showSpinner('Validating 2FA codes...');
+		this.showSpinner('Validating code...');
 		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.authenticatorCode })
 			.then(nextroute => {
 				this.hideSpinner();

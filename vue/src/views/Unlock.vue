@@ -60,7 +60,7 @@ export default class Unlock extends mixins(Global) {
 	mounted() {
 		const iconSeed = localStorage.getItem('iconSeed') || '';
 		this.generateImage(iconSeed);
-		this.showSpinner('Loading User...');
+		this.showSpinner('Loading account...');
 		// Check if the wallet can be unlocked using the local-storage stored password
 		this.unlockWithStoredPassword()
 			.then(result => {
@@ -81,7 +81,7 @@ export default class Unlock extends mixins(Global) {
 	 */
 	async login() {
 		const password = await sha256(this.walletPassword);
-		this.showSpinnerThenAutohide('Logging in User...');
+		this.showSpinnerThenAutohide('Logging in...');
 
 		// Call the fetchUser store action to process the wallet logon
 		this.unlockWithPassword({ password })

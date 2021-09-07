@@ -56,7 +56,7 @@ export default class RecoverWalletFacebook extends mixins(Global) {
 	}
 
 	async onLogin(data) {
-		this.showSpinner('Trying to Login...');
+		this.showSpinner('Trying to log in...');
 		try {
 			const userID = data.authResponse.userID;
 			const accessToken = data.authResponse.accessToken;

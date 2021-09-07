@@ -70,7 +70,7 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 						//document.location.reload();
 					}, 500);
 
-					this.showSpinner('Trying to Login...');
+					this.showSpinner('Trying to log in...');
 					try {
 						const userID = params.user_id;
 						const accessToken = params.access_token;

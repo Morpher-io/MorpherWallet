@@ -117,7 +117,7 @@ export default class Login extends mixins(Global) {
 	 */
 	login() {
 		this.logonError = '';
-		this.showSpinner('Loading User...');
+		this.showSpinner('Loading account...');
 		this.store.loginComplete = false;
 		const email = this.walletEmail;
 		const password = this.walletPassword;

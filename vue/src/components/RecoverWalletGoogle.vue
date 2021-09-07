@@ -53,7 +53,7 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 	}
 
 	onLogin(googleUser) {
-		this.showSpinner('Trying to Login...');
+		this.showSpinner('Trying to log in...');
 		try {
 			const userID = googleUser.getBasicProfile().getId();
 			const accessToken = googleUser.getAuthResponse(true).access_token;
