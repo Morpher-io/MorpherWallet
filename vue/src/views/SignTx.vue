@@ -132,7 +132,7 @@ export default class SignTx extends mixins(Global, Authenticated) {
 	}
 	
 	get isMPH() {
-		return process.env.VUE_APP_MORPHER_TOKEN_MAINCHAIN && this.store.transactionDetails && this.store.transactionDetails.to.toLowerCase() === process.env.VUE_APP_MORPHER_TOKEN_MAINCHAIN.toLowerCase();
+		return this.store.transactionDetails && this.store.transactionDetails.mph_value;
 	}
 	copySrcETHAddress(text: string) {
 		copyToClipboard(text);
