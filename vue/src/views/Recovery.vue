@@ -46,14 +46,10 @@
 					<button type="submit" class="button is-green big-button is-login transition-faster">
 						<span>Continue</span>
 					</button>
-				</form>
-
-				<div class="mt-2 is-grouped">
 					<router-link to="/login" tag="button" class="button is-ghost is-blue big-button medium-text transition-faster">
 						<span>Back</span>
 					</router-link>
-				</div>
-
+				</form>
 				<p class="is-size-7 mt-5 transition-faster">Need help with recovery? <a href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/" target="__blank" class="login-router">Learn more</a></p>
 			</div>
 		</div>

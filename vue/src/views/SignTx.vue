@@ -30,7 +30,7 @@
 			<div class="card column">
 				<p class="has-text-weight-medium">Send</p>
 				<p v-if=isMPH class="eth_balance">{{ roundFormatter(mphValue) }} MPH</p>
-				<p v-else class="eth_balance">{{ roundFormatter(store.transactionDetails.value / Math.pow(10, 18)) }} ETH </p>
+				<p v-else class="eth_balance">{{ roundFormatter(store.transactionDetails.value / Math.pow(10, 18)) }} ETH</p>
 			</div>
 
 			<div class="payment-description">
@@ -66,7 +66,7 @@
 				<div v-else class="details-group mb-0 is-align-items-start">
 					<p class="subtitle has-text-weight-medium">Total</p>
 					<p class="text">
-						<span class="is-block has-text-right reset-line-height">{{ roundFormatter(Number(store.transactionDetails.value || 0) / Math.pow(10, 18)) }} MPH</span>
+						<span class="is-block has-text-right reset-line-height">{{ roundFormatter(mphValue) }} MPH</span>
 						<span class="is-block has-text-right reset-line-height mt-1"
 							>+
 							{{
@@ -132,8 +132,9 @@ export default class SignTx extends mixins(Global, Authenticated) {
 	}
 	
 	get isMPH() {
-		return process.env.VUE_APP_MORPHER_TOKEN_MAINCHAIN && this.store.transactionDetails && this.store.transactionDetails.to.toLowerCase() === process.env.VUE_APP_MORPHER_TOKEN_MAINCHAIN.toLowerCase();
+		return process.env.VUE_APP_MORPHER_TOKEN_MAINCHAIN && this.store.transactionDetails && this.store.transactionDetails.to?.toLowerCase() === process.env.VUE_APP_MORPHER_TOKEN_MAINCHAIN?.toLowerCase();
 	}
+
 	copySrcETHAddress(text: string) {
 		copyToClipboard(text);
 		this.copyTextSrc = 'Eth Address Copied';
