@@ -22,7 +22,7 @@
 				<div class="error" v-if="logonError">
 					<p data-cy="loginError">
 						⚠️ <span v-html="logonError"></span>
-						<router-link v-if="showRecovery" to="/recovery" class="login-router transition-faster"><span>Recover your wallet?</span></router-link>
+						<router-link v-if="showRecovery" to="/recovery" class="login-router transition-faster"><span class="ml-1">Recover your wallet?</span></router-link>
 					</p>
 				</div>
 
@@ -89,6 +89,11 @@ export default class Login extends mixins(Global) {
 				});
 		} else {
 			this.unlockUpdate();
+		}
+
+		if (this.store.status === 'invalid password') {
+			this.logonError = getDictionaryValue('DECRYPT_FAILED');
+			this.showRecovery = true;
 		}
 	}
 
