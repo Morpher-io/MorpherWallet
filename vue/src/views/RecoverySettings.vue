@@ -16,6 +16,10 @@
 			</div>
 			<p class="subtitle has-text-left">Add a trusted online account as the recovery method for your wallet (in case you forget your wallet password).</p>
 
+			<div class="error mt-3 mb-3" v-if="logonError">
+				<p>⚠️ <span v-html="logonError"></span></p>
+			</div>
+
 			<div>
 				<AddRecoveryGoogle v-if="whatRecovery.google" @processMethod="processMethod"></AddRecoveryGoogle>
 
@@ -42,10 +46,6 @@
 					:walletEmail="store.email"
 					@processMethod="processMethod"
 				></AddRecoveryVkontakte>
-			</div>
-
-			<div class="error mt-3" v-if="logonError">
-				<p>⚠️ <span v-html="logonError"></span></p>
 			</div>
 
 			<div class="divider just-space" />
