@@ -14,7 +14,9 @@
 				</button>
 				<h2 class="title ml-3">Account Recovery</h2>
 			</div>
-			<p class="subtitle has-text-left">Add a trusted online account as the recovery method for your wallet (in case you forget your wallet password).</p>
+			<p class="subtitle has-text-left">
+				Add a trusted online account as the recovery method for your wallet (in case you forget your wallet password).
+			</p>
 
 			<div class="error mt-3 mb-3" v-if="logonError">
 				<p>⚠️ <span v-html="logonError"></span></p>
@@ -144,7 +146,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 			if (data.error === 'popup_closed_by_user') {
 				this.logonError = getDictionaryValue('GOOGLE_COOKIES_BLOCKED');
 			} else if (data.error === 'google_script_blocked') {
-				this.logonError = getDictionaryValue('GOOGLE_SCRIPT_BLOCKED')
+				this.logonError = getDictionaryValue('GOOGLE_SCRIPT_BLOCKED');
 			} else {
 				this.logonError = data.method + ': ' + getDictionaryValue(data.error);
 			}

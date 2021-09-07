@@ -96,7 +96,7 @@ export default class TwoFA extends mixins(Global) {
 	}
 
 	@Watch('authenticatorCode')
-	authenticatorCodeChanged(value: any) {
+	authenticatorCodeChanged() {
 		if (this.authenticatorCode.length === 6) {
 			this.validateCode();
 		}

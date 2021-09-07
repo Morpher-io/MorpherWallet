@@ -29,7 +29,7 @@
 
 			<div class="card column">
 				<p class="has-text-weight-medium">Send</p>
-				<p v-if=isMPH class="eth_balance">{{ roundFormatter(mphValue) }} MPH</p>
+				<p v-if="isMPH" class="eth_balance">{{ roundFormatter(mphValue) }} MPH</p>
 				<p v-else class="eth_balance">{{ roundFormatter(store.transactionDetails.value / Math.pow(10, 18)) }} ETH</p>
 			</div>
 
@@ -69,9 +69,7 @@
 						<span class="is-block has-text-right reset-line-height">{{ roundFormatter(mphValue) }} MPH</span>
 						<span class="is-block has-text-right reset-line-height mt-1"
 							>+
-							{{
-								roundFormatter((Number(store.transactionDetails.gasPrice) * Number(store.transactionDetails.gas)) / Math.pow(10, 18))
-							}}
+							{{ roundFormatter((Number(store.transactionDetails.gasPrice) * Number(store.transactionDetails.gas)) / Math.pow(10, 18)) }}
 							ETH</span
 						>
 					</p>
@@ -125,12 +123,12 @@ export default class SignTx extends mixins(Global, Authenticated) {
 	}
 	get mphValue() {
 		if (this.store.transactionDetails && this.store.transactionDetails.mph_value) {
-			return Number(this.store.transactionDetails.mph_value) / Math.pow(10,18)
+			return Number(this.store.transactionDetails.mph_value) / Math.pow(10, 18);
 		} else {
 			return 0;
 		}
 	}
-	
+
 	get isMPH() {
 		return this.store.transactionDetails && this.store.transactionDetails.mph_value;
 	}

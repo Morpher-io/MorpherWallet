@@ -84,7 +84,6 @@ export interface RootState {
 	ethBalance: string;
 	unlocking: boolean;
 	redirectPath: string;
-
 }
 
 /**
@@ -242,7 +241,8 @@ const store: Store<RootState> = new Vuex.Store({
 			state.accounts = payload.accounts;
 			state.hashedPassword = payload.hashedPassword;
 
-			if (payload.accounts && payload.accounts[0]) window.localStorage.setItem('iconSeed', parseInt(payload.accounts[0].slice(2, 10), 16).toString());
+			if (payload.accounts && payload.accounts[0])
+				window.localStorage.setItem('iconSeed', parseInt(payload.accounts[0].slice(2, 10), 16).toString());
 			sessionStorage.setItem('password', payload.hashedPassword);
 		},
 		seedExported(state: RootState) {
@@ -740,7 +740,7 @@ const store: Store<RootState> = new Vuex.Store({
 				commit('delayedSpinnerMessage', 'Wrong password for private key');
 			}
 		},
-		showPrivateKeyBackground({ commit, state }, params: TypeShowPhraseKeyVariables) {
+		showPrivateKeyBackground({ state }, params: TypeShowPhraseKeyVariables) {
 			const storedPassword = state.hashedPassword;
 
 			if (storedPassword === params.password) {
@@ -750,7 +750,7 @@ const store: Store<RootState> = new Vuex.Store({
 				}
 			}
 
-			return null
+			return null;
 		},
 		exportKeystore({ commit, state }, params: TypeExportPhraseKeyVariables) {
 			const storedPassword = state.hashedPassword;
@@ -784,7 +784,7 @@ const store: Store<RootState> = new Vuex.Store({
 				commit('delayedSpinnerMessage', 'Wrong password for Seed Phrase');
 			}
 		},
-		async showSeedPhraseBackground({ commit, state }, params: TypeShowPhraseKeyVariables) {
+		async showSeedPhraseBackground({ state }, params: TypeShowPhraseKeyVariables) {
 			const storedPassword = state.hashedPassword;
 
 			if (storedPassword === params.password) {
@@ -877,8 +877,11 @@ initialize the iframe parent connection
 */
 if (isIframe()) {
 	store.state.connection = connectToParent({
-		parentOrigin: process.env.NODE_ENV === 'production' ? /(?=.*morpher.com)^(\/www\.|https:\/\/www\.|https:\/\/)?[a-z 0-9]+([-.]{1}[a-z 0-9]+)*\.[a-z]{2,5}?(\/.*)?$/gm : /.*/gm,
-		
+		parentOrigin:
+			process.env.NODE_ENV === 'production'
+				? /(?=.*morpher.com)^(\/www\.|https:\/\/www\.|https:\/\/)?[a-z 0-9]+([-.]{1}[a-z 0-9]+)*\.[a-z]{2,5}?(\/.*)?$/gm
+				: /.*/gm,
+
 		// Methods child is exposing to parent
 		methods: {
 			async getAccounts() {

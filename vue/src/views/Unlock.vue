@@ -21,7 +21,7 @@
 			<label class="label">Password</label>
 
 			<div class="control">
-				<input type="password" class="input" name="walletPassword" v-model="walletPassword"  @keypress="handleKeyPress"/>
+				<input type="password" class="input" name="walletPassword" v-model="walletPassword" @keypress="handleKeyPress" />
 				<div v-if="showRecovery">
 					<p class="help is-danger">
 						The Password you provided can't be used to de-crypt your wallet.

@@ -1,7 +1,13 @@
 <template>
 	<div class="field">
 		<div class="control is-expanded" v-if="!hasRecoveryMethod">
-			<GoogleLogin class="button is-grey big-button outlined-button is-thick transition-faster" :params="{ clientId }" :onSuccess="onLogin"  :onCurrentUser="onLogin" :onFailure="onError" >
+			<GoogleLogin
+				class="button is-grey big-button outlined-button is-thick transition-faster"
+				:params="{ clientId }"
+				:onSuccess="onLogin"
+				:onCurrentUser="onLogin"
+				:onFailure="onError"
+			>
 				<span class="icon img">
 					<img src="@/assets/img/google_logo.svg" alt="Google Logo" />
 				</span>
@@ -10,7 +16,13 @@
 		</div>
 		<div v-if="hasRecoveryMethod" class="has-text-centered">
 			<div class="control is-expanded" v-if="hasRecoveryMethod">
-				<GoogleLogin class="button is-danger big-button is-thick transition-faster" :params="{ clientId }" :onSuccess="onDelete"  :onCurrentUser="onDelete" :onFailure="onError">
+				<GoogleLogin
+					class="button is-danger big-button is-thick transition-faster"
+					:params="{ clientId }"
+					:onSuccess="onDelete"
+					:onCurrentUser="onDelete"
+					:onFailure="onError"
+				>
 					<span class="icon img">
 						<img src="@/assets/img/google_logo_white.svg" alt="Google Logo" />
 					</span>
@@ -55,17 +67,16 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 	}
 
 	onError(error) {
-		
-		let errorText = error.error || error.err || 'Google login Error'
-		
+		let errorText = error.error || error.err || 'Google login Error';
+
 		if (String(errorText.toLowerCase()).includes('script not loaded correctly')) {
-			errorText = 'google_script_blocked'
+			errorText = 'google_script_blocked';
 		}
 
-		 this.processMethod({
-		 		success: false,
-		 		error: errorText
-		 	});
+		this.processMethod({
+			success: false,
+			error: errorText
+		});
 	}
 
 	async onLogin(googleUser) {

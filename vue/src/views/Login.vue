@@ -15,14 +15,23 @@
 					<label class="label">Password</label>
 
 					<div class="control">
-						<input type="password" class="input" data-cy="walletPassword" name="walletPassword" v-model="walletPassword" @keydown="checkKeyPress" />
+						<input
+							type="password"
+							class="input"
+							data-cy="walletPassword"
+							name="walletPassword"
+							v-model="walletPassword"
+							@keydown="checkKeyPress"
+						/>
 					</div>
 				</div>
 
 				<div class="error" v-if="logonError">
 					<p data-cy="loginError">
 						⚠️ <span v-html="logonError"></span>
-						<router-link v-if="showRecovery" to="/recovery" class="login-router transition-faster"><span class="ml-1">Recover your wallet?</span></router-link>
+						<router-link v-if="showRecovery" to="/recovery" class="login-router transition-faster"
+							><span class="ml-1">Recover your wallet?</span></router-link
+						>
 					</p>
 				</div>
 
@@ -97,10 +106,10 @@ export default class Login extends mixins(Global) {
 		}
 	}
 
-	checkKeyPress(e:any) {
+	checkKeyPress(e: any) {
 		if (e.keyCode === 13) {
-        	this.login()
-      }
+			this.login();
+		}
 	}
 
 	/**

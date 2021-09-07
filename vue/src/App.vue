@@ -1,10 +1,12 @@
 <template>
 	<div id="app">
-		<section :class="{
-			'main_iframe': iFrameDisplay,
-			'main': !iFrameDisplay,
-			'dev-border': isDev,
-		}">
+		<section
+			:class="{
+				main_iframe: iFrameDisplay,
+				main: !iFrameDisplay,
+				'dev-border': isDev
+			}"
+		>
 			<spinner v-bind:active="loading" v-bind:status="spinnerStatusText"></spinner>
 			<div class="header">
 				<img src="@/assets/img/wallet_logo.svg" class="headerImage" />
@@ -48,7 +50,7 @@ export default class App extends Vue {
 	iFrameDisplay = isIframe();
 	connection = this.$store.state.connection;
 	isDev = process.env.VUE_APP_ENVIRONMENT === 'development';
-	
+
 	async closeWallet() {
 		if (this.iFrameDisplay) {
 			if (this.connection && this.connection !== null) {
@@ -58,16 +60,13 @@ export default class App extends Vue {
 				(await promise).onClose();
 
 				if (this.$store.getters.isLoggedIn) {
-					if (this.$router.currentRoute.path !== '/')
-						this.$router.push('/');
+					if (this.$router.currentRoute.path !== '/') this.$router.push('/');
 				} else {
-					if (this.$router.currentRoute.path !== '/login')
-						this.$router.push('/login');
+					if (this.$router.currentRoute.path !== '/login') this.$router.push('/login');
 				}
 			}
 		}
 	}
-
 }
 </script>
 

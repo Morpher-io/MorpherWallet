@@ -8,7 +8,13 @@
 
 				<div class="error alert warning is-size-7" v-if="logonError">
 					<p data-cy="loginError">⚠️ <span v-html="logonError"></span></p>
-					<a v-if="showMore" href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/" target="__blank" class="login-router transition-faster"><span>Learn more</span></a>
+					<a
+						v-if="showMore"
+						href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/"
+						target="__blank"
+						class="login-router transition-faster"
+						><span>Learn more</span></a
+					>
 				</div>
 
 				<div class="field is-grouped">
@@ -25,7 +31,15 @@
 					<span>Cancel</span>
 				</router-link>
 
-				<p class="is-size-7 mt-5 transition-faster">Need help with recovery? <a href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/" target="__blank" class="login-router">Learn more</a></p>
+				<p class="is-size-7 mt-5 transition-faster">
+					Need help with recovery?
+					<a
+						href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/"
+						target="__blank"
+						class="login-router"
+						>Learn more</a
+					>
+				</p>
 			</div>
 			<div v-else class="container">
 				<img src="@/assets/img/recover_wallet.svg" alt="Recover wallet image" class="mb-3" />
@@ -50,7 +64,15 @@
 						<span>Back</span>
 					</router-link>
 				</form>
-				<p class="is-size-7 mt-5 transition-faster">Need help with recovery? <a href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/" target="__blank" class="login-router">Learn more</a></p>
+				<p class="is-size-7 mt-5 transition-faster">
+					Need help with recovery?
+					<a
+						href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/"
+						target="__blank"
+						class="login-router"
+						>Learn more</a
+					>
+				</p>
 			</div>
 		</div>
 		<div class="container">
@@ -121,9 +143,9 @@ export default class Recovery extends mixins(Authenticated, Global) {
 			if (data.error === 'popup_closed_by_user') {
 				this.logonError = getDictionaryValue('GOOGLE_COOKIES_BLOCKED');
 			} else if (data.error === 'google_script_blocked') {
-				this.logonError = getDictionaryValue('GOOGLE_SCRIPT_BLOCKED')
+				this.logonError = getDictionaryValue('GOOGLE_SCRIPT_BLOCKED');
 			} else {
-				this.logonError = getDictionaryValue('RECOVERY_UNLOCK_ERROR')
+				this.logonError = getDictionaryValue('RECOVERY_UNLOCK_ERROR');
 			}
 			this.currentPage = 0;
 		}

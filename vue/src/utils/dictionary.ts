@@ -27,8 +27,10 @@ const dictionary: Dictionary = {
 	// Frontend
 	DECRYPT_FAILED: 'Password provided failed to decrypt your account.',
 	// google
-	GOOGLE_COOKIES_BLOCKED: 'Unable to log into Google. It looks like cookies are disabled wich may be blocking google access. Try turning off incognito mode. ',
-	GOOGLE_SCRIPT_BLOCKED:  'Unable to log into Google. The google login script has been blocked, possibly by an ad-blocker. Try turning off your ad-blocker and login again. ',
+	GOOGLE_COOKIES_BLOCKED:
+		'Unable to log into Google. It looks like cookies are disabled wich may be blocking google access. Try turning off incognito mode. ',
+	GOOGLE_SCRIPT_BLOCKED:
+		'Unable to log into Google. The google login script has been blocked, possibly by an ad-blocker. Try turning off your ad-blocker and login again. ',
 	RECOVERY_UNLOCK_ERROR: 'Unable to unlock your wallet. This may be because you used a different account or never set up account recovery. '
 };
 

@@ -16,10 +16,16 @@
 
 			<p class="has-text-left mt-2 transition-faster">
 				<span class="has-text-weight-medium">For advanced users only!</span> Export wallet seed phrase & private key for backup or to change
-				wallets. <a href="https://support.morpher.com/en/article/export-morpher-wallet-d6wr6g/" target="__blank" class="login-router">Learn more</a>
+				wallets.
+				<a href="https://support.morpher.com/en/article/export-morpher-wallet-d6wr6g/" target="__blank" class="login-router">Learn more</a>
 			</p>
 
-			<button class="mt-3 button is-blue big-button is-login transition-faster" data-cy="exportSeed" type="submit" @click="setExport('seed')">
+			<button
+				class="mt-3 button is-blue big-button is-login transition-faster"
+				data-cy="exportSeed"
+				type="submit"
+				@click="setExport('seed')"
+			>
 				<span>Export Seed Phrase</span>
 			</button>
 
@@ -76,10 +82,7 @@
 				⚠ The private key JSON file is password protected using your wallet password.
 			</div>
 
-			<button
-				class="button is-blue big-button is-login transition-faster mt-4"
-				@click="exportPhrase(store.accounts[0])"
-			>
+			<button class="button is-blue big-button is-login transition-faster mt-4" @click="exportPhrase(store.accounts[0])">
 				<span>Download JSON</span>
 			</button>
 

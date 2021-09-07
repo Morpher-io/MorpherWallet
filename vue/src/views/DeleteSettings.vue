@@ -40,7 +40,8 @@
 					Does my wallet get deleted?
 				</p>
 				<p>
-					We don’t control your wallet. As long as you have your keys, you can use your wallet with any other Ethereum service. For example you can import your keys into Metamask.
+					We don’t control your wallet. As long as you have your keys, you can use your wallet with any other Ethereum service. For example
+					you can import your keys into Metamask.
 				</p>
 
 				<p class="has-text-weight-medium mt-2">
@@ -113,7 +114,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 
 				try {
 					await this.deleteWalletAccount({ password: this.password });
-					this.showSpinnerThenAutohide('Account deleted successfully.')
+					this.showSpinnerThenAutohide('Account deleted successfully.');
 				} catch (e) {
 					this.logonError = e;
 				}
