@@ -421,6 +421,7 @@ input[type="checkbox"]:checked {
 
 	&.thick {
 		height: 1px;
+		margin:  15px 0;
 	}
 
 	&.just-space {
@@ -1060,7 +1061,7 @@ input[type="checkbox"]:checked {
 		width: 14px;
 		height: 14px;
 		border-radius: 10px;
-		border-width: 0.8px;
+		border-width: 1px;
 		border-style: solid;
 		border-color: #979797;
 		transition: 200ms;

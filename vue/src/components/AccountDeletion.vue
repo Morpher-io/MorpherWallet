@@ -34,8 +34,8 @@
 			</div>
 		</div>
 		<p class="reset-line-height is-size-7 reset-mt">
-			<span v-html="currentMethod === 0">Make sure to have one space between each word.</span>
-			<span v-html="currentMethod === 1">Don’t know your keys? <router-link to="/settings/keys" class="login-router">Export your wallet</router-link></span>
+			<span v-if="currentMethod === 0">Make sure to have one space between each word.</span>
+			<span v-if="currentMethod === 1">Don’t know your keys? <router-link to="/settings/keys" class="login-router">Export your wallet</router-link></span>
 		</p>
 
 		<div class="error mt-3" v-if="logonError">
