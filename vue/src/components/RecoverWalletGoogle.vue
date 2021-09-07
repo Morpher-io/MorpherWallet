@@ -1,6 +1,6 @@
 <template>
 	<div class="control is-expanded">
-		<GoogleLogin class="button is-grey big-button outlined-button is-thick transition-faster" :params="{ clientId }" :onSuccess="onLogin">
+		<GoogleLogin class="button is-grey big-button outlined-button is-thick transition-faster" :params="{ clientId }" :onSuccess="onLogin" :onCurrentUser="onLogin" :onFailure="onError">
 			<span class="icon img">
 				<img src="@/assets/img/google_logo.svg" alt="Google Logo" />
 			</span>
@@ -25,6 +25,7 @@ import { Emit } from 'vue-property-decorator';
 })
 export default class RecoverWalletGoogle extends mixins(Global) {
 	clientId = process.env.VUE_APP_GOOGLE_APP_ID;
+	
 	recoveryTypeId = 3;
 
 	@Emit('setPassword')
@@ -32,7 +33,16 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 		return data;
 	}
 
+	onError(error) {
+		console.log('google login error', error)
+		this.setPassword({
+				success: false,
+				error: 'Google Access Error'
+			});
+	}
+
 	onLogin(googleUser) {
+		
 		this.showSpinner('Trying to Login...');
 		try {
 			const userID = googleUser.getBasicProfile().getId();
