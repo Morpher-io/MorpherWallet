@@ -1,6 +1,6 @@
 import * as expect from 'expect';
 import { describe, it, beforeEach } from 'mocha';
-import { Recovery, User } from '../database/models';
+import { Recovery, User, Email_Template } from '../database/models';
 import { sha256, sortObject } from '../helpers/functions/util';
 import { authenticator } from 'otplib';
 
@@ -14,6 +14,18 @@ const Account = new Web3EthAccounts('https://sidechain.morpher.com');
 async function clearDatabase() {
     await Recovery.destroy({ where: {} });
     await User.destroy({ where: {} });
+    const email_template = await Email_Template.findOne({ where: {template_name: 'Email 2FA'} });
+    if (!email_template) {
+        await Email_Template.create({
+            template_name: 'Email 2FA',
+            from_address: 'Morpher <notifications@morpher.com>',
+            subject: 'MorpherWallet Email 2FA',
+            template_html: '<html><body>Your email verification code is: {{2FA_CODE}}</body></html>',
+            template_text: 'Your email verification code is: {{2FA_CODE}}'
+
+        });
+    }
+    
 }
 
 const bodyData = {
