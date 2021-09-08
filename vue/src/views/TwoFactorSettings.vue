@@ -6,7 +6,7 @@
 					<i class="fas fa-chevron-left"></i>
 				</span>
 			</button>
-			<h2 class="title ml-4">Two-Factor settings</h2>
+			<h2 class="title ml-3">2-Step Verification</h2>
 		</div>
 
 		<div v-if="currentPage === 0">

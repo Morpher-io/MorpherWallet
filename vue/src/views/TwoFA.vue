@@ -57,17 +57,16 @@
 				<span>Submit</span>
 			</button>
 
-			<div class="mt-2 is-grouped">
-				<button v-on:click="logout()" tag="button" class="button is-ghost is-blue big-button medium-text transition-faster">
-					<span>Cancel</span>
-				</button>
-			</div>
+			<button v-on:click="logout()" tag="button" class="button is-ghost is-blue big-button medium-text transition-faster">
+				<span>Cancel</span>
+			</button>
 		</form>
 
-		<p class="mt-3 has-text-left password-help">
-			<strong>Lost 2FA Access?</strong>
-			<br />Please email <a href="mailto:contact@help.morpher.com" class="login-router">contact@help.morpher.com</a>. Users that completed
-			KYC in the app are more likely to have their account restored.
+		<p class="mt-5 transition-faster">
+			Having problems?
+			<a href="https://support.morpher.com/en/article/2fa-2-step-verification-troubleshooting-ejmssf/" target="__blank" class="login-router"
+				>2-Step Support</a
+			>
 		</p>
 	</div>
 </template>
@@ -89,7 +88,7 @@ export default class TwoFA extends mixins(Global) {
 	mounted() {
 		window.setTimeout(() => {
 			const email: any = this.$refs.email_code;
-			const auth: any = this.$refs.email_code;
+			const auth: any = this.$refs.auth_code;
 			if (email) email.focus();
 			else if (auth) auth.focus();
 		}, 100);
@@ -97,8 +96,8 @@ export default class TwoFA extends mixins(Global) {
 	}
 
 	@Watch('authenticatorCode')
-	authenticatorCodeChanged(value: any) {
-		if (value.length === 6) {
+	authenticatorCodeChanged() {
+		if (this.authenticatorCode.length === 6) {
 			this.validateCode();
 		}
 	}
@@ -107,7 +106,7 @@ export default class TwoFA extends mixins(Global) {
 	 */
 	async validateCode() {
 		this.logonError = '';
-		this.showSpinner('Validating 2FA codes...');
+		this.showSpinner('Validating code...');
 		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.authenticatorCode })
 			.then(nextroute => {
 				this.hideSpinner();

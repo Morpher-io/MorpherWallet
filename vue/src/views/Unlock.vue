@@ -11,7 +11,7 @@
 					<div ref="userImage" class="jazz-icon" />
 					<div class="ml-3">
 						<p>{{ walletEmail }}</p>
-						<div @click="logout()" class="login-router">Switch account</div>
+						<div @click="logout()" class="login-router transition-faster reset-line-height">Switch account</div>
 					</div>
 				</div>
 			</div>
@@ -21,7 +21,7 @@
 			<label class="label">Password</label>
 
 			<div class="control">
-				<input type="password" class="input" name="walletPassword" v-model="walletPassword" />
+				<input type="password" class="input" name="walletPassword" v-model="walletPassword" @keypress="handleKeyPress" />
 				<div v-if="showRecovery">
 					<p class="help is-danger">
 						The Password you provided can't be used to de-crypt your wallet.
@@ -35,7 +35,7 @@
 			<span>Log In</span>
 		</button>
 		<p class="forgot-password">
-			Forgot password? <router-link to="/recovery" class="login-router"><span>Recover your wallet</span></router-link>
+			Forgot password? <router-link to="/recovery" class="login-router transition-faster"><span>Recover your wallet</span></router-link>
 		</p>
 	</div>
 </template>
@@ -60,7 +60,7 @@ export default class Unlock extends mixins(Global) {
 	mounted() {
 		const iconSeed = localStorage.getItem('iconSeed') || '';
 		this.generateImage(iconSeed);
-		this.showSpinner('Loading User...');
+		this.showSpinner('Loading account...');
 		// Check if the wallet can be unlocked using the local-storage stored password
 		this.unlockWithStoredPassword()
 			.then(result => {
@@ -81,7 +81,7 @@ export default class Unlock extends mixins(Global) {
 	 */
 	async login() {
 		const password = await sha256(this.walletPassword);
-		this.showSpinnerThenAutohide('Logging in User...');
+		this.showSpinnerThenAutohide('Logging in...');
 
 		// Call the fetchUser store action to process the wallet logon
 		this.unlockWithPassword({ password })
@@ -118,6 +118,14 @@ export default class Unlock extends mixins(Global) {
 
 		const image = jazzicon(32, seed);
 		ref.append(image);
+	}
+
+	handleKeyPress(e: any) {
+		const key = e.which || e.charCode || e.keyCode || 0;
+
+		if (key === 13) {
+			this.login();
+		}
 	}
 }
 </script>

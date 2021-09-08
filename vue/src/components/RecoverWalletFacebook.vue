@@ -2,11 +2,7 @@
 	<div class="control is-expanded">
 		<v-facebook-login
 			:logo-style="{
-				color: '#4267B2',
-				marginRight: '5px',
-				borderRadius: '100px',
-				width: '24px',
-				height: '24px'
+				display: 'none'
 			}"
 			type="button"
 			class="button is-grey big-button outlined-button is-thick transition-faster facebook-button"
@@ -15,7 +11,12 @@
 			@login="onLogin"
 			v-model="facebook.model"
 		>
-			<span slot="login">Facebook</span>
+			<span class="is-flex is-align-items-center" slot="login">
+				<span class="icon img">
+					<img src="@/assets/img/fb_logo.svg" alt="Facebook Logo" />
+				</span>
+				<span>Facebook</span>
+			</span>
 		</v-facebook-login>
 	</div>
 </template>
@@ -55,7 +56,7 @@ export default class RecoverWalletFacebook extends mixins(Global) {
 	}
 
 	async onLogin(data) {
-		this.showSpinner('Trying to Login...');
+		this.showSpinner('Trying to log in...');
 		try {
 			const userID = data.authResponse.userID;
 			const accessToken = data.authResponse.accessToken;

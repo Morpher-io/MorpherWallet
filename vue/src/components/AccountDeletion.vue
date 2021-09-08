@@ -34,14 +34,16 @@
 			</div>
 		</div>
 		<p class="reset-line-height is-size-7 reset-mt">
-			Make sure to have one space between each word.
-			<br />Don’t know your keys? <router-link to="/settings/keys" class="login-router">Export your wallet</router-link>
+			<span v-if="currentMethod === 0">Make sure to have one space between each word.</span>
+			<span v-if="currentMethod === 1"
+				>Don’t know your keys? <router-link to="/settings/keys" class="login-router">Export your wallet</router-link></span
+			>
 		</p>
 
 		<div class="error mt-3" v-if="logonError">
 			<p>⚠️ <span v-html="logonError"></span></p>
 		</div>
-		
+
 		<button @click="deleteAccount()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!input">
 			<span>Verify & Delete</span>
 		</button>
@@ -80,7 +82,7 @@ export default class AccountDeletion extends mixins(Authenticated, Global) {
 		this.logonError = '';
 		return {
 			input: this.input,
-			method: this.currentMethod === 0 ? 'seed' : 'key',
+			method: this.currentMethod === 0 ? 'seed' : 'key'
 		};
 	}
 

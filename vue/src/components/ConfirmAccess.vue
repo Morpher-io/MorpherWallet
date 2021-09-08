@@ -8,7 +8,7 @@
 			<label class="label">Password</label>
 
 			<div class="control">
-				<input type="password" class="input" name="walletPassword" v-model="walletPassword" />
+				<input type="password" class="input" name="walletPassword" v-model="walletPassword" @keypress="handleKeyPress" />
 			</div>
 		</div>
 
@@ -59,6 +59,14 @@ export default class ConfirmAccess extends mixins(Authenticated) {
 	@Emit('pageBack')
 	pageBack() {
 		return;
+	}
+
+	handleKeyPress(e: any) {
+		const key = e.which || e.charCode || e.keyCode || 0;
+
+		if (key === 13) {
+			this.setPassword();
+		}
 	}
 }
 </script>

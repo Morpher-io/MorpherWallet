@@ -141,17 +141,16 @@ router.beforeEach((to, from, next) => {
 		if (store.getters.isLoggedIn) {
 			if (store.state.redirectPath) {
 				const path = store.state.redirectPath;
-				store.commit('setRedirect', '')
+				store.commit('setRedirect', '');
 				next(path);
 			} else {
 				next();
 			}
-			
-			
+
 			return;
 		}
 		if (to.path && to.path !== '/') {
-			store.commit('setRedirect', to.path)
+			store.commit('setRedirect', to.path);
 		}
 
 		if (store.getters.twoFaRequired) {

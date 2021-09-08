@@ -4,7 +4,7 @@
 			<div class="card-content">
 				<div class="is-flex">
 					<div class="details has-text-left mr-4">
-						<p class="has-text-weight-bold is-size-5">
+						<p class="has-text-weight-medium is-size-5">
 							<i class="fas fa-envelope" />
 							<span class="ml-2">Email</span>
 						</p>
@@ -35,7 +35,7 @@
 			<div class="card-content">
 				<div class="is-flex">
 					<div class="details has-text-left mr-4">
-						<p class="has-text-weight-bold is-size-5">
+						<p class="has-text-weight-medium is-size-5">
 							<i class="fas fa-mobile-alt" />
 							<span class="ml-2">Authenticator</span>
 						</p>

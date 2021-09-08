@@ -18,23 +18,27 @@ import { connectToChild } from 'penpal';
 
 
 let WIDGET_URL: string;
-const ZEROWALLET_IFRAME_CLASS = 'zerowallet-widget-frame';
-const ZEROWALLET_CONTAINER_CLASS = 'zerowallet-container';
-let zeroWalletIframe: HTMLIFrameElement;
-let zeroWalletContainer: HTMLDivElement;
+const MORPHERWALLET_IFRAME_CLASS = 'morpherwallet-widget-frame';
+const MORPHERWALLET_CONTAINER_CLASS = 'morpherwallet-container';
+let morpherWalletIframe: HTMLIFrameElement;
+let morpherWalletContainer: HTMLDivElement;
+let _onSendCallback:any = null;
 
-if (document.getElementById('zero_wallet_sdk_iframe')) {
-	zeroWalletIframe = (document.getElementById('zero_wallet_sdk_iframe') as HTMLIFrameElement);
+
+if (document.getElementById('morpher_wallet_sdk_iframe')) {
+	morpherWalletIframe = (document.getElementById('morpher_wallet_sdk_iframe') as HTMLIFrameElement);
 } else {
-	zeroWalletIframe = document.createElement('iframe');
-	zeroWalletIframe.id= 'zero_wallet_sdk_iframe';
-	zeroWalletIframe.className = ZEROWALLET_IFRAME_CLASS;
-	zeroWalletIframe.scrolling="no";
-	zeroWalletIframe.style.overflow="hidden";
+  morpherWalletIframe = document.createElement('iframe');
+  morpherWalletIframe.id = 'morpher_wallet_sdk_iframe';
+  morpherWalletIframe.className = MORPHERWALLET_IFRAME_CLASS;
+  morpherWalletIframe.scrolling = "no";
+  morpherWalletIframe.style.overflow = "hidden";
+  morpherWalletIframe.style.width = "0";
+  morpherWalletIframe.style.height = "0";
 }
 
 
-export type ZeroWalletConfig = {
+export type MorpherWalletConfig = {
 	__typename?: "Type2FARequired";
 	env: string;
   show_transaction: boolean;
@@ -45,21 +49,22 @@ export type ZeroWalletConfig = {
 
 let iframeLoadedFired = false;
 
-export default class ZeroWallet {
+export default class MorpherWallet {
 
 	wsRPCEndpointUrl: string;
 	chainId: number;
 	widget: any;
 	provider: Web3ProviderEngine;
 	_onLoginCallback: any;
+  _onLoginErrorCallback: any;
 	_onLogoutCallback: any;
 	_onCloseCallback: any;
 	_onActiveWalletChangedCallback: any;
 	_onErrorCallback: any;
-	config: ZeroWalletConfig;
+	config: MorpherWalletConfig;
 	_selectedAddress: any;
   
-  constructor(wsRPCEndpointUrl: string, chainId: number, config: ZeroWalletConfig = null) {
+  constructor(wsRPCEndpointUrl: string, chainId: number, config: MorpherWalletConfig = null) {
 		if (config === null) {
 			config = {
 				show_transaction: false,
@@ -87,7 +92,7 @@ export default class ZeroWallet {
 		this.provider = this._initProvider();
 
 		
-    //window.zerowallet = this;
+    //window.morpherwallet = this;
   }
 
   getProvider() {
@@ -98,7 +103,7 @@ export default class ZeroWallet {
     return this.chainId;
   }
 
-  async showZeroWallet() {
+  async showMorpherWallet() {
 		this.showWallet()
     const widgetCommunication = (await this.widget).communication;
     return widgetCommunication.showPage('wallet');
@@ -111,6 +116,10 @@ export default class ZeroWallet {
 
   onLogin(callback: any) {
     this._onLoginCallback = callback;
+  }
+
+  onLoginError(callback: any) {
+    this._onLoginErrorCallback = callback;
   }
 
 	onClose(callback: any) {
@@ -128,6 +137,15 @@ export default class ZeroWallet {
   onError(callback: any) {
     this._onErrorCallback = callback;
 	}
+  onSend(callback: any) {
+    _onSendCallback = callback;
+  }
+  async openSendInApp() {
+    this.hideWallet()
+    if (_onSendCallback) {
+      _onSendCallback();
+    }
+  }
 	
 	async loginWallet() {
 		const loggedInResult = await this.isLoggedIn();
@@ -150,6 +168,24 @@ export default class ZeroWallet {
     return widgetCommunication.showPage('settings');
 	}
 
+  async showWallet2fa() {
+    this.showWallet();
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.showPage('2fa');
+  }    
+
+  async showWalletRecovery() {
+    this.showWallet();
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.showPage('recovery');
+  }    
+
+  async showWalletEmail() {
+    this.showWallet();
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.showPage('email');
+  } 
+
 	async showWalletRegister() {
 		this.showWallet()
     const widgetCommunication = (await this.widget).communication;
@@ -158,24 +194,30 @@ export default class ZeroWallet {
 
 	async showWallet() {
 		
-    zeroWalletContainer.style.position = 'absolute';
-    zeroWalletContainer.style.height = '100%';
-    zeroWalletContainer.style.width = '100%';
-    zeroWalletContainer.style.top='0';
-    zeroWalletContainer.style.left='0';
-		zeroWalletContainer.style.display = 'inline';
-		zeroWalletContainer.style.visibility = 'visible';
-	
+    morpherWalletContainer.style.height = '100%';
+    morpherWalletContainer.style.width = '100%';
+    morpherWalletContainer.style.top = '0';
+    morpherWalletContainer.style.left = '0';
+    morpherWalletContainer.style.display = 'inline';
+    morpherWalletContainer.style.visibility = 'visible';
+    morpherWalletIframe.style.width = '';
+    morpherWalletIframe.style.height = '';
+    
+    if (this.config && this.config.env === 'dev') {
+      morpherWalletIframe.style.border = '3px solid #00d492';
+    }
 	}
 
 	async hideWallet() {
-		zeroWalletContainer.style.position = 'absolute';
-		zeroWalletContainer.style.width = '0';
-		zeroWalletContainer.style.height = '0';
-		zeroWalletContainer.style.display = 'none';
-		zeroWalletContainer.style.visibility = 'invisible';
-		zeroWalletContainer.style.top = '-999px';
-		zeroWalletContainer.style.left = '-999px';		
+    morpherWalletContainer.style.width = '0';
+    morpherWalletContainer.style.height = '0';
+    morpherWalletContainer.style.display = 'block';
+    morpherWalletContainer.style.visibility = 'invisible';
+    morpherWalletContainer.style.top = '-999px';
+    morpherWalletContainer.style.left = '-999px';
+    morpherWalletIframe.style.width = '0';
+    morpherWalletIframe.style.height = '0';
+    morpherWalletIframe.style.border = 'none';
 	}
 
   async isLoggedIn() {
@@ -204,7 +246,7 @@ export default class ZeroWallet {
         resolve(true);
       }
 
-      zeroWalletIframe.onload = () => {
+      morpherWalletIframe.onload = () => {
         iframeLoadedFired = true;
         resolve(true);
       };
@@ -212,9 +254,9 @@ export default class ZeroWallet {
   }
 
   async _initWidget() {
-		zeroWalletIframe.src = WIDGET_URL;
+		morpherWalletIframe.src = WIDGET_URL;
 		
-		zeroWalletIframe.onload = () => {
+		morpherWalletIframe.onload = () => {
 			iframeLoadedFired = true;
 		};
     
@@ -222,37 +264,38 @@ export default class ZeroWallet {
     const style = document.createElement('style');
     style.innerHTML = styles;
 
-		if (document.getElementById('zero_wallet_sdk_container')) {
-			zeroWalletContainer = (document.getElementById('zero_wallet_sdk_container') as HTMLDivElement);
+		if (document.getElementById('morpher_wallet_sdk_container')) {
+			morpherWalletContainer = (document.getElementById('morpher_wallet_sdk_container') as HTMLDivElement);
 		} else {
-			zeroWalletContainer = document.createElement('div');
-			zeroWalletContainer.id= 'zero_wallet_sdk_container';
-			zeroWalletContainer.className = ZEROWALLET_CONTAINER_CLASS;
-			zeroWalletContainer.style.width = '0';
-			zeroWalletContainer.style.height = '0';
-			zeroWalletContainer.style.border = 'none';
-			zeroWalletContainer.style.display = 'none';
-			zeroWalletContainer.style.visibility = 'invisible';
-			zeroWalletContainer.style.position = 'absolute';
-			zeroWalletContainer.style.top = '-999px';
-			zeroWalletContainer.style.left = '-999px';
-			zeroWalletContainer.appendChild(zeroWalletIframe);
-			document.body.appendChild(zeroWalletContainer);
+			morpherWalletContainer = document.createElement('div');
+			morpherWalletContainer.id= 'morpher_wallet_sdk_container';
+			morpherWalletContainer.className = MORPHERWALLET_CONTAINER_CLASS;
+			morpherWalletContainer.style.width = '0';
+			morpherWalletContainer.style.height = '0';
+			morpherWalletContainer.style.border = 'none';
+      morpherWalletContainer.style.overflow = 'hidden';
+			morpherWalletContainer.style.visibility = 'invisible';
+			morpherWalletContainer.style.top = '-999px';
+			morpherWalletContainer.style.left = '-999px';
+			morpherWalletContainer.appendChild(morpherWalletIframe);
+			document.body.appendChild(morpherWalletContainer);
 			document.head.appendChild(style);
 	
 		}
 
     const connection = connectToChild({
-      iframe: zeroWalletIframe,
+      iframe: morpherWalletIframe,
       methods: {
         setHeight: this._setHeight.bind(this),
         getWindowSize: this._getWindowSize.bind(this),
 				onLogin: this._onLogin.bind(this),
+        onLoginError: this._onLoginError.bind(this),
 				onClose: this._onClose.bind(this),
         onLogout: this._onLogout.bind(this),
         onActiveWalletChanged: this._onActiveWalletChanged.bind(this),
 				onError: this._onError.bind(this),
 				hideWallet: this.hideWallet,
+        openSendInApp: this.openSendInApp,
         showWallet: this.showWallet
       },
     });
@@ -260,7 +303,7 @@ export default class ZeroWallet {
     const communication = await connection.promise;
     //communication.retrieveSession();
 
-    return { communication: (communication as any), iframe: zeroWalletIframe };
+    return { communication: (communication as any), iframe: morpherWalletIframe };
   }
 
   _initProvider() {
@@ -413,6 +456,12 @@ export default class ZeroWallet {
 		this.hideWallet();
     if (this._onLoginCallback) {
       this._onLoginCallback(walletAddress, email);
+    }
+	}
+
+  _onLoginError(email: any, error: any) {
+    if (this._onLoginErrorCallback) {
+      this._onLoginErrorCallback(email, error);
     }
 	}
 	

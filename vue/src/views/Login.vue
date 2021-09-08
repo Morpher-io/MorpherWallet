@@ -15,14 +15,23 @@
 					<label class="label">Password</label>
 
 					<div class="control">
-						<input type="password" class="input" data-cy="walletPassword" name="walletPassword" v-model="walletPassword" />
+						<input
+							type="password"
+							class="input"
+							data-cy="walletPassword"
+							name="walletPassword"
+							v-model="walletPassword"
+							@keydown="checkKeyPress"
+						/>
 					</div>
 				</div>
 
 				<div class="error" v-if="logonError">
 					<p data-cy="loginError">
 						⚠️ <span v-html="logonError"></span>
-						<router-link v-if="showRecovery" to="/recovery" class="login-router"><span>Recover your wallet?</span></router-link>
+						<router-link v-if="showRecovery" to="/recovery" class="login-router transition-faster"
+							><span class="ml-1">Recover your wallet?</span></router-link
+						>
 					</p>
 				</div>
 
@@ -31,14 +40,14 @@
 				</button>
 
 				<p class="forgot-password">
-					Forgot password? <router-link to="/recovery" class="login-router"><span>Recover your wallet</span></router-link>
+					Forgot password? <router-link to="/recovery" class="login-router transition-faster"><span>Recover your wallet</span></router-link>
 				</p>
 
 				<div class="divider"></div>
 
 				<div class="login-link">
 					<span>Don't have a wallet?</span>
-					<router-link to="/signup" class="login-router">
+					<router-link to="/signup" class="login-router transition-faster">
 						<span>
 							Sign up
 						</span>
@@ -90,6 +99,28 @@ export default class Login extends mixins(Global) {
 		} else {
 			this.unlockUpdate();
 		}
+
+		if (this.store.status === 'invalid password') {
+			this.logonError = getDictionaryValue('DECRYPT_FAILED');
+			if (this.walletEmail) this.loginErrorReturn(this.walletEmail, 'INVALID_PASSWORD');
+			this.showRecovery = true;
+		}
+	}
+
+	checkKeyPress(e: any) {
+		if (e.keyCode === 13) {
+			this.login();
+		}
+	}
+
+	async loginErrorReturn(email: string, err: any) {
+		if (this.isIframe()) {
+			if (this.store.connection && this.store.connection !== null) {
+				const promise = this.store.connection.promise;
+
+				(await promise).onLoginError(email, err);
+			}
+		}
 	}
 
 	/**
@@ -97,7 +128,7 @@ export default class Login extends mixins(Global) {
 	 */
 	login() {
 		this.logonError = '';
-		this.showSpinner('Loading User...');
+		this.showSpinner('Loading account...');
 		this.store.loginComplete = false;
 		const email = this.walletEmail;
 		const password = this.walletPassword;
@@ -119,6 +150,7 @@ export default class Login extends mixins(Global) {
 						.catch(() => {
 							this.hideSpinner();
 							this.logonError = getDictionaryValue('DECRYPT_FAILED');
+							this.loginErrorReturn(email, 'INVALID_PASSWORD');
 							this.showRecovery = true;
 						});
 				}
@@ -128,8 +160,10 @@ export default class Login extends mixins(Global) {
 				this.hideSpinner();
 				if (error !== true && error !== false) {
 					if (error.success === false) {
+						this.loginErrorReturn(email, error.error);
 						this.logonError = getDictionaryValue(error.error);
 					} else {
+						this.loginErrorReturn(email, error);
 						// console.log('Error in login', error);
 					}
 				}

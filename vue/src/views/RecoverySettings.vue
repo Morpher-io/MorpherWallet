@@ -12,11 +12,15 @@
 						<i class="fas fa-chevron-left"></i>
 					</span>
 				</button>
-				<h2 class="title ml-4">Account Recovery</h2>
+				<h2 class="title ml-3">Account Recovery</h2>
 			</div>
-			<p class="subtitle">Add a trusted online account as the recovery method for your wallet (in case you forget your wallet password).</p>
+			<p class="subtitle has-text-left">
+				Add a trusted online account as the recovery method for your wallet (in case you forget your wallet password).
+			</p>
 
-			<div class="divider just-space" />
+			<div class="error mt-3 mb-3" v-if="logonError">
+				<p>⚠️ <span v-html="logonError"></span></p>
+			</div>
 
 			<div>
 				<AddRecoveryGoogle v-if="whatRecovery.google" @processMethod="processMethod"></AddRecoveryGoogle>
@@ -46,9 +50,7 @@
 				></AddRecoveryVkontakte>
 			</div>
 
-			<div class="error mt-3" v-if="logonError">
-				<p>⚠️ <span v-html="logonError"></span></p>
-			</div>
+			<div class="divider just-space" />
 
 			<div class="has-text-left mt-5 is-size-7">
 				<p class="has-text-weight-bold"><i class="fas fa-shield-alt"></i> Fully Encrypted Backup</p>
@@ -141,7 +143,13 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 			this.isEnabled = data.enabled;
 			this.currentPage = 2;
 		} else {
-			this.logonError = data.method + ': ' + getDictionaryValue(data.error);
+			if (data.error === 'popup_closed_by_user') {
+				this.logonError = getDictionaryValue('GOOGLE_COOKIES_BLOCKED');
+			} else if (data.error === 'google_script_blocked') {
+				this.logonError = getDictionaryValue('GOOGLE_SCRIPT_BLOCKED');
+			} else {
+				this.logonError = data.method + ': ' + getDictionaryValue(data.error);
+			}
 		}
 	}
 

@@ -5,34 +5,37 @@
 			<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 			<h2 class="title">Confirm Transaction</h2>
 			<p class="subtitle" v-if="store.transactionDetails">{{ chainName }}</p>
-			<div class="card">
-				<div
-					class="layout split first eth-address-copy"
-					:data-tooltip="copyTextSrc"
-					@click="copySrcETHAddress(store.transactionDetails.from)"
-				>
-					{{ formatEthAddress(store.transactionDetails.from) }}
-				</div>
-				<i class="fas fa-arrow-right transfer-icon"></i>
-				<div
-					class="layout split second eth-address-copy"
-					:data-tooltip="copyTextDest"
-					@click="copyDestETHAddress(store.transactionDetails.to)"
-				>
-					<div class="has-text-right">{{ formatEthAddress(store.transactionDetails.to) }}</div>
+			<div class="settings-data user-details">
+				<div class="details is-flex is-align-items-center">
+					<p
+						class="layout split first eth-address-copy"
+						:data-tooltip="copyTextSrc"
+						@click="copySrcETHAddress(store.transactionDetails.from)"
+					>
+						{{ formatEthAddress(store.transactionDetails.from) }}
+					</p>
+					<i class="fas fa-arrow-right transfer-icon"></i>
+					<p
+						class="layout split second eth-address-copy"
+						:data-tooltip="copyTextDest"
+						@click="copyDestETHAddress(store.transactionDetails.to)"
+					>
+						{{ formatEthAddress(store.transactionDetails.to) }}
+					</p>
 				</div>
 			</div>
 
-			<div class="divider thick"></div>
+			<div class="divider just-space"></div>
 
 			<div class="card column">
-				<p>Balance:</p>
-				<p class="eth_balance">{{ roundFormatter(Number(store.ethBalance) / Math.pow(10, 18)) }} ETH</p>
+				<p class="has-text-weight-medium">Send</p>
+				<p v-if="isMPH" class="eth_balance">{{ roundFormatter(mphValue) }} MPH</p>
+				<p v-else class="eth_balance">{{ roundFormatter(store.transactionDetails.value / Math.pow(10, 18)) }} ETH</p>
 			</div>
 
 			<div class="payment-description">
-				<div class="details-group" v-if="true">
-					<p class="subtitle"><b>Gas Fee</b></p>
+				<div class="details-group">
+					<p class="subtitle has-text-weight-medium">Gas Fee</p>
 					<p class="text">
 						{{ roundFormatter((Number(store.transactionDetails.gasPrice) * Number(store.transactionDetails.gas)) / Math.pow(10, 18)) }} ETH
 					</p>
@@ -48,15 +51,8 @@
 
 				<div class="divider thick"></div>
 
-				<div class="details-group" v-if="store.transactionDetails.value">
-					<p class="subtitle"><b>ETH</b></p>
-					<p class="text">{{ roundFormatter(store.transactionDetails.value / Math.pow(10, 18)) }} ETH</p>
-				</div>
-
-				<div class="divider thick"></div>
-
-				<div class="details-group" v-if="store.transactionDetails.value">
-					<p class="subtitle"><b>Total</b></p>
+				<div v-if="!isMPH" class="details-group mb-0">
+					<p class="subtitle has-text-weight-medium">Total</p>
 					<p class="text">
 						{{
 							roundFormatter(
@@ -67,13 +63,22 @@
 						ETH
 					</p>
 				</div>
+				<div v-else class="details-group mb-0 is-align-items-start">
+					<p class="subtitle has-text-weight-medium">Total</p>
+					<p class="text">
+						<span class="is-block has-text-right reset-line-height">{{ roundFormatter(mphValue) }} MPH</span>
+						<span class="is-block has-text-right reset-line-height mt-1"
+							>+
+							{{ roundFormatter((Number(store.transactionDetails.gasPrice) * Number(store.transactionDetails.gas)) / Math.pow(10, 18)) }}
+							ETH</span
+						>
+					</p>
+				</div>
 			</div>
 
 			<button class="button is-green big-button is-login transition-faster mt-5" @click="sign()">
 				<span>Confirm</span>
 			</button>
-
-			<div class="divider thick"></div>
 
 			<button @click="cancel()" class="button is-ghost is-blue big-button medium-text transition-faster">
 				<span>Cancel</span>
@@ -116,9 +121,21 @@ export default class SignTx extends mixins(Global, Authenticated) {
 
 		return 'Unknown';
 	}
+	get mphValue() {
+		if (this.store.transactionDetails && this.store.transactionDetails.mph_value) {
+			return Number(this.store.transactionDetails.mph_value) / Math.pow(10, 18);
+		} else {
+			return 0;
+		}
+	}
+
+	get isMPH() {
+		return this.store.transactionDetails && this.store.transactionDetails.mph_value;
+	}
+
 	copySrcETHAddress(text: string) {
-		copyToClipboard(text, this);
-		this.copyTextSrc = "Eth Address Copied"
+		copyToClipboard(text);
+		this.copyTextSrc = 'Eth Address Copied';
 		setTimeout(() => {
 			this.copyTextSrc = 'Copy to clipboard';
 		}, 5000);
@@ -135,7 +152,7 @@ export default class SignTx extends mixins(Global, Authenticated) {
 
 <style lang="scss" scoped>
 .eth_balance {
-	font-size: 21px;
+	font-size: 24px;
 }
 .transaction-breakdown {
 	font-size: 20px;
@@ -148,12 +165,11 @@ export default class SignTx extends mixins(Global, Authenticated) {
 }
 .transfer-icon {
 	display: inline-block;
-	font-size: 18px;
-	position: absolute;
-	left: 50%;
+	font-size: 22px;
 }
 .eth-address-copy {
 	cursor: pointer;
+	font-size: 16px;
 }
 
 .card {
@@ -174,7 +190,7 @@ export default class SignTx extends mixins(Global, Authenticated) {
 }
 
 .payment-description {
-	padding: 20px;
+	padding: 15px;
 	background: #f9f9f9;
 	margin: 0 10px;
 	position: relative;
@@ -183,6 +199,7 @@ export default class SignTx extends mixins(Global, Authenticated) {
 	.details-group {
 		display: flex;
 		align-items: center;
+		margin-bottom: 5px;
 
 		.subtitle {
 			margin: 0;
@@ -194,9 +211,13 @@ export default class SignTx extends mixins(Global, Authenticated) {
 		}
 
 		&.small {
-			padding-left: 15px;
-			margin-top: 5px;
+			padding-left: 20px;
 			position: relative;
+			margin-bottom: 0;
+
+			+ .small {
+				margin-top: 3px;
+			}
 
 			&::before {
 				content: '';
@@ -204,7 +225,7 @@ export default class SignTx extends mixins(Global, Authenticated) {
 				top: 50%;
 				transform: translateY(-50%);
 				left: 0;
-				width: 10px;
+				width: 15px;
 				height: 1px;
 				background: #bababa;
 			}
