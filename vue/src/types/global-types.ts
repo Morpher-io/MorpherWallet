@@ -99,6 +99,14 @@ export type TypePayloadData = {
 	needConfirmation?: boolean;
 };
 
+export type Type2FAUpdateParams = {
+	__typename?: 'Type2FAUpdateParams';
+	email: boolean;
+	authenticator: boolean;
+	email2faVerification: string;
+	authenticator2faVerification: string;
+};
+
 export type TypeCreatedKeystore = {
 	__typename?: 'TypeCreatedKeystore';
 	encryptedSeed: TypeEncryptedSeed;
@@ -110,7 +118,7 @@ export type WalletSign = {
 	sign: any;
 };
 
-export type ZeroWalletConfig = {
+export type MorpherWalletConfig = {
 	__typename?: 'Type2FARequired';
 	show_transaction: boolean;
 	confirm_transaction: boolean;

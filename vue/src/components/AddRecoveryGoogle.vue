@@ -1,20 +1,32 @@
 <template>
 	<div class="field">
 		<div class="control is-expanded" v-if="!hasRecoveryMethod">
-			<GoogleLogin class="button is-grey big-button outlined-button is-thick transition-faster" :params="{ clientId }" :onSuccess="onLogin">
-				<span class="icon google-icon">
-					<i class="fab fa-google"></i>
+			<GoogleLogin
+				class="button is-grey big-button outlined-button is-thick transition-faster"
+				:params="{ clientId }"
+				:onSuccess="onLogin"
+				:onCurrentUser="onLogin"
+				:onFailure="onError"
+			>
+				<span class="icon img">
+					<img src="@/assets/img/google_logo.svg" alt="Google Logo" />
 				</span>
 				<span>Google</span>
 			</GoogleLogin>
 		</div>
 		<div v-if="hasRecoveryMethod" class="has-text-centered">
 			<div class="control is-expanded" v-if="hasRecoveryMethod">
-				<GoogleLogin class="button is-danger big-button is-thick transition-faster" :params="{ clientId }" :onSuccess="onDelete">
-					<span class="icon">
-						<i class="fab fa-google"></i>
+				<GoogleLogin
+					class="button is-danger big-button is-thick transition-faster"
+					:params="{ clientId }"
+					:onSuccess="onDelete"
+					:onCurrentUser="onDelete"
+					:onFailure="onError"
+				>
+					<span class="icon img">
+						<img src="@/assets/img/google_logo_white.svg" alt="Google Logo" />
 					</span>
-					<span>Revoke Google Access</span>
+					<span>Revoke Access</span>
 				</GoogleLogin>
 			</div>
 			<div class="recovery-active is-text-small">
@@ -24,7 +36,6 @@
 				Google Recovery Active
 			</div>
 		</div>
-		<!--		<div v-if="error">{{ error }}</div>-->
 	</div>
 </template>
 
@@ -34,6 +45,7 @@ import { sha256 } from './../utils/cryptoFunctions';
 
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
+import { Emit } from 'vue-property-decorator';
 
 @Component({
 	components: {
@@ -41,20 +53,30 @@ import { Authenticated, Global } from '../mixins/mixins';
 	}
 })
 export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
-	error = '';
 	hasRecoveryMethod = false;
 	clientId = process.env.VUE_APP_GOOGLE_APP_ID;
 	recoveryTypeId = 3;
+
+	@Emit('processMethod')
+	processMethod(data) {
+		return data;
+	}
 
 	async mounted() {
 		this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 	}
 
-	async resetRecovery() {
-		const success = await this.resetRecoveryMethod({ recoveryTypeId: this.recoveryTypeId });
-		if (success) {
-			this.hasRecoveryMethod = false;
+	onError(error) {
+		let errorText = error.error || error.err || 'Google login Error';
+
+		if (String(errorText.toLowerCase()).includes('script not loaded correctly')) {
+			errorText = 'google_script_blocked';
 		}
+
+		this.processMethod({
+			success: false,
+			error: errorText
+		});
 	}
 
 	async onLogin(googleUser) {
@@ -66,10 +88,21 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 				googleUser.disconnect();
 				this.showSpinnerThenAutohide('Saved Successfully');
 				this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
+				this.processMethod({
+					success: true,
+					method: 'Google',
+					enabled: true,
+					erorr: ''
+				});
 			})
-			.catch(e => {
+			.catch(() => {
 				this.showSpinnerThenAutohide('Error');
-				this.error = e.toString();
+				this.processMethod({
+					success: false,
+					method: 'Google',
+					enabled: true,
+					erorr: ''
+				});
 			});
 	}
 
@@ -82,10 +115,21 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 				googleUser.disconnect();
 				this.showSpinnerThenAutohide('Keystore deleted successfully');
 				this.hasRecoveryMethod = false;
+				this.processMethod({
+					success: true,
+					method: 'Google',
+					enabled: false,
+					erorr: ''
+				});
 			})
-			.catch(e => {
+			.catch(() => {
 				this.showSpinnerThenAutohide('Error finding user');
-				this.error = e.toString();
+				this.processMethod({
+					success: false,
+					method: 'Google',
+					enabled: false,
+					erorr: ''
+				});
 			});
 	}
 }

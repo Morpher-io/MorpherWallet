@@ -1,11 +1,17 @@
 <template>
 	<div id="app">
-		<section :class="iFrameDisplay ? 'main_iframe' : 'main'">
+		<section
+			:class="{
+				main_iframe: iFrameDisplay,
+				main: !iFrameDisplay,
+				'dev-border': isDev
+			}"
+		>
 			<spinner v-bind:active="loading" v-bind:status="spinnerStatusText"></spinner>
 			<div class="header">
 				<img src="@/assets/img/wallet_logo.svg" class="headerImage" />
 				<span class="icon closeButton" v-if="iFrameDisplay" @click="closeWallet">
-					<i class="fa fa-times"/>
+					<i class="fa fa-times" />
 				</span>
 			</div>
 			<transition name="fade" mode="out-in">
@@ -37,14 +43,13 @@ import Spinner from './components/loading-spinner/Spinner.vue';
 			loading: (state: any) => state.loading,
 			spinnerStatusText: (state: any) => state.spinnerStatusText,
 			unlocking: (state: any) => state.unlocking
-		}
-					
-		)
+		})
 	}
 })
 export default class App extends Vue {
 	iFrameDisplay = isIframe();
 	connection = this.$store.state.connection;
+	isDev = process.env.VUE_APP_ENVIRONMENT === 'development';
 
 	async closeWallet() {
 		if (this.iFrameDisplay) {
@@ -54,7 +59,11 @@ export default class App extends Vue {
 				(await promise).hideWallet();
 				(await promise).onClose();
 
-				this.$router.push('/');
+				if (this.$store.getters.isLoggedIn) {
+					if (this.$router.currentRoute.path !== '/') this.$router.push('/');
+				} else {
+					if (this.$router.currentRoute.path !== '/login') this.$router.push('/login');
+				}
 			}
 		}
 	}

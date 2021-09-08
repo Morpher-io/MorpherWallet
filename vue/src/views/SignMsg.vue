@@ -3,13 +3,15 @@
 		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 		<div class="container">
 			<spinner v-model="showSpinner" v-bind:status="status"></spinner>
-			<h2 class="title">Sign Message</h2>
+			<h2 class="title">Sign Transaction</h2>
 			<p class="subtitle">Your signature is being requested</p>
 
 			<div class="field">
-				<label class="label">You are signing:</label>
-				<div class="card">
-					{{ store.messageDetails }}
+				<label class="label">Message</label>
+				<div class="settings-data user-details">
+					<div class="details">
+						{{ store.messageDetails }}
+					</div>
 				</div>
 			</div>
 
@@ -17,9 +19,7 @@
 				<span>Sign</span>
 			</button>
 
-			<div class="divider thick"></div>	
-
-			<button class="button" @click="cancel()">
+			<button @click="cancel()" class="button is-ghost is-blue big-button medium-text transition-faster">
 				<span>Cancel</span>
 			</button>
 		</div>
@@ -45,17 +45,17 @@ export default class SignMsg extends mixins(Global, Authenticated) {
 <style lang="scss" scoped>
 .card {
 	padding: 20px;
-    border-radius: 10px;
-    background: #f9f9f9;
-    display: flex;
-    padding: 10px 20px;
-    border-radius: 10px;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(0, 195, 134, 0.1);
-    border: 1px solid #00c386;
-    box-shadow: 0 1px 2px 0 rgb(0 195 134 / 20%), 0 5px 12px 0 rgb(0 0 0 / 10%);
-    position: relative;
-    z-index: 1;
+	border-radius: 10px;
+	background: #f9f9f9;
+	display: flex;
+	padding: 10px 20px;
+	border-radius: 10px;
+	align-items: center;
+	justify-content: center;
+	background-color: rgba(0, 195, 134, 0.1);
+	border: 1px solid #00c386;
+	box-shadow: 0 1px 2px 0 rgb(0 195 134 / 20%), 0 5px 12px 0 rgb(0 0 0 / 10%);
+	position: relative;
+	z-index: 1;
 }
 </style>

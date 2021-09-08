@@ -1,24 +1,39 @@
 <template>
 	<div class="field">
 		<div class="control is-expanded" v-if="!hasRecoveryMethod">
-			<v-facebook-login :logo-style="{
-				color: '#4267B2',
-				marginRight: '5px',
-			}" class="button is-grey big-button outlined-button is-thick facebook-button transition-faster" :appId="clientId" @sdk-init="handleSdkInit" @login="onLogin" v-model="facebook.model"
-				><span slot="login">Facebook</span>
+			<v-facebook-login
+				:logo-style="{
+					display: 'none'
+				}"
+				class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
+				:appId="clientId"
+				@sdk-init="handleSdkInit"
+				@login="onLogin"
+				v-model="facebook.model"
+				><span class="is-flex is-align-items-center" slot="login">
+					<span class="icon img">
+						<img src="@/assets/img/fb_logo.svg" alt="Facebook Logo" />
+					</span>
+					<span>Facebook</span>
+				</span>
 			</v-facebook-login>
 		</div>
 		<div class="control is-expanded has-text-centered" v-if="hasRecoveryMethod">
 			<v-facebook-login
 				:logo-style="{
-					marginRight: '5px',
+					display: 'none'
 				}"
 				class="button is-danger big-button is-thick transition-faster facebook-button"
 				:appId="clientId"
 				@sdk-init="handleSdkInit"
 				@login="deleteRecovery"
 				v-model="facebook.model"
-				><span slot="login">Revoke Facebook Access</span>
+				><span class="is-flex is-align-items-center" slot="login">
+					<span class="icon img">
+						<img src="@/assets/img/fb_logo_white.svg" alt="Facebook Logo" />
+					</span>
+					<span>Revoke Access</span>
+				</span>
 			</v-facebook-login>
 			<div class="recovery-active is-text-small">
 				<span class="icon">
@@ -27,7 +42,6 @@
 				Facebook Recovery Active
 			</div>
 		</div>
-		<div v-if="error">{{ error }}</div>
 	</div>
 </template>
 
@@ -37,6 +51,7 @@ import { sha256 } from './../utils/cryptoFunctions';
 
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
+import { Emit } from 'vue-property-decorator';
 
 @Component({
 	components: {
@@ -44,7 +59,6 @@ import { Authenticated, Global } from '../mixins/mixins';
 	}
 })
 export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
-	loggedIn = false;
 	facebook = {
 		FB: {},
 		model: {},
@@ -53,7 +67,12 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 	clientId = process.env.VUE_APP_FACEBOOK_APP_ID;
 	recoveryTypeId = 2;
 	hasRecoveryMethod = false;
-	error = '';
+	processing = false;
+
+	@Emit('processMethod')
+	processMethod(data) {
+		return data;
+	}
 
 	handleSdkInit({ FB, scope }) {
 		this.facebook.scope = scope;
@@ -65,8 +84,16 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 	}
 
 	async onLogin(data) {
+		this.processing = true;
+
 		if (data == undefined) {
 			// this.showSpinnerThenAutohide('Aborted Facebook Recovery');
+			this.processMethod({
+				success: false,
+				method: 'Facebook',
+				enabled: true,
+				erorr: ''
+			});
 			return;
 		}
 		this.showSpinner('Saving Keystore for Recovery');
@@ -79,17 +106,37 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 					this.facebook.scope.logout();
 					this.showSpinnerThenAutohide('Saved Successfully');
 					this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
+					this.processing = false;
+					this.processMethod({
+						success: true,
+						method: 'Facebook',
+						enabled: true,
+						erorr: ''
+					});
 				});
 			})
 			.catch(() => {
 				this.showSpinnerThenAutohide('Error During Saving');
-				this.error = 'Error during Saving.';
+				this.processing = false;
+				this.processMethod({
+					success: false,
+					method: 'Facebook',
+					enabled: true,
+					erorr: ''
+				});
 			});
 	}
 
 	async deleteRecovery(data) {
+		this.processing = true;
 		if (data == undefined) {
 			// this.showSpinnerThenAutohide('Aborted Facebook Recovery');
+			this.processMethod({
+				success: false,
+				method: 'Facebook',
+				enabled: false,
+				erorr: ''
+			});
 			return;
 		}
 
@@ -102,11 +149,24 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 					this.facebook.scope.logout();
 					this.showSpinnerThenAutohide('Keystore deleted successfully');
 					this.hasRecoveryMethod = false;
+					this.processing = false;
+					this.processMethod({
+						success: true,
+						method: 'Facebook',
+						enabled: false,
+						erorr: ''
+					});
 				});
 			})
 			.catch(() => {
 				this.showSpinnerThenAutohide('Error finding user');
-				this.error = 'Error during Saving.';
+				this.processing = false;
+				this.processMethod({
+					success: false,
+					method: 'Facebook',
+					enabled: false,
+					erorr: ''
+				});
 			});
 	}
 }
@@ -115,6 +175,7 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .facebook-button {
-	border-radius: 7px!important;
+	border-radius: 7px !important;
+	align-items: center;
 }
 </style>

@@ -6,77 +6,137 @@
 					<i class="fas fa-chevron-left"></i>
 				</span>
 			</button>
-			<h2 class="title ml-4">{{
-				generateTitle()
-			}}</h2>
+			<h2 v-if="!isEmailPasswordPage" class="title ml-3">Settings</h2>
+			<h2 v-if="isEmailPasswordPage" class="title ml-3">Email & Password</h2>
 		</div>
 
-		<ChangeEmail :activePage="activePage" @changeActive="activePage = 'email'"></ChangeEmail>
+		<div class="divider just-space" />
 
-		<ChangePassword :activePage="activePage" @changeActive="activePage = 'password'"></ChangePassword>
+		<div v-if="!isEmailPasswordPage" class="settings-data">
+			<div key="email_passowrd" class="settings-link is-flex is-align-items-center" @click="changeActive('email_password')">
+				<i class="fas fa-user-circle" />
+				<span class="text">
+					Email & Password
+				</span>
+				<span class="icon">
+					<i class="fas fa-chevron-right" />
+				</span>
+			</div>
 
-		<Change2FA :activePage="activePage" @changeActive="activePage = '2FA'"></Change2FA>
+			<div key="recovery" class="settings-link is-flex is-align-items-center" @click="changeActive('recovery')">
+				<i class="fas fa-life-ring" />
+				<span class="text">
+					Trusted Account Recovery
+				</span>
+				<span class="icon">
+					<i class="fas fa-chevron-right" />
+				</span>
+			</div>
 
-		<ExportWallet :activePage="activePage" @changeActive="activePage = 'keys'"></ExportWallet>
+			<div key="2FA" class="settings-link is-flex is-align-items-center" @click="changeActive('2FA')">
+				<i class="fas fa-check-double" />
+				<span class="text">
+					2-Step Verification
+				</span>
+				<span class="icon">
+					<i class="fas fa-chevron-right" />
+				</span>
+			</div>
 
-		<AccountRecovery :activePage="activePage" @changeActive="activePage = 'recovery'"></AccountRecovery>
+			<div key="keys" class="settings-link is-flex is-align-items-center" @click="changeActive('keys')">
+				<i class="fas fa-file-download" />
+				<span class="text">
+					Export Wallet
+				</span>
+				<span class="icon">
+					<i class="fas fa-chevron-right" />
+				</span>
+			</div>
+
+			<div key="delete" class="settings-link is-flex is-align-items-center" @click="changeActive('delete')">
+				<i class="fas fa-ban" />
+				<span class="text">
+					Delete Account
+				</span>
+				<span class="icon">
+					<i class="fas fa-chevron-right" />
+				</span>
+			</div>
+		</div>
+
+		<div v-else class="settings-data">
+			<div key="email" class="settings-link email-password is-flex is-align-items-center reset-cursor">
+				<div class="data">
+					<p class="has-text-weight-bold">Email</p>
+					<p>{{ store.email }}</p>
+				</div>
+				<div class="link">
+					<div class="login-router transition-faster" @click="changeActive('email')">
+						<i class="fas fa-pen-square" />
+					</div>
+				</div>
+			</div>
+			<div key="password" class="settings-link email-password is-flex is-align-items-center reset-cursor">
+				<div class="data">
+					<p class="has-text-weight-bold">Password</p>
+					<p>********</p>
+				</div>
+				<div class="link">
+					<div class="login-router transition-faster" @click="changeActive('password')">
+						<i class="fas fa-pen-square" />
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { mapState } from 'vuex';
+import Component, { mixins } from 'vue-class-component';
 import ChangePassword from '../components/ChangePassword.vue';
 import ChangeEmail from '../components/ChangeEmail.vue';
 import Change2FA from '../components/Change2FA.vue';
-import ExportWallet from '../components/ExportWallet.vue';
 import AccountRecovery from '../components/AccountRecovery.vue';
+import { Authenticated, Global } from '../mixins/mixins';
 
 @Component({
 	components: {
 		ChangePassword,
 		ChangeEmail,
 		Change2FA,
-		ExportWallet,
-		AccountRecovery,
-	},
-	computed: {
-		...mapState({
-			twoFaRequired: (state: any) => state.twoFaRequired,
-			walletEmail: (state: any) => state.email,
-			status: (state: any) => state.status,
-			accounts: (state: any) => state.accounts,
-			keystore: (state: any) => state.keystore
-		})
+		AccountRecovery
 	}
 })
-export default class Settings extends Vue {
+export default class Settings extends mixins(Authenticated, Global) {
 	activePage = '';
-
-	generateTitle() {
-		let title = 'Settings';
-
-		if (this.activePage === 'email') {
-			title = 'Email settings';
-		} else if (this.activePage === 'password') {
-			title = 'Password settings';
-		} else if (this.activePage === '2FA') {
-			title = 'Two-Factor settings';
-		} else if (this.activePage === 'keys') {
-			title = 'Keys settings';
-		} else if (this.activePage === 'recovery') {
-			title = 'Recovery settings';
-		}
-
-		return title;
-	}
+	isEmailPasswordPage = false;
 
 	redirectUser() {
-		if (!this.activePage) {
-			this.$router.push('/');
-		} else {
+		if (this.activePage === 'email_password') {
+			this.isEmailPasswordPage = false;
 			this.activePage = '';
+			return;
+		}
+
+		this.$router.push('/');
+	}
+
+	changeActive(page: string) {
+		this.activePage = page;
+
+		if (page === 'email_password') {
+			this.isEmailPasswordPage = true;
+			return;
+		}
+
+		this.$router.push('/settings/' + page);
+	}
+
+	mounted() {
+		if (this.$route.query.email_password) {
+			this.isEmailPasswordPage = true;
+			this.activePage = 'email_password';
+			this.$router.replace({ query: {} });
 		}
 	}
 }
@@ -100,7 +160,7 @@ a {
 
 .title-container {
 	display: flex;
-    align-items: center;
+	align-items: center;
 
 	.title {
 		margin: 0;

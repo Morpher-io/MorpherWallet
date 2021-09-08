@@ -30,7 +30,7 @@ function sortObject(object: any) {
 /*
  * Function uses to copy the given text to the clipboard. ses a hidden textArea to copy the text
  */
-const copyToClipboard = (text: string, self: any) => {
+const copyToClipboard = (text: string) => {
 	const textArea = document.createElement('textarea');
 	// Place in top-left corner of screen regardless of scroll position.
 	textArea.style.position = 'fixed';
@@ -63,27 +63,22 @@ const copyToClipboard = (text: string, self: any) => {
 
 		if (successful) {
 			document.body.removeChild(textArea);
-			return('COPY_CLIPBOARD_SUCCESS')
+			return 'COPY_CLIPBOARD_SUCCESS';
 		} else {
 			document.body.removeChild(textArea);
-			return('COPY_CLIPBOARD_FAIL')
+			return 'COPY_CLIPBOARD_FAIL';
 		}
 	} catch (err) {
 		document.body.removeChild(textArea);
 		console.error('Fallback: Oops, unable to copy', err);
-		return('COPY_CLIPBOARD_FAIL') 
+		return 'COPY_CLIPBOARD_FAIL';
 	}
-	
 };
 
 const formatEthAddress = (ethAddress: string) => {
-	if (!ethAddress) return "";
+	if (!ethAddress) return '';
 	if (ethAddress.length <= 11) return ethAddress;
-	return ethAddress
-		? ethAddress.substr(0, 5) +
-				"..." +
-				ethAddress.substr(ethAddress.length - 3)
-		: "";
+	return ethAddress ? ethAddress.substr(0, 5) + '...' + ethAddress.substr(ethAddress.length - 3) : '';
 };
 
 export { getAccountsFromKeystore, downloadEncryptedKeystore, sortObject, copyToClipboard, formatEthAddress };

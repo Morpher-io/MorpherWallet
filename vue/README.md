@@ -1,4 +1,4 @@
-# zerowallet
+# morpherwallet
 
 ## Project setup
 ```

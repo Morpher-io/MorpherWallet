@@ -4,7 +4,7 @@ const getWeb3 = () =>
   new Promise((resolve, reject) => {
     // Wait for loading completion to avoid race conditions with web3 injection timing.
     if (['loaded', 'interactive', 'complete'].indexOf(document.readyState) > -1) {
-      const web3 = new Web3(window.zerowallet.getProvider());
+      const web3 = new Web3(window.morpherwallet.getProvider());
       resolve(web3);
        
       // // Modern dapp browsers...
@@ -27,10 +27,10 @@ const getWeb3 = () =>
       //   resolve(web3);
       // }
       // //detect if Morphers Zerowallet is in use
-      // else if (window.zerowallet) {
-      //   const web3 = new Web3(window.zerowallet.getProvider());
+      // else if (window.morpherwallet) {
+      //   const web3 = new Web3(window.morpherwallet.getProvider());
       //   try {
-      //     await window.zerowallet.enable();
+      //     await window.morpherwallet.enable();
       //     resolve(web3);
       //   } catch (error) {
       //     reject(error);

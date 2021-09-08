@@ -1,12 +1,17 @@
 <template>
-	<div class="control is-expanded">
-		<GoogleLogin class="button is-grey big-button outlined-button is-thick transition-faster" :params="{ clientId }" :onSuccess="onLogin">
-			<span class="icon google-icon">
-				<i class="fab fa-google"></i>
+	<div class="control is-expanded" v-if="clientId">
+		<GoogleLogin
+			class="button is-grey big-button outlined-button is-thick transition-faster"
+			:params="{ client_id: clientId }"
+			:onSuccess="onLogin"
+			:onCurrentUser="onLogin"
+			:onFailure="onError"
+		>
+			<span class="icon img">
+				<img src="@/assets/img/google_logo.svg" alt="Google Logo" />
 			</span>
 			<span>Google</span>
 		</GoogleLogin>
-		<ChangePassword v-if="seedFound" :presetOldPassword="oldPassword" activePage="password"></ChangePassword>
 	</div>
 </template>
 
@@ -16,6 +21,7 @@ import ChangePassword from './ChangePassword.vue';
 
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
+import { Emit } from 'vue-property-decorator';
 
 @Component({
 	components: {
@@ -24,15 +30,30 @@ import { Global } from '../mixins/mixins';
 	}
 })
 export default class RecoverWalletGoogle extends mixins(Global) {
-	isLoggedIn = false;
-	recoveryError = '';
-	seedFound = false; //if seed was found, the user can enter a new password
-	oldPassword = '';
 	clientId = process.env.VUE_APP_GOOGLE_APP_ID;
+
 	recoveryTypeId = 3;
 
+	@Emit('setPassword')
+	setPassword(data) {
+		return data;
+	}
+
+	onError(error) {
+		let errorText = error.error || error.err || 'Google login Error';
+
+		if (String(errorText.toLowerCase()).includes('script not loaded correctly')) {
+			errorText = 'google_script_blocked';
+		}
+
+		this.setPassword({
+			success: false,
+			error: errorText
+		});
+	}
+
 	onLogin(googleUser) {
-		this.showSpinner('Trying to Login...');
+		this.showSpinner('Trying to log in...');
 		try {
 			const userID = googleUser.getBasicProfile().getId();
 			const accessToken = googleUser.getAuthResponse(true).access_token;
@@ -41,18 +62,25 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 				.then(() => {
 					googleUser.disconnect();
 					this.hideSpinner();
-					this.seedFound = true;
-					this.oldPassword = userID;
+					this.setPassword({
+						success: true,
+						oldPassword: userID
+					});
 				})
-				.catch(error => {
+				.catch(() => {
 					googleUser.disconnect();
-					this.showSpinnerThenAutohide('No recovery found...');
-					this.recoveryError = error;
+					this.showSpinnerThenAutohide('No recovery found');
+					this.setPassword({
+						success: false,
+						error: 'No recovery found'
+					});
 				});
 		} catch (e) {
-			this.showSpinnerThenAutohide('No recovery found...');
-			this.recoveryError = e.toString();
-			console.error(e);
+			this.showSpinnerThenAutohide('No recovery found');
+			this.setPassword({
+				success: false,
+				error: 'No recovery found'
+			});
 		}
 	}
 }

@@ -10,7 +10,12 @@ import Unlock from '../views/Unlock.vue';
 import SignTx from '../views/SignTx.vue';
 import SignMsg from '../views/SignMsg.vue';
 import Recovery from '../views/Recovery.vue';
-import RecoveryAdd from '../views/RecoveryAdd.vue';
+import EmailSettings from '../views/EmailSettings.vue';
+import PasswordSettings from '../views/PasswordSettings.vue';
+import TwoFactorSettings from '../views/TwoFactorSettings.vue';
+import KeysSettings from '../views/KeysSettings.vue';
+import RecoverySettings from '../views/RecoverySettings.vue';
+import DeleteSettings from '../views/DeleteSettings.vue';
 
 Vue.use(VueRouter);
 
@@ -34,9 +39,49 @@ const routes: Array<RouteConfig> = [
 		}
 	},
 	{
-		path: '/addrecovery',
-		name: 'AddRecovery',
-		component: RecoveryAdd,
+		path: '/settings/email',
+		name: 'EmailSettings',
+		component: EmailSettings,
+		meta: {
+			requiresAuth: true
+		}
+	},
+	{
+		path: '/settings/password',
+		name: 'PasswordSettings',
+		component: PasswordSettings,
+		meta: {
+			requiresAuth: true
+		}
+	},
+	{
+		path: '/settings/2fa',
+		name: 'TwoFactorSettings',
+		component: TwoFactorSettings,
+		meta: {
+			requiresAuth: true
+		}
+	},
+	{
+		path: '/settings/keys',
+		name: 'KeysSettings',
+		component: KeysSettings,
+		meta: {
+			requiresAuth: true
+		}
+	},
+	{
+		path: '/settings/recovery',
+		name: 'RecoverySettings',
+		component: RecoverySettings,
+		meta: {
+			requiresAuth: true
+		}
+	},
+	{
+		path: '/settings/delete',
+		name: 'DeleteSettings',
+		component: DeleteSettings,
 		meta: {
 			requiresAuth: true
 		}
@@ -93,14 +138,26 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
 	if (to.matched.some(record => record.meta.requiresAuth)) {
+		if (store.getters.isLoggedIn) {
+			if (store.state.redirectPath) {
+				const path = store.state.redirectPath;
+				store.commit('setRedirect', '');
+				next(path);
+			} else {
+				next();
+			}
+
+			return;
+		}
+		if (to.path && to.path !== '/') {
+			store.commit('setRedirect', to.path);
+		}
+
 		if (store.getters.twoFaRequired) {
 			next('/2fa');
 			return;
 		}
-		if (store.getters.isLoggedIn) {
-			next();
-			return;
-		}
+
 		if (store.getters.hasEncryptedKeystore && store.state.email) {
 			next('/unlock');
 			return;

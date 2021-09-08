@@ -7,13 +7,7 @@
 				<div class="field">
 					<label class="label">Email</label>
 					<div class="control">
-						<input
-							type="email"
-							class="input"
-							data-cy="walletEmail"
-							name="walletEmail"
-							v-model="walletEmail"
-						/>
+						<input type="email" class="input" data-cy="walletEmail" name="walletEmail" v-model="walletEmail" />
 					</div>
 				</div>
 
@@ -23,37 +17,42 @@
 					<div class="control">
 						<input
 							type="password"
-							class="input password-input"
+							class="input"
 							data-cy="walletPassword"
 							name="walletPassword"
 							v-model="walletPassword"
+							@keydown="checkKeyPress"
 						/>
-
-						<div v-if="store.status === 'invalid password' || showRecovery == true">
-							<p class="help is-danger">
-								The Password you provided can't be used to de-crypt your wallet.
-								<router-link to="/recovery">Do you want to restore your Account?</router-link>
-							</p>
-						</div>
 					</div>
+				</div>
+
+				<div class="error" v-if="logonError">
+					<p data-cy="loginError">
+						⚠️ <span v-html="logonError"></span>
+						<router-link v-if="showRecovery" to="/recovery" class="login-router transition-faster"
+							><span class="ml-1">Recover your wallet?</span></router-link
+						>
+					</p>
 				</div>
 
 				<button type="submit" data-cy="submit" class="button is-green big-button is-login transition-faster">
 					<span>Log In</span>
 				</button>
 
-				<div class="field" v-if="showError">
-					<p class="help is-danger" data-cy="loginError">
-						Error: {{ logonError }}
-					</p>
-				</div>
+				<p class="forgot-password">
+					Forgot password? <router-link to="/recovery" class="login-router transition-faster"><span>Recover your wallet</span></router-link>
+				</p>
 
 				<div class="divider"></div>
 
-				<router-link to="/signup" tag="button" class="button is-grey big-button outlined-button is-thick transition-faster">
-					<span>Sign Up</span>
-				</router-link>
-				<p class="new-account">Don’t have a wallet? Create one in 2 minutes.</p>
+				<div class="login-link">
+					<span>Don't have a wallet?</span>
+					<router-link to="/signup" class="login-router transition-faster">
+						<span>
+							Sign up
+						</span>
+					</router-link>
+				</div>
 			</form>
 		</div>
 	</div>
@@ -63,6 +62,7 @@
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 import Password from 'vue-password-strength-meter';
+import { getDictionaryValue } from '../utils/dictionary';
 
 @Component({
 	components: {
@@ -74,7 +74,6 @@ export default class Login extends mixins(Global) {
 	walletEmail = '';
 	walletPassword = '';
 	showRecovery = false;
-	showError = false;
 	logonError = '';
 
 	/**
@@ -98,7 +97,29 @@ export default class Login extends mixins(Global) {
 					}
 				});
 		} else {
-			this.unlockUpdate()
+			this.unlockUpdate();
+		}
+
+		if (this.store.status === 'invalid password') {
+			this.logonError = getDictionaryValue('DECRYPT_FAILED');
+			if (this.walletEmail) this.loginErrorReturn(this.walletEmail, 'INVALID_PASSWORD');
+			this.showRecovery = true;
+		}
+	}
+
+	checkKeyPress(e: any) {
+		if (e.keyCode === 13) {
+			this.login();
+		}
+	}
+
+	async loginErrorReturn(email: string, err: any) {
+		if (this.isIframe()) {
+			if (this.store.connection && this.store.connection !== null) {
+				const promise = this.store.connection.promise;
+
+				(await promise).onLoginError(email, err);
+			}
 		}
 	}
 
@@ -106,8 +127,8 @@ export default class Login extends mixins(Global) {
 	 * Execute the logon
 	 */
 	login() {
-		this.showError = false;
-		this.showSpinner('Loading User...');
+		this.logonError = '';
+		this.showSpinner('Loading account...');
 		this.store.loginComplete = false;
 		const email = this.walletEmail;
 		const password = this.walletPassword;
@@ -128,6 +149,8 @@ export default class Login extends mixins(Global) {
 						})
 						.catch(() => {
 							this.hideSpinner();
+							this.logonError = getDictionaryValue('DECRYPT_FAILED');
+							this.loginErrorReturn(email, 'INVALID_PASSWORD');
 							this.showRecovery = true;
 						});
 				}
@@ -137,9 +160,10 @@ export default class Login extends mixins(Global) {
 				this.hideSpinner();
 				if (error !== true && error !== false) {
 					if (error.success === false) {
-						this.showError = true;
-						this.logonError = error.error;
+						this.loginErrorReturn(email, error.error);
+						this.logonError = getDictionaryValue(error.error);
 					} else {
+						this.loginErrorReturn(email, error);
 						// console.log('Error in login', error);
 					}
 				}

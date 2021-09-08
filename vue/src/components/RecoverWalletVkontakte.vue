@@ -1,34 +1,33 @@
 <template>
 	<div class="control is-expanded">
 		<button type="button" class="button is-grey big-button outlined-button is-thick transition-faster" @click="doLogin">
-			<span class="icon vk-icon">
-				<i class="fab fa-vk"></i>
+			<span class="icon img">
+				<img src="@/assets/img/vk_logo.svg" alt="VKontakte Logo" />
 			</span>
 			<span>VKontakte</span>
 		</button>
-		<ChangePassword v-if="seedFound" :presetOldPassword="oldPassword" activePage="password"></ChangePassword>
 	</div>
 </template>
 <script>
-import GoogleLogin from 'vue-google-login';
 import ChangePassword from './ChangePassword.vue';
 
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
+import { Emit } from 'vue-property-decorator';
 
 @Component({
 	components: {
-		GoogleLogin,
 		ChangePassword
 	}
 })
 export default class RecoveryWalletVkontakte extends mixins(Global) {
-	isLoggedIn = false;
-	recoveryError = '';
-	seedFound = false; //if seed was found, the user can enter a new password
-	oldPassword = '';
 	clientId = process.env.VUE_APP_VK_APP_ID;
 	recoveryTypeId = 5;
+
+	@Emit('setPassword')
+	setPassword(data) {
+		return data;
+	}
 
 	callbackUrlForPopup = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '');
 	vkPopup(options) {
@@ -71,7 +70,7 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 						//document.location.reload();
 					}, 500);
 
-					this.showSpinner('Trying to Login...');
+					this.showSpinner('Trying to log in...');
 					try {
 						const userID = params.user_id;
 						const accessToken = params.access_token;
@@ -79,21 +78,32 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 						this.fetchWalletFromRecovery({ accessToken, password: userID, recoveryTypeId: this.recoveryTypeId })
 							.then(() => {
 								this.hideSpinner();
-								this.seedFound = true;
-								this.oldPassword = userID;
+								this.setPassword({
+									success: true,
+									oldPassword: userID
+								});
 							})
 							.catch(error => {
 								this.showSpinnerThenAutohide('No recovery found...');
-								this.recoveryError = error;
+								this.setPassword({
+									success: false,
+									error: error
+								});
 							});
 					} catch (e) {
 						this.showSpinnerThenAutohide('No recovery found...');
-						this.recoveryError = e.toString();
-						console.error(e);
+						this.setPassword({
+							success: false,
+							error: e.toString()
+						});
 					}
 				}
 			} catch (e) {
 				// console.log(e);
+				this.setPassword({
+					success: false,
+					error: e.toString()
+				});
 			}
 		}, 100);
 	}
