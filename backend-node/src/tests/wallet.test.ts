@@ -236,6 +236,7 @@ describe('Wallet controller test cases', async () => {
             email: true,
             authenticator: false,
             nonce: user.nonce,
+            email2faVerification: user.email_verification_code
         };
 
         const signature = account.sign(JSON.stringify(sortObject(data)));
