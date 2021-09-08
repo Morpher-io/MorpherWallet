@@ -522,6 +522,7 @@ export async function change2FAMethods(req, res) {
     let toggleAuthenticator = req.body.authenticator;
     const email2faVerification = req.body.email2faVerification;
     const authenticator2faVerification = req.body.authenticator2faVerification;
+    const environment = process.env.ENVIRONMENT;
 
     // only allow one
     if (toggleAuthenticator) toggleEmail = false;
@@ -538,7 +539,9 @@ export async function change2FAMethods(req, res) {
     
                 const verificationCode = await updateEmail2fa(user.id);
 
-                await sendEmail2FA(verificationCode, user.email);
+                if (environment !== 'development') {
+                    await sendEmail2FA(verificationCode, user.email);
+                }
                 
                 Logger.info({
                     method: arguments.callee.name,
