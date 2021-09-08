@@ -56,6 +56,7 @@ export default class MorpherWallet {
 	widget: any;
 	provider: Web3ProviderEngine;
 	_onLoginCallback: any;
+  _onLoginErrorCallback: any;
 	_onLogoutCallback: any;
 	_onCloseCallback: any;
 	_onActiveWalletChangedCallback: any;
@@ -115,6 +116,10 @@ export default class MorpherWallet {
 
   onLogin(callback: any) {
     this._onLoginCallback = callback;
+  }
+
+  onLoginError(callback: any) {
+    this._onLoginErrorCallback = callback;
   }
 
 	onClose(callback: any) {
@@ -284,6 +289,7 @@ export default class MorpherWallet {
         setHeight: this._setHeight.bind(this),
         getWindowSize: this._getWindowSize.bind(this),
 				onLogin: this._onLogin.bind(this),
+        onLoginError: this._onLoginError.bind(this),
 				onClose: this._onClose.bind(this),
         onLogout: this._onLogout.bind(this),
         onActiveWalletChanged: this._onActiveWalletChanged.bind(this),
@@ -450,6 +456,12 @@ export default class MorpherWallet {
 		this.hideWallet();
     if (this._onLoginCallback) {
       this._onLoginCallback(walletAddress, email);
+    }
+	}
+
+  _onLoginError(email: any, error: any) {
+    if (this._onLoginErrorCallback) {
+      this._onLoginErrorCallback(email, error);
     }
 	}
 	

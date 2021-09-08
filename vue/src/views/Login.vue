@@ -102,6 +102,7 @@ export default class Login extends mixins(Global) {
 
 		if (this.store.status === 'invalid password') {
 			this.logonError = getDictionaryValue('DECRYPT_FAILED');
+			if (this.walletEmail) this.loginErrorReturn(this.walletEmail, 'INVALID_PASSWORD');
 			this.showRecovery = true;
 		}
 	}
@@ -109,6 +110,16 @@ export default class Login extends mixins(Global) {
 	checkKeyPress(e: any) {
 		if (e.keyCode === 13) {
 			this.login();
+		}
+	}
+
+	async loginErrorReturn(email: string, err: any) {
+		if (this.isIframe()) {
+			if (this.store.connection && this.store.connection !== null) {
+				const promise = this.store.connection.promise;
+
+				(await promise).onLoginError(email, err);
+			}
 		}
 	}
 
@@ -139,6 +150,7 @@ export default class Login extends mixins(Global) {
 						.catch(() => {
 							this.hideSpinner();
 							this.logonError = getDictionaryValue('DECRYPT_FAILED');
+							this.loginErrorReturn(email, 'INVALID_PASSWORD');
 							this.showRecovery = true;
 						});
 				}
@@ -148,8 +160,10 @@ export default class Login extends mixins(Global) {
 				this.hideSpinner();
 				if (error !== true && error !== false) {
 					if (error.success === false) {
+						this.loginErrorReturn(email, error.error);
 						this.logonError = getDictionaryValue(error.error);
 					} else {
+						this.loginErrorReturn(email, error);
 						// console.log('Error in login', error);
 					}
 				}
