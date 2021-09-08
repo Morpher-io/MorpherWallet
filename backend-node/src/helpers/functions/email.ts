@@ -10,61 +10,36 @@ export async function sendEmail2FA(payload, email) {
         region: 'eu-west-1'
     });
 
-    let params:any;
+    const from_address = email_template.from_address;
+    let html = email_template.template_html;
+    let text = email_template.template_text;
+    let subject = email_template.subject;
 
-    if (email_template) {
+    html = html.replace('{{2FA_CODE}}', payload)
+    text = text.replace('{{2FA_CODE}}', payload)
+    subject = subject.replace('{{2FA_CODE}}', payload)
 
-        const from_address = email_template.from_address;
-        let html = email_template.template_html;
-        let text = email_template.template_text;
-        let subject = email_template.subject;
+    
 
-        html = html.replace('{{2FA_CODE}}', payload)
-        text = text.replace('{{2FA_CODE}}', payload)
-        subject = subject.replace('{{2FA_CODE}}', payload)
-
-        
-
-        params = {
-            Destination: {
-                ToAddresses: [email]
-            },
-            Message: {
-                Body: {
-                    Text: {
-                        Data: text
-                    },
-                    Html: {
-                        Data: html
-                    }
+    const params = {
+        Destination: {
+            ToAddresses: [email]
+        },
+        Message: {
+            Body: {
+                Text: {
+                    Data: text
                 },
-                Subject: {
-                    Data: subject
+                Html: {
+                    Data: html
                 }
             },
-            Source: from_address
-        };
-    } else {
-        const emailBody = `Your email address has changed to: ${payload}`;
-
-        const params = {
-            Destination: {
-                ToAddresses: [email]
-            },
-            Message: {
-                Body: {
-                    Text: {
-                        Data: emailBody
-                    }
-                },
-                Subject: {
-                    Data: 'Morpher Wallet Email Has Changed!'
-                }
-            },
-            Source: 'team@morpher.com'
-        };
-        
-    }
+            Subject: {
+                Data: subject
+            }
+        },
+        Source: from_address
+    };
 
     await SES.sendEmail(params).promise();
 }

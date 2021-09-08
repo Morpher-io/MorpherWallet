@@ -1,6 +1,6 @@
 import * as expect from 'expect';
 import { describe, it, beforeEach } from 'mocha';
-import { Recovery, User, Email_Template } from '../database/models';
+import { Recovery, User } from '../database/models';
 import { sha256, sortObject } from '../helpers/functions/util';
 import { authenticator } from 'otplib';
 
@@ -236,6 +236,7 @@ describe('Wallet controller test cases', async () => {
             email: true,
             authenticator: false,
             nonce: user.nonce,
+            email2faVerification: user.email_verification_code
         };
 
         const signature = account.sign(JSON.stringify(sortObject(data)));
