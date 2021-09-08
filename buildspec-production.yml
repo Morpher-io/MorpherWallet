@@ -2,6 +2,7 @@ version: 0.2
 
 env:
     variables:
+        NODE_ENV: 'production'
         VUE_APP_BACKEND_ENDPOINT: 'https://wallet-api.morpher.com'
     secrets-manager:
         VUE_APP_GOOGLE_APP_ID: "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:WALLET_GOOGLE_APP_ID::"
@@ -18,7 +19,7 @@ phases:
     pre_build:
         commands:
             - cd vue
-            - npm install
+            - npm install --production=false
     build:
         commands:
             - npm run lint
@@ -32,4 +33,3 @@ artifacts:
         - '**/*'
     base-directory: 'vue/dist*'
 
-    
