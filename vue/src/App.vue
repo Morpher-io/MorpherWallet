@@ -49,7 +49,7 @@ import Spinner from './components/loading-spinner/Spinner.vue';
 export default class App extends Vue {
 	iFrameDisplay = isIframe();
 	connection = this.$store.state.connection;
-	isDev = process.env.VUE_APP_ENVIRONMENT === 'development';
+	isDev = (process.env.NODE_ENV !== 'production');
 
 	async closeWallet() {
 		if (this.iFrameDisplay) {
