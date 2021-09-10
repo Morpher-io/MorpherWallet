@@ -139,9 +139,14 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 			}
 
 			this.hideSpinner();
-		} catch (err) {
+		} catch (error) {
 			this.hideSpinner();
-			this.updateError = getDictionaryValue(err.toString());
+
+			if (error && error.toString() === 'TypeError: Failed to fetch') {
+				this.showNetworkError(true);
+			}
+
+			this.updateError = getDictionaryValue(error.toString());
 		}
 	}
 

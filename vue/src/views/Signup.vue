@@ -154,7 +154,6 @@ export default class Signup extends mixins(Global) {
 		/**
 		 * Validating Email
 		 */
-		this.showSpinner('Validating Email...');
 		const emailMessage = await validateInput('email', this.walletEmail);
 		if (emailMessage) {
 			this.hideSpinner();
@@ -165,8 +164,6 @@ export default class Signup extends mixins(Global) {
 		/**
 		 * Validating Password
 		 */
-
-		this.showSpinner('Validating Password...');
 		const passwordMessage = await validateInput('password', this.walletPassword);
 		if (passwordMessage) {
 			this.hideSpinner();
@@ -187,9 +184,14 @@ export default class Signup extends mixins(Global) {
 					this.$router.push('/');
 				}
 			})
-			.catch(e => {
+			.catch(error => {
 				this.hideSpinner();
-				this.logonError = getDictionaryValue(e.toString());
+
+				if (error && error.toString() === 'TypeError: Failed to fetch') {
+					this.showNetworkError(true);
+				}
+
+				this.logonError = getDictionaryValue(error.toString());
 			});
 	}
 }

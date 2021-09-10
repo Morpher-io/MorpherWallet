@@ -71,7 +71,10 @@ export default class Unlock extends mixins(Global) {
 			})
 			.catch(error => {
 				this.hideSpinner();
-				console.log(error);
+
+				if (error && error.toString() === 'TypeError: Failed to fetch') {
+					this.showNetworkError(true);
+				}
 				// error
 			});
 	}
@@ -90,7 +93,11 @@ export default class Unlock extends mixins(Global) {
 				this.$router.push('/');
 			})
 			.catch(error => {
-				console.log(error);
+				this.hideSpinner();
+
+				if (error && error.toString() === 'TypeError: Failed to fetch') {
+					this.showNetworkError(true);
+				}
 				// Logon failed
 			});
 	}

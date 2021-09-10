@@ -8,6 +8,7 @@
 			}"
 		>
 			<spinner v-bind:active="loading" v-bind:status="spinnerStatusText"></spinner>
+			<NetworkError :active="isNetworkError && !loading" />
 			<div class="header">
 				<img src="@/assets/img/wallet_logo.svg" class="headerImage" />
 				<span class="icon closeButton" v-if="iFrameDisplay" @click="closeWallet">
@@ -33,14 +34,17 @@ import Vue from 'vue';
 import { mapState } from 'vuex';
 import Component from 'vue-class-component';
 import Spinner from './components/loading-spinner/Spinner.vue';
+import NetworkError from './components/NetworkError.vue';
 
 @Component({
 	components: {
-		Spinner
+		Spinner,
+		NetworkError
 	},
 	computed: {
 		...mapState({
 			loading: (state: any) => state.loading,
+			isNetworkError: (state: any) => state.isNetworkError,
 			spinnerStatusText: (state: any) => state.spinnerStatusText,
 			unlocking: (state: any) => state.unlocking
 		})
