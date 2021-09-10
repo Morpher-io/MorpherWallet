@@ -80,6 +80,10 @@ export default class Unlock extends mixins(Global) {
 	 * Execute the logon
 	 */
 	async login() {
+		// block if unlock is already executing
+		if (this.store.loading) {
+			return;
+		}
 		const password = await sha256(this.walletPassword);
 		this.showSpinnerThenAutohide('Logging in...');
 
