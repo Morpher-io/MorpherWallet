@@ -70,7 +70,7 @@ const copyToClipboard = (text: string) => {
 		}
 	} catch (err) {
 		document.body.removeChild(textArea);
-		console.error('Fallback: Oops, unable to copy', err);
+		//console.error('Fallback: Oops, unable to copy', err);
 		return 'COPY_CLIPBOARD_FAIL';
 	}
 };

@@ -69,9 +69,9 @@ export default class Unlock extends mixins(Global) {
 					this.$router.push('/');
 				}
 			})
-			.catch(error => {
+			.catch(() => {
 				this.hideSpinner();
-				console.log(error);
+				///console.log(error);
 				// error
 			});
 	}
@@ -80,6 +80,10 @@ export default class Unlock extends mixins(Global) {
 	 * Execute the logon
 	 */
 	async login() {
+		// block if unlock is already executing
+		if (this.store.loading) {
+			return;
+		}
 		const password = await sha256(this.walletPassword);
 		this.showSpinnerThenAutohide('Logging in...');
 
@@ -89,15 +93,12 @@ export default class Unlock extends mixins(Global) {
 				// open root page after logon success
 				this.$router.push('/');
 			})
-			.catch(error => {
-				console.log(error);
-				// Logon failed
-			});
+			.catch();
 	}
 
 	logout() {
 		this.logoutWallet();
-		this.$router.push('/login');
+		//this.$router.push('/login');
 	}
 
 	generateImage(seed: any): void {

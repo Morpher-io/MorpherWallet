@@ -105,6 +105,10 @@ export default class TwoFA extends mixins(Global) {
 	 * Process email 2fa authentication
 	 */
 	async validateCode() {
+		// block if 2fa validation is already executing
+		if (this.store.loading) {
+			return;
+		}		
 		this.logonError = '';
 		this.showSpinner('Validating code...');
 		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.authenticatorCode })
@@ -124,7 +128,7 @@ export default class TwoFA extends mixins(Global) {
 
 	logout() {
 		this.logoutWallet();
-		this.router.push('/login');
+		//this.router.push('/login');
 	}
 }
 </script>
