@@ -124,7 +124,7 @@ export default class TwoFA extends mixins(Global) {
 
 	logout() {
 		this.logoutWallet();
-		this.router.push('/login');
+		//this.router.push('/login');
 	}
 }
 </script>

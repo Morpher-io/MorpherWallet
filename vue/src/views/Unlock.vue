@@ -69,9 +69,9 @@ export default class Unlock extends mixins(Global) {
 					this.$router.push('/');
 				}
 			})
-			.catch(error => {
+			.catch(() => {
 				this.hideSpinner();
-				console.log(error);
+				///console.log(error);
 				// error
 			});
 	}
@@ -89,15 +89,12 @@ export default class Unlock extends mixins(Global) {
 				// open root page after logon success
 				this.$router.push('/');
 			})
-			.catch(error => {
-				console.log(error);
-				// Logon failed
-			});
+			.catch();
 	}
 
 	logout() {
 		this.logoutWallet();
-		this.$router.push('/login');
+		//this.$router.push('/login');
 	}
 
 	generateImage(seed: any): void {
