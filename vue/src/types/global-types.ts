@@ -61,6 +61,11 @@ export type TypeUnlockWithPassword = {
 	password: string;
 };
 
+export type TypeUpdateRecovery = {
+	__typename?: 'TypeUpdateRecovery';
+	dbUpdate: boolean;
+};
+
 export type TypeChangePassword = {
 	__typename?: 'TypeChangePassword';
 	oldPassword: string;

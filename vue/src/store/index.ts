@@ -40,7 +40,8 @@ import {
 	TypeUpdatePrivateKey,
 	TypeUpdateSeedPhrase,
 	TypeShowPhraseKeyVariables,
-	TypeExportPhraseKeyVariables
+	TypeExportPhraseKeyVariables,
+	TypeUpdateRecovery
 } from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
@@ -85,6 +86,7 @@ export interface RootState {
 	ethBalance: string;
 	unlocking: boolean;
 	redirectPath: string;
+	twoFARetry: number;
 }
 
 /**
@@ -138,7 +140,8 @@ function initialState(): RootState {
 		signResponse: null,
 		ethBalance: '0',
 		unlocking: true,
-		redirectPath: ''
+		redirectPath: '',
+		twoFARetry: 0
 	} as RootState;
 }
 
@@ -280,7 +283,7 @@ const store: Store<RootState> = new Vuex.Store({
 		/**
 		 * Fetch the user data from the database and attempt to unlock the wallet using the mail encrypted seed
 		 */
-		async fetchUser({ commit }, params: TypeFetchUser) {
+		async fetchUser({ commit, rootState }, params: TypeFetchUser) {
 			commit('updateUnlocking', true);
 			const email: string = params.email;
 			const password: string = params.password;
@@ -291,6 +294,7 @@ const store: Store<RootState> = new Vuex.Store({
 					.then(hashedPassword => {
 						getPayload(email)
 							.then(payload => {
+								rootState.twoFARetry = 0;
 								commit('userFound', { email, hashedPassword });
 								commit('updatePayload', payload);
 
@@ -373,7 +377,7 @@ const store: Store<RootState> = new Vuex.Store({
 					url: getBackendEndpoint() + '/v1/auth/addRecoveryMethod'
 				})
 					.then(() => {
-						dispatch('updateRecoveryMethods').then(() => {
+						dispatch('updateRecoveryMethods', { dbUpdate:true }).then(() => {
 							resolve(true);
 						});
 					})
@@ -477,7 +481,11 @@ const store: Store<RootState> = new Vuex.Store({
 					if (result.success) {
 						emailCorrect = true;
 					} else {
-						commit('authError', '2FA Email code not correct');
+						rootState.twoFARetry +=1;
+						if (rootState.twoFARetry >= 3) {
+							commit('authError', '2FA Email code not correct');
+							router.push('/login');
+						}
 						reject(result.error);
 						return;
 					}
@@ -491,7 +499,11 @@ const store: Store<RootState> = new Vuex.Store({
 					if (result.success) {
 						authenticatorCorrect = true;
 					} else {
-						commit('authError', '2FA Authenticator code not correct');
+						rootState.twoFARetry +=1;
+						if (rootState.twoFARetry >= 3) {
+							commit('authError', '2FA Authenticator code not correct');
+							router.push('/login');
+						}
 						reject(result.error);
 						return;
 					}
@@ -587,7 +599,7 @@ const store: Store<RootState> = new Vuex.Store({
 						commit('keystoreUnlocked', { keystore, accounts, hashedPassword: params.password });
 						getPayload(state.email).then(payload => {
 							commit('updatePayload', payload);
-							dispatch('updateRecoveryMethods').then(() => {
+							dispatch('updateRecoveryMethods', {dbUpdate: false}).then(() => {
 								resolve(true);
 							});
 						});
@@ -600,9 +612,9 @@ const store: Store<RootState> = new Vuex.Store({
 					});
 			});
 		},
-		updateRecoveryMethods({ commit, dispatch }) {
+		updateRecoveryMethods({ commit, dispatch }, params: TypeUpdateRecovery) {
 			return new Promise((resolve, reject) => {
-				if (localStorage.getItem('recoveryMethods')) {
+				if (localStorage.getItem('recoveryMethods') && params.dbUpdate !== true) {
 					const methods = JSON.parse(localStorage.getItem('recoveryMethods') || '');
 					commit('recoveryMethodsFound', methods);
 					resolve(true);
@@ -613,6 +625,7 @@ const store: Store<RootState> = new Vuex.Store({
 						url: getBackendEndpoint() + '/v1/auth/getRecoveryMethods'
 					})
 						.then(methods => {
+							console.log(methods)
 							commit('recoveryMethodsFound', methods);
 							resolve(true);
 						})
@@ -767,7 +780,7 @@ const store: Store<RootState> = new Vuex.Store({
 					url: getBackendEndpoint() + '/v1/auth/resetRecovery'
 				})
 					.then(() => {
-						dispatch('updateRecoveryMethods').then(() => {
+						dispatch('updateRecoveryMethods', { dbUpdate:true }).then(() => {
 							resolve(true);
 						});
 					})
