@@ -108,7 +108,7 @@ export default class TwoFA extends mixins(Global) {
 		// block if 2fa validation is already executing
 		if (this.store.loading) {
 			return;
-		}		
+		}
 		this.logonError = '';
 		this.showSpinner('Validating code...');
 		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.authenticatorCode })

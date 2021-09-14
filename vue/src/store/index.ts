@@ -40,7 +40,8 @@ import {
 	TypeUpdatePrivateKey,
 	TypeUpdateSeedPhrase,
 	TypeShowPhraseKeyVariables,
-	TypeExportPhraseKeyVariables
+	TypeExportPhraseKeyVariables,
+	TypeUpdateRecovery
 } from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
@@ -85,6 +86,7 @@ export interface RootState {
 	ethBalance: string;
 	unlocking: boolean;
 	redirectPath: string;
+	loginRetryCount: number;
 }
 
 /**
@@ -138,7 +140,8 @@ function initialState(): RootState {
 		signResponse: null,
 		ethBalance: '0',
 		unlocking: true,
-		redirectPath: ''
+		redirectPath: '',
+		loginRetryCount: 0
 	} as RootState;
 }
 
@@ -218,6 +221,8 @@ const store: Store<RootState> = new Vuex.Store({
 			localStorage.removeItem('email');
 			localStorage.removeItem('iconSeed');
 			removeSessionStore('password');
+			state.loginRetryCount = 0;
+			router.push('/login');
 		},
 		logout(state: RootState) {
 			state.email = '';
@@ -280,7 +285,7 @@ const store: Store<RootState> = new Vuex.Store({
 		/**
 		 * Fetch the user data from the database and attempt to unlock the wallet using the mail encrypted seed
 		 */
-		async fetchUser({ commit }, params: TypeFetchUser) {
+		async fetchUser({ commit, rootState }, params: TypeFetchUser) {
 			commit('updateUnlocking', true);
 			const email: string = params.email;
 			const password: string = params.password;
@@ -291,6 +296,7 @@ const store: Store<RootState> = new Vuex.Store({
 					.then(hashedPassword => {
 						getPayload(email)
 							.then(payload => {
+								rootState.loginRetryCount = 0;
 								commit('userFound', { email, hashedPassword });
 								commit('updatePayload', payload);
 
@@ -342,6 +348,7 @@ const store: Store<RootState> = new Vuex.Store({
 						commit('seedFound', { encryptedSeed });
 						getKeystoreFromEncryptedSeed(state.encryptedSeed, params.password)
 							.then((keystore: WalletBase) => {
+								state.loginRetryCount = 0;
 								const accounts = getAccountsFromKeystore(keystore);
 								//not setting any password here, this is simply for the password change mechanism
 								commit('keystoreUnlocked', { keystore, accounts, hashedPassword: '' });
@@ -349,7 +356,8 @@ const store: Store<RootState> = new Vuex.Store({
 								resolve(true);
 							})
 							.catch(() => {
-								commit('authError', 'Cannot unlock the Keystore, wrong ID');
+								state.loginRetryCount += 1;
+								if (state.loginRetryCount >= 3) commit('authError', 'Cannot unlock the Keystore, wrong ID');
 								commit('updateUnlocking', false);
 								reject(false);
 							});
@@ -373,7 +381,7 @@ const store: Store<RootState> = new Vuex.Store({
 					url: getBackendEndpoint() + '/v1/auth/addRecoveryMethod'
 				})
 					.then(() => {
-						dispatch('updateRecoveryMethods').then(() => {
+						dispatch('updateRecoveryMethods', { dbUpdate: true }).then(() => {
 							resolve(true);
 						});
 					})
@@ -475,9 +483,11 @@ const store: Store<RootState> = new Vuex.Store({
 					const result = await verifyEmailCode(rootState.email, params.email2FA);
 
 					if (result.success) {
+						rootState.loginRetryCount = 0;
 						emailCorrect = true;
 					} else {
-						commit('authError', '2FA Email code not correct');
+						rootState.loginRetryCount += 1;
+						if (rootState.loginRetryCount >= 3) commit('authError', '2FA Email code not correct');
 						reject(result.error);
 						return;
 					}
@@ -490,8 +500,10 @@ const store: Store<RootState> = new Vuex.Store({
 
 					if (result.success) {
 						authenticatorCorrect = true;
+						rootState.loginRetryCount = 0;
 					} else {
-						commit('authError', '2FA Authenticator code not correct');
+						rootState.loginRetryCount += 1;
+						if (rootState.loginRetryCount >= 3) commit('authError', '2FA Authenticator code not correct');
 						reject(result.error);
 						return;
 					}
@@ -503,8 +515,10 @@ const store: Store<RootState> = new Vuex.Store({
 					const result = await verifyEmailConfirmationCode(rootState.email, params.email2FA);
 					if (result.success) {
 						userConfirmed = true;
+						state.loginRetryCount = 0;
 					} else {
-						commit('authError', 'Confirmation Email code not correct');
+						state.loginRetryCount += 1;
+						if (state.loginRetryCount >= 3) commit('authError', 'Confirmation Email code not correct');
 						reject(result.error);
 						return;
 					}
@@ -583,11 +597,12 @@ const store: Store<RootState> = new Vuex.Store({
 				getKeystoreFromEncryptedSeed(state.encryptedSeed, params.password)
 					.then((keystore: WalletBase) => {
 						const accounts = getAccountsFromKeystore(keystore);
+						state.loginRetryCount = 0;
 
 						commit('keystoreUnlocked', { keystore, accounts, hashedPassword: params.password });
 						getPayload(state.email).then(payload => {
 							commit('updatePayload', payload);
-							dispatch('updateRecoveryMethods').then(() => {
+							dispatch('updateRecoveryMethods', { dbUpdate: false }).then(() => {
 								resolve(true);
 							});
 						});
@@ -595,14 +610,15 @@ const store: Store<RootState> = new Vuex.Store({
 					})
 					.catch(err => {
 						commit('updateUnlocking', false);
-						commit('authError', "The user wasn't found: Signup first!");
+						state.loginRetryCount += 1;
+						if (state.loginRetryCount >= 3) commit('authError', "The user wasn't found: Signup first!");
 						reject(err);
 					});
 			});
 		},
-		updateRecoveryMethods({ commit, dispatch }) {
+		updateRecoveryMethods({ commit, dispatch }, params: TypeUpdateRecovery) {
 			return new Promise((resolve, reject) => {
-				if (localStorage.getItem('recoveryMethods')) {
+				if (localStorage.getItem('recoveryMethods') && params.dbUpdate !== true) {
 					const methods = JSON.parse(localStorage.getItem('recoveryMethods') || '');
 					commit('recoveryMethodsFound', methods);
 					resolve(true);
@@ -767,7 +783,7 @@ const store: Store<RootState> = new Vuex.Store({
 					url: getBackendEndpoint() + '/v1/auth/resetRecovery'
 				})
 					.then(() => {
-						dispatch('updateRecoveryMethods').then(() => {
+						dispatch('updateRecoveryMethods', { dbUpdate: true }).then(() => {
 							resolve(true);
 						});
 					})
