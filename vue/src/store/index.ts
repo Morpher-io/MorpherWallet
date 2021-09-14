@@ -86,7 +86,7 @@ export interface RootState {
 	ethBalance: string;
 	unlocking: boolean;
 	redirectPath: string;
-	twoFARetry: number;
+	loginRetryCount: number;
 }
 
 /**
@@ -141,7 +141,7 @@ function initialState(): RootState {
 		ethBalance: '0',
 		unlocking: true,
 		redirectPath: '',
-		twoFARetry: 0
+		loginRetryCount: 0
 	} as RootState;
 }
 
@@ -221,6 +221,8 @@ const store: Store<RootState> = new Vuex.Store({
 			localStorage.removeItem('email');
 			localStorage.removeItem('iconSeed');
 			removeSessionStore('password');
+			state.loginRetryCount = 0;
+			router.push('/login');
 		},
 		logout(state: RootState) {
 			state.email = '';
@@ -294,7 +296,7 @@ const store: Store<RootState> = new Vuex.Store({
 					.then(hashedPassword => {
 						getPayload(email)
 							.then(payload => {
-								rootState.twoFARetry = 0;
+								rootState.loginRetryCount = 0;
 								commit('userFound', { email, hashedPassword });
 								commit('updatePayload', payload);
 
@@ -346,6 +348,7 @@ const store: Store<RootState> = new Vuex.Store({
 						commit('seedFound', { encryptedSeed });
 						getKeystoreFromEncryptedSeed(state.encryptedSeed, params.password)
 							.then((keystore: WalletBase) => {
+								state.loginRetryCount = 0;
 								const accounts = getAccountsFromKeystore(keystore);
 								//not setting any password here, this is simply for the password change mechanism
 								commit('keystoreUnlocked', { keystore, accounts, hashedPassword: '' });
@@ -353,7 +356,8 @@ const store: Store<RootState> = new Vuex.Store({
 								resolve(true);
 							})
 							.catch(() => {
-								commit('authError', 'Cannot unlock the Keystore, wrong ID');
+								state.loginRetryCount += 1;
+								if (state.loginRetryCount >= 3) commit('authError', 'Cannot unlock the Keystore, wrong ID');
 								commit('updateUnlocking', false);
 								reject(false);
 							});
@@ -377,7 +381,7 @@ const store: Store<RootState> = new Vuex.Store({
 					url: getBackendEndpoint() + '/v1/auth/addRecoveryMethod'
 				})
 					.then(() => {
-						dispatch('updateRecoveryMethods', { dbUpdate:true }).then(() => {
+						dispatch('updateRecoveryMethods', { dbUpdate: true }).then(() => {
 							resolve(true);
 						});
 					})
@@ -479,13 +483,11 @@ const store: Store<RootState> = new Vuex.Store({
 					const result = await verifyEmailCode(rootState.email, params.email2FA);
 
 					if (result.success) {
+						rootState.loginRetryCount = 0;
 						emailCorrect = true;
 					} else {
-						rootState.twoFARetry +=1;
-						if (rootState.twoFARetry >= 3) {
-							commit('authError', '2FA Email code not correct');
-							router.push('/login');
-						}
+						rootState.loginRetryCount += 1;
+						if (rootState.loginRetryCount >= 3) commit('authError', '2FA Email code not correct');
 						reject(result.error);
 						return;
 					}
@@ -498,12 +500,10 @@ const store: Store<RootState> = new Vuex.Store({
 
 					if (result.success) {
 						authenticatorCorrect = true;
+						rootState.loginRetryCount = 0;
 					} else {
-						rootState.twoFARetry +=1;
-						if (rootState.twoFARetry >= 3) {
-							commit('authError', '2FA Authenticator code not correct');
-							router.push('/login');
-						}
+						rootState.loginRetryCount += 1;
+						if (rootState.loginRetryCount >= 3) commit('authError', '2FA Authenticator code not correct');
 						reject(result.error);
 						return;
 					}
@@ -515,8 +515,10 @@ const store: Store<RootState> = new Vuex.Store({
 					const result = await verifyEmailConfirmationCode(rootState.email, params.email2FA);
 					if (result.success) {
 						userConfirmed = true;
+						state.loginRetryCount = 0;
 					} else {
-						commit('authError', 'Confirmation Email code not correct');
+						state.loginRetryCount += 1;
+						if (state.loginRetryCount >= 3) commit('authError', 'Confirmation Email code not correct');
 						reject(result.error);
 						return;
 					}
@@ -595,11 +597,12 @@ const store: Store<RootState> = new Vuex.Store({
 				getKeystoreFromEncryptedSeed(state.encryptedSeed, params.password)
 					.then((keystore: WalletBase) => {
 						const accounts = getAccountsFromKeystore(keystore);
+						state.loginRetryCount = 0;
 
 						commit('keystoreUnlocked', { keystore, accounts, hashedPassword: params.password });
 						getPayload(state.email).then(payload => {
 							commit('updatePayload', payload);
-							dispatch('updateRecoveryMethods', {dbUpdate: false}).then(() => {
+							dispatch('updateRecoveryMethods', { dbUpdate: false }).then(() => {
 								resolve(true);
 							});
 						});
@@ -607,7 +610,8 @@ const store: Store<RootState> = new Vuex.Store({
 					})
 					.catch(err => {
 						commit('updateUnlocking', false);
-						commit('authError', "The user wasn't found: Signup first!");
+						state.loginRetryCount += 1;
+						if (state.loginRetryCount >= 3) commit('authError', "The user wasn't found: Signup first!");
 						reject(err);
 					});
 			});
@@ -625,7 +629,6 @@ const store: Store<RootState> = new Vuex.Store({
 						url: getBackendEndpoint() + '/v1/auth/getRecoveryMethods'
 					})
 						.then(methods => {
-							console.log(methods)
 							commit('recoveryMethodsFound', methods);
 							resolve(true);
 						})
@@ -780,7 +783,7 @@ const store: Store<RootState> = new Vuex.Store({
 					url: getBackendEndpoint() + '/v1/auth/resetRecovery'
 				})
 					.then(() => {
-						dispatch('updateRecoveryMethods', { dbUpdate:true }).then(() => {
+						dispatch('updateRecoveryMethods', { dbUpdate: true }).then(() => {
 							resolve(true);
 						});
 					})

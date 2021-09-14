@@ -23,10 +23,18 @@ import { Emit } from 'vue-property-decorator';
 export default class RecoveryWalletVkontakte extends mixins(Global) {
 	clientId = process.env.VUE_APP_VK_APP_ID;
 	recoveryTypeId = 5;
+	watchTimer = null;
 
 	@Emit('setPassword')
 	setPassword(data) {
 		return data;
+	}
+
+	unmounted() {
+		if (this.watchTimer) clearInterval(this.watchTimer);
+	}
+	destroyed() {
+		if (this.watchTimer) clearInterval(this.watchTimer);
 	}
 
 	callbackUrlForPopup = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '');
@@ -53,10 +61,11 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 			url: url
 		});
 
-		const watchTimer = setInterval(async () => {
+		if (this.watchTimer) clearInterval(this.watchTimer);
+		this.watchTimer = setInterval(async () => {
 			try {
 				if (uriRegex.test(win.location)) {
-					clearInterval(watchTimer);
+					if (this.watchTimer) clearInterval(this.watchTimer);
 
 					const hash = win.location.hash.substr(1);
 					const params = hash.split('&').reduce((result, item) => {
@@ -98,12 +107,8 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 						});
 					}
 				}
-			} catch (e) {
-				// console.log(e);
-				this.setPassword({
-					success: false,
-					error: e.toString()
-				});
+			} catch {
+				return;
 			}
 		}, 100);
 	}
