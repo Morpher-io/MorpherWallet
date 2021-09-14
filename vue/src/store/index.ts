@@ -58,6 +58,7 @@ Vue.use(Vuex);
  */
 export interface RootState {
 	loading: boolean;
+	isNetworkError: boolean;
 	status: string;
 	spinnerStatusText: string;
 	message: string;
@@ -108,6 +109,7 @@ function initialState(): RootState {
 
 	return {
 		loading: false,
+		isNetworkError: false,
 		status: '',
 		spinnerStatusText: '',
 		message: '',
@@ -164,6 +166,9 @@ const store: Store<RootState> = new Vuex.Store({
 				state.spinnerStatusText = '';
 				state.loading = false;
 			}
+		},
+		updateNetworkError(state: RootState, isNetworkError: boolean) {
+			state.isNetworkError = isNetworkError;
 		},
 		setRedirect(state: RootState, path: string) {
 			state.redirectPath = path;
@@ -282,6 +287,9 @@ const store: Store<RootState> = new Vuex.Store({
 		showSpinnerThenAutohide({ commit }, message: string) {
 			commit('delayedSpinnerMessage', message);
 		},
+		showNetworkError({ commit }, isNetworkError: boolean) {
+			commit('updateNetworkError', isNetworkError);
+		},
 		/**
 		 * Fetch the user data from the database and attempt to unlock the wallet using the mail encrypted seed
 		 */
@@ -306,9 +314,9 @@ const store: Store<RootState> = new Vuex.Store({
 											commit('updateUnlocking', false);
 											resolve;
 										})
-										.catch(() => {
+										.catch(e => {
 											commit('updateUnlocking', false);
-											reject;
+											reject(e);
 										});
 								}
 
@@ -336,7 +344,7 @@ const store: Store<RootState> = new Vuex.Store({
 					})
 					.catch(() => {
 						commit('updateUnlocking', false);
-						reject;
+						reject(new Error('error'));
 					});
 			});
 		},
@@ -405,10 +413,9 @@ const store: Store<RootState> = new Vuex.Store({
 				sha256(params.password).then(hashedPassword => {
 					getPayload(params.email)
 						.then(() => {
-							commit('delayedSpinnerMessage', 'The user already exists.');
 							reject('USER_ALREADY_EXISTS');
 						})
-						.catch(async () => {
+						.catch(async e => {
 							commit('authRequested');
 							commit('loading', 'Creating new Keystore...');
 							/**
@@ -423,10 +430,13 @@ const store: Store<RootState> = new Vuex.Store({
 								dispatch('fetchUser', { email: params.email, password: params.password })
 									.then(resolve)
 									.catch(e => {
+										reject(e);
 										commit('delayedSpinnerMessage', 'Unknown Error occurred during saving.');
 										reject(e);
 									});
 							});
+
+							reject(e);
 						});
 				});
 			});
@@ -575,13 +585,13 @@ const store: Store<RootState> = new Vuex.Store({
 							commit('updateUnlocking', false);
 							resolve(true);
 						})
-						.catch(() => {
+						.catch((e) => {
 							commit('updateUnlocking', false);
-							reject(false);
+							reject(e);
 						});
 				} else {
 					commit('updateUnlocking', false);
-					reject(false);
+					reject(new Error);
 				}
 			});
 		},
@@ -605,6 +615,8 @@ const store: Store<RootState> = new Vuex.Store({
 							dispatch('updateRecoveryMethods', { dbUpdate: false }).then(() => {
 								resolve(true);
 							});
+						}).catch((e) => {
+							reject(e);
 						});
 						commit('updateUnlocking', false);
 					})
@@ -737,41 +749,47 @@ const store: Store<RootState> = new Vuex.Store({
 						commit('updatePayload', params);
 						resolve(response);
 					})
-					.catch(reject);
+					.catch((e) => {
+						reject(e);
+					});
 			});
 		},
 		sendSignedRequest({ state }, params: TypeRequestParams) {
 			return new Promise(async (resolve, reject) => {
-				const body = params.body;
-				const key = await sha256(state.email.toLowerCase());
-				body.nonce = (await getNonce(key)).nonce;
-				const signMessage = JSON.stringify(sortObject(body));
-				if (state.keystore != null) {
-					const signature = await state.keystore[0].sign(signMessage);
-					const options: RequestInit = {
-						method: params.method,
-						headers: {
-							Accept: 'application/json',
-							'Content-Type': 'application/json',
-							Signature: JSON.stringify(signature),
-							key: key
-						},
-						body: JSON.stringify(body),
-						mode: 'cors',
-						cache: 'default'
-					};
+				try {
+					const body = params.body;
+					const key = await sha256(state.email.toLowerCase());
+					body.nonce = (await getNonce(key)).nonce;
+					const signMessage = JSON.stringify(sortObject(body));
+					if (state.keystore != null) {
+						const signature = await state.keystore[0].sign(signMessage);
+						const options: RequestInit = {
+							method: params.method,
+							headers: {
+								Accept: 'application/json',
+								'Content-Type': 'application/json',
+								Signature: JSON.stringify(signature),
+								key: key
+							},
+							body: JSON.stringify(body),
+							mode: 'cors',
+							cache: 'default'
+						};
 
-					try {
-						const response = await fetch(params.url, options);
-						if (!response.ok) {
-							reject((await response.json()).error);
+						try {
+							const response = await fetch(params.url, options);
+							if (!response.ok) {
+								reject((await response.json()).error);
+							}
+							resolve(await response.json());
+						} catch (e) {
+							reject(e);
 						}
-						resolve(await response.json());
-					} catch (e) {
-						reject(e);
+					} else {
+						reject('Keystore not found, aborting');
 					}
-				} else {
-					reject('Keystore not found, aborting');
+				} catch (e) {
+					reject(e);
 				}
 			});
 		},
@@ -916,10 +934,10 @@ const store: Store<RootState> = new Vuex.Store({
 							});
 						})
 						.catch(e => {
-							reject(e.toString());
+							reject(e);
 						});
 				} else {
-					reject('Wrong password for account deletion');
+					reject(new Error('Wrong password for account deletion'));
 				}
 			});
 		},

@@ -121,15 +121,23 @@ export default class Recovery extends mixins(Authenticated, Global) {
 		}
 
 		try {
-			const user: any = await getPayload(this.newEmail);
+			const result: any = await getPayload(this.newEmail);
 
-			if (user.success) {
+			if (result.success) {
 				this.setUsersEmail(this.newEmail);
 			} else {
-				this.logonError = getDictionaryValue(user);
+				if (result && result.toString() === 'TypeError: Failed to fetch') {
+					this.showNetworkError(true);
+				}
+
+				this.logonError = getDictionaryValue(result.toString());
 			}
-		} catch (e) {
-			this.logonError = getDictionaryValue(e.error);
+		} catch (error) {
+			if (error && error.toString() === 'TypeError: Failed to fetch') {
+				this.showNetworkError(true);
+			}
+
+			this.logonError = getDictionaryValue(error.toString());
 		}
 	}
 

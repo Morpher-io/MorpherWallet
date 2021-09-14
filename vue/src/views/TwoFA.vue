@@ -118,6 +118,11 @@ export default class TwoFA extends mixins(Global) {
 			})
 			.catch(error => {
 				this.hideSpinner();
+
+				if (error && error.toString() === 'TypeError: Failed to fetch') {
+					this.showNetworkError(true);
+				}
+
 				if (error.toString() === 'invalid password') {
 					this.store.status = 'invalid password';
 					this.router.push('/login');
