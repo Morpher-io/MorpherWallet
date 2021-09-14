@@ -5,7 +5,7 @@ describe('Front Page', () => {
 		cy.visit('/');
 		// check that the logon page is displayed
 		cy.contains('h2', 'Wallet Login');
-		console.log(Cypress.env('firstEmail'));
+		//console.log(Cypress.env('firstEmail'));
 	});
 
 	it('Open The register URL', () => {

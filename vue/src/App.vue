@@ -53,7 +53,7 @@ import NetworkError from './components/NetworkError.vue';
 export default class App extends Vue {
 	iFrameDisplay = isIframe();
 	connection = this.$store.state.connection;
-	isDev = (process.env.NODE_ENV !== 'production');
+	isDev = process.env.NODE_ENV !== 'production';
 
 	async closeWallet() {
 		if (this.iFrameDisplay) {

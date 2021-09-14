@@ -42,6 +42,7 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 	hasRecoveryMethod = false;
 	clientId = process.env.VUE_APP_VK_APP_ID;
 	recoveryTypeId = 5;
+	watchTimer = null;
 
 	callbackUrlForPopup = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '');
 
@@ -52,6 +53,12 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 
 	async mounted() {
 		this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
+	}
+	async unmounted() {
+		if (this.watchTimer) clearInterval(this.watchTimer);
+	}
+	async destroyed() {
+		if (this.watchTimer) clearInterval(this.watchTimer);
 	}
 
 	vkPopup(options) {
@@ -77,10 +84,11 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 			url: url
 		});
 
-		const watchTimer = setInterval(async () => {
+		if (this.watchTimer) clearInterval(this.watchTimer);
+		this.watchTimer = setInterval(async () => {
 			try {
 				if (uriRegex.test(win.location)) {
-					clearInterval(watchTimer);
+					if (this.watchTimer) clearInterval(this.watchTimer);
 					const hash = win.location.hash.substr(1);
 					const params = hash.split('&').reduce((result, item) => {
 						const parts = item.split('=');
@@ -118,14 +126,8 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 							});
 						});
 				}
-			} catch (e) {
-				//win.close()
-				this.processMethod({
-					success: false,
-					method: 'VKontakte',
-					enabled: true,
-					erorr: ''
-				});
+			} catch {
+				return;
 			}
 		}, 100);
 	}
@@ -140,10 +142,11 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 			url: url
 		});
 
-		const watchTimer = setInterval(async () => {
+		if (this.watchTimer) clearInterval(this.watchTimer);
+		this.watchTimer = setInterval(async () => {
 			try {
 				if (uriRegex.test(win.location)) {
-					clearInterval(watchTimer);
+					if (this.watchTimer) clearInterval(this.watchTimer);
 					const hash = win.location.hash.substr(1);
 					const params = hash.split('&').reduce((result, item) => {
 						const parts = item.split('=');
@@ -181,13 +184,7 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 						});
 				}
 			} catch (e) {
-				//win.close()
-				this.processMethod({
-					success: false,
-					method: 'VKontakte',
-					enabled: false,
-					erorr: ''
-				});
+				return;
 			}
 		}, 100);
 	}

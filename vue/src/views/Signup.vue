@@ -142,6 +142,10 @@ export default class Signup extends mixins(Global) {
 
 	// Methods
 	async signupExecute(e: any) {
+		// block if signup is already executing
+		if (this.store.loading) {
+			return;
+		}
 		e.preventDefault();
 		this.logonError = '';
 

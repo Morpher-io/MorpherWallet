@@ -15,14 +15,7 @@
 					<label class="label">Password</label>
 
 					<div class="control">
-						<input
-							type="password"
-							class="input"
-							data-cy="walletPassword"
-							name="walletPassword"
-							v-model="walletPassword"
-							@keydown="checkKeyPress"
-						/>
+						<input type="password" class="input" data-cy="walletPassword" name="walletPassword" v-model="walletPassword" />
 					</div>
 				</div>
 
@@ -107,12 +100,6 @@ export default class Login extends mixins(Global) {
 		}
 	}
 
-	checkKeyPress(e: any) {
-		if (e.keyCode === 13) {
-			this.login();
-		}
-	}
-
 	async loginErrorReturn(email: string, err: any) {
 		if (this.isIframe()) {
 			if (this.store.connection && this.store.connection !== null) {
@@ -127,6 +114,10 @@ export default class Login extends mixins(Global) {
 	 * Execute the logon
 	 */
 	login() {
+		// block if login is already executing
+		if (this.store.loading) {
+			return;
+		}
 		this.logonError = '';
 		this.showSpinner('Loading account...');
 		this.store.loginComplete = false;
