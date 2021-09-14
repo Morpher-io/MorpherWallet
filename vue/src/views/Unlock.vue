@@ -88,7 +88,7 @@ export default class Unlock extends mixins(Global) {
 					this.$router.push('/');
 				}
 			})
-			.catch(() => {
+			.catch(error => {
 				this.hideSpinner();
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {

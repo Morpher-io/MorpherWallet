@@ -16,7 +16,7 @@
 
 <script lang="ts">
 import Component, { mixins } from 'vue-class-component';
-import { Prop, Watch } from 'vue-property-decorator';
+import { Prop } from 'vue-property-decorator';
 import { Global } from '../mixins/mixins';
 
 @Component({})
@@ -24,9 +24,9 @@ export default class NetworkError extends mixins(Global) {
 	@Prop({ default: false })
 	active!: boolean;
 
-    hide() {
-        this.showNetworkError(false);
-    }
+	hide() {
+		this.showNetworkError(false);
+	}
 }
 </script>
 

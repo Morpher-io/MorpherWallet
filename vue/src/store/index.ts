@@ -585,13 +585,13 @@ const store: Store<RootState> = new Vuex.Store({
 							commit('updateUnlocking', false);
 							resolve(true);
 						})
-						.catch((e) => {
+						.catch(e => {
 							commit('updateUnlocking', false);
 							reject(e);
 						});
 				} else {
 					commit('updateUnlocking', false);
-					reject(new Error);
+					reject(new Error());
 				}
 			});
 		},
@@ -610,14 +610,16 @@ const store: Store<RootState> = new Vuex.Store({
 						state.loginRetryCount = 0;
 
 						commit('keystoreUnlocked', { keystore, accounts, hashedPassword: params.password });
-						getPayload(state.email).then(payload => {
-							commit('updatePayload', payload);
-							dispatch('updateRecoveryMethods', { dbUpdate: false }).then(() => {
-								resolve(true);
+						getPayload(state.email)
+							.then(payload => {
+								commit('updatePayload', payload);
+								dispatch('updateRecoveryMethods', { dbUpdate: false }).then(() => {
+									resolve(true);
+								});
+							})
+							.catch(e => {
+								reject(e);
 							});
-						}).catch((e) => {
-							reject(e);
-						});
 						commit('updateUnlocking', false);
 					})
 					.catch(err => {
@@ -749,7 +751,7 @@ const store: Store<RootState> = new Vuex.Store({
 						commit('updatePayload', params);
 						resolve(response);
 					})
-					.catch((e) => {
+					.catch(e => {
 						reject(e);
 					});
 			});
