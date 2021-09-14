@@ -17,6 +17,11 @@ const sessionStorageTransfer = function(event: any) {
 		}
 	}
 	if (!event.newValue) return; // do nothing if no value to work with
+
+	if (event.key == 'recoveryMethods') {
+		store.dispatch('updateRecoveryMethods', { dbUpdate: false });
+	}
+
 	if (event.key == 'getWalletSessionStorage') {
 		const password = sessionStorage.getItem('password');
 		if (password) {

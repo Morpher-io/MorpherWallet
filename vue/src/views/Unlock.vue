@@ -21,7 +21,14 @@
 			<label class="label">Password</label>
 
 			<div class="control">
-				<input type="password" class="input" name="walletPassword" v-model="walletPassword" @keypress="handleKeyPress" />
+				<input
+					type="password"
+					ref="unlock_password"
+					class="input"
+					name="walletPassword"
+					v-model="walletPassword"
+					@keypress="handleKeyPress"
+				/>
 				<div v-if="showRecovery">
 					<p class="help is-danger">
 						The Password you provided can't be used to de-crypt your wallet.
@@ -29,6 +36,10 @@
 					</p>
 				</div>
 			</div>
+		</div>
+
+		<div class="error" v-if="logonError">
+			<p>⚠️ <span v-html="logonError"></span></p>
 		</div>
 
 		<button @click="login()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!walletPassword">
@@ -45,6 +56,7 @@ import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 import { sha256 } from '../utils/cryptoFunctions';
 import jazzicon from '@metamask/jazzicon';
+import { getDictionaryValue } from '../utils/dictionary';
 
 @Component({})
 export default class Unlock extends mixins(Global) {
@@ -53,11 +65,18 @@ export default class Unlock extends mixins(Global) {
 	walletEmail = this.$store.getters.walletEmail;
 	iconSeed = this.$store.getters.iconSeed;
 	showRecovery = false;
+	logonError = '';
 
 	/**
 	 * Cmponent mounted lifestyle hook
 	 */
 	mounted() {
+		// set focus to the password field when the control opens
+		window.setTimeout(() => {
+			const passwordEmelemt: any = this.$refs.unlock_password;
+			if (passwordEmelemt) passwordEmelemt.focus();
+		}, 100);
+
 		const iconSeed = localStorage.getItem('iconSeed') || '';
 		this.generateImage(iconSeed);
 		this.showSpinner('Loading account...');
@@ -69,9 +88,12 @@ export default class Unlock extends mixins(Global) {
 					this.$router.push('/');
 				}
 			})
-			.catch(() => {
+			.catch(error => {
 				this.hideSpinner();
-				///console.log(error);
+
+				if (error && error.toString() === 'TypeError: Failed to fetch') {
+					this.showNetworkError(true);
+				}
 				// error
 			});
 	}
@@ -84,6 +106,7 @@ export default class Unlock extends mixins(Global) {
 		if (this.store.loading) {
 			return;
 		}
+		this.logonError = '';
 		const password = await sha256(this.walletPassword);
 		this.showSpinnerThenAutohide('Logging in...');
 
@@ -93,7 +116,16 @@ export default class Unlock extends mixins(Global) {
 				// open root page after logon success
 				this.$router.push('/');
 			})
-			.catch();
+			.catch(error => {
+				this.hideSpinner();
+
+				if (error && error.toString() === 'TypeError: Failed to fetch') {
+					this.showNetworkError(true);
+				}
+
+				// Logon failed
+				this.logonError = getDictionaryValue('DECRYPT_FAILED');
+			});
 	}
 
 	logout() {

@@ -127,19 +127,17 @@ export default class Login extends mixins(Global) {
 		// Call the fetchUser store action to process the wallet logon
 		this.fetchUser({ email, password })
 			.then(() => {
+				this.hideSpinner();
 				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator || this.store.twoFaRequired.needConfirmation) {
 					// open 2fa page if 2fa is required
-					this.hideSpinner();
 					this.$router.push('/2fa');
 				} else {
 					this.unlockWithStoredPassword()
 						.then(() => {
-							this.hideSpinner();
 							// open root page after logon success
 							this.$router.push('/');
 						})
 						.catch(() => {
-							this.hideSpinner();
 							this.logonError = getDictionaryValue('DECRYPT_FAILED');
 							this.loginErrorReturn(email, 'INVALID_PASSWORD');
 							this.showRecovery = true;
@@ -149,6 +147,11 @@ export default class Login extends mixins(Global) {
 			.catch(error => {
 				// Logon failed
 				this.hideSpinner();
+
+				if (error && error.toString() === 'TypeError: Failed to fetch') {
+					this.showNetworkError(true);
+				}
+
 				if (error !== true && error !== false) {
 					if (error.success === false) {
 						this.loginErrorReturn(email, error.error);

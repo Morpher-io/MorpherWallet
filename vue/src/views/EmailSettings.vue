@@ -56,8 +56,12 @@ export default class EmailSettings extends mixins(Authenticated, Global) {
 			this.currentPage = 1;
 			this.twoFaSent = true;
 			this.twoFa = false;
-		} catch (e) {
-			this.logonError = getDictionaryValue(e);
+		} catch (error) {
+			if (error && error.toString() === 'TypeError: Failed to fetch') {
+				this.showNetworkError(true);
+			}
+
+			this.logonError = getDictionaryValue(error.toString());
 		}
 	}
 
@@ -71,8 +75,12 @@ export default class EmailSettings extends mixins(Authenticated, Global) {
 			await this.submitChange();
 
 			this.currentPage = 2;
-		} catch (e) {
-			this.logonError = getDictionaryValue(e);
+		} catch (error) {
+			if (error && error.toString() === 'TypeError: Failed to fetch') {
+				this.showNetworkError(true);
+			}
+
+			this.logonError = getDictionaryValue(error.toString());
 		}
 	}
 

@@ -19,7 +19,9 @@ const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: TypeEncrypted
 			.then((returnObj: TypeCreatedKeystore) => {
 				resolve(returnObj.keystore);
 			})
-			.catch(reject);
+			.catch((error: Error) => {
+				reject(error);
+			});
 	});
 
 const getEncryptedSeedFromMail = async (email: string, email2fa: string, authenticator2fa: string) =>
@@ -36,21 +38,30 @@ const getEncryptedSeedFromMail = async (email: string, email2fa: string, authent
 				cache: 'default'
 			};
 
-			fetch(getBackendEndpoint() + '/v1/getEncryptedSeed', options).then(response => {
-				response.json().then(responseBody => {
-					/**
-					 * Login /Create Wallet is in one function
-					 * @todo: Separate Login and Create Wallet into separate functions so that upon failed "login" a recovery can be suggested
-					 */
-					if (responseBody.success) {
-						/**
-						 * Wallet was found on server, attempting to decrypt with the password
-						 */
-						resolve(JSON.parse(responseBody.encryptedSeed));
-					}
-					reject('seed not found');
+			fetch(getBackendEndpoint() + '/v1/getEncryptedSeed', options)
+				.then(response => {
+					response
+						.json()
+						.then(responseBody => {
+							/**
+							 * Login /Create Wallet is in one function
+							 * @todo: Separate Login and Create Wallet into separate functions so that upon failed "login" a recovery can be suggested
+							 */
+							if (responseBody.success) {
+								/**
+								 * Wallet was found on server, attempting to decrypt with the password
+								 */
+								resolve(JSON.parse(responseBody.encryptedSeed));
+							}
+							reject('seed not found');
+						})
+						.catch(() => {
+							reject('seed not found');
+						});
+				})
+				.catch(err => {
+					reject(err);
 				});
-			});
 		});
 	});
 
@@ -68,28 +79,33 @@ const validateInput = async (fieldName: string, inputFieldValue: string) => {
 		mode: 'cors',
 		cache: 'default'
 	};
-	const result = await fetch(getBackendEndpoint() + '/v1/validateInput', options);
 
-	const response = await result.json();
+	try {
+		const result = await fetch(getBackendEndpoint() + '/v1/validateInput', options);
 
-	if (fieldName === 'email') {
-		if (response.success === false) return 'Please input a valid email.';
-	}
+		const response = await result.json();
 
-	if (fieldName === 'password') {
-		if (response.success === false) {
-			let badPasswordMessage = 'Password must have';
-
-			for (const reason of response.validationFails) {
-				if (reason === 'min') badPasswordMessage += ' at least 8 characters,';
-				if (reason === 'uppercase') badPasswordMessage += ' at least 1 uppercase character,';
-				if (reason === 'lowercase') badPasswordMessage += ' at least 1 lowercase character,';
-				if (reason === 'digits') badPasswordMessage += ' at least 1 numerical digit,';
-			}
-
-			badPasswordMessage = badPasswordMessage.slice(0, -1) + '.';
-			return badPasswordMessage;
+		if (fieldName === 'email') {
+			if (response.success === false) return 'Please input a valid email.';
 		}
+
+		if (fieldName === 'password') {
+			if (response.success === false) {
+				let badPasswordMessage = 'Password must have';
+
+				for (const reason of response.validationFails) {
+					if (reason === 'min') badPasswordMessage += ' at least 8 characters,';
+					if (reason === 'uppercase') badPasswordMessage += ' at least 1 uppercase character,';
+					if (reason === 'lowercase') badPasswordMessage += ' at least 1 lowercase character,';
+					if (reason === 'digits') badPasswordMessage += ' at least 1 numerical digit,';
+				}
+
+				badPasswordMessage = badPasswordMessage.slice(0, -1) + '.';
+				return badPasswordMessage;
+			}
+		}
+	} catch (e) {
+		return;
 	}
 };
 
@@ -132,41 +148,49 @@ const recoverSeedSocialRecovery = async (accessToken: string, signupEmail: strin
 			mode: 'cors',
 			cache: 'default'
 		};
-		fetch(getBackendEndpoint() + '/v1/recoverSeedSocialRecovery', options).then(r => {
-			r.json().then(async responseBody => {
-				if (responseBody.success) {
-					//initiate recovery
-					const encryptedSeed = JSON.parse(responseBody.encryptedSeed);
-					resolve(encryptedSeed);
-				} else {
-					reject("Your account wasn't found with Facebook recovery, create one with username and password first");
-				}
+		fetch(getBackendEndpoint() + '/v1/recoverSeedSocialRecovery', options)
+			.then(r => {
+				r.json().then(async responseBody => {
+					if (responseBody.success) {
+						//initiate recovery
+						const encryptedSeed = JSON.parse(responseBody.encryptedSeed);
+						resolve(encryptedSeed);
+					} else {
+						reject("Your account wasn't found with Facebook recovery, create one with username and password first");
+					}
+				});
+			})
+			.catch(err => {
+				reject(err);
 			});
-		});
 	});
 
 const getPayload = (email: string) =>
 	new Promise<TypePayloadData>(async (resolve, reject) => {
-		const key = await sha256(email.toLowerCase());
-		const options: RequestInit = {
-			method: 'POST',
-			headers: {
-				Accept: 'application/json',
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				key
-			}),
-			mode: 'cors',
-			cache: 'default'
-		};
-		const result = await fetch(getBackendEndpoint() + '/v1/getPayload', options);
-		const response: TypePayloadData = await result.json();
-		if (result.status != 200) {
-			reject(response);
-		}
+		try {
+			const key = await sha256(email.toLowerCase());
+			const options: RequestInit = {
+				method: 'POST',
+				headers: {
+					Accept: 'application/json',
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					key
+				}),
+				mode: 'cors',
+				cache: 'default'
+			};
+			const result = await fetch(getBackendEndpoint() + '/v1/getPayload', options);
+			const response: TypePayloadData = await result.json();
+			if (result.status != 200) {
+				reject(response);
+			}
 
-		resolve(response);
+			resolve(response);
+		} catch (err) {
+			reject(err);
+		}
 	});
 
 const getNonce = async (key: string) => {
@@ -202,10 +226,16 @@ const send2FAEmail = async (email: string) => {
 		mode: 'cors',
 		cache: 'default'
 	};
+
 	const result = await fetch(getBackendEndpoint() + '/v1/send2FAEmail', options);
 
-	const response = await result.json();
-	return response;
+	if (result.ok) {
+		const response = await result.json();
+
+		return response;
+	}
+
+	return result;
 };
 
 const verifyAuthenticatorCode = async (email: string, code: string) => {
@@ -232,7 +262,7 @@ const verifyAuthenticatorCode = async (email: string, code: string) => {
 	} catch (e) {
 		return {
 			success: false,
-			error: ''
+			error: e
 		};
 	}
 };
@@ -265,7 +295,7 @@ const verifyEmailCode = async (email: string, code: string) => {
 	} catch (e) {
 		return {
 			success: false,
-			error: ''
+			error: e
 		};
 	}
 };
@@ -298,7 +328,7 @@ const verifyEmailConfirmationCode = async (email: string, code: string) => {
 	} catch (e) {
 		return {
 			success: false,
-			error: ''
+			error: e
 		};
 	}
 };

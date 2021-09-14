@@ -49,6 +49,9 @@ export class Global extends Vue {
 	public hideSpinner!: () => void;
 
 	@Action
+	public showNetworkError!: (isNetworkError: boolean) => void;
+
+	@Action
 	public fetchUser!: (params: TypeFetchUser) => Promise<unknown>;
 
 	@Action

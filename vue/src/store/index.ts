@@ -40,7 +40,8 @@ import {
 	TypeUpdatePrivateKey,
 	TypeUpdateSeedPhrase,
 	TypeShowPhraseKeyVariables,
-	TypeExportPhraseKeyVariables
+	TypeExportPhraseKeyVariables,
+	TypeUpdateRecovery
 } from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
@@ -57,6 +58,7 @@ Vue.use(Vuex);
  */
 export interface RootState {
 	loading: boolean;
+	isNetworkError: boolean;
 	status: string;
 	spinnerStatusText: string;
 	message: string;
@@ -85,6 +87,7 @@ export interface RootState {
 	ethBalance: string;
 	unlocking: boolean;
 	redirectPath: string;
+	loginRetryCount: number;
 }
 
 /**
@@ -106,6 +109,7 @@ function initialState(): RootState {
 
 	return {
 		loading: false,
+		isNetworkError: false,
 		status: '',
 		spinnerStatusText: '',
 		message: '',
@@ -138,7 +142,8 @@ function initialState(): RootState {
 		signResponse: null,
 		ethBalance: '0',
 		unlocking: true,
-		redirectPath: ''
+		redirectPath: '',
+		loginRetryCount: 0
 	} as RootState;
 }
 
@@ -161,6 +166,9 @@ const store: Store<RootState> = new Vuex.Store({
 				state.spinnerStatusText = '';
 				state.loading = false;
 			}
+		},
+		updateNetworkError(state: RootState, isNetworkError: boolean) {
+			state.isNetworkError = isNetworkError;
 		},
 		setRedirect(state: RootState, path: string) {
 			state.redirectPath = path;
@@ -218,6 +226,8 @@ const store: Store<RootState> = new Vuex.Store({
 			localStorage.removeItem('email');
 			localStorage.removeItem('iconSeed');
 			removeSessionStore('password');
+			state.loginRetryCount = 0;
+			router.push('/login');
 		},
 		logout(state: RootState) {
 			state.email = '';
@@ -277,10 +287,13 @@ const store: Store<RootState> = new Vuex.Store({
 		showSpinnerThenAutohide({ commit }, message: string) {
 			commit('delayedSpinnerMessage', message);
 		},
+		showNetworkError({ commit }, isNetworkError: boolean) {
+			commit('updateNetworkError', isNetworkError);
+		},
 		/**
 		 * Fetch the user data from the database and attempt to unlock the wallet using the mail encrypted seed
 		 */
-		async fetchUser({ commit }, params: TypeFetchUser) {
+		async fetchUser({ commit, rootState }, params: TypeFetchUser) {
 			commit('updateUnlocking', true);
 			const email: string = params.email;
 			const password: string = params.password;
@@ -291,6 +304,7 @@ const store: Store<RootState> = new Vuex.Store({
 					.then(hashedPassword => {
 						getPayload(email)
 							.then(payload => {
+								rootState.loginRetryCount = 0;
 								commit('userFound', { email, hashedPassword });
 								commit('updatePayload', payload);
 
@@ -300,9 +314,9 @@ const store: Store<RootState> = new Vuex.Store({
 											commit('updateUnlocking', false);
 											resolve;
 										})
-										.catch(() => {
+										.catch(e => {
 											commit('updateUnlocking', false);
-											reject;
+											reject(e);
 										});
 								}
 
@@ -330,7 +344,7 @@ const store: Store<RootState> = new Vuex.Store({
 					})
 					.catch(() => {
 						commit('updateUnlocking', false);
-						reject;
+						reject(new Error('error'));
 					});
 			});
 		},
@@ -342,6 +356,7 @@ const store: Store<RootState> = new Vuex.Store({
 						commit('seedFound', { encryptedSeed });
 						getKeystoreFromEncryptedSeed(state.encryptedSeed, params.password)
 							.then((keystore: WalletBase) => {
+								state.loginRetryCount = 0;
 								const accounts = getAccountsFromKeystore(keystore);
 								//not setting any password here, this is simply for the password change mechanism
 								commit('keystoreUnlocked', { keystore, accounts, hashedPassword: '' });
@@ -349,7 +364,8 @@ const store: Store<RootState> = new Vuex.Store({
 								resolve(true);
 							})
 							.catch(() => {
-								commit('authError', 'Cannot unlock the Keystore, wrong ID');
+								state.loginRetryCount += 1;
+								if (state.loginRetryCount >= 3) commit('authError', 'Cannot unlock the Keystore, wrong ID');
 								commit('updateUnlocking', false);
 								reject(false);
 							});
@@ -373,7 +389,7 @@ const store: Store<RootState> = new Vuex.Store({
 					url: getBackendEndpoint() + '/v1/auth/addRecoveryMethod'
 				})
 					.then(() => {
-						dispatch('updateRecoveryMethods').then(() => {
+						dispatch('updateRecoveryMethods', { dbUpdate: true }).then(() => {
 							resolve(true);
 						});
 					})
@@ -397,10 +413,9 @@ const store: Store<RootState> = new Vuex.Store({
 				sha256(params.password).then(hashedPassword => {
 					getPayload(params.email)
 						.then(() => {
-							commit('delayedSpinnerMessage', 'The user already exists.');
 							reject('USER_ALREADY_EXISTS');
 						})
-						.catch(async () => {
+						.catch(async e => {
 							commit('authRequested');
 							commit('loading', 'Creating new Keystore...');
 							/**
@@ -415,10 +430,13 @@ const store: Store<RootState> = new Vuex.Store({
 								dispatch('fetchUser', { email: params.email, password: params.password })
 									.then(resolve)
 									.catch(e => {
+										reject(e);
 										commit('delayedSpinnerMessage', 'Unknown Error occurred during saving.');
 										reject(e);
 									});
 							});
+
+							reject(e);
 						});
 				});
 			});
@@ -475,9 +493,11 @@ const store: Store<RootState> = new Vuex.Store({
 					const result = await verifyEmailCode(rootState.email, params.email2FA);
 
 					if (result.success) {
+						rootState.loginRetryCount = 0;
 						emailCorrect = true;
 					} else {
-						commit('authError', '2FA Email code not correct');
+						rootState.loginRetryCount += 1;
+						if (rootState.loginRetryCount >= 3) commit('authError', '2FA Email code not correct');
 						reject(result.error);
 						return;
 					}
@@ -490,8 +510,10 @@ const store: Store<RootState> = new Vuex.Store({
 
 					if (result.success) {
 						authenticatorCorrect = true;
+						rootState.loginRetryCount = 0;
 					} else {
-						commit('authError', '2FA Authenticator code not correct');
+						rootState.loginRetryCount += 1;
+						if (rootState.loginRetryCount >= 3) commit('authError', '2FA Authenticator code not correct');
 						reject(result.error);
 						return;
 					}
@@ -503,8 +525,10 @@ const store: Store<RootState> = new Vuex.Store({
 					const result = await verifyEmailConfirmationCode(rootState.email, params.email2FA);
 					if (result.success) {
 						userConfirmed = true;
+						state.loginRetryCount = 0;
 					} else {
-						commit('authError', 'Confirmation Email code not correct');
+						state.loginRetryCount += 1;
+						if (state.loginRetryCount >= 3) commit('authError', 'Confirmation Email code not correct');
 						reject(result.error);
 						return;
 					}
@@ -561,13 +585,13 @@ const store: Store<RootState> = new Vuex.Store({
 							commit('updateUnlocking', false);
 							resolve(true);
 						})
-						.catch(() => {
+						.catch(e => {
 							commit('updateUnlocking', false);
-							reject(false);
+							reject(e);
 						});
 				} else {
 					commit('updateUnlocking', false);
-					reject(false);
+					reject(new Error());
 				}
 			});
 		},
@@ -583,26 +607,32 @@ const store: Store<RootState> = new Vuex.Store({
 				getKeystoreFromEncryptedSeed(state.encryptedSeed, params.password)
 					.then((keystore: WalletBase) => {
 						const accounts = getAccountsFromKeystore(keystore);
+						state.loginRetryCount = 0;
 
 						commit('keystoreUnlocked', { keystore, accounts, hashedPassword: params.password });
-						getPayload(state.email).then(payload => {
-							commit('updatePayload', payload);
-							dispatch('updateRecoveryMethods').then(() => {
-								resolve(true);
+						getPayload(state.email)
+							.then(payload => {
+								commit('updatePayload', payload);
+								dispatch('updateRecoveryMethods', { dbUpdate: false }).then(() => {
+									resolve(true);
+								});
+							})
+							.catch(e => {
+								reject(e);
 							});
-						});
 						commit('updateUnlocking', false);
 					})
 					.catch(err => {
 						commit('updateUnlocking', false);
-						commit('authError', "The user wasn't found: Signup first!");
+						state.loginRetryCount += 1;
+						if (state.loginRetryCount >= 3) commit('authError', "The user wasn't found: Signup first!");
 						reject(err);
 					});
 			});
 		},
-		updateRecoveryMethods({ commit, dispatch }) {
+		updateRecoveryMethods({ commit, dispatch }, params: TypeUpdateRecovery) {
 			return new Promise((resolve, reject) => {
-				if (localStorage.getItem('recoveryMethods')) {
+				if (localStorage.getItem('recoveryMethods') && params.dbUpdate !== true) {
 					const methods = JSON.parse(localStorage.getItem('recoveryMethods') || '');
 					commit('recoveryMethodsFound', methods);
 					resolve(true);
@@ -721,41 +751,47 @@ const store: Store<RootState> = new Vuex.Store({
 						commit('updatePayload', params);
 						resolve(response);
 					})
-					.catch(reject);
+					.catch(e => {
+						reject(e);
+					});
 			});
 		},
 		sendSignedRequest({ state }, params: TypeRequestParams) {
 			return new Promise(async (resolve, reject) => {
-				const body = params.body;
-				const key = await sha256(state.email.toLowerCase());
-				body.nonce = (await getNonce(key)).nonce;
-				const signMessage = JSON.stringify(sortObject(body));
-				if (state.keystore != null) {
-					const signature = await state.keystore[0].sign(signMessage);
-					const options: RequestInit = {
-						method: params.method,
-						headers: {
-							Accept: 'application/json',
-							'Content-Type': 'application/json',
-							Signature: JSON.stringify(signature),
-							key: key
-						},
-						body: JSON.stringify(body),
-						mode: 'cors',
-						cache: 'default'
-					};
+				try {
+					const body = params.body;
+					const key = await sha256(state.email.toLowerCase());
+					body.nonce = (await getNonce(key)).nonce;
+					const signMessage = JSON.stringify(sortObject(body));
+					if (state.keystore != null) {
+						const signature = await state.keystore[0].sign(signMessage);
+						const options: RequestInit = {
+							method: params.method,
+							headers: {
+								Accept: 'application/json',
+								'Content-Type': 'application/json',
+								Signature: JSON.stringify(signature),
+								key: key
+							},
+							body: JSON.stringify(body),
+							mode: 'cors',
+							cache: 'default'
+						};
 
-					try {
-						const response = await fetch(params.url, options);
-						if (!response.ok) {
-							reject((await response.json()).error);
+						try {
+							const response = await fetch(params.url, options);
+							if (!response.ok) {
+								reject((await response.json()).error);
+							}
+							resolve(await response.json());
+						} catch (e) {
+							reject(e);
 						}
-						resolve(await response.json());
-					} catch (e) {
-						reject(e);
+					} else {
+						reject('Keystore not found, aborting');
 					}
-				} else {
-					reject('Keystore not found, aborting');
+				} catch (e) {
+					reject(e);
 				}
 			});
 		},
@@ -767,7 +803,7 @@ const store: Store<RootState> = new Vuex.Store({
 					url: getBackendEndpoint() + '/v1/auth/resetRecovery'
 				})
 					.then(() => {
-						dispatch('updateRecoveryMethods').then(() => {
+						dispatch('updateRecoveryMethods', { dbUpdate: true }).then(() => {
 							resolve(true);
 						});
 					})
@@ -900,10 +936,10 @@ const store: Store<RootState> = new Vuex.Store({
 							});
 						})
 						.catch(e => {
-							reject(e.toString());
+							reject(e);
 						});
 				} else {
-					reject('Wrong password for account deletion');
+					reject(new Error('Wrong password for account deletion'));
 				}
 			});
 		},

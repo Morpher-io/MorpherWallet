@@ -108,7 +108,7 @@ export default class TwoFA extends mixins(Global) {
 		// block if 2fa validation is already executing
 		if (this.store.loading) {
 			return;
-		}		
+		}
 		this.logonError = '';
 		this.showSpinner('Validating code...');
 		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.authenticatorCode })
@@ -118,6 +118,11 @@ export default class TwoFA extends mixins(Global) {
 			})
 			.catch(error => {
 				this.hideSpinner();
+
+				if (error && error.toString() === 'TypeError: Failed to fetch') {
+					this.showNetworkError(true);
+				}
+
 				if (error.toString() === 'invalid password') {
 					this.store.status = 'invalid password';
 					this.router.push('/login');

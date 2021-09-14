@@ -187,7 +187,11 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 					this.$router.push('/login');
 				}
 			})
-			.catch(() => {
+			.catch(error => {
+				if (error && error.toString() === 'TypeError: Failed to fetch') {
+					this.showNetworkError(true);
+				}
+
 				this.logonError = getDictionaryValue('');
 			});
 	}
