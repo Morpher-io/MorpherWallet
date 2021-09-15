@@ -26,7 +26,6 @@ services:
         command: "npx nodemon --legacy-watch --exec ts-node ./src/index.ts"
         env_file:
             - .env.development.backend
-            - .env.aws.backend
     seeder:
         build:
             context: ./backend-node
@@ -41,7 +40,6 @@ services:
         command: "npx ts-node ./src/database/seed/index.ts"
         env_file:
             - .env.development.backend
-            - .env.aws.backend
     vue:
         build:
             context: ./vue
