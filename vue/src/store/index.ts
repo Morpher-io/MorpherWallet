@@ -434,9 +434,9 @@ const store: Store<RootState> = new Vuex.Store({
 										commit('delayedSpinnerMessage', 'Unknown Error occurred during saving.');
 										reject(e);
 									});
+							}).catch((e) => {
+								reject(e);
 							});
-
-							reject(e);
 						});
 				});
 			});
