@@ -9,7 +9,7 @@
 							<span class="important-font"> {{ formatEthAddress(accounts[0]) }} </span>
 							<span class="copy-icon" @click="copyETHAddress(accounts[0])"><i class="fas fa-copy"/></span>
 						</p>
-						<p>{{ store.email }}</p>
+						<p data-cy="currentEmail">{{ store.email }}</p>
 					</div>
 				</div>
 				<div class="buttons horizontal-buttons mt-3">
@@ -22,7 +22,7 @@
 						<span class="icon is-small">
 							<i class="fas fa-paper-plane"></i>
 						</span>
-						<span>Send</span>
+						<span data-cy="sendButton">Send</span>
 						<div class="tooltip" v-if="!this.isIframe()">
 							Sending on Ethereum only available when using wallet inside the Morpher app.
 						</div>
@@ -31,7 +31,7 @@
 						<span class="icon is-small">
 							<i class="fas fa-cog"></i>
 						</span>
-						<span>Settings</span>
+						<span data-cy="settingsButton">Settings</span>
 					</router-link>
 				</div>
 			</div>
@@ -95,7 +95,7 @@
 				<div class="protection-enabled" v-if="twoFactorEmailActive">
 					<i class="fas fa-envelope mr-1 is-size-6"></i>
 					<p class="mr-1">Email</p>
-					<span class="enabled">Enabled</span>
+					<span data-cy="2FAEmailEnabled" class="enabled">Enabled</span>
 				</div>
 				<div class="protection-enabled mt-1" v-if="twoFactorActive">
 					<i class="fas fa-mobile-alt mr-1 is-size-6"></i>
@@ -122,7 +122,7 @@
 			<div class="divider vertical"></div>
 			<div class="link is-flex has-text-weight-medium is-align-items-center">
 				<i class="fas fa-door-open mr-1 is-size-6"></i>
-				<div @click="logout()" class="login-router transition-faster">Logout</div>
+				<div data-cy="logoutButton" @click="logout()" class="login-router transition-faster">Logout</div>
 			</div>
 		</div>
 	</div>

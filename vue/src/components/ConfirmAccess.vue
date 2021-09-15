@@ -2,13 +2,13 @@
 	<div>
 		<img src="@/assets/img/password.svg" alt="Recover wallet image" class="mb-3" />
 		<h2 class="title">Confirm Access</h2>
-		<p class="subtitle">Please enter your password before making changes.</p>
+		<p data-cy="confirmAccessTitle" class="subtitle">Please enter your password before making changes.</p>
 
 		<div class="field">
 			<label class="label">Password</label>
 
 			<div class="control">
-				<input type="password" class="input" name="walletPassword" v-model="walletPassword" @keypress="handleKeyPress" />
+				<input data-cy="confirmAccessPassword" type="password" class="input" name="walletPassword" v-model="walletPassword" @keypress="handleKeyPress" />
 			</div>
 		</div>
 
@@ -16,7 +16,7 @@
 			<p>⚠️ <span v-html="logonError"></span></p>
 		</div>
 
-		<button @click="setPassword()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!walletPassword">
+		<button data-cy="confirmAccessButton" @click="setPassword()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!walletPassword">
 			<span>Continue</span>
 		</button>
 		<button v-on:click="pageBack()" class="button is-ghost is-blue big-button medium-text transition-faster">

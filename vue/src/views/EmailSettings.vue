@@ -3,12 +3,12 @@
 		<h2 class="title">Change Email</h2>
 		<h4 class="subtitle">Enter a new email address.</h4>
 		<ChangeEmail v-if="currentPage === 0" @setNewData="setNewData" :error="logonError" />
-		<Change2faEmail v-if="currentPage === 1" @setCode="setCode" @pageBack="pageBack" :error="logonError" />
+		<Change2FAEmail v-if="currentPage === 1" @setCode="setCode" @pageBack="pageBack" :error="logonError" />
 		<div v-if="currentPage === 2">
 			<div>
 				<img src="@/assets/img/checkmark.svg" alt="Checkmark image" class="mb-3" />
-				<h2 class="title">Email Updated</h2>
-				<p class="subtitle">Your email was successfully updated!</p>
+				<h2 data-cy="emailUpdatedTitle" class="title">Email Updated</h2>
+				<p data-cy="emailUpdatedDescription" class="subtitle">Your email was successfully updated!</p>
 
 				<button @click="resetData" tag="button" class="button outlined-button big-button transition-faster">
 					<span>Close</span>
@@ -21,14 +21,14 @@
 <script lang="ts">
 import Component, { mixins } from 'vue-class-component';
 import ChangeEmail from '../components/ChangeEmail.vue';
-import Change2faEmail from '../components/Change2faEmail.vue';
+import Change2FAEmail from '../components/Change2FAEmail.vue';
 import { Authenticated, Global } from '../mixins/mixins';
 import { getDictionaryValue } from '../utils/dictionary';
 
 @Component({
 	components: {
 		ChangeEmail,
-		Change2faEmail
+		Change2FAEmail
 	}
 })
 export default class EmailSettings extends mixins(Authenticated, Global) {

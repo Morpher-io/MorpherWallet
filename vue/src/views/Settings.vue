@@ -13,7 +13,7 @@
 		<div class="divider just-space" />
 
 		<div v-if="!isEmailPasswordPage" class="settings-data">
-			<div key="email_passowrd" class="settings-link is-flex is-align-items-center" @click="changeActive('email_password')">
+			<div data-cy="emailPasswordButton" key="email_passowrd" class="settings-link is-flex is-align-items-center" @click="changeActive('email_password')">
 				<i class="fas fa-user-circle" />
 				<span class="text">
 					Email & Password
@@ -33,7 +33,7 @@
 				</span>
 			</div>
 
-			<div key="2FA" class="settings-link is-flex is-align-items-center" @click="changeActive('2FA')">
+			<div data-cy="verificationSettings"  key="2FA" class="settings-link is-flex is-align-items-center" @click="changeActive('2FA')">
 				<i class="fas fa-check-double" />
 				<span class="text">
 					2-Step Verification
@@ -71,7 +71,7 @@
 					<p>{{ store.email }}</p>
 				</div>
 				<div class="link">
-					<div class="login-router transition-faster" @click="changeActive('email')">
+					<div class="login-router transition-faster" data-cy="emailChangeButton" @click="changeActive('email')">
 						<i class="fas fa-pen-square" />
 					</div>
 				</div>
@@ -82,7 +82,7 @@
 					<p>********</p>
 				</div>
 				<div class="link">
-					<div class="login-router transition-faster" @click="changeActive('password')">
+					<div class="login-router transition-faster" data-cy="passwordChangeButton"  @click="changeActive('password')">
 						<i class="fas fa-pen-square" />
 					</div>
 				</div>

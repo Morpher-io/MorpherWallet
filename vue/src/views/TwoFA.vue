@@ -7,7 +7,7 @@
 			class="mb-3"
 		/>
 		<img v-if="twoFaRequired.authenticator" src="@/assets/img/authenticator.svg" alt="Phone authenticator image" class="mb-3" />
-		<h2 class="title">2-Step Verification</h2>
+		<h2 data-cy="verificationTitle" class="title">2-Step Verification</h2>
 		<p v-if="(twoFaRequired.email || twoFaRequired.needConfirmation) && !twoFaRequired.authenticator" class="subtitle">
 			Please enter the code we sent to your email.
 		</p>

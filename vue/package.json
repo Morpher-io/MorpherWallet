@@ -47,7 +47,7 @@
     "@vue/eslint-config-typescript": "^5.0.2",
     "@vue/test-utils": "^1.0.3",
     "bulma": "^0.9.1",
-    "cypress": "^6.2.0",
+    "cypress": "^8.4.0",
     "cypress-otp": "^1.0.3",
     "cypress-wait-until": "^1.7.1",
     "eslint": "^6.7.2",

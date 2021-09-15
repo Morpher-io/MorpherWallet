@@ -57,7 +57,7 @@
 						<p data-cy="loginError">⚠️ <span v-html="logonError"></span></p>
 					</div>
 
-					<button type="submit" class="button is-green big-button is-login transition-faster">
+					<button data-cy="confirmButton" type="submit" class="button is-green big-button is-login transition-faster">
 						<span>Continue</span>
 					</button>
 					<router-link to="/login" tag="button" class="button is-ghost is-blue big-button medium-text transition-faster">
