@@ -1,4 +1,4 @@
-FROM public.ecr.aws/socar/node:lts-alpine3.9
+FROM node:12
 
 # Create app directory
 WORKDIR /usr/src/app
