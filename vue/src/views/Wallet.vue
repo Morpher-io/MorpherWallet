@@ -100,7 +100,7 @@
 				<div class="protection-enabled mt-1" v-if="twoFactorActive">
 					<i class="fas fa-mobile-alt mr-1 is-size-6"></i>
 					<p class="mr-1">2-Step Authenticator</p>
-					<span class="enabled">Enabled</span>
+					<span data-cy="2FAAuthenticatorEnabled" class="enabled">Enabled</span>
 				</div>
 			</div>
 		</div>

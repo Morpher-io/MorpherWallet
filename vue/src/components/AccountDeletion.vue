@@ -24,13 +24,13 @@
 				}"
 			>
 				<div class="circle"><div class="inner"></div></div>
-				<p class="has-text-weight-medium">Verify with Private Key</p>
+				<p data-cy="privateKeyOption" class="has-text-weight-medium">Verify with Private Key</p>
 			</div>
 		</div>
 		<div class="field">
 			<label class="label">{{ currentMethod === 0 ? 'Seed Phrase' : 'Private Key' }}</label>
 			<div class="control">
-				<input type="password" name="input" class="input password-input" v-model="input" />
+				<input data-cy="privateKeyInput" type="password" name="input" class="input password-input" v-model="input" />
 			</div>
 		</div>
 		<p class="reset-line-height is-size-7 reset-mt">
@@ -44,7 +44,7 @@
 			<p>⚠️ <span v-html="logonError"></span></p>
 		</div>
 
-		<button @click="deleteAccount()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!input">
+		<button data-cy="confirmDeleteButton" @click="deleteAccount()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!input">
 			<span>Verify & Delete</span>
 		</button>
 		<button v-on:click="pageBack()" class="button is-ghost is-blue big-button medium-text transition-faster">

@@ -48,6 +48,7 @@
 								'button is-light-green is-small-button has-text-weight-bold transition-faster': true,
 								'is-light-danger': store.twoFaRequired.authenticator
 							}"
+							data-cy="authenticatorToggle"
 							@click="setCurrentMethod('authenticator', !store.twoFaRequired.authenticator)"
 						>
 							<span>{{ !store.twoFaRequired.authenticator ? 'Enable' : 'Disable' }}</span>
@@ -56,7 +57,7 @@
 				</div>
 			</div>
 		</div>
-		<div v-if="store.twoFaRequired.authenticator" class="recovery-active is-text-small">
+		<div data-cy="authenticator2faConfirmed" v-if="store.twoFaRequired.authenticator" class="recovery-active is-text-small">
 			<span class="icon">
 				<i class="fas fa-check-circle"></i>
 			</span>

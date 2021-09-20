@@ -48,8 +48,8 @@ describe('Email 2FA', () => {
 
 			cy.get('[data-cy=confirmButton]').click();
 
-			cy.waitUntil(() => cy.get('[data-cy=2faEmailConfirmedTitle]').contains('2-Step Activated'));
-			cy.get('[data-cy=2faEmailConfirmedDescription]').contains('All done, 2-step verification has been added to your account. Your account is now more secure!');
+			cy.waitUntil(() => cy.get('[data-cy=2faConfirmedTitle]').contains('2-Step Activated'));
+			cy.get('[data-cy=2faConfirmedDescription]').contains('All done, 2-step verification has been added to your account. Your account is now more secure!');
 
 			cy.get('[data-cy=closeButton]').click();
 
@@ -133,8 +133,8 @@ describe('Email 2FA', () => {
 
 			cy.get('[data-cy=confirmAccessButton]').click();
 
-			cy.waitUntil(() => cy.get('[data-cy=2faEmailConfirmedTitle]').contains('2-Step Deactivated'));
-			cy.get('[data-cy=2faEmailConfirmedDescription]').contains('2-step verification has been removed from your account.');
+			cy.waitUntil(() => cy.get('[data-cy=2faConfirmedTitle]').contains('2-Step Deactivated'));
+			cy.get('[data-cy=2faDisabledDescription]').contains('2-step verification has been removed from your account.');
 
 			cy.get('[data-cy=closeButton]').click();
 		});

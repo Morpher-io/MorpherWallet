@@ -23,11 +23,11 @@
 		<div v-if="currentPage === 3">
 			<div>
 				<img src="@/assets/img/checkmark.svg" alt="Checkmark image" class="mb-3" />
-				<h2 data-cy="2faEmailConfirmedTitle"  class="title">2-Step {{ isEnabling ? 'Activated' : 'Deactivated' }}</h2>
-				<p data-cy="2faEmailConfirmedDescription" v-if="isEnabling" class="subtitle">
+				<h2 data-cy="2faConfirmedTitle"  class="title">2-Step {{ isEnabling ? 'Activated' : 'Deactivated' }}</h2>
+				<p data-cy="2faConfirmedDescription" v-if="isEnabling" class="subtitle">
 					All done, 2-step verification has been added to your account. Your account is now more secure!
 				</p>
-				<p data-cy="2faEmailConfirmedDescription" v-else class="subtitle">2-step verification has been removed from your account.</p>
+				<p data-cy="2faDisabledDescription" v-else class="subtitle">2-step verification has been removed from your account.</p>
 
 				<div v-if="!isEnabling" class="alert warning mt-3 is-size-7 has-text-left mb-5">
 					⚠ Your account security is much lower now.

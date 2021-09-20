@@ -43,7 +43,7 @@
 				</span>
 			</div>
 
-			<div key="keys" class="settings-link is-flex is-align-items-center" @click="changeActive('keys')">
+			<div key="keys" class="settings-link is-flex is-align-items-center" data-cy="exportWalletButton" @click="changeActive('keys')">
 				<i class="fas fa-file-download" />
 				<span class="text">
 					Export Wallet
@@ -53,7 +53,7 @@
 				</span>
 			</div>
 
-			<div key="delete" class="settings-link is-flex is-align-items-center" @click="changeActive('delete')">
+			<div data-cy="deleteAccountSettings" key="delete" class="settings-link is-flex is-align-items-center" @click="changeActive('delete')">
 				<i class="fas fa-ban" />
 				<span class="text">
 					Delete Account

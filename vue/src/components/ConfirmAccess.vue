@@ -13,7 +13,7 @@
 		</div>
 
 		<div class="error mt-3" v-if="logonError">
-			<p>⚠️ <span v-html="logonError"></span></p>
+			<p>⚠️ <span data-cy="passwordError" v-html="logonError"></span></p>
 		</div>
 
 		<button data-cy="confirmAccessButton" @click="setPassword()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!walletPassword">

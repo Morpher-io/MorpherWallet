@@ -21,7 +21,7 @@
 				You need to verify ownership with the seed phrase or private key before your account can be removed.
 			</p>
 			<div class="field is-grouped mb-5">
-				<button @click="setNewPage()" tag="button" class="button big-button is-danger transition-faster">
+				<button data-cy="deleteAccountButton" @click="setNewPage()" tag="button" class="button big-button is-danger transition-faster">
 					<span>Delete Account</span>
 				</button>
 			</div>
