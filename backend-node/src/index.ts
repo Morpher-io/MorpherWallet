@@ -21,7 +21,7 @@ const rateLimit = require('express-rate-limit');
 
 const limiter = {
     windowMs: 60 * 1000, // 1 minute
-    max: 60 // limit each IP to 60 requests per minute
+    max: 200 // limit each IP to 60 requests per minute
 };
 
 if (process.env.ENVIRONMENT === 'development') {
