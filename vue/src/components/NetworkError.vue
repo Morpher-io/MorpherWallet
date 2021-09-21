@@ -2,12 +2,12 @@
 	<transition name="fade">
 		<div class="overlay" v-if="active">
 			<div class="overlay-frame">
-				<h3 class="is-size-5 has-text-weight-bold">Network Error</h3>
+				<h3 class="is-size-5 has-text-weight-bold">{{ $t('errors.NETWORK_ERROR_TITLE') }}</h3>
 				<p class="status-text">
-					A network error occured. Please check your connection and try again.
+					{{ $t('errors.NETWORK_ERROR_DESCRIPTION') }}
 				</p>
 				<button class="button is-light-green is-small-button has-text-weight-bold transition-faster mt-3" @click="() => hide()">
-					Okay
+					{{ $t('common.OKAY') }}
 				</button>
 			</div>
 		</div>

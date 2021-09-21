@@ -1,24 +1,24 @@
 <template>
 	<div>
 		<div class="container">
-			<h2 data-cy="signUpTitle" class="title">Sign Up</h2>
-			<p data-cy="signUpDescription" class="subtitle">Create a new wallet.</p>
+			<h2 data-cy="signUpTitle" class="title">{{ $t('auth.SIGNUP') }}</h2>
+			<p data-cy="signUpDescription" class="subtitle">{{ $t('auth.SIGNUP_DESCRIPTION') }}</p>
 			<form v-on:submit.prevent="signupExecute" novalidate>
 				<div class="field">
-					<label class="label">Email</label>
+					<label class="label">{{ $t('common.EMAIL') }}</label>
 					<div class="control">
 						<input type="email" class="input" name="walletEmail" data-cy="walletEmail" v-model="walletEmail" />
 					</div>
 				</div>
 
 				<div class="field">
-					<label class="label">Password</label>
+					<label class="label">{{ $t('common.PASSWORD') }}</label>
 
 					<div class="control">
 						<input type="password" class="input password-input" name="walletPassword" data-cy="walletPassword" v-model="walletPassword" />
 						<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial" />
 						<div class="password-help">
-							<p>Requirements:</p>
+							<p>{{ $t('password.REQUIREMENTS') }}</p>
 							<ul class="items">
 								<li
 									:class="{
@@ -26,7 +26,7 @@
 										fail: passwordChecks.min === 'fail'
 									}"
 								>
-									Min. 8 characters
+									{{ $t('password.MIN_CHARACTERS') }}
 								</li>
 								<li
 									:class="{
@@ -34,7 +34,7 @@
 										fail: passwordChecks.lowercase === 'fail'
 									}"
 								>
-									Lowercase letter
+									{{ $t('password.LOWERCASE_LETTER') }}
 								</li>
 								<li
 									:class="{
@@ -42,7 +42,7 @@
 										fail: passwordChecks.uppercase === 'fail'
 									}"
 								>
-									Uppercase letter
+									{{ $t('password.UPPERCASE_LETTER') }}
 								</li>
 								<li
 									:class="{
@@ -50,7 +50,7 @@
 										fail: passwordChecks.number === 'fail'
 									}"
 								>
-									Number
+									{{ $t('password.NUMBER') }}
 								</li>
 								<li
 									:class="{
@@ -58,14 +58,14 @@
 										fail: passwordChecks.match === 'fail'
 									}"
 								>
-									Passwords match
+									{{ $t('password.PASSWORD_MATCH') }}
 								</li>
 							</ul>
 						</div>
 					</div>
 				</div>
 				<div class="field">
-					<label class="label">Confirm Password</label>
+					<label class="label">{{ $t('common.CONFIRM_PASSWORD') }}</label>
 					<div class="control">
 						<input
 							type="password"
@@ -82,16 +82,16 @@
 				</div>
 
 				<button type="submit" data-cy="createNewWallet" class="button is-green big-button is-login transition-faster">
-					<span>Create Wallet</span>
+					<span>{{ $t('auth.CREATE_WALLET') }}</span>
 				</button>
 
 				<div class="divider"></div>
 
 				<div class="login-link">
-					<span>Already have a wallet?</span>
+					<span>{{ $t('auth.ALREADY_HAVE_WALLET') }}</span>
 					<router-link to="/login" class="login-router transition-faster">
 						<span data-cy="logInButton">
-							Log In
+							{{ $t('auth.LOGIN') }}
 						</span>
 					</router-link>
 				</div>
@@ -188,7 +188,7 @@ export default class Signup extends mixins(Global) {
 					this.$router.push('/');
 				}
 			})
-			.catch(error => {
+			.catch((error) => {
 				this.hideSpinner();
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {

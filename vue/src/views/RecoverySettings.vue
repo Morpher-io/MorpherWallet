@@ -12,10 +12,10 @@
 						<i class="fas fa-chevron-left"></i>
 					</span>
 				</button>
-				<h2 class="title ml-3">Account Recovery</h2>
+				<h2 class="title ml-3">{{ $t('recovery.ACCOUNT_RECOVERY') }}</h2>
 			</div>
 			<p class="subtitle has-text-left">
-				Add a trusted online account as the recovery method for your wallet (in case you forget your wallet password).
+				{{ $t('recovery.ADD_TRUSTED_ACCOUNT') }}
 			</p>
 
 			<div class="error mt-3 mb-3" v-if="logonError">
@@ -36,7 +36,7 @@
 
 			<div v-if="!whatRecovery.google || !whatRecovery.facebook || !whatRecovery.vkontakte">
 				<p v-if="whatRecovery.google || whatRecovery.facebook || whatRecovery.vkontakte" class="another-text has-text-left mt-5">
-					Add another trusted account:
+					{{ $t('recovery.ADD_ANOTHER_ACCOUNT') }}
 				</p>
 
 				<AddRecoveryGoogle v-if="!whatRecovery.google" @processMethod="processMethod"></AddRecoveryGoogle>
@@ -53,21 +53,28 @@
 			<div class="divider just-space" />
 
 			<div class="has-text-left mt-5 is-size-7">
-				<p class="has-text-weight-bold"><i class="fas fa-shield-alt"></i> Fully Encrypted Backup</p>
+				<p class="has-text-weight-bold"><i class="fas fa-shield-alt"></i> {{ $t('recovery.ADD_ACCOUNT_TIP_TITLE') }}</p>
 				<p>
-					Your wallet keys are never shared. These services cannot access your wallet or monitor your funds & activity. Please make sure to
-					use a recovery account with a strong password.
+					{{ $t('recovery.ADD_ACCOUNT_TIP_DESCRIPTION') }}
 				</p>
 			</div>
 		</div>
 		<div v-if="currentPage === 2">
 			<div>
 				<img src="@/assets/img/checkmark.svg" alt="Checkmark image" class="mb-3" />
-				<h2 class="title">{{ currentMethod }} Recovery {{ isEnabled ? 'Enabled' : 'Disabled' }}</h2>
-				<p class="subtitle">Trusted account successfully {{ isEnabled ? 'activated' : 'deactivated' }} for recovery.</p>
+				<h2 class="title">
+					{{ $t('recovery.RECOVERY_ENABLED', {
+						currentMethod,
+						isEnabled: $t(isEnabled ? 'common.ENABLED' : 'common.DISABLED'),
+					}) }}</h2>
+				<p class="subtitle">
+					{{ $t('recovery.TRUSTED_CHANGED', {
+						isActivated: $t(isEnabled ? 'common.ACTIVATED' : 'common.DEACTIVATED').toString().toLowerCase(),
+					}) }}
+				</p>
 
 				<button @click="resetData" tag="button" class="button outlined-button big-button transition-faster">
-					<span>Close</span>
+					<span>{{ $t('common.CLOSE') }}</span>
 				</button>
 			</div>
 		</div>

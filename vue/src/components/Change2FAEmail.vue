@@ -1,11 +1,11 @@
 <template>
 	<div>
 		<img src="@/assets/img/email_verification.svg" alt="Email 2FA image" class="mb-3" />
-		<h2 data-cy="emailConfirmationTitle" class="title">Email Confirmation</h2>
-		<p class="subtitle">We sent you an email with code. Enter the verification code below to confirm 2-step activation.</p>
+		<h2 data-cy="emailConfirmationTitle" class="title">{{ $t('2fa.EMAIL_CONFIRMATION_TITLE') }}</h2>
+		<p class="subtitle">{{ $t('2fa.EMAIL_CONFIRMATION_DESCRIPTION') }}</p>
 
 		<div class="field">
-			<label class="label">Verification Code</label>
+			<label class="label">{{ $t('2fa.VERIFICATION_CODE') }}</label>
 
 			<div class="control">
 				<input data-cy="2faEmailCode" type="text" class="input" v-model="authenticatorCode" />
@@ -17,10 +17,10 @@
 		</div>
 
 		<button data-cy="confirmButton" @click="setCode()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!authenticatorCode">
-			<span>Submit</span>
+			<span>{{ $t('common.SUBMIT') }}</span>
 		</button>
 		<button v-on:click="pageBack()" class="button is-ghost is-blue big-button medium-text transition-faster">
-			<span>Cancel</span>
+			<span>{{ $t('common.CANCEL') }}</span>
 		</button>
 	</div>
 </template>

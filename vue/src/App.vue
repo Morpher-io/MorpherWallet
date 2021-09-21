@@ -22,9 +22,10 @@
 				<span class="icon is-small">
 					<i class="fas fa-lock"></i>
 				</span>
-				<span>Secured with AES | SHA-256 | PBKDF2</span>
+				<span>{{ $t('common.SECURED_WALLET') }}</span>
 			</div>
 		</section>
+		<Footer />
 	</div>
 </template>
 
@@ -35,11 +36,13 @@ import { mapState } from 'vuex';
 import Component from 'vue-class-component';
 import Spinner from './components/loading-spinner/Spinner.vue';
 import NetworkError from './components/NetworkError.vue';
+import Footer from './components/Footer.vue';
 
 @Component({
 	components: {
 		Spinner,
-		NetworkError
+		NetworkError,
+		Footer,
 	},
 	computed: {
 		...mapState({

@@ -99,6 +99,8 @@ body {
 	overflow-x: hidden;
 	margin-bottom: $spacing_1;
 	color: $col_black;
+	display: flex;
+	flex-direction: column;
 }
 
 .main_iframe {

@@ -6,7 +6,7 @@
 					<i class="fas fa-chevron-left"></i>
 				</span>
 			</button>
-			<h2 class="title ml-3">2-Step Verification</h2>
+			<h2 class="title ml-3">{{ $t('settings.2_STEP_VERIFICATION') }}</h2>
 		</div>
 
 		<div v-if="currentPage === 0">
@@ -23,27 +23,26 @@
 		<div v-if="currentPage === 3">
 			<div>
 				<img src="@/assets/img/checkmark.svg" alt="Checkmark image" class="mb-3" />
-				<h2 data-cy="2faConfirmedTitle"  class="title">2-Step {{ isEnabling ? 'Activated' : 'Deactivated' }}</h2>
+				<h2 data-cy="2faConfirmedTitle"  class="title">{{ $t('2fa.2_STEP_ACTIVATED', {
+					isActivated: isEnabling ? $t('common.ACTIVATED') : $t('common.DEACTIVATED')
+				}) }}</h2>
 				<p data-cy="2faConfirmedDescription" v-if="isEnabling" class="subtitle">
-					All done, 2-step verification has been added to your account. Your account is now more secure!
+					{{ $t('2fa.2_STEP_ADDED') }}
 				</p>
-				<p data-cy="2faDisabledDescription" v-else class="subtitle">2-step verification has been removed from your account.</p>
+				<p data-cy="2faDisabledDescription" v-else class="subtitle">{{ $t('2fa.2_STEP_REMOVED') }}</p>
 
 				<div v-if="!isEnabling" class="alert warning mt-3 is-size-7 has-text-left mb-5">
-					⚠ Your account security is much lower now.
+					⚠ {{ $t('2fa.2_STEP_REMOVED_WARNING') }}
 				</div>
 
 				<button @click="resetData" tag="button" class="button outlined-button big-button transition-faster">
-					<span data-cy="closeButton">Close</span>
+					<span data-cy="closeButton">{{ $t('common.CLOSE') }}</span>
 				</button>
 
 				<div v-if="isEnabling">
 					<div class="divider"></div>
-					<p class="has-text-left has-text-weight-bold mb-0">KYC Recovery</p>
-					<p class="has-text-left subtitle mt-0">
-						Please complete KYC in the Morpher app if you want to be able to restore your account. If you lose 2FA access and we cannot
-						verify your identity, your wallet will be lost.
-					</p>
+					<p class="has-text-left has-text-weight-bold mb-0">{{ $t('2fa.KYC_TITLE') }}</p>
+					<p class="has-text-left subtitle mt-0">{{ $t('2fa.KYC_DESCRIPTION') }}</p>
 				</div>
 			</div>
 		</div>
@@ -88,7 +87,7 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 		try {
 			this.updateError = '';
 			if (type === 'email') {
-				this.showSpinner('Loading');
+				this.showSpinner(this.$t('loader.LOADING').toString());
 				let email = true;
 				let authenticator = false;
 
@@ -115,7 +114,7 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 					this.currentPage = 3;
 				}
 			} else if (type === 'authenticator') {
-				this.showSpinner('Loading');
+				this.showSpinner(this.$t('loader.LOADING').toString());
 
 				let email = false;
 				let authenticator = true;

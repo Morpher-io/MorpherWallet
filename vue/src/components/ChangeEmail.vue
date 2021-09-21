@@ -5,13 +5,13 @@
 				<div class="card-content">
 					<div class="content">
 						<div class="field">
-							<label class="label">New Email</label>
+							<label class="label">{{ $t('common.NEW_EMAIL') }}</label>
 							<div class="control">
 								<input data-cy="newEmail" class="input" name="newEmail" v-model="newEmail" />
 							</div>
 						</div>
 						<div class="field">
-							<label class="label">Password</label>
+							<label class="label">{{ $t('common.PASSWORD') }}</label>
 							<div class="control">
 								<input data-cy="confirmPassword" type="password" class="input" name="password" v-model="password" />
 							</div>
@@ -35,14 +35,14 @@
 							})
 						"
 					>
-						<span>Update Email</span>
+						<span>{{ $t('common.UPDATE_EMAIL') }}</span>
 					</button>
 					<button
 						v-on:click="$router.push('/settings?email_password=true')"
 						tag="button"
 						class="button is-ghost is-blue big-button medium-text transition-faster"
 					>
-						<span>Cancel</span>
+						<span>{{ $t('common.CANCEL') }}</span>
 					</button>
 				</div>
 			</div>
@@ -90,12 +90,12 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 		const newPassword = await sha256(data.password);
 
 		if (this.store.hashedPassword !== newPassword) {
-			this.logonError = 'The password you entered is not correct.';
+			this.logonError = this.$t('errors.WRONG_PASSWORD').toString();
 			return { email: null, password: null };
 		}
 
 		if (this.store.email === this.newEmail) {
-			this.logonError = 'The Email Address you entered is the same as you already use.';
+			this.logonError = this.$t('errors.SAME_EMAIL').toString();
 			return { email: null, password: null };
 		}
 

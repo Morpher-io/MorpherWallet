@@ -7,7 +7,7 @@
 			<p class="subtitle">Your signature is being requested</p>
 
 			<div class="field">
-				<label class="label">Message</label>
+				<label class="label">{{ $t('common.MESSAGE') }}</label>
 				<div class="settings-data user-details">
 					<div class="details">
 						{{ store.messageDetails }}
@@ -16,11 +16,11 @@
 			</div>
 
 			<button class="button is-green big-button is-login transition-faster mt-5" @click="sign()">
-				<span>Sign</span>
+				<span>{{ $t('common.SIGN') }}</span>
 			</button>
 
 			<button @click="cancel()" class="button is-ghost is-blue big-button medium-text transition-faster">
-				<span>Cancel</span>
+				<span>{{ $t('common.CANCEL') }}</span>
 			</button>
 		</div>
 	</div>

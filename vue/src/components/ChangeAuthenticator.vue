@@ -1,25 +1,24 @@
 <template>
 	<div>
-		<h2 class="title">2-Step Activation</h2>
-		<p class="subtitle">Scan the QR code with an authenticator app. Enter the verification code below to confirm 2-step activation.</p>
+		<h2 class="title">{{ $t('2fa.CHANGE_AUTH_TITLE') }}</h2>
+		<p class="subtitle">{{ $t('2fa.CHANGE_AUTH_DESCRIPTION') }}</p>
 
 		<div class="custom-card">
 			<figure class="image" v-if="qrCode">
-				<img v-bind:src="qrCode" alt="QR Code" />
+				<img v-bind:src="qrCode" :alt="$t('2fa.QR_CODE')" />
 			</figure>
 		</div>
 		<p class="is-size-7 mt-2 transition-faster">
-			Need an authenticator? Get <a href="https://authy.com/download/" target="__blank" class="login-router">Authy</a> or
-			<a
-				href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US"
-				target="__blank"
-				class="login-router"
-				>Google Authenticator</a
-			>.
+			{{
+				$t('2fa.NEED_AUTHENTICATOR_HELP', {
+					authyLink: 'https://authy.com/download/',
+					googleLink: 'https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US'
+				})
+			}}
 		</p>
 
 		<div class="field">
-			<label class="label">Verification Code</label>
+			<label class="label">{{ $t('2fa.VERIFICATION_CODE') }}</label>
 
 			<div class="control">
 				<input data-cy="2faAuthenticatorCode" type="text" class="input" v-model="authenticatorCode" />
@@ -30,11 +29,16 @@
 			<p>⚠️ <span data-cy="2faAuthenticatorError" v-html="logonError"></span></p>
 		</div>
 
-		<button data-cy="confirm2faButton" @click="setCode()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!authenticatorCode">
-			<span>Confirm</span>
+		<button
+			data-cy="confirm2faButton"
+			@click="setCode()"
+			class="button is-green big-button is-login transition-faster mt-5"
+			:disabled="!authenticatorCode"
+		>
+			<span>{{ $t('common.CONFIRM') }}</span>
 		</button>
 		<button v-on:click="pageBack()" class="button is-ghost is-blue big-button medium-text transition-faster">
-			<span>Back</span>
+			<span>{{ $t('common.BACK') }}</span>
 		</button>
 	</div>
 </template>

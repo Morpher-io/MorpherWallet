@@ -6,9 +6,9 @@
 					<div class="details has-text-left mr-4">
 						<p class="has-text-weight-medium is-size-5">
 							<i class="fas fa-envelope" />
-							<span class="ml-2">Email</span>
+							<span class="ml-2">{{ $t('common.EMAIL') }}</span>
 						</p>
-						<p>Get a code sent to your email address every time you log in.</p>
+						<p>{{ $t('2fa.2FA_EMAIL_DESCRIPTION') }}</p>
 					</div>
 					<div class="actions">
 						<button
@@ -19,7 +19,7 @@
 							data-cy="emailToggle"
 							@click="setCurrentMethod('email', !store.twoFaRequired.email)"
 						>
-							<span>{{ !store.twoFaRequired.email ? 'Enable' : 'Disable' }}</span>
+							<span>{{ !store.twoFaRequired.email ? $t('common.ENABLE') : $t('common.DISABLE') }}</span>
 						</button>
 					</div>
 				</div>
@@ -30,7 +30,7 @@
 			<span class="icon">
 				<i class="fas fa-check-circle"></i>
 			</span>
-			Verification enabled
+			{{ $t('2fa.VERIFICATION_ENABLED') }}
 		</div>
 		<div class="custom-card mt-5">
 			<div class="card-content">
@@ -38,9 +38,9 @@
 					<div class="details has-text-left mr-4">
 						<p class="has-text-weight-medium is-size-5">
 							<i class="fas fa-mobile-alt" />
-							<span class="ml-2">Authenticator</span>
+							<span class="ml-2">{{ $t('common.AUTHENTICATOR') }}</span>
 						</p>
-						<p>Use an authenticator app to generate a code for logging in.</p>
+						<p>{{ $t('2fa.2FA_AUTH_DESCRIPTION') }}</p>
 					</div>
 					<div class="actions">
 						<button
@@ -51,7 +51,7 @@
 							data-cy="authenticatorToggle"
 							@click="setCurrentMethod('authenticator', !store.twoFaRequired.authenticator)"
 						>
-							<span>{{ !store.twoFaRequired.authenticator ? 'Enable' : 'Disable' }}</span>
+							<span>{{ !store.twoFaRequired.authenticator ? $t('common.ENABLE') : $t('common.DISABLE') }}</span>
 						</button>
 					</div>
 				</div>
@@ -61,10 +61,10 @@
 			<span class="icon">
 				<i class="fas fa-check-circle"></i>
 			</span>
-			Verification enabled
+			{{ $t('2fa.VERIFICATION_ENABLED') }}
 		</div>
 		<div class="alert warning mt-5 is-size-7 has-text-left">
-			⚠ If you lose your 2-step verification device, trusted account recovery will not work.
+			⚠ {{ $t('2fa.VERIFICATION_LOSE') }}
 		</div>
 	</div>
 </template>
