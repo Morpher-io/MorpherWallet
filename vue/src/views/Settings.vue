@@ -23,7 +23,7 @@
 				</span>
 			</div>
 
-			<div key="recovery" class="settings-link is-flex is-align-items-center" @click="changeActive('recovery')">
+			<div data-cy="recoverySettings" key="recovery" class="settings-link is-flex is-align-items-center" @click="changeActive('recovery')">
 				<i class="fas fa-life-ring" />
 				<span class="text">
 					Trusted Account Recovery
