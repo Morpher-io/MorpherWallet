@@ -5,7 +5,6 @@
   "scripts": {
     "serve": "vue-cli-service serve  --port 3001",
     "build": "vue-cli-service build",
-    "test:unit": "vue-cli-service test:unit",
     "tests": "npx cypress run --headed",
     "tests-headless": "npx cypress run --headless",
     "lint": "vue-cli-service lint"
