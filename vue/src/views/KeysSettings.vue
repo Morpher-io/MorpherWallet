@@ -112,7 +112,7 @@ export default class KeysSettings extends mixins(Global, Authenticated) {
 	copyToClipboard = copyToClipboard;
 
 	redirectUser() {
-		this.$router.push('/settings');
+		this.$router.push('/settings').catch(() => undefined);;
 	}
 
 	setExport(page: string) {

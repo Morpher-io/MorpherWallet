@@ -67,6 +67,7 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 	}
 
 	onError(error) {
+		this.logSentryError('addGoogleRecovery', error.toString(), { hasRecoveryMethod: this.hasRecoveryMethod, clientId: this.clientId, recoveryTypeId: this.recoveryTypeId })
 		let errorText = error.error || error.err || 'Google login Error';
 
 		if (String(errorText.toLowerCase()).includes('script not loaded correctly')) {
@@ -95,7 +96,8 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 					erorr: ''
 				});
 			})
-			.catch(() => {
+			.catch((error) => {
+				this.logSentryError('addGoogleRecovery', error.toString(), { hasRecoveryMethod: this.hasRecoveryMethod, clientId: this. clientId, recoveryTypeId: this.recoveryTypeId, googleUser })
 				this.showSpinnerThenAutohide('Error');
 				this.processMethod({
 					success: false,
@@ -122,7 +124,8 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 					erorr: ''
 				});
 			})
-			.catch(() => {
+			.catch((error) => {
+				this.logSentryError('deleteGoogleRecovery', error.toString(), { hasRecoveryMethod: this.hasRecoveryMethod, clientId: this. clientId, recoveryTypeId: this.recoveryTypeId, googleUser })
 				this.showSpinnerThenAutohide('Error finding user');
 				this.processMethod({
 					success: false,

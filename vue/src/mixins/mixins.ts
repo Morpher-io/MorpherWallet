@@ -1,6 +1,7 @@
 // global mixins
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import * as Sentry from '@sentry/vue';
 import Spinner from '../components/loading-spinner/Spinner.vue';
 import { Action } from 'vuex-class';
 import {
@@ -142,19 +143,19 @@ export class Global extends Vue {
 	@Watch('store.keystore')
 	onPropertyChanged(value: any) {
 		if (value === null) {
-			this.$router.push('/login');
+			this.$router.push('/login').catch(() => undefined);;
 		}
 	}
 
 	@Watch('store.openPage')
 	onPageChanged(value: any) {
 		if (value) {
-			if (value === 'wallet') this.$router.push('/');
-			if (value === 'settings') this.$router.push('/settings');
-			if (value === 'register') this.$router.push('/signup');
-			if (value === '2fa') this.$router.push('/settings/2FA');
-			if (value === 'recovery') this.$router.push('/settings/recovery');
-			if (value === 'email') this.$router.push('/settings/email');
+			if (value === 'wallet') this.$router.push('/').catch(() => undefined);;
+			if (value === 'settings') this.$router.push('/settings').catch(() => undefined);;
+			if (value === 'register') this.$router.push('/signup').catch(() => undefined);;
+			if (value === '2fa') this.$router.push('/settings/2FA').catch(() => undefined);;
+			if (value === 'recovery') this.$router.push('/settings/recovery').catch(() => undefined);;
+			if (value === 'email') this.$router.push('/settings/email').catch(() => undefined);;
 
 			this.clearPage();
 		}
@@ -211,6 +212,40 @@ export class Global extends Vue {
 		}
 
 		return updatedChecks;
+	}
+
+
+	formatComponentName(vm:any) {
+		// tslint:disable:no-unsafe-any
+		if (vm.$root === vm) {
+			return 'root instance';
+		}
+		const name = vm._isVue ? vm.$options.name || vm.$options._componentTag : vm.name;
+		return (
+			(name ? 'component <' + name + '>' : 'anonymous component') +
+			(vm._isVue && vm.$options.__file ? ' at ' + vm.$options.__file : '')
+		);
+	}
+	/**
+	 * Log an error to sentry and include all relevant information from vue
+	 * @param {*} errorDescription Error to be lodgged
+	 */
+	async logSentryError(source: string, errorDescription: string, customContext: any) {
+		const vueData: any = { source };
+		// Get the component and props data
+		vueData.componentName = this.formatComponentName(this);
+		if (this.$options.propsData) {
+			vueData.propsData = this.$options.propsData;
+		}
+
+		if (customContext) {
+			Sentry.setContext('custom', customContext);
+		}
+
+		Sentry.setContext('vue', vueData);
+
+		// Capture the exception
+		Sentry.captureException(errorDescription);
 	}
 }
 
