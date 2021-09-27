@@ -41,30 +41,10 @@ export default class Footer extends Vue {
 			code: 'en',
 			name: 'English'
 		},
-		// {
-		// 	code: 'de',
-		// 	name: 'Deutsch'
-		// },
-		// {
-		// 	code: 'ru',
-		// 	name: 'Русский'
-		// },
-		// {
-		// 	code: 'pt',
-		// 	name: 'Português'
-		// },
-		// {
-		// 	code: 'ar',
-		// 	name: '‏العربية‏'
-		// },
-		// {
-		// 	code: 'zh',
-		// 	name: '中文'
-		// },
-		// {
-		// 	code: 'ja',
-		// 	name: '日本語'
-		// },
+		{
+			code: 'ru',
+			name: 'Русский'
+		},
 		{
 			code: 'bs',
 			name: 'Bosanski'

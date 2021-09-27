@@ -10,7 +10,7 @@ Vue.config.productionTip = false;
 // Multi-language i18n plugin
 import { i18n } from "./plugins/i18n";
 
-const supportedLanguages = ["en", "bs", "ar", "de", "ru", "ja", "zh", "pt"];
+const supportedLanguages = ["en", "ru", "bs"];
 const defaultLangugage: any = "en";
 const currentLocale = Cookie.get("locale");
 
