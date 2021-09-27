@@ -118,7 +118,7 @@ export default class Settings extends mixins(Authenticated, Global) {
 			return;
 		}
 
-		this.$router.push('/');
+		this.$router.push('/').catch(() => undefined);;
 	}
 
 	changeActive(page: string) {
@@ -129,7 +129,7 @@ export default class Settings extends mixins(Authenticated, Global) {
 			return;
 		}
 
-		this.$router.push('/settings/' + page);
+		this.$router.push('/settings/' + page).catch(() => undefined);;
 	}
 
 	mounted() {
