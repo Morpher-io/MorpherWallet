@@ -7,13 +7,13 @@
 						<div class="field">
 							<label class="label">New Email</label>
 							<div class="control">
-								<input class="input" name="newEmail" v-model="newEmail" />
+								<input data-cy="newEmail" class="input" name="newEmail" v-model="newEmail" />
 							</div>
 						</div>
 						<div class="field">
 							<label class="label">Password</label>
 							<div class="control">
-								<input type="password" class="input" name="password" v-model="password" />
+								<input data-cy="confirmPassword" type="password" class="input" name="password" v-model="password" />
 							</div>
 						</div>
 					</div>
@@ -26,6 +26,7 @@
 				<div class="mt-5">
 					<button
 						class="button is-green big-button is-login transition-faster"
+						data-cy="updateEmailButton"
 						:disabled="!newEmail || !password"
 						@click="
 							setNewData({

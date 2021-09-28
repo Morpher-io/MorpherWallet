@@ -3,9 +3,13 @@
   "experimentalNetworkStubbing": true,
   "retries": 1,
   "baseUrl": "http://localhost:3001",
+  "video": false,
   "env": {
     "firstEmail": "test@email.com",
     "secondEmail": "test2@email.com",
+    "firstPassword": "Test123!",
+    "secondPassword": "Test1234!",
+    "incorrectPassword": "Test12345!",
     "backendUrl": "http://backend"
   }
 }

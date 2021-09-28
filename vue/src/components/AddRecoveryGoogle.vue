@@ -7,6 +7,7 @@
 				:onSuccess="onLogin"
 				:onCurrentUser="onLogin"
 				:onFailure="onError"
+				data-cy="googleButton"
 			>
 				<span class="icon img">
 					<img src="@/assets/img/google_logo.svg" alt="Google Logo" />
@@ -26,7 +27,7 @@
 					<span class="icon img">
 						<img src="@/assets/img/google_logo_white.svg" alt="Google Logo" />
 					</span>
-					<span>Revoke Access</span>
+					<span data-cy="revokeGoogle">Revoke Access</span>
 				</GoogleLogin>
 			</div>
 			<div class="recovery-active is-text-small">

@@ -1,16 +1,29 @@
 // https://docs.cypress.io/api/introduction/api.html
 
 describe('Front Page', () => {
-	it('Open The root URL', () => {
+	it('Open the Root URL', () => {
 		cy.visit('/');
-		// check that the logon page is displayed
-		cy.contains('h2', 'Wallet Login');
-		//console.log(Cypress.env('firstEmail'));
+		cy.contains('[data-cy=logInTitle]', 'Log In');
+		cy.contains('[data-cy=logInDescription]', 'Unlock your crypto wallet.');
 	});
 
-	it('Open The register URL', () => {
+	it('Navigate from root to SignUp', () => {
+		cy.visit('/');
+		cy.get('[data-cy=signUpButton]').click()
+		cy.contains('[data-cy=signUpTitle]', 'Sign Up');
+		cy.contains('[data-cy=signUpDescription]', 'Create a new wallet.');
+	});
+
+	it('Open the Sign Up URL', () => {
 		cy.visit('/signup');
-		cy.contains('h2', 'Signup');
-		cy.contains('h4', 'Create a new wallet.');
+		cy.contains('[data-cy=signUpTitle]', 'Sign Up');
+		cy.contains('[data-cy=signUpDescription]', 'Create a new wallet.');
+	});
+
+	it('Navigate from SignUp to LogIn', () => {
+		cy.visit('/signup');
+		cy.get('[data-cy=logInButton]').click()
+		cy.contains('[data-cy=logInTitle]', 'Log In');
+		cy.contains('[data-cy=logInDescription]', 'Unlock your crypto wallet.');
 	});
 });

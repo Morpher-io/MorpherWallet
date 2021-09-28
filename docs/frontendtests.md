@@ -14,9 +14,13 @@ You can use any free email service i.e. https://temp-mail.org/en/.
 
 Note: Sending real emails is disabled in development and testing.
 
+You will also need to install OS specific libraries to support testing automation browsers. 
+
+In Ubuntu 16.04+: `sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb -y`
+
 ## Cypress
 
-Once all the setup is done, you will only need to run `npm run test:e2e` and the Cypress test suite will start. You can either run all of the tests at once or one by one.
+Once all the setup is done, you can run ``npm run tests`` or `npm run tests-headless` depending on your preference or environment.
 
 # More information
 

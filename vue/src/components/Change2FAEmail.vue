@@ -1,14 +1,14 @@
 <template>
 	<div>
 		<img src="@/assets/img/email_verification.svg" alt="Email 2FA image" class="mb-3" />
-		<h2 class="title">Email Confirmation</h2>
+		<h2 data-cy="emailConfirmationTitle" class="title">Email Confirmation</h2>
 		<p class="subtitle">We sent you an email with code. Enter the verification code below to confirm 2-step activation.</p>
 
 		<div class="field">
 			<label class="label">Verification Code</label>
 
 			<div class="control">
-				<input type="text" class="input" v-model="authenticatorCode" />
+				<input data-cy="2faEmailCode" type="text" class="input" v-model="authenticatorCode" />
 			</div>
 		</div>
 
@@ -16,7 +16,7 @@
 			<p>⚠️ <span v-html="logonError"></span></p>
 		</div>
 
-		<button @click="setCode()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!authenticatorCode">
+		<button data-cy="confirmButton" @click="setCode()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!authenticatorCode">
 			<span>Submit</span>
 		</button>
 		<button v-on:click="pageBack()" class="button is-ghost is-blue big-button medium-text transition-faster">
@@ -33,7 +33,7 @@ import { verifyEmailCode } from '../utils/backupRestore';
 import { getDictionaryValue } from '../utils/dictionary';
 
 @Component({})
-export default class Change2faEmail extends mixins(Authenticated) {
+export default class Change2FAEmail extends mixins(Authenticated) {
 	authenticatorCode = '';
 	logonError = '';
 

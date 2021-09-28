@@ -18,23 +18,23 @@
 		</div>
 		<div v-if="currentPage === 2">
 			<ChangeAuthenticator v-if="currentMethod === 'authenticator'" :qrCode="qrCode" @setCode="setCode" @pageBack="pageBack" />
-			<Change2faEmail v-if="currentMethod === 'email'" @setCode="setCode" @pageBack="pageBack" />
+			<Change2FAEmail v-if="currentMethod === 'email'" @setCode="setCode" @pageBack="pageBack" />
 		</div>
 		<div v-if="currentPage === 3">
 			<div>
 				<img src="@/assets/img/checkmark.svg" alt="Checkmark image" class="mb-3" />
-				<h2 class="title">2-Step {{ isEnabling ? 'Activated' : 'Deactivated' }}</h2>
-				<p v-if="isEnabling" class="subtitle">
+				<h2 data-cy="2faConfirmedTitle"  class="title">2-Step {{ isEnabling ? 'Activated' : 'Deactivated' }}</h2>
+				<p data-cy="2faConfirmedDescription" v-if="isEnabling" class="subtitle">
 					All done, 2-step verification has been added to your account. Your account is now more secure!
 				</p>
-				<p v-else class="subtitle">2-step verification has been removed from your account.</p>
+				<p data-cy="2faDisabledDescription" v-else class="subtitle">2-step verification has been removed from your account.</p>
 
 				<div v-if="!isEnabling" class="alert warning mt-3 is-size-7 has-text-left mb-5">
 					⚠ Your account security is much lower now.
 				</div>
 
 				<button @click="resetData" tag="button" class="button outlined-button big-button transition-faster">
-					<span>Close</span>
+					<span data-cy="closeButton">Close</span>
 				</button>
 
 				<div v-if="isEnabling">
@@ -58,7 +58,7 @@ import Component, { mixins } from 'vue-class-component';
 import Change2FA from '../components/Change2FA.vue';
 import ConfirmAccess from '../components/ConfirmAccess.vue';
 import ChangeAuthenticator from '../components/ChangeAuthenticator.vue';
-import Change2faEmail from '../components/Change2faEmail.vue';
+import Change2FAEmail from '../components/Change2FAEmail.vue';
 import { Authenticated, Global } from '../mixins/mixins';
 import { getDictionaryValue } from '../utils/dictionary';
 import { Watch } from 'vue-property-decorator';
@@ -68,7 +68,7 @@ import { Watch } from 'vue-property-decorator';
 		Change2FA,
 		ConfirmAccess,
 		ChangeAuthenticator,
-		Change2faEmail
+		Change2FAEmail
 	}
 })
 export default class TwoFactorSettings extends mixins(Authenticated, Global) {

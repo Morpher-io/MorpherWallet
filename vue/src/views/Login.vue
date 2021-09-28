@@ -1,8 +1,8 @@
 <template>
 	<div>
 		<div class="container">
-			<h2 class="title">Log In</h2>
-			<p class="subtitle">Unlock your crypto wallet.</p>
+			<h2 data-cy="logInTitle" class="title">Log In</h2>
+			<p data-cy="logInDescription" class="subtitle">Unlock your crypto wallet.</p>
 			<form v-on:submit.prevent="login">
 				<div class="field">
 					<label class="label">Email</label>
@@ -41,7 +41,7 @@
 				<div class="login-link">
 					<span>Don't have a wallet?</span>
 					<router-link to="/signup" class="login-router transition-faster">
-						<span>
+						<span data-cy="signUpButton" >
 							Sign up
 						</span>
 					</router-link>

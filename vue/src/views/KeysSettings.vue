@@ -3,6 +3,7 @@
 		<div v-if="currentPage === 0">
 			<div class="title-container has-text-left">
 				<button
+						data-cy="backArrowButton"
 					@click="redirectUser"
 					tag="button"
 					class="button is-grey big-button outlined-button is-thick transition-faster is-icon-only"
@@ -22,7 +23,7 @@
 
 			<button
 				class="mt-3 button is-blue big-button is-login transition-faster"
-				data-cy="exportSeed"
+				data-cy="exportSeedPhraseButton"
 				type="submit"
 				@click="setExport('seed')"
 			>
@@ -32,7 +33,7 @@
 			<div class="divider just-space" />
 
 			<p class="mt-4 has-text-left">Additional options:</p>
-			<button @click="setExport('key')" tag="button" class="button outlined-button is-thick big-button transition-faster mt-2">
+			<button data-cy="exportPrivateKeyButton" @click="setExport('key')" tag="button" class="button outlined-button is-thick big-button transition-faster mt-2">
 				<span>Export Private Key</span>
 			</button>
 		</div>
@@ -41,7 +42,7 @@
 
 		<div v-if="currentPage === 2">
 			<h2 class="title">Export Seed Phrase</h2>
-			<p class="subtitle">Save your seed phrase in a safe place (never share it).</p>
+			<p data-cy="seedPhraseSuccess" class="subtitle">Save your seed phrase in a safe place (never share it).</p>
 
 			<div class="settings-data user-details">
 				<div class="details">
@@ -63,11 +64,11 @@
 
 		<div v-if="currentPage === 3">
 			<h2 class="title">Export Private Key</h2>
-			<p class="subtitle">Save your private key in a safe place (never share it).</p>
+			<p data-cy="privateKeySuccess" class="subtitle">Save your private key in a safe place (never share it).</p>
 
 			<div class="settings-data user-details">
 				<div class="details">
-					<p class="seed">{{ store.privateKey }}</p>
+					<p data-cy="privateKeyValue" class="seed">{{ store.privateKey }}</p>
 				</div>
 			</div>
 
@@ -78,15 +79,15 @@
 				</div>
 			</div>
 
-			<div class="alert warning has-text-left is-size-7 mt-5">
+			<div data-cy="privateKeyJsonMessage" class="alert warning has-text-left is-size-7 mt-5">
 				⚠ The private key JSON file is password protected using your wallet password.
 			</div>
 
-			<button class="button is-blue big-button is-login transition-faster mt-4" @click="exportPhrase(store.accounts[0])">
+			<button data-cy="privateKeyJsonButton" class="button is-blue big-button is-login transition-faster mt-4" @click="exportPhrase(store.accounts[0])">
 				<span>Download JSON</span>
 			</button>
 
-			<button @click="resetData()" tag="button" class="button outlined-button is-thick big-button transition-faster mt-4">
+			<button data-cy="exportBackButton" @click="resetData()" tag="button" class="button outlined-button is-thick big-button transition-faster mt-4">
 				<span>Close</span>
 			</button>
 		</div>

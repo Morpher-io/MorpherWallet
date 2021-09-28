@@ -13,7 +13,7 @@
 		<div class="divider just-space" />
 
 		<div v-if="!isEmailPasswordPage" class="settings-data">
-			<div key="email_passowrd" class="settings-link is-flex is-align-items-center" @click="changeActive('email_password')">
+			<div data-cy="emailPasswordButton" key="email_passowrd" class="settings-link is-flex is-align-items-center" @click="changeActive('email_password')">
 				<i class="fas fa-user-circle" />
 				<span class="text">
 					Email & Password
@@ -23,7 +23,7 @@
 				</span>
 			</div>
 
-			<div key="recovery" class="settings-link is-flex is-align-items-center" @click="changeActive('recovery')">
+			<div data-cy="recoverySettings" key="recovery" class="settings-link is-flex is-align-items-center" @click="changeActive('recovery')">
 				<i class="fas fa-life-ring" />
 				<span class="text">
 					Trusted Account Recovery
@@ -33,7 +33,7 @@
 				</span>
 			</div>
 
-			<div key="2FA" class="settings-link is-flex is-align-items-center" @click="changeActive('2FA')">
+			<div data-cy="verificationSettings"  key="2FA" class="settings-link is-flex is-align-items-center" @click="changeActive('2FA')">
 				<i class="fas fa-check-double" />
 				<span class="text">
 					2-Step Verification
@@ -43,7 +43,7 @@
 				</span>
 			</div>
 
-			<div key="keys" class="settings-link is-flex is-align-items-center" @click="changeActive('keys')">
+			<div key="keys" class="settings-link is-flex is-align-items-center" data-cy="exportWalletButton" @click="changeActive('keys')">
 				<i class="fas fa-file-download" />
 				<span class="text">
 					Export Wallet
@@ -53,7 +53,7 @@
 				</span>
 			</div>
 
-			<div key="delete" class="settings-link is-flex is-align-items-center" @click="changeActive('delete')">
+			<div data-cy="deleteAccountSettings" key="delete" class="settings-link is-flex is-align-items-center" @click="changeActive('delete')">
 				<i class="fas fa-ban" />
 				<span class="text">
 					Delete Account
@@ -71,7 +71,7 @@
 					<p>{{ store.email }}</p>
 				</div>
 				<div class="link">
-					<div class="login-router transition-faster" @click="changeActive('email')">
+					<div class="login-router transition-faster" data-cy="emailChangeButton" @click="changeActive('email')">
 						<i class="fas fa-pen-square" />
 					</div>
 				</div>
@@ -82,7 +82,7 @@
 					<p>********</p>
 				</div>
 				<div class="link">
-					<div class="login-router transition-faster" @click="changeActive('password')">
+					<div class="login-router transition-faster" data-cy="passwordChangeButton"  @click="changeActive('password')">
 						<i class="fas fa-pen-square" />
 					</div>
 				</div>
