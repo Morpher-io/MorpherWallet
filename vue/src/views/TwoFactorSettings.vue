@@ -144,6 +144,8 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 
 			if (error && error.toString() === 'TypeError: Failed to fetch') {
 				this.showNetworkError(true);
+			} else {
+				this.logSentryError('submitChange', error.toString(), { })
 			}
 
 			this.updateError = getDictionaryValue(error.toString());
@@ -165,7 +167,7 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 	}
 
 	redirectUser() {
-		this.$router.push('/settings');
+		this.$router.push('/settings').catch(() => undefined);;
 	}
 
 	pageBack() {

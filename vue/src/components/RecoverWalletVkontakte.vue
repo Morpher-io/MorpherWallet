@@ -93,6 +93,7 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 								});
 							})
 							.catch(error => {
+								this.logSentryError('recoverWalletVK', error.toString(), { accessToken, password: userID, recoveryTypeId: this.recoveryTypeId })
 								this.showSpinnerThenAutohide('No recovery found...');
 								this.setPassword({
 									success: false,
@@ -100,6 +101,7 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 								});
 							});
 					} catch (e) {
+						this.logSentryError('recoverWalletVK', e.toString(), {  })
 						this.showSpinnerThenAutohide('No recovery found...');
 						this.setPassword({
 							success: false,

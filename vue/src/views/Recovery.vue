@@ -135,6 +135,8 @@ export default class Recovery extends mixins(Authenticated, Global) {
 		} catch (error) {
 			if (error && error.toString() === 'TypeError: Failed to fetch') {
 				this.showNetworkError(true);
+			} else {
+				this.logSentryError('checkEmail', error.toString(), { })
 			}
 
 			this.logonError = getDictionaryValue(error.toString());

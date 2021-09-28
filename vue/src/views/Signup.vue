@@ -183,9 +183,9 @@ export default class Signup extends mixins(Global) {
 				this.hideSpinner();
 				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator || this.store.twoFaRequired.needConfirmation) {
 					// open 2fa page if 2fa is required
-					this.$router.push('/2fa');
+					this.$router.push('/2fa').catch(() => undefined);;
 				} else {
-					this.$router.push('/');
+					this.$router.push('/').catch(() => undefined);;
 				}
 			})
 			.catch(error => {
@@ -193,6 +193,8 @@ export default class Signup extends mixins(Global) {
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {
 					this.showNetworkError(true);
+				} else {
+					this.logSentryError('createWallet', error.toString(), { })
 				}
 
 				this.logonError = getDictionaryValue(error.toString());

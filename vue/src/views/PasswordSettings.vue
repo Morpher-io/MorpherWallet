@@ -16,7 +16,7 @@ import ChangePassword from '../components/ChangePassword.vue';
 })
 export default class PasswordSettings extends Vue {
 	redirectUser() {
-		this.$router.push('/settings');
+		this.$router.push('/settings').catch(() => undefined);;
 	}
 }
 </script>
