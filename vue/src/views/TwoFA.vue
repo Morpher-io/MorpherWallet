@@ -7,7 +7,7 @@
 			class="mb-3"
 		/>
 		<img v-if="twoFaRequired.authenticator" src="@/assets/img/authenticator.svg" alt="Phone authenticator image" class="mb-3" />
-		<h2 class="title">2-Step Verification</h2>
+		<h2 data-cy="verificationTitle" class="title">2-Step Verification</h2>
 		<p v-if="(twoFaRequired.email || twoFaRequired.needConfirmation) && !twoFaRequired.authenticator" class="subtitle">
 			Please enter the code we sent to your email.
 		</p>
@@ -114,7 +114,7 @@ export default class TwoFA extends mixins(Global) {
 		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.authenticatorCode })
 			.then(nextroute => {
 				this.hideSpinner();
-				this.router.push(nextroute);
+				this.router.push(nextroute).catch(() => undefined);;
 			})
 			.catch(error => {
 				this.hideSpinner();
@@ -125,7 +125,7 @@ export default class TwoFA extends mixins(Global) {
 
 				if (error.toString() === 'invalid password') {
 					this.store.status = 'invalid password';
-					this.router.push('/login');
+					this.router.push('/login').catch(() => undefined);;
 				}
 				this.logonError = getDictionaryValue(error.toString());
 			});
@@ -133,7 +133,7 @@ export default class TwoFA extends mixins(Global) {
 
 	logout() {
 		this.logoutWallet();
-		//this.router.push('/login');
+		//this.router.push('/login').catch(() => undefined);;
 	}
 }
 </script>

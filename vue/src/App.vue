@@ -1,5 +1,6 @@
 <template>
 	<div id="app">
+		<div v-if="!iFrameDisplay" class="image-blur"></div>
 		<section
 			:class="{
 				main_iframe: iFrameDisplay,
@@ -25,6 +26,7 @@
 				<span>Secured with AES | SHA-256 | PBKDF2</span>
 			</div>
 		</section>
+		<Footer v-if="!iFrameDisplay" :NFTBackground="NFTBackground" />
 	</div>
 </template>
 
@@ -35,11 +37,15 @@ import { mapState } from 'vuex';
 import Component from 'vue-class-component';
 import Spinner from './components/loading-spinner/Spinner.vue';
 import NetworkError from './components/NetworkError.vue';
+import Footer from './components/Footer.vue';
+
+import { BackgroundNFT, getRandomNFTBackground } from '../src/utils/backgroundNFT';
 
 @Component({
 	components: {
 		Spinner,
-		NetworkError
+		NetworkError,
+		Footer
 	},
 	computed: {
 		...mapState({
@@ -55,6 +61,8 @@ export default class App extends Vue {
 	connection = this.$store.state.connection;
 	isDev = process.env.NODE_ENV !== 'production';
 
+	NFTBackground: BackgroundNFT | null = null;
+
 	async closeWallet() {
 		if (this.iFrameDisplay) {
 			if (this.connection && this.connection !== null) {
@@ -64,11 +72,19 @@ export default class App extends Vue {
 				(await promise).onClose();
 
 				if (this.$store.getters.isLoggedIn) {
-					if (this.$router.currentRoute.path !== '/') this.$router.push('/');
+					if (this.$router.currentRoute.path !== '/') this.$router.push('/').catch(() => undefined);;
 				} else {
-					if (this.$router.currentRoute.path !== '/login') this.$router.push('/login');
+					if (this.$router.currentRoute.path !== '/login') this.$router.push('/login').catch(() => undefined);;
 				}
 			}
+		}
+	}
+
+	mounted() {
+		if (!this.iFrameDisplay) {
+			this.NFTBackground = getRandomNFTBackground();
+
+			window.document.body.style.backgroundImage = 'url(' + require('./assets/img/nft_backgrounds/' + this.NFTBackground.image) + ')';
 		}
 	}
 }

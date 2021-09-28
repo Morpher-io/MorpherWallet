@@ -1,8 +1,8 @@
 <template>
 	<div>
 		<div class="container">
-			<h2 class="title">Sign Up</h2>
-			<p class="subtitle">Create a new wallet.</p>
+			<h2 data-cy="signUpTitle" class="title">Sign Up</h2>
+			<p data-cy="signUpDescription" class="subtitle">Create a new wallet.</p>
 			<form v-on:submit.prevent="signupExecute" novalidate>
 				<div class="field">
 					<label class="label">Email</label>
@@ -90,7 +90,7 @@
 				<div class="login-link">
 					<span>Already have a wallet?</span>
 					<router-link to="/login" class="login-router transition-faster">
-						<span>
+						<span data-cy="logInButton">
 							Log In
 						</span>
 					</router-link>
@@ -183,9 +183,9 @@ export default class Signup extends mixins(Global) {
 				this.hideSpinner();
 				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator || this.store.twoFaRequired.needConfirmation) {
 					// open 2fa page if 2fa is required
-					this.$router.push('/2fa');
+					this.$router.push('/2fa').catch(() => undefined);;
 				} else {
-					this.$router.push('/');
+					this.$router.push('/').catch(() => undefined);;
 				}
 			})
 			.catch(error => {
@@ -193,6 +193,8 @@ export default class Signup extends mixins(Global) {
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {
 					this.showNetworkError(true);
+				} else {
+					this.logSentryError('createWallet', error.toString(), { })
 				}
 
 				this.logonError = getDictionaryValue(error.toString());

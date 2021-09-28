@@ -73,7 +73,7 @@
 					</div>
 
 					<div class="error mt-3" v-if="logonError">
-						<p>⚠️ <span v-html="logonError"></span></p>
+						<p>⚠️ <span data-cy="incorrectPassword" v-html="logonError"></span></p>
 					</div>
 
 					<button class="button is-green big-button is-login transition-faster mt-5" type="submit" data-cy="passwordSubmit">
@@ -82,7 +82,7 @@
 
 					<div class="mt-2">
 						<button
-							v-on:click="$router.push(hideOldPassword ? '/login' : '/settings?email_password=true')"
+							v-on:click="$router.push(hideOldPassword ? '/login' : '/settings?email_password=true').catch(() => undefined);"
 							tag="button"
 							type="button"
 							class="button is-ghost is-blue big-button medium-text transition-faster"
@@ -97,8 +97,8 @@
 		<div v-if="currentPage === 1">
 			<div>
 				<img src="@/assets/img/checkmark.svg" alt="Checkmark image" class="mb-3" />
-				<h2 class="title">Password Updated</h2>
-				<p class="subtitle">Your password was successfully updated!</p>
+				<h2 data-cy="passwordChangeTitle" class="title">Password Updated</h2>
+				<p data-cy="passwordChangeDescription" class="subtitle">Your password was successfully updated!</p>
 
 				<button @click="resetData" tag="button" class="button outlined-button big-button transition-faster">
 					<span>Close</span>
@@ -184,7 +184,7 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 				this.currentPage = 1;
 
 				if (this.presetOldPassword !== undefined) {
-					this.$router.push('/login');
+					this.$router.push('/login').catch(() => undefined);;
 				}
 			})
 			.catch(error => {

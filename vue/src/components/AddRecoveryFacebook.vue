@@ -10,6 +10,7 @@
 				@sdk-init="handleSdkInit"
 				@login="onLogin"
 				v-model="facebook.model"
+				data-cy="facebookButton"
 				><span class="is-flex is-align-items-center" slot="login">
 					<span class="icon img">
 						<img src="@/assets/img/fb_logo.svg" alt="Facebook Logo" />
@@ -32,7 +33,7 @@
 					<span class="icon img">
 						<img src="@/assets/img/fb_logo_white.svg" alt="Facebook Logo" />
 					</span>
-					<span>Revoke Access</span>
+					<span data-cy="revokeFacebook">Revoke Access</span>
 				</span>
 			</v-facebook-login>
 			<div class="recovery-active is-text-small">
@@ -115,7 +116,8 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 					});
 				});
 			})
-			.catch(() => {
+			.catch((error) => {
+				this.logSentryError('addFacebookRecovery', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId })
 				this.showSpinnerThenAutohide('Error During Saving');
 				this.processing = false;
 				this.processMethod({
@@ -158,7 +160,8 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 					});
 				});
 			})
-			.catch(() => {
+			.catch((error) => {
+				this.logSentryError('deleteFacebookRecovery', error.toString(), { data, recoveryTypeId: this.recoveryTypeId })
 				this.showSpinnerThenAutohide('Error finding user');
 				this.processing = false;
 				this.processMethod({

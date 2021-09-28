@@ -5,6 +5,7 @@
 				class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
 				@click="doLogin"
 				v-if="!hasRecoveryMethod"
+				data-cy="vkontakteButton"
 			>
 				<span class="icon img">
 					<img src="@/assets/img/vk_logo.svg" alt="VKontakte Logo" />
@@ -18,7 +19,7 @@
 				<span class="icon img">
 					<img src="@/assets/img/vk_logo_white.svg" alt="VKontakte Logo" />
 				</span>
-				<span>Revoke Access</span>
+				<span data-cy="revokeVkontakte">Revoke Access</span>
 			</button>
 			<div class="recovery-active is-text-small">
 				<span class="icon">
@@ -116,7 +117,8 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 								erorr: ''
 							});
 						})
-						.catch(() => {
+						.catch((error) => {
+							this.logSentryError('addRecoveryVK', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId })
 							this.showSpinnerThenAutohide('Error');
 							this.processMethod({
 								success: false,
@@ -173,7 +175,8 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 								erorr: ''
 							});
 						})
-						.catch(() => {
+						.catch((error) => {
+							this.logSentryError('deleteRecoveryVK', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId })
 							this.showSpinnerThenAutohide('Error finding user');
 							this.processMethod({
 								success: false,

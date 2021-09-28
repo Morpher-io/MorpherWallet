@@ -63,10 +63,10 @@
 		<div v-if="currentPage === 2">
 			<div>
 				<img src="@/assets/img/checkmark.svg" alt="Checkmark image" class="mb-3" />
-				<h2 class="title">{{ currentMethod }} Recovery {{ isEnabled ? 'Enabled' : 'Disabled' }}</h2>
-				<p class="subtitle">Trusted account successfully {{ isEnabled ? 'activated' : 'deactivated' }} for recovery.</p>
+				<h2 data-cy="recoveryTitle" class="title">{{ currentMethod }} Recovery {{ isEnabled ? 'Enabled' : 'Disabled' }}</h2>
+				<p data-cy="recoveryDescription" class="subtitle">Trusted account successfully {{ isEnabled ? 'activated' : 'deactivated' }} for recovery.</p>
 
-				<button @click="resetData" tag="button" class="button outlined-button big-button transition-faster">
+				<button data-cy="recoveryCloseButton" @click="resetData" tag="button" class="button outlined-button big-button transition-faster">
 					<span>Close</span>
 				</button>
 			</div>
@@ -132,7 +132,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 	}
 
 	redirectUser() {
-		this.$router.push('/settings');
+		this.$router.push('/settings').catch(() => undefined);;
 	}
 
 	processMethod(data: any): void {

@@ -1,8 +1,8 @@
 <template>
 	<div>
 		<div class="container">
-			<h2 class="title">Log In</h2>
-			<p class="subtitle">Unlock your crypto wallet.</p>
+			<h2 data-cy="logInTitle" class="title">Log In</h2>
+			<p data-cy="logInDescription" class="subtitle">Unlock your crypto wallet.</p>
 			<form v-on:submit.prevent="login">
 				<div class="field">
 					<label class="label">Email</label>
@@ -41,7 +41,7 @@
 				<div class="login-link">
 					<span>Don't have a wallet?</span>
 					<router-link to="/signup" class="login-router transition-faster">
-						<span>
+						<span data-cy="signUpButton" >
 							Sign up
 						</span>
 					</router-link>
@@ -81,7 +81,7 @@ export default class Login extends mixins(Global) {
 			this.unlockWithStoredPassword()
 				.then(result => {
 					if (result) {
-						this.$router.push('/');
+						this.$router.push('/').catch(() => undefined);;
 					}
 				})
 				.catch(error => {
@@ -130,12 +130,12 @@ export default class Login extends mixins(Global) {
 				this.hideSpinner();
 				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator || this.store.twoFaRequired.needConfirmation) {
 					// open 2fa page if 2fa is required
-					this.$router.push('/2fa');
+					this.$router.push('/2fa').catch(() => undefined);;
 				} else {
 					this.unlockWithStoredPassword()
 						.then(() => {
 							// open root page after logon success
-							this.$router.push('/');
+							this.$router.push('/').catch(() => undefined);;
 						})
 						.catch(() => {
 							this.logonError = getDictionaryValue('DECRYPT_FAILED');
@@ -150,6 +150,8 @@ export default class Login extends mixins(Global) {
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {
 					this.showNetworkError(true);
+				} else {
+					this.logSentryError('fetchUser', error.toString(), { email, password })
 				}
 
 				if (error !== true && error !== false) {

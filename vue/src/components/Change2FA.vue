@@ -16,6 +16,7 @@
 								'button is-light-green is-small-button has-text-weight-bold transition-faster': true,
 								'is-light-danger': store.twoFaRequired.email
 							}"
+							data-cy="emailToggle"
 							@click="setCurrentMethod('email', !store.twoFaRequired.email)"
 						>
 							<span>{{ !store.twoFaRequired.email ? 'Enable' : 'Disable' }}</span>
@@ -25,7 +26,7 @@
 				<p class="has-text-left mt-2 is-size-7">{{ store.email }}</p>
 			</div>
 		</div>
-		<div v-if="store.twoFaRequired.email" class="recovery-active is-text-small">
+		<div data-cy="email2faConfirmed" v-if="store.twoFaRequired.email" class="recovery-active is-text-small">
 			<span class="icon">
 				<i class="fas fa-check-circle"></i>
 			</span>
@@ -47,6 +48,7 @@
 								'button is-light-green is-small-button has-text-weight-bold transition-faster': true,
 								'is-light-danger': store.twoFaRequired.authenticator
 							}"
+							data-cy="authenticatorToggle"
 							@click="setCurrentMethod('authenticator', !store.twoFaRequired.authenticator)"
 						>
 							<span>{{ !store.twoFaRequired.authenticator ? 'Enable' : 'Disable' }}</span>
@@ -55,7 +57,7 @@
 				</div>
 			</div>
 		</div>
-		<div v-if="store.twoFaRequired.authenticator" class="recovery-active is-text-small">
+		<div data-cy="authenticator2faConfirmed" v-if="store.twoFaRequired.authenticator" class="recovery-active is-text-small">
 			<span class="icon">
 				<i class="fas fa-check-circle"></i>
 			</span>

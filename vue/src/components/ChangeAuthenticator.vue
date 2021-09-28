@@ -22,15 +22,15 @@
 			<label class="label">Verification Code</label>
 
 			<div class="control">
-				<input type="text" class="input" v-model="authenticatorCode" />
+				<input data-cy="2faAuthenticatorCode" type="text" class="input" v-model="authenticatorCode" />
 			</div>
 		</div>
 
 		<div class="error mt-3" v-if="logonError">
-			<p>⚠️ <span v-html="logonError"></span></p>
+			<p>⚠️ <span data-cy="2faAuthenticatorError" v-html="logonError"></span></p>
 		</div>
 
-		<button @click="setCode()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!authenticatorCode">
+		<button data-cy="confirm2faButton" @click="setCode()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!authenticatorCode">
 			<span>Confirm</span>
 		</button>
 		<button v-on:click="pageBack()" class="button is-ghost is-blue big-button medium-text transition-faster">

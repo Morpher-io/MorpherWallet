@@ -21,7 +21,7 @@
 				You need to verify ownership with the seed phrase or private key before your account can be removed.
 			</p>
 			<div class="field is-grouped mb-5">
-				<button @click="setNewPage()" tag="button" class="button big-button is-danger transition-faster">
+				<button data-cy="deleteAccountButton" @click="setNewPage()" tag="button" class="button big-button is-danger transition-faster">
 					<span>Delete Account</span>
 				</button>
 			</div>
@@ -76,7 +76,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 	password = '';
 
 	redirectUser() {
-		this.$router.push('/settings');
+		this.$router.push('/settings').catch(() => undefined);;
 	}
 
 	setNewPage() {
@@ -116,6 +116,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 					await this.deleteWalletAccount({ password: this.password });
 					this.showSpinnerThenAutohide('Account deleted successfully.');
 				} catch (error) {
+					this.logSentryError('deleteAccount', error.toString(), data)
 					if (error && error.toString() === 'TypeError: Failed to fetch') {
 						this.showNetworkError(true);
 					}
@@ -134,6 +135,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 					await this.deleteWalletAccount({ password: this.password });
 					this.showSpinnerThenAutohide('Account deleted successfully.');
 				} catch (error) {
+					this.logSentryError('deleteAccount', error.toString(), data)
 					if (error && error.toString() === 'TypeError: Failed to fetch') {
 						this.showNetworkError(true);
 					}
@@ -142,6 +144,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 				}
 			}
 		} catch (e) {
+			this.logSentryError('deleteAccount', e.toString(), data)
 			this.logonError = getDictionaryValue('');
 		}
 	}
