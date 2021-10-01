@@ -117,11 +117,10 @@ body {
 .main {
 	@extend %centered_block;
 
-	max-width: 400px;
-	min-width: 400px;
-	width: 80%;
+	max-width: 414px;
+	width: 90%;
+	margin-top: 80px;
 
-	margin-top: $spacing_1;
 	border: 1px solid $col_grey;
 	padding-bottom: $spacing_1;
 
@@ -1144,4 +1143,10 @@ a {
 	width: 100%;
 	height: 100%;
 	background: rgb(0 0 0 / 50%);
+}
+
+@media (max-width: 768px) {
+	.main {
+		margin-top: 20px;
+	}
 }
