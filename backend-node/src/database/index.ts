@@ -22,11 +22,15 @@ export const sequelize = new Sequelize({
         //prevent sequelize from pluralizing table names
         freezeTableName: true
     },
+    dialectOptions: {
+        statement_timeout: 60000,
+        idle_in_transaction_session_timeout: 180000
+    },
     pool: {
-        max: 100,
+        max: 200,
         min: 0,
-        idle: 200000,
-        acquire: 1000000
+        idle: 120000,
+        acquire: 60000
     }
 });
 
