@@ -38,7 +38,7 @@
 						<span>Update Email</span>
 					</button>
 					<button
-						v-on:click="$router.push('/settings?email_password=true').catch(() => undefined);"
+						v-on:click="$router.push('/settings?email_password=true').catch(() => undefined)"
 						tag="button"
 						class="button is-ghost is-blue big-button medium-text transition-faster"
 					>

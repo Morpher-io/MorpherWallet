@@ -87,7 +87,9 @@ describe('Authenticator 2FA', () => {
 				cy.get('[data-cy=confirm2faButton]').click();
 
 				cy.waitUntil(() => cy.get('[data-cy=2faConfirmedTitle]').contains('2-Step Activated'));
-				cy.get('[data-cy=2faConfirmedDescription]').contains('All done, 2-step verification has been added to your account. Your account is now more secure!');
+				cy.get('[data-cy=2faConfirmedDescription]').contains(
+					'All done, 2-step verification has been added to your account. Your account is now more secure!'
+				);
 
 				cy.get('[data-cy=closeButton]').click();
 

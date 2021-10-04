@@ -23,7 +23,7 @@
 		<div v-if="currentPage === 3">
 			<div>
 				<img src="@/assets/img/checkmark.svg" alt="Checkmark image" class="mb-3" />
-				<h2 data-cy="2faConfirmedTitle"  class="title">2-Step {{ isEnabling ? 'Activated' : 'Deactivated' }}</h2>
+				<h2 data-cy="2faConfirmedTitle" class="title">2-Step {{ isEnabling ? 'Activated' : 'Deactivated' }}</h2>
 				<p data-cy="2faConfirmedDescription" v-if="isEnabling" class="subtitle">
 					All done, 2-step verification has been added to your account. Your account is now more secure!
 				</p>
@@ -145,7 +145,7 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 			if (error && error.toString() === 'TypeError: Failed to fetch') {
 				this.showNetworkError(true);
 			} else {
-				this.logSentryError('submitChange', error.toString(), { })
+				this.logSentryError('submitChange', error.toString(), {});
 			}
 
 			this.updateError = getDictionaryValue(error.toString());
@@ -167,7 +167,7 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 	}
 
 	redirectUser() {
-		this.$router.push('/settings').catch(() => undefined);;
+		this.$router.push('/settings').catch(() => undefined);
 	}
 
 	pageBack() {

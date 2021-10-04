@@ -117,8 +117,8 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 								erorr: ''
 							});
 						})
-						.catch((error) => {
-							this.logSentryError('addRecoveryVK', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId })
+						.catch(error => {
+							this.logSentryError('addRecoveryVK', error.toString(), { userID, recoveryTypeId: this.recoveryTypeId });
 							this.showSpinnerThenAutohide('Error');
 							this.processMethod({
 								success: false,
@@ -175,8 +175,8 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 								erorr: ''
 							});
 						})
-						.catch((error) => {
-							this.logSentryError('deleteRecoveryVK', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId })
+						.catch(error => {
+							this.logSentryError('deleteRecoveryVK', error.toString(), { userID, recoveryTypeId: this.recoveryTypeId });
 							this.showSpinnerThenAutohide('Error finding user');
 							this.processMethod({
 								success: false,

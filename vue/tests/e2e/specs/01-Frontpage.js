@@ -9,7 +9,7 @@ describe('Front Page', () => {
 
 	it('Navigate from root to SignUp', () => {
 		cy.visit('/');
-		cy.get('[data-cy=signUpButton]').click()
+		cy.get('[data-cy=signUpButton]').click();
 		cy.contains('[data-cy=signUpTitle]', 'Sign Up');
 		cy.contains('[data-cy=signUpDescription]', 'Create a new wallet.');
 	});
@@ -22,7 +22,7 @@ describe('Front Page', () => {
 
 	it('Navigate from SignUp to LogIn', () => {
 		cy.visit('/signup');
-		cy.get('[data-cy=logInButton]').click()
+		cy.get('[data-cy=logInButton]').click();
 		cy.contains('[data-cy=logInTitle]', 'Log In');
 		cy.contains('[data-cy=logInDescription]', 'Unlock your crypto wallet.');
 	});

@@ -35,7 +35,7 @@ describe('Export Wallet', () => {
 
 		cy.get('[data-cy=confirmAccessButton]').click();
 
-		cy.waitUntil(() => cy.get('[data-cy=passwordError]').contains('The password you entered is not correct.'))
+		cy.waitUntil(() => cy.get('[data-cy=passwordError]').contains('The password you entered is not correct.'));
 	});
 
 	it('Export Seed Phrase Error on Wrong Password', () => {
@@ -68,7 +68,7 @@ describe('Export Wallet', () => {
 
 		cy.get('[data-cy=confirmAccessButton]').click();
 
-		cy.waitUntil(() => cy.get('[data-cy=passwordError]').contains('The password you entered is not correct.'))
+		cy.waitUntil(() => cy.get('[data-cy=passwordError]').contains('The password you entered is not correct.'));
 	});
 
 	it('Export Private Key', () => {
@@ -101,11 +101,11 @@ describe('Export Wallet', () => {
 
 		cy.get('[data-cy=confirmAccessButton]').click();
 
-		cy.waitUntil(() => cy.get('[data-cy=privateKeySuccess]').contains('Save your private key in a safe place (never share it).'))
+		cy.waitUntil(() => cy.get('[data-cy=privateKeySuccess]').contains('Save your private key in a safe place (never share it).'));
 
-		cy.get('[data-cy=privateKeyValue]').should(($element) => {
+		cy.get('[data-cy=privateKeyValue]').should($element => {
 			privateKey = $element.text();
-		})
+		});
 
 		cy.get('[data-cy=privateKeyJsonButton]').click();
 
@@ -175,9 +175,9 @@ describe('Export Wallet', () => {
 
 		cy.get('[data-cy=confirmAccessButton]').click();
 
-		cy.waitUntil(() => cy.get('[data-cy=privateKeySuccess]').contains('Save your private key in a safe place (never share it).'))
+		cy.waitUntil(() => cy.get('[data-cy=privateKeySuccess]').contains('Save your private key in a safe place (never share it).'));
 
-		cy.get('[data-cy=exportBackButton]').click()
+		cy.get('[data-cy=exportBackButton]').click();
 
 		cy.get('[data-cy=backArrowButton]').click();
 
@@ -202,5 +202,5 @@ describe('Export Wallet', () => {
 
 		cy.contains('[data-cy=logInTitle]', 'Log In');
 		cy.contains('[data-cy=logInDescription]', 'Unlock your crypto wallet.');
-	})
+	});
 });

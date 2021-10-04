@@ -76,7 +76,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 	password = '';
 
 	redirectUser() {
-		this.$router.push('/settings').catch(() => undefined);;
+		this.$router.push('/settings').catch(() => undefined);
 	}
 
 	setNewPage() {
@@ -116,7 +116,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 					await this.deleteWalletAccount({ password: this.password });
 					this.showSpinnerThenAutohide('Account deleted successfully.');
 				} catch (error) {
-					this.logSentryError('deleteAccount', error.toString(), data)
+					this.logSentryError('deleteAccount', error.toString(), data);
 					if (error && error.toString() === 'TypeError: Failed to fetch') {
 						this.showNetworkError(true);
 					}
@@ -135,7 +135,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 					await this.deleteWalletAccount({ password: this.password });
 					this.showSpinnerThenAutohide('Account deleted successfully.');
 				} catch (error) {
-					this.logSentryError('deleteAccount', error.toString(), data)
+					this.logSentryError('deleteAccount', error.toString(), data);
 					if (error && error.toString() === 'TypeError: Failed to fetch') {
 						this.showNetworkError(true);
 					}
@@ -144,7 +144,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 				}
 			}
 		} catch (e) {
-			this.logSentryError('deleteAccount', e.toString(), data)
+			this.logSentryError('deleteAccount', e.toString(), data);
 			this.logonError = getDictionaryValue('');
 		}
 	}

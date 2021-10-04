@@ -3,7 +3,7 @@
 		<div v-if="currentPage === 0">
 			<div class="title-container has-text-left">
 				<button
-						data-cy="backArrowButton"
+					data-cy="backArrowButton"
 					@click="redirectUser"
 					tag="button"
 					class="button is-grey big-button outlined-button is-thick transition-faster is-icon-only"
@@ -33,7 +33,12 @@
 			<div class="divider just-space" />
 
 			<p class="mt-4 has-text-left">Additional options:</p>
-			<button data-cy="exportPrivateKeyButton" @click="setExport('key')" tag="button" class="button outlined-button is-thick big-button transition-faster mt-2">
+			<button
+				data-cy="exportPrivateKeyButton"
+				@click="setExport('key')"
+				tag="button"
+				class="button outlined-button is-thick big-button transition-faster mt-2"
+			>
 				<span>Export Private Key</span>
 			</button>
 		</div>
@@ -83,11 +88,20 @@
 				⚠ The private key JSON file is password protected using your wallet password.
 			</div>
 
-			<button data-cy="privateKeyJsonButton" class="button is-blue big-button is-login transition-faster mt-4" @click="exportPhrase(store.accounts[0])">
+			<button
+				data-cy="privateKeyJsonButton"
+				class="button is-blue big-button is-login transition-faster mt-4"
+				@click="exportPhrase(store.accounts[0])"
+			>
 				<span>Download JSON</span>
 			</button>
 
-			<button data-cy="exportBackButton" @click="resetData()" tag="button" class="button outlined-button is-thick big-button transition-faster mt-4">
+			<button
+				data-cy="exportBackButton"
+				@click="resetData()"
+				tag="button"
+				class="button outlined-button is-thick big-button transition-faster mt-4"
+			>
 				<span>Close</span>
 			</button>
 		</div>
@@ -113,7 +127,7 @@ export default class KeysSettings extends mixins(Global, Authenticated) {
 	copyToClipboard = copyToClipboard;
 
 	redirectUser() {
-		this.$router.push('/settings').catch(() => undefined);;
+		this.$router.push('/settings').catch(() => undefined);
 	}
 
 	setExport(page: string) {
