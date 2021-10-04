@@ -41,6 +41,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
             encryptedSeed.iv === undefined ||
             encryptedSeed.salt === undefined
         ) {
+            await transaction.rollback();
             return errorResponse(res, 'BAD_REQUEST', 400);
         }
 
@@ -78,6 +79,8 @@ export async function saveEmailPassword(req: Request, res: Response) {
             return successResponse(res, {
                 recovery_id: recoveryId
             });
+        } else {
+            await transaction.commit();
         }
     } catch (error) {
         // If an error happened anywhere along the way, rollback all the changes.
@@ -137,9 +140,6 @@ export async function addRecoveryMethod(req: Request, res: Response) {
 // Function to save new email/password to the database.
 //only works if passed through a middleware that checks the signature!
 export async function updatePassword(req: Request, res: Response) {
-    // Get sequelize transactions to rollback changes in case of failure.
-    const [err, transaction] = await to(getTransaction());
-    if (err) return errorResponse(res, err.message);
 
     try {
         const key = req.header('key');
