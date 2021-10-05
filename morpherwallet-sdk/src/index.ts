@@ -45,6 +45,7 @@ export type MorpherWalletConfig = {
 	confirm_transaction: boolean;
 	show_message: boolean;
   confirm_message: boolean;
+  locale?: string;
 } | null;
 
 let iframeLoadedFired = false;
@@ -90,6 +91,8 @@ export default class MorpherWallet {
     this.chainId = chainId;
     this.widget = this._initWidget();
 		this.provider = this._initProvider();
+
+    this.setLanguage(this.config.locale);
 
 		
     //window.morpherwallet = this;
@@ -229,6 +232,16 @@ export default class MorpherWallet {
 		const widgetCommunication = (await this.widget).communication;
     return widgetCommunication.isLoggedIn();
   }
+
+  async setLanguage(lang?: string) {
+    if (!lang) return;
+
+		await this.iframeLoaded();
+
+		const widgetCommunication = (await this.widget).communication;
+
+		return widgetCommunication.setLanguage(lang);
+	}
 
   async hasSocialRecoveryMethods() {
 
