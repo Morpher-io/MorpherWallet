@@ -25,7 +25,7 @@
 				<span>{{ $t('common.SECURED_WALLET') }}</span>
 			</div>
 		</section>
-		<Footer />
+		<Footer v-if="!iFrameDisplay" />
 	</div>
 </template>
 

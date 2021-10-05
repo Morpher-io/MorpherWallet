@@ -10,18 +10,20 @@ Vue.config.productionTip = false;
 // Multi-language i18n plugin
 import { i18n } from "./plugins/i18n";
 
-const supportedLanguages = ["en", "ru", "bs"];
-const defaultLangugage: any = "en";
-const currentLocale = Cookie.get("locale");
+const supportedLocales: string[] = process.env.VUE_APP_I18N_SUPPORTED_LOCALE ? JSON.parse(process.env.VUE_APP_I18N_SUPPORTED_LOCALE) : ['en'];
+const defaultLocale = process.env.VUE_APP_I18N_DEFAULT_LOCALE || 'en';
+const currentLocale = Cookie.get('locale');
+
+console.log(process.env);
 
 if (!currentLocale) {
   const language =
     (navigator.languages && navigator.languages[0]) || // Chrome / Firefox
     navigator.language;
 
-  const lang = language.split("-")[0] || defaultLangugage;
+  const lang = language.split("-")[0] || defaultLocale;
 
-  if (supportedLanguages.includes(lang)) {
+  if (supportedLocales.includes(lang)) {
     i18n.locale = lang;
     document.querySelector("html")?.setAttribute("lang", lang);
     if (lang === "ar")
@@ -29,21 +31,21 @@ if (!currentLocale) {
     else document.querySelector("html")?.setAttribute("dir", "");
     Cookie.set("locale", lang);
   } else {
-    i18n.locale = defaultLangugage;
-    document.querySelector("html")?.setAttribute("lang", defaultLangugage);
-    if (defaultLangugage === "ar")
+    i18n.locale = defaultLocale;
+    document.querySelector("html")?.setAttribute("lang", defaultLocale);
+    if (defaultLocale === "ar")
       document.querySelector("html")?.setAttribute("dir", "rtl");
     else document.querySelector("html")?.setAttribute("dir", "");
-    Cookie.set("locale", defaultLangugage);
+    Cookie.set("locale", defaultLocale);
   }
 } else {
-  if (!supportedLanguages.includes(currentLocale)) {
-    Cookie.set("locale", defaultLangugage);
-    document.querySelector("html")?.setAttribute("lang", defaultLangugage);
-    if (defaultLangugage === "ar")
+  if (!supportedLocales.includes(currentLocale)) {
+    Cookie.set("locale", defaultLocale);
+    document.querySelector("html")?.setAttribute("lang", defaultLocale);
+    if (defaultLocale === "ar")
       document.querySelector("html")?.setAttribute("dir", "rtl");
     else document.querySelector("html")?.setAttribute("dir", "");
-    i18n.locale = defaultLangugage;
+    i18n.locale = defaultLocale;
   } else {
     i18n.locale = currentLocale;
     document.querySelector("html")?.setAttribute("lang", currentLocale);
