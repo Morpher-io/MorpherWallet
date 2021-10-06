@@ -20,7 +20,8 @@ const app = express();
 const rateLimit = require('express-rate-limit');
 
 const limitReached = (req: express.Request, res: express.Response) => {
-    Logger.warn({ data: { ip: req.ip} , message: 'Rate limiter triggered'});
+
+    Logger.warn({ data: { ip: req.ip, method: req.method, path: req.path, url: req.originalUrl} , message: 'Rate limiter triggered'});
 };
 
 const limiter = {

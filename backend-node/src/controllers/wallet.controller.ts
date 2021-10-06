@@ -775,14 +775,7 @@ export async function send2FAEmail(req, res) {
             });
             return successResponse(res, { sent: true });
         } catch (e) {
-            Logger.info({
-                method: arguments.callee.name,
-                type: "Error: Can't send 2FA email",
-                user_id: user.id,
-                user,
-                headers: req.headers,
-                body: req.body
-            });
+            Logger.error({ source: 'send2FAEmail', data: req.body, message: e.message || e.toString() } );
             return errorResponse(res, 'PROBLEM_SENDING_EMAIL', 500);
         }
     } catch (error) {
