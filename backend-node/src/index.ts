@@ -19,8 +19,13 @@ const app = express();
 
 const rateLimit = require('express-rate-limit');
 
+const limitReached = (req: express.Request, res: express.Response) => {
+    Logger.warn({ data: { ip: req.ip} , message: 'Rate limiter triggered'});
+};
+
 const limiter = {
     windowMs: 60 * 1000, // 1 minute
+    onLimitReached: limitReached,
     max: 200 // limit each IP to 60 requests per minute
 };
 
@@ -67,7 +72,7 @@ app.get('/', async (req, res) => {
 const httpServer = http.createServer(app);
 
 process.on('unhandledRejection', (error: any, promise) => {
-    Logger.info(error.stack || error);
+    Logger.error({ source: 'unhandledRejection', data: error.stack  || error, message: error.message || error.toString() } );
 });
 
 async function quitBackend() {
