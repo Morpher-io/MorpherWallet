@@ -33,11 +33,11 @@ import { Global, Authenticated } from '../mixins/mixins';
 export default class SignMsg extends mixins(Global, Authenticated) {
 	sign() {
 		this.store.signResponse = 'confirm';
-		this.$router.push('/');
+		this.$router.push('/').catch(() => undefined);;
 	}
 	cancel() {
 		this.store.signResponse = 'cancel';
-		this.$router.push('/');
+		this.$router.push('/').catch(() => undefined);;
 	}
 }
 </script>

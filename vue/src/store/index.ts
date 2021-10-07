@@ -18,6 +18,7 @@ import {
 import { downloadEncryptedKeystore, getAccountsFromKeystore, sortObject } from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
 import { getSessionStore, saveSessionStore, removeSessionStore } from '../utils/sessionStore';
+import * as Sentry from '@sentry/vue';
 
 import {
 	Type2FARequired,
@@ -100,6 +101,10 @@ function initialState(): RootState {
 	const email = localStorage.getItem('email') || '';
 	const iconSeed = parseInt(localStorage.getItem('iconSeed') || '') || null;
 	const hashedPassword = '';
+
+	Sentry.configureScope(scope => {
+		scope.setUser({ id: '', email: email });
+	});
 
 	let encryptedSeed: TypeEncryptedSeed = {};
 	if (localStorage.getItem('encryptedSeed')) {
@@ -204,6 +209,9 @@ const store: Store<RootState> = new Vuex.Store({
 		userFound(state: RootState, userData: TypeUserFoundData) {
 			state.email = userData.email;
 			state.hashedPassword = userData.hashedPassword;
+			Sentry.configureScope(scope => {
+				scope.setUser({ id: state.accounts && state.accounts.length > 0 ? state.accounts[0] : '', email: state.email });
+			});	
 
 			window.localStorage.setItem('email', userData.email);
 			saveSessionStore('password', userData.hashedPassword);
@@ -216,6 +224,9 @@ const store: Store<RootState> = new Vuex.Store({
 			localStorage.setItem('email', seedCreatedData.email);
 			localStorage.setItem('encryptedSeed', JSON.stringify(seedCreatedData.encryptedSeed));
 			saveSessionStore('password', seedCreatedData.hashedPassword);
+			Sentry.configureScope(scope => {
+				scope.setUser({ id: state.accounts && state.accounts.length > 0 ? state.accounts[0] : '', email: state.email });
+			});	
 		},
 		setPage(state: RootState, page) {
 			state.openPage = page;
@@ -225,12 +236,16 @@ const store: Store<RootState> = new Vuex.Store({
 			state.email = '';
 			state.hashedPassword = '';
 
+
 			localStorage.removeItem('encryptedSeed');
 			localStorage.removeItem('email');
 			localStorage.removeItem('iconSeed');
 			removeSessionStore('password');
 			state.loginRetryCount = 0;
-			router.push('/login');
+			router.push('/login').catch(() => undefined);;
+			Sentry.configureScope(scope => {
+				scope.setUser({ id: '', email: '' });
+			});				
 		},
 		logout(state: RootState) {
 			state.email = '';
@@ -245,6 +260,9 @@ const store: Store<RootState> = new Vuex.Store({
 			localStorage.removeItem('recoveryMethods');
 			removeSessionStore('password');
 			localStorage.removeItem('encryptedSeed');
+			Sentry.configureScope(scope => {
+				scope.setUser({ id: '', email: '' });
+			});	
 		},
 		clearUser(state: RootState) {
 			state.email = '';
@@ -254,6 +272,9 @@ const store: Store<RootState> = new Vuex.Store({
 
 			state.status = '';
 			state.token = '';
+			Sentry.configureScope(scope => {
+				scope.setUser({ id: '', email: '' });
+			});				
 		},
 		keystoreUnlocked(state: RootState, payload: TypeKeystoreUnlocked) {
 			state.keystore = payload.keystore;
@@ -261,6 +282,9 @@ const store: Store<RootState> = new Vuex.Store({
 			state.hashedPassword = payload.hashedPassword;
 
 			if (payload.accounts && payload.accounts[0])
+				Sentry.configureScope(scope => {
+					scope.setUser({ id: payload.accounts[0], email: state.email });
+				});			
 				window.localStorage.setItem('iconSeed', parseInt(payload.accounts[0].slice(2, 10), 16).toString());
 			saveSessionStore('password', payload.hashedPassword);
 		},
@@ -462,12 +486,16 @@ const store: Store<RootState> = new Vuex.Store({
 				state.iconSeed = iconSeed;
 				state.hashedPassword = hashedPassword;
 				state.encryptedSeed = encryptedSeed;
+
+				Sentry.configureScope(scope => {
+					scope.setUser({ id: state.accounts && state.accounts.length > 0 ? state.accounts[0] : '', email: state.email });
+				});			
 			}
 
 			dispatch('unlockWithStoredPassword')
 				.then(result => {
 					if (result) {
-						router.push('/');
+						router.push('/').catch(() => undefined);;
 					}
 				})
 				.catch(error => {
@@ -478,7 +506,7 @@ const store: Store<RootState> = new Vuex.Store({
 		},
 		async logoutWallet({ commit }) {
 			await commit('logout');
-			if (router.currentRoute.path !== '/login') router.push('/login');
+			if (router.currentRoute.path !== '/login') router.push('/login').catch(() => undefined);;
 		},
 		clearPage({ commit }) {
 			commit('setPage', '');
@@ -1003,7 +1031,7 @@ if (isIframe()) {
 								}
 								store.state.transactionDetails = txObj;
 								store.state.signResponse = null;
-								router.push('/signtx');
+								router.push('/signtx').catch(() => undefined);;
 								const interval = setInterval(() => {
 									if (store.state.signResponse) {
 										clearInterval(interval);
@@ -1050,7 +1078,7 @@ if (isIframe()) {
 								const Web3Utils = require('web3-utils');
 								store.state.messageDetails = Web3Utils.toAscii(txObj.data);
 								store.state.signResponse = null;
-								router.push('/signmsg');
+								router.push('/signmsg').catch(() => undefined);;
 
 								const interval = setInterval(() => {
 									if (store.state.signResponse) {

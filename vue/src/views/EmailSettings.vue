@@ -59,6 +59,8 @@ export default class EmailSettings extends mixins(Authenticated, Global) {
 		} catch (error) {
 			if (error && error.toString() === 'TypeError: Failed to fetch') {
 				this.showNetworkError(true);
+			} else {
+				this.logSentryError('setNewData', error.toString(), data)
 			}
 
 			this.logonError = getDictionaryValue(error.toString());
@@ -78,6 +80,8 @@ export default class EmailSettings extends mixins(Authenticated, Global) {
 		} catch (error) {
 			if (error && error.toString() === 'TypeError: Failed to fetch') {
 				this.showNetworkError(true);
+			} else {
+				this.logSentryError('setCode', error.toString(), { code })
 			}
 
 			this.logonError = getDictionaryValue(error.toString());
@@ -89,7 +93,7 @@ export default class EmailSettings extends mixins(Authenticated, Global) {
 	}
 
 	redirectUser() {
-		this.$router.push('/settings');
+		this.$router.push('/settings').catch(() => undefined);;
 	}
 
 	resetData() {

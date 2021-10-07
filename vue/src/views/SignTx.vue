@@ -100,11 +100,11 @@ export default class SignTx extends mixins(Global, Authenticated) {
 
 	sign() {
 		this.store.signResponse = 'confirm';
-		this.$router.push('/');
+		this.$router.push('/').catch(() => undefined);;
 	}
 	cancel() {
 		this.store.signResponse = 'cancel';
-		this.$router.push('/');
+		this.$router.push('/').catch(() => undefined);;
 	}
 	get chainName() {
 		if (this.store.transactionDetails && Number(this.store.transactionDetails.chainId) === 21) {

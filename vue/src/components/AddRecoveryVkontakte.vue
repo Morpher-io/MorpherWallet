@@ -5,6 +5,7 @@
 				class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
 				@click="doLogin"
 				v-if="!hasRecoveryMethod"
+				data-cy="vkontakteButton"
 			>
 				<span class="icon img">
 					<img src="@/assets/img/vk_logo.svg" alt="VKontakte Logo" />
@@ -119,6 +120,7 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 							});
 						})
 						.catch(() => {
+						  this.logSentryError('addRecoveryVK', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId })
 							this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_ERROR'));
 							this.processMethod({
 								success: false,
@@ -176,6 +178,7 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 							});
 						})
 						.catch(() => {
+						  this.logSentryError('deleteRecoveryVK', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId })
 							this.showSpinnerThenAutohide(this.$t('common.ERROR_FIND_USER'));
 							this.processMethod({
 								success: false,

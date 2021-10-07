@@ -217,7 +217,7 @@ export default class Wallet extends mixins(Global, Authenticated) {
 
 	logout() {
 		this.logoutWallet();
-		//this.router.push('/login');
+		//this.router.push('/login').catch(() => undefined);;
 	}
 }
 </script>

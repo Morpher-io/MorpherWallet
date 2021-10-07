@@ -10,6 +10,7 @@
 				@sdk-init="handleSdkInit"
 				@login="onLogin"
 				v-model="facebook.model"
+				data-cy="facebookButton"
 				><span class="is-flex is-align-items-center" slot="login">
 					<span class="icon img">
 						<img src="@/assets/img/fb_logo.svg" alt="Facebook Logo" />
@@ -118,6 +119,7 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 				});
 			})
 			.catch(() => {
+			  this.logSentryError('addFacebookRecovery', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId })
 				this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_ERROR'));
 				this.processing = false;
 				this.processMethod({
@@ -161,6 +163,7 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 				});
 			})
 			.catch(() => {
+			  this.logSentryError('deleteFacebookRecovery', error.toString(), { data, recoveryTypeId: this.recoveryTypeId })
 				this.showSpinnerThenAutohide(this.$t('common.ERROR_FIND_USER'));
 				this.processing = false;
 				this.processMethod({

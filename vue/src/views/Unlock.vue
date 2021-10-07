@@ -85,7 +85,7 @@ export default class Unlock extends mixins(Global) {
 			.then(result => {
 				this.hideSpinner();
 				if (result) {
-					this.$router.push('/');
+					this.$router.push('/').catch(() => undefined);;
 				}
 			})
 			.catch(error => {
@@ -93,6 +93,8 @@ export default class Unlock extends mixins(Global) {
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {
 					this.showNetworkError(true);
+				} else {
+					this.logSentryError('Unlock', error.toString(), { })
 				}
 				// error
 			});
@@ -114,13 +116,15 @@ export default class Unlock extends mixins(Global) {
 		this.unlockWithPassword({ password })
 			.then(() => {
 				// open root page after logon success
-				this.$router.push('/');
+				this.$router.push('/').catch(() => undefined);;
 			})
 			.catch(error => {
 				this.hideSpinner();
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {
 					this.showNetworkError(true);
+				} else {
+					this.logSentryError('Unlock', error.toString(), { })
 				}
 
 				// Logon failed
@@ -130,7 +134,7 @@ export default class Unlock extends mixins(Global) {
 
 	logout() {
 		this.logoutWallet();
-		//this.$router.push('/login');
+		//this.$router.push('/login').catch(() => undefined);;
 	}
 
 	generateImage(seed: any): void {

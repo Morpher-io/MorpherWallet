@@ -7,6 +7,7 @@
 				:onSuccess="onLogin"
 				:onCurrentUser="onLogin"
 				:onFailure="onError"
+				data-cy="googleButton"
 			>
 				<span class="icon img">
 					<img src="@/assets/img/google_logo.svg" alt="Google Logo" />
@@ -69,6 +70,7 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 	}
 
 	onError(error) {
+		this.logSentryError('addGoogleRecovery', error.toString(), { hasRecoveryMethod: this.hasRecoveryMethod, clientId: this.clientId, recoveryTypeId: this.recoveryTypeId })
 		let errorText = error.error || error.err || 'Google login Error';
 
 		if (String(errorText.toLowerCase()).includes('script not loaded correctly')) {
@@ -98,6 +100,7 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 				});
 			})
 			.catch(() => {
+			  	this.logSentryError('addGoogleRecovery', error.toString(), { hasRecoveryMethod: this.hasRecoveryMethod, clientId: this. clientId, recoveryTypeId: this.recoveryTypeId, googleUser })
 				this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_ERROR'));
 				this.processMethod({
 					success: false,
@@ -125,6 +128,7 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 				});
 			})
 			.catch(() => {
+			  this.logSentryError('deleteGoogleRecovery', error.toString(), { hasRecoveryMethod: this.hasRecoveryMethod, clientId: this. clientId, recoveryTypeId: this.recoveryTypeId, googleUser })
 				this.showSpinnerThenAutohide(this.$t('common.ERROR_FIND_USER'));
 				this.processMethod({
 					success: false,

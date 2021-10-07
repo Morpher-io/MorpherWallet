@@ -139,7 +139,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 	}
 
 	redirectUser() {
-		this.$router.push('/settings');
+		this.$router.push('/settings').catch(() => undefined);;
 	}
 
 	processMethod(data: any): void {

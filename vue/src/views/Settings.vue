@@ -23,7 +23,7 @@
 				</span>
 			</div>
 
-			<div key="recovery" class="settings-link is-flex is-align-items-center" @click="changeActive('recovery')">
+			<div data-cy="recoverySettings" key="recovery" class="settings-link is-flex is-align-items-center" @click="changeActive('recovery')">
 				<i class="fas fa-life-ring" />
 				<span class="text">
 					{{ $t('settings.TRUSTED_ACCOUNT') }}
@@ -118,7 +118,7 @@ export default class Settings extends mixins(Authenticated, Global) {
 			return;
 		}
 
-		this.$router.push('/');
+		this.$router.push('/').catch(() => undefined);;
 	}
 
 	changeActive(page: string) {
@@ -129,7 +129,7 @@ export default class Settings extends mixins(Authenticated, Global) {
 			return;
 		}
 
-		this.$router.push('/settings/' + page);
+		this.$router.push('/settings/' + page).catch(() => undefined);;
 	}
 
 	mounted() {

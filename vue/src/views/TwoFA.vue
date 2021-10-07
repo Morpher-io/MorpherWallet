@@ -117,7 +117,7 @@ export default class TwoFA extends mixins(Global) {
 		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.authenticatorCode })
 			.then((nextroute) => {
 				this.hideSpinner();
-				this.router.push(nextroute);
+				this.router.push(nextroute).catch(() => undefined);;
 			})
 			.catch((error) => {
 				this.hideSpinner();
@@ -128,7 +128,7 @@ export default class TwoFA extends mixins(Global) {
 
 				if (error.toString() === 'invalid password') {
 					this.store.status = 'invalid password';
-					this.router.push('/login');
+					this.router.push('/login').catch(() => undefined);;
 				}
 				this.logonError = getDictionaryValue(error.toString());
 			});
@@ -136,7 +136,7 @@ export default class TwoFA extends mixins(Global) {
 
 	logout() {
 		this.logoutWallet();
-		//this.router.push('/login');
+		//this.router.push('/login').catch(() => undefined);;
 	}
 }
 </script>
