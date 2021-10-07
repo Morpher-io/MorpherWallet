@@ -78,7 +78,7 @@
                 },
                 {
                     "name": "EMAIL_NOTIFICATIONS_NAME",
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:EMAIL_NOTIFICATIONS_NAME::"
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:WALLET_EMAIL_NOTIFICATIONS_NAME::"
                 },
                 {
                     "name": "SECRET_API_KEY",
