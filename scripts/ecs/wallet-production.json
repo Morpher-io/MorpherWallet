@@ -82,7 +82,7 @@
                 },
                 {
                     "name": "SECRET_API_KEY",
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_EMAIL_NOTIFICATIONS_SECRET::"
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:WALLET_EMAIL_NOTIFICATIONS_SECRET::"
                 }
 
             ],
