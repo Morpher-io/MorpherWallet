@@ -151,7 +151,7 @@
         "UPPERCASE_LETTER": "Uppercase letter",
         "NUMBER": "Number",
         "PASSWORD_MATCH": "Passwords match",
-        "PASSWORD_UPDATED_TITLE": "Password updated",
+        "PASSWORD_UPDATED_TITLE": "Password Updated",
         "PASSWORD_UPDATED_DESCRIPTION": "Your password was successfully updated!"
     },
     "email": {
