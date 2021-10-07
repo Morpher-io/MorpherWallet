@@ -54,7 +54,7 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 	}
 
 	onLogin(googleUser) {
-		this.showSpinner('Trying to log in...');
+		this.showSpinner(this.$t('recovery.RECOVERY_LOG_IN'));
 		try {
 			const userID = googleUser.getBasicProfile().getId();
 			const accessToken = googleUser.getAuthResponse(true).access_token;
@@ -71,18 +71,18 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 				.catch(error => {
 					this.logSentryError('recoverWalletGoogle', error.toString(), { userID });
 					googleUser.disconnect();
-					this.showSpinnerThenAutohide('No recovery found');
+					this.showSpinnerThenAutohide(this.$t('recovery.NO_RECOVERY_FOUND'));
 					this.setPassword({
 						success: false,
-						error: 'No recovery found'
+						error: this.$t('recovery.NO_RECOVERY_FOUND')
 					});
 				});
 		} catch (e) {
-			this.logSentryError('recoverWalletGoogle', e.toString(), {});
-			this.showSpinnerThenAutohide('No recovery found');
+			this.logSentryError('recoverWalletGoogle', e.toString(), { googleUser })
+			this.showSpinnerThenAutohide(this.$t('recovery.NO_RECOVERY_FOUND'));
 			this.setPassword({
 				success: false,
-				error: 'No recovery found'
+				error: this.$t('recovery.NO_RECOVERY_FOUND')
 			});
 		}
 	}

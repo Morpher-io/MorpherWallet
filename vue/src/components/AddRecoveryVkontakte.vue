@@ -19,13 +19,15 @@
 				<span class="icon img">
 					<img src="@/assets/img/vk_logo_white.svg" alt="VKontakte Logo" />
 				</span>
-				<span data-cy="revokeVkontakte">Revoke Access</span>
+				<span>{{ $t('recovery.REVOKE_ACCESS') }}</span>
 			</button>
 			<div class="recovery-active is-text-small">
 				<span class="icon">
 					<i class="fas fa-check-circle"></i>
 				</span>
-				VKontakte Recovery Active
+				{{ $t('recovery.RECOVERY_ACTIVE', {
+					currentMethod: 'VKontakte'
+				}) }}
 			</div>
 		</div>
 	</div>
@@ -103,12 +105,12 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 					}, 100);
 
 					const userID = params.user_id;
-					this.showSpinner('Saving Keystore for Recovery');
+					this.showSpinner(this.$t('loader.SAVING_KEYSTORE_RECOVERY'));
 
 					const key = await sha256(this.clientId + userID);
 					this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
 						.then(async () => {
-							this.showSpinnerThenAutohide('Saved Successfully');
+							this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_SUCCESSFULLY'));
 							this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 							this.processMethod({
 								success: true,
@@ -117,9 +119,9 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 								erorr: ''
 							});
 						})
-						.catch(error => {
-							this.logSentryError('addRecoveryVK', error.toString(), { userID, recoveryTypeId: this.recoveryTypeId });
-							this.showSpinnerThenAutohide('Error');
+						.catch((error) => {
+						  this.logSentryError('addRecoveryVK', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId })
+							this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_ERROR'));
 							this.processMethod({
 								success: false,
 								method: 'VKontakte',
@@ -161,12 +163,12 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 					}, 100);
 
 					const userID = params.user_id;
-					this.showSpinner('Deleting Keystore for Recovery');
+					this.showSpinner(this.$t('loader.DELETING_KEYSTORE_RECOVERY'));
 
 					const key = await sha256(this.clientId + userID);
 					this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId })
 						.then(async () => {
-							this.showSpinnerThenAutohide('Deleted Successfully');
+							this.showSpinnerThenAutohide(this.$t('loader.DELETED_KEYSTORE_SUCCESSFULLY'));
 							this.hasRecoveryMethod = false;
 							this.processMethod({
 								success: true,
@@ -175,9 +177,9 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 								erorr: ''
 							});
 						})
-						.catch(error => {
-							this.logSentryError('deleteRecoveryVK', error.toString(), { userID, recoveryTypeId: this.recoveryTypeId });
-							this.showSpinnerThenAutohide('Error finding user');
+						.catch((error) => {
+						  this.logSentryError('deleteRecoveryVK', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId })
+							this.showSpinnerThenAutohide(this.$t('common.ERROR_FIND_USER'));
 							this.processMethod({
 								success: false,
 								method: 'VKontakte',

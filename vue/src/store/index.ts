@@ -52,6 +52,9 @@ import { CallSender, Connection } from 'penpal/lib/types';
 import router from '@/router';
 import download from 'downloadjs';
 
+import { i18n } from '../plugins/i18n';
+import Cookie from 'js-cookie';
+
 Vue.use(Vuex);
 
 /*
@@ -1146,6 +1149,17 @@ if (isIframe()) {
 			},
 			logout() {
 				store.commit('logout');
+			},
+			setLanguage(lang?: string): void {
+				const supportedLocales: string[] = JSON.parse(process.env.VUE_APP_I18N_SUPPORTED_LOCALE || '') || ['en'];
+
+				if (lang && supportedLocales.includes(lang)) {
+					i18n.locale = lang;
+					document.querySelector('html')?.setAttribute('lang', lang);
+					if (lang === 'ar') document.querySelector('html')?.setAttribute('dir', 'rtl');
+					else document.querySelector('html')?.setAttribute('dir', '');
+					Cookie.set('locale', lang);
+				}
 			}
 		}
 	});

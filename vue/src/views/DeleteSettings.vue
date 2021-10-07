@@ -11,45 +11,37 @@
 						<i class="fas fa-chevron-left"></i>
 					</span>
 				</button>
-				<h2 class="title ml-3">Delete Account</h2>
+				<h2 class="title ml-3">{{ $t('delete.DELETE_ACCOUNT_TITLE') }}</h2>
 			</div>
 			<div class="divider just-space" />
 			<p class="has-text-left reset-line-height">
-				<span class="has-text-weight-medium"
-					>Please <router-link to="/settings/keys" class="login-router transition-faster">export your wallet</router-link> first.</span
-				>
-				You need to verify ownership with the seed phrase or private key before your account can be removed.
+				<span
+					class="has-text-weight-medium"
+					v-html="
+						$t('delete.PLEASE_EXPORT_YOUR_WALLET', {
+							link: '/settings/keys'
+						})
+					"
+				></span>
+				{{ $t('delete.DELETE_TIP') }}
 			</p>
 			<div class="field is-grouped mb-5">
 				<button data-cy="deleteAccountButton" @click="setNewPage()" tag="button" class="button big-button is-danger transition-faster">
-					<span>Delete Account</span>
+					<span>{{ $t('delete.DELETE_ACCOUNT_TITLE') }}</span>
 				</button>
 			</div>
 
 			<div class="divider" />
 
 			<div class="has-text-left mt-5 reset-line-height">
-				<p class="has-text-weight-medium">
-					What gets deleted?
-				</p>
-				<p>
-					Any information in our databases linked to this wallet account (such as email and settings).
-				</p>
+				<p class="has-text-weight-medium">{{ $t('delete.WHAT_DELETE_TITLE') }}</p>
+				<p>{{ $t('delete.WHAT_DELETE_DESCRIPTION') }}</p>
 
-				<p class="has-text-weight-medium mt-2">
-					Does my wallet get deleted?
-				</p>
-				<p>
-					We don’t control your wallet. As long as you have your keys, you can use your wallet with any other Ethereum service. For example
-					you can import your keys into Metamask.
-				</p>
+				<p class="has-text-weight-medium mt-2">{{ $t('delete.DOES_DELETE_WALLET_TITLE') }}</p>
+				<p>{{ $t('delete.DOES_DELETE_WALLET_DESCRIPTION') }}</p>
 
-				<p class="has-text-weight-medium mt-2">
-					What happens to my funds?
-				</p>
-				<p>
-					Funds on mainnet Ethereum are not affected by account deletion.
-				</p>
+				<p class="has-text-weight-medium mt-2">{{ $t('delete.WHAT_FUNDS_TITLE') }}</p>
+				<p>{{ $t('delete.WHAT_FUNDS_DESCRIPTION') }}</p>
 			</div>
 		</div>
 		<ConfirmAccess v-if="currentPage === 1" @pageBack="pageBack" @setPassword="setPassword" :error="logonError" />
@@ -108,13 +100,13 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 				const seed = await this.showSeedPhraseBackground({ password: this.password });
 
 				if (!seed || data.input !== seed) {
-					this.logonError = 'Wrong seed phrase. Please try again.';
+					this.logonError = this.$t('common.WRONG_SEED').toString();
 					return;
 				}
 
 				try {
 					await this.deleteWalletAccount({ password: this.password });
-					this.showSpinnerThenAutohide('Account deleted successfully.');
+					this.showSpinnerThenAutohide(this.$t('loader.ACCOUNT_DELETED_SUCCESSFULLY').toString());
 				} catch (error) {
 					this.logSentryError('deleteAccount', error.toString(), data);
 					if (error && error.toString() === 'TypeError: Failed to fetch') {
@@ -127,13 +119,13 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 				const key = await this.showPrivateKeyBackground({ password: this.password });
 
 				if (!key || data.input !== key) {
-					this.logonError = 'Wrong private key. Please try again.';
+					this.logonError = this.$t('common.WRONG_PRIVATE_KEY').toString();
 					return;
 				}
 
 				try {
 					await this.deleteWalletAccount({ password: this.password });
-					this.showSpinnerThenAutohide('Account deleted successfully.');
+					this.showSpinnerThenAutohide(this.$t('loader.ACCOUNT_DELETED_SUCCESSFULLY').toString());
 				} catch (error) {
 					this.logSentryError('deleteAccount', error.toString(), data);
 					if (error && error.toString() === 'TypeError: Failed to fetch') {

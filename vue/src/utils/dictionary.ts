@@ -1,44 +1,10 @@
-const FALLBACK_MESSAGE = 'Something went wrong. Please try again later.';
-
-interface Dictionary {
-	[key: string]: string;
-}
-
-const dictionary: Dictionary = {
-	INTERNAL_SERVER_ERROR: 'Internal server error',
-	BAD_REQUEST: 'Bad request',
-	USER_NOT_FOUND: 'No account found. Please check your credentials and try again.',
-	RECOVERY_METHOD_ALREADY_SET: 'Recovery Method already set!',
-	RECOVERY_METHOD_NOT_EXIST: 'The Recovery Method does not exist.',
-	USER_ALREADY_EXISTS: 'Wallet for this mail already exists.',
-	ACCOUNT_NOT_CONFIRMED: 'Account not yet confirmed. Try again.',
-	SOME_2FA_WRONG: 'Either Email2FA or Authenticator2FA was wrong. Try again.',
-	EMAIL_2FA_WRONG: 'Incorrect Email 2FA code. Check your email and Try again.',
-	EMAIL_2FA_EXPIRED: 'Email 2FA is expired. Logout/Login and enter Email 2FA within 15 minutes.',
-	METHODS_2FA_NOT_FOUND: '2FA methods could not be found',
-	NONCE_NOT_FOUND: 'Nonce could not be found',
-	CANNOT_DELETE_USER: 'Could not delete User!',
-	CANNOT_GENERATE_QR_CODE: 'Could not generate QR code.',
-	CANNOT_VERIFY_AUTHENTICATOR: 'Could not verify authenticator code.',
-	PROBLEM_SENDING_EMAIL: 'There was a problem parsing the email',
-	CANNOT_VERIFY_EMAIL_CODE: 'Could not verify email code. Please try again.',
-	CANNOT_FIND_RECOVERY: 'Could not find recovery!',
-	AUTH_ERROR: 'Auth Error - Aborting!',
-	// Frontend
-	DECRYPT_FAILED: 'Password provided failed to decrypt your account.',
-	// google
-	GOOGLE_COOKIES_BLOCKED:
-		'Unable to log into Google. It looks like cookies are disabled wich may be blocking google access. Try turning off incognito mode. ',
-	GOOGLE_SCRIPT_BLOCKED:
-		'Unable to log into Google. The google login script has been blocked, possibly by an ad-blocker. Try turning off your ad-blocker and login again. ',
-	RECOVERY_UNLOCK_ERROR: 'Unable to unlock your wallet. This may be because you used a different account or never set up account recovery. '
-};
+import { i18n } from "@/plugins/i18n";
 
 const getDictionaryValue = (key: string): string => {
-	let message: string = FALLBACK_MESSAGE;
+	let message: string = i18n.t('errors.' + key).toString();
 
-	if (dictionary[key]) {
-		message = dictionary[key];
+	if (!message) {
+		message = i18n.t('errors.FALLBACK_MESSAGE').toString()
 	}
 
 	return message;

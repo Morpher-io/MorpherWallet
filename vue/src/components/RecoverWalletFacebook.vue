@@ -56,7 +56,7 @@ export default class RecoverWalletFacebook extends mixins(Global) {
 	}
 
 	async onLogin(data) {
-		this.showSpinner('Trying to log in...');
+		this.showSpinner(this.$t('recovery.RECOVERY_LOG_IN'));
 		try {
 			const userID = data.authResponse.userID;
 			const accessToken = data.authResponse.accessToken;
@@ -76,7 +76,7 @@ export default class RecoverWalletFacebook extends mixins(Global) {
 					this.logSentryError('facebookRecovery', error.toString(), { userID });
 					this.facebook.FB.api('/me/permissions', 'DELETE', async () => {
 						this.facebook.scope.logout();
-						this.showSpinnerThenAutohide('No recovery found...');
+						this.showSpinnerThenAutohide(this.$t('recovery.NO_RECOVERY_FOUND'));
 						this.recoveryError = error;
 						this.setPassword({
 							success: false,
@@ -86,13 +86,13 @@ export default class RecoverWalletFacebook extends mixins(Global) {
 					});
 				});
 		} catch (e) {
-			this.logSentryError('facebookRecovery', e.toString(), {});
-			this.showSpinnerThenAutohide('Your Account was not found');
-			this.recoveryError = 'Your Account was not found.';
+			this.logSentryError('facebookRecovery', e.toString(), data)
+			this.showSpinnerThenAutohide(this.$t('recovery.NO_ACCOUNT_FOUND'));
+			this.recoveryError = this.$t('recovery.NO_ACCOUNT_FOUND');
 			this.setPassword({
 				success: false,
 				oldPassword: null,
-				error: 'Your account was not found.'
+				error: this.$t('recovery.NO_ACCOUNT_FOUND')
 			});
 		}
 	}

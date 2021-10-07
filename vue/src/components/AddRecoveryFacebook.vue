@@ -33,14 +33,16 @@
 					<span class="icon img">
 						<img src="@/assets/img/fb_logo_white.svg" alt="Facebook Logo" />
 					</span>
-					<span data-cy="revokeFacebook">Revoke Access</span>
+					<span>{{ $t('recovery.REVOKE_ACCESS') }}</span>
 				</span>
 			</v-facebook-login>
 			<div class="recovery-active is-text-small">
 				<span class="icon">
 					<i class="fas fa-check-circle"></i>
 				</span>
-				Facebook Recovery Active
+				{{ $t('recovery.RECOVERY_ACTIVE', {
+					currentMethod: 'Facebook'
+				}) }}
 			</div>
 		</div>
 	</div>
@@ -97,7 +99,7 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 			});
 			return;
 		}
-		this.showSpinner('Saving Keystore for Recovery');
+		this.showSpinner(this.$t('loader.SAVING_KEYSTORE_RECOVERY'));
 		const userID = data.authResponse.userID;
 		const key = await sha256(this.clientId + userID);
 
@@ -105,7 +107,7 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 			.then(async () => {
 				this.facebook.FB.api('/me/permissions', 'DELETE', async () => {
 					this.facebook.scope.logout();
-					this.showSpinnerThenAutohide('Saved Successfully');
+					this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_SUCCESSFULLY'));
 					this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 					this.processing = false;
 					this.processMethod({
@@ -116,9 +118,9 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 					});
 				});
 			})
-			.catch(error => {
-				this.logSentryError('addFacebookRecovery', error.toString(), { userID, recoveryTypeId: this.recoveryTypeId });
-				this.showSpinnerThenAutohide('Error During Saving');
+			.catch((error) => {
+			  this.logSentryError('addFacebookRecovery', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId })
+				this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_ERROR'));
 				this.processing = false;
 				this.processMethod({
 					success: false,
@@ -142,14 +144,14 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 			return;
 		}
 
-		this.showSpinner('Deleting Keystore for Recovery');
+		this.showSpinner(this.$t('loader.DELETING_KEYSTORE_RECOVERY'));
 		const userID = data.authResponse.userID;
 		const key = await sha256(this.clientId + userID);
 		this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId })
 			.then(async () => {
 				this.facebook.FB.api('/me/permissions', 'DELETE', () => {
 					this.facebook.scope.logout();
-					this.showSpinnerThenAutohide('Keystore deleted successfully');
+					this.showSpinnerThenAutohide(this.$t('loader.DELETED_KEYSTORE_SUCCESSFULLY'));
 					this.hasRecoveryMethod = false;
 					this.processing = false;
 					this.processMethod({
@@ -160,9 +162,9 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 					});
 				});
 			})
-			.catch(error => {
-				this.logSentryError('deleteFacebookRecovery', error.toString(), { data, recoveryTypeId: this.recoveryTypeId });
-				this.showSpinnerThenAutohide('Error finding user');
+			.catch((error) => {
+			  this.logSentryError('deleteFacebookRecovery', error.toString(), { data, recoveryTypeId: this.recoveryTypeId })
+				this.showSpinnerThenAutohide(this.$t('common.ERROR_FIND_USER'));
 				this.processing = false;
 				this.processMethod({
 					success: false,

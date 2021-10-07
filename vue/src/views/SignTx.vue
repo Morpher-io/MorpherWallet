@@ -3,7 +3,7 @@
 		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 		<div class="container">
 			<spinner v-model="showSpinner" v-bind:status="status"></spinner>
-			<h2 class="title">Confirm Transaction</h2>
+			<h2 class="title">{{ $t('common.CONFIRM_TRANSACTION') }}</h2>
 			<p class="subtitle" v-if="store.transactionDetails">{{ chainName }}</p>
 			<div class="settings-data user-details">
 				<div class="details is-flex is-align-items-center">
@@ -28,31 +28,31 @@
 			<div class="divider just-space"></div>
 
 			<div class="card column">
-				<p class="has-text-weight-medium">Send</p>
+				<p class="has-text-weight-medium">{{ $t('common.SEND') }}</p>
 				<p v-if="isMPH" class="eth_balance">{{ roundFormatter(mphValue) }} MPH</p>
 				<p v-else class="eth_balance">{{ roundFormatter(store.transactionDetails.value / Math.pow(10, 18)) }} ETH</p>
 			</div>
 
 			<div class="payment-description">
 				<div class="details-group">
-					<p class="subtitle has-text-weight-medium">Gas Fee</p>
+					<p class="subtitle has-text-weight-medium">{{ $t('common.GAS_FEE') }}</p>
 					<p class="text">
 						{{ roundFormatter((Number(store.transactionDetails.gasPrice) * Number(store.transactionDetails.gas)) / Math.pow(10, 18)) }} ETH
 					</p>
 				</div>
 				<div class="details-group small">
-					<p class="subtitle">Gas Price</p>
+					<p class="subtitle">{{ $t('common.GAS_PRICE') }}</p>
 					<p class="text">{{ roundFormatter(Number(store.transactionDetails.gasPrice) / Math.pow(10, 9)) }} gwei</p>
 				</div>
 				<div class="details-group small">
-					<p class="subtitle">Gas Limit</p>
+					<p class="subtitle">{{ $t('common.GAS_LIMIT') }}</p>
 					<p class="text">{{ roundFormatter(Number(store.transactionDetails.gas)) }} gwei</p>
 				</div>
 
 				<div class="divider thick"></div>
 
 				<div v-if="!isMPH" class="details-group mb-0">
-					<p class="subtitle has-text-weight-medium">Total</p>
+					<p class="subtitle has-text-weight-medium">{{ $t('common.TOTAL') }}</p>
 					<p class="text">
 						{{
 							roundFormatter(
@@ -64,7 +64,7 @@
 					</p>
 				</div>
 				<div v-else class="details-group mb-0 is-align-items-start">
-					<p class="subtitle has-text-weight-medium">Total</p>
+					<p class="subtitle has-text-weight-medium">{{ $t('common.TOTAL') }}</p>
 					<p class="text">
 						<span class="is-block has-text-right reset-line-height">{{ roundFormatter(mphValue) }} MPH</span>
 						<span class="is-block has-text-right reset-line-height mt-1"
@@ -77,11 +77,11 @@
 			</div>
 
 			<button class="button is-green big-button is-login transition-faster mt-5" @click="sign()">
-				<span>Confirm</span>
+				<span>{{ $t('common.CONFIRM') }}</span>
 			</button>
 
 			<button @click="cancel()" class="button is-ghost is-blue big-button medium-text transition-faster">
-				<span>Cancel</span>
+				<span>{{ $t('common.CANCEL') }}</span>
 			</button>
 		</div>
 	</div>
@@ -94,8 +94,8 @@ import { copyToClipboard } from '../utils/utils';
 
 @Component({})
 export default class SignTx extends mixins(Global, Authenticated) {
-	copyTextSrc = 'Copy to Clipboard';
-	copyTextDest = 'Copy to Clipboard';
+	copyTextSrc = this.$t('common.COPY_TO_CLIPBOARD').toString();
+	copyTextDest = this.$t('common.COPY_TO_CLIPBOARD').toString();
 	copyToClipboard = copyToClipboard;
 
 	sign() {
@@ -135,16 +135,16 @@ export default class SignTx extends mixins(Global, Authenticated) {
 
 	copySrcETHAddress(text: string) {
 		copyToClipboard(text);
-		this.copyTextSrc = 'Eth Address Copied';
+		this.copyTextSrc = this.$t('common.ETH_ADDRESS_COPIED').toString();
 		setTimeout(() => {
-			this.copyTextSrc = 'Copy to clipboard';
+			this.copyTextSrc = this.$t('common.COPY_TO_CLIPBOARD').toString();
 		}, 5000);
 	}
 	copyDestETHAddress(text: string) {
 		copyToClipboard(text);
-		this.copyTextDest = 'Eth Address Copied';
+		this.copyTextDest = this.$t('common.ETH_ADDRESS_COPIED').toString();
 		setTimeout(() => {
-			this.copyTextDest = 'Copy to clipboard';
+			this.copyTextDest = this.$t('common.COPY_TO_CLIPBOARD').toString();
 		}, 5000);
 	}
 }

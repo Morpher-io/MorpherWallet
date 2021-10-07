@@ -2,8 +2,8 @@
 	<div class="container">
 		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 
-		<h2 class="title">👋 Welcome Back</h2>
-		<p class="subtitle">Unlock your crypto wallet.</p>
+		<h2 class="title">👋 {{ $t('auth.UNLOCK_TITLE') }}</h2>
+		<p class="subtitle">{{ $t('auth.UNLOCK_DESCRIPTION') }}</p>
 
 		<div class="user-details settings-data">
 			<div class="details">
@@ -11,14 +11,14 @@
 					<div ref="userImage" class="jazz-icon" />
 					<div class="ml-3">
 						<p>{{ walletEmail }}</p>
-						<div @click="logout()" class="login-router transition-faster reset-line-height">Switch account</div>
+						<div @click="logout()" class="login-router transition-faster reset-line-height">{{ $t('auth.SWITCH_ACCOUNT') }}</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
 		<div class="field">
-			<label class="label">Password</label>
+			<label class="label">{{ $t('common.PASSWORD') }}</label>
 
 			<div class="control">
 				<input
@@ -31,8 +31,8 @@
 				/>
 				<div v-if="showRecovery">
 					<p class="help is-danger">
-						The Password you provided can't be used to de-crypt your wallet.
-						<router-link to="/recovery">Do you want to restore your Account?</router-link>
+						{{ $t('auth.CANNOT_DECRYPT_PASSWORD') }}
+						<router-link to="/recovery">{{ $t('auth.RESTORE_ACCOUNT') }}</router-link>
 					</p>
 				</div>
 			</div>
@@ -43,10 +43,10 @@
 		</div>
 
 		<button @click="login()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!walletPassword">
-			<span>Log In</span>
+			<span>{{ $t('auth.LOGIN') }}</span>
 		</button>
 		<p class="forgot-password">
-			Forgot password? <router-link to="/recovery" class="login-router transition-faster"><span>Recover your wallet</span></router-link>
+			{{ $t('auth.FORGOT_PASSWORD') }} <router-link to="/recovery" class="login-router transition-faster"><span>{{ $t('auth.RECOVER_YOUR_WALLET') }}</span></router-link>
 		</p>
 	</div>
 </template>
@@ -79,7 +79,7 @@ export default class Unlock extends mixins(Global) {
 
 		const iconSeed = localStorage.getItem('iconSeed') || '';
 		this.generateImage(iconSeed);
-		this.showSpinner('Loading account...');
+		this.showSpinner(this.$t('loader.LOADING_ACCOUNT').toString());
 		// Check if the wallet can be unlocked using the local-storage stored password
 		this.unlockWithStoredPassword()
 			.then(result => {
@@ -108,7 +108,7 @@ export default class Unlock extends mixins(Global) {
 		}
 		this.logonError = '';
 		const password = await sha256(this.walletPassword);
-		this.showSpinnerThenAutohide('Logging in...');
+		this.showSpinnerThenAutohide(this.$t('loader.RECOVERY_LOG_IN').toString());
 
 		// Call the fetchUser store action to process the wallet logon
 		this.unlockWithPassword({ password })

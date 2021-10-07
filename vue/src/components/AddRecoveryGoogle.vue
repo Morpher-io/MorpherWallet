@@ -27,14 +27,16 @@
 					<span class="icon img">
 						<img src="@/assets/img/google_logo_white.svg" alt="Google Logo" />
 					</span>
-					<span data-cy="revokeGoogle">Revoke Access</span>
+					<span>{{ $t('recovery.REVOKE_ACCESS') }}</span>
 				</GoogleLogin>
 			</div>
 			<div class="recovery-active is-text-small">
 				<span class="icon">
 					<i class="fas fa-check-circle"></i>
 				</span>
-				Google Recovery Active
+				{{ $t('recovery.RECOVERY_ACTIVE', {
+					currentMethod: 'Google'
+				}) }}
 			</div>
 		</div>
 	</div>
@@ -86,13 +88,13 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 	}
 
 	async onLogin(googleUser) {
-		this.showSpinner('Saving Keystore for Recovery');
+		this.showSpinner(this.$t('loader.SAVING_KEYSTORE_RECOVERY'));
 		const userID = googleUser.getBasicProfile().getId();
 		const key = await sha256(this.clientId + userID);
 		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
 			.then(async () => {
 				googleUser.disconnect();
-				this.showSpinnerThenAutohide('Saved Successfully');
+				this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_SUCCESSFULLY'));
 				this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 				this.processMethod({
 					success: true,
@@ -101,14 +103,9 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 					erorr: ''
 				});
 			})
-			.catch(error => {
-				this.logSentryError('addGoogleRecovery', error.toString(), {
-					hasRecoveryMethod: this.hasRecoveryMethod,
-					clientId: this.clientId,
-					recoveryTypeId: this.recoveryTypeId,
-					googleUser
-				});
-				this.showSpinnerThenAutohide('Error');
+			.catch((error) => {
+			  	this.logSentryError('addGoogleRecovery', error.toString(), { hasRecoveryMethod: this.hasRecoveryMethod, clientId: this. clientId, recoveryTypeId: this.recoveryTypeId, googleUser })
+				this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_ERROR'));
 				this.processMethod({
 					success: false,
 					method: 'Google',
@@ -119,13 +116,13 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 	}
 
 	async onDelete(googleUser) {
-		this.showSpinner('Deleting Keystore for Recovery');
+		this.showSpinner(this.$t('loader.DELETING_KEYSTORE_RECOVERY'));
 		const userID = googleUser.getBasicProfile().getId();
 		const key = await sha256(this.clientId + userID);
 		this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId })
 			.then(async () => {
 				googleUser.disconnect();
-				this.showSpinnerThenAutohide('Keystore deleted successfully');
+				this.showSpinnerThenAutohide(this.$t('loader.DELETED_KEYSTORE_SUCCESSFULLY'));
 				this.hasRecoveryMethod = false;
 				this.processMethod({
 					success: true,
@@ -134,14 +131,9 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 					erorr: ''
 				});
 			})
-			.catch(error => {
-				this.logSentryError('deleteGoogleRecovery', error.toString(), {
-					hasRecoveryMethod: this.hasRecoveryMethod,
-					clientId: this.clientId,
-					recoveryTypeId: this.recoveryTypeId,
-					googleUser
-				});
-				this.showSpinnerThenAutohide('Error finding user');
+			.catch((error) => {
+			  this.logSentryError('deleteGoogleRecovery', error.toString(), { hasRecoveryMethod: this.hasRecoveryMethod, clientId: this. clientId, recoveryTypeId: this.recoveryTypeId, googleUser })
+				this.showSpinnerThenAutohide(this.$t('common.ERROR_FIND_USER'));
 				this.processMethod({
 					success: false,
 					method: 'Google',

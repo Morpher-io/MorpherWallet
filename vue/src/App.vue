@@ -23,7 +23,7 @@
 				<span class="icon is-small">
 					<i class="fas fa-lock"></i>
 				</span>
-				<span>Secured with AES | SHA-256 | PBKDF2</span>
+				<span>{{ $t('common.SECURED_WALLET') }}</span>
 			</div>
 		</section>
 		<Footer v-if="!iFrameDisplay" :NFTBackground="NFTBackground" />

@@ -1,7 +1,7 @@
 <template>
 	<div>
-		<h2 class="title">Delete Account</h2>
-		<p class="subtitle">Verify your wallet keys before deleting your account.</p>
+		<h2 class="title">{{ $t('delete.DELETE_ACCOUNT_TITLE') }}</h2>
+		<p class="subtitle">{{ $t('delete.DELETE_ACCOUNT_DESCRIPTION') }}</p>
 
 		<div class="settings-data user-details has-text-left">
 			<div
@@ -12,7 +12,7 @@
 				}"
 			>
 				<div class="circle"><div class="inner"></div></div>
-				<p class="has-text-weight-medium">Verify with Seed Phrase</p>
+				<p class="has-text-weight-medium">{{ $t('delete.VERIFY_WITH_SEED') }}</p>
 			</div>
 		</div>
 		<div class="settings-data user-details mt-2 has-text-left">
@@ -24,19 +24,19 @@
 				}"
 			>
 				<div class="circle"><div class="inner"></div></div>
-				<p data-cy="privateKeyOption" class="has-text-weight-medium">Verify with Private Key</p>
+				<p data-cy="privateKeyOption" class="has-text-weight-medium">{{ $t('delete.VERIFY_WITH_PRIVATE_KEY') }}</p>
 			</div>
 		</div>
 		<div class="field">
-			<label class="label">{{ currentMethod === 0 ? 'Seed Phrase' : 'Private Key' }}</label>
+			<label class="label">{{ currentMethod === 0 ? $t('delete.SEED_PHRASE') : $t('delete.PRIVATE_KEY') }}</label>
 			<div class="control">
 				<input data-cy="privateKeyInput" type="password" name="input" class="input password-input" v-model="input" />
 			</div>
 		</div>
 		<p class="reset-line-height is-size-7 reset-mt">
-			<span v-if="currentMethod === 0">Make sure to have one space between each word.</span>
+			<span v-if="currentMethod === 0">{{ $t('delete.SEED_TIP') }}</span>
 			<span v-if="currentMethod === 1"
-				>Don’t know your keys? <router-link to="/settings/keys" class="login-router">Export your wallet</router-link></span
+				>{{ $t('delete.DO_NOT_KNOW_KEYS') }} <router-link to="/settings/keys" class="login-router">{{ $t('delete.EXPORT_YOUR_WALLET') }}</router-link></span
 			>
 		</p>
 
@@ -44,16 +44,11 @@
 			<p>⚠️ <span v-html="logonError"></span></p>
 		</div>
 
-		<button
-			data-cy="confirmDeleteButton"
-			@click="deleteAccount()"
-			class="button is-green big-button is-login transition-faster mt-5"
-			:disabled="!input"
-		>
-			<span>Verify & Delete</span>
+		<button data-cy="confirmDeleteButton" @click="deleteAccount()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!input">
+			<span>{{ $t('delete.VERIFY_AND_DELETE') }}</span>
 		</button>
 		<button v-on:click="pageBack()" class="button is-ghost is-blue big-button medium-text transition-faster">
-			<span>Cancel</span>
+			<span>{{ $t('common.CANCEL') }}</span>
 		</button>
 	</div>
 </template>

@@ -6,8 +6,8 @@
 					<i class="fas fa-chevron-left"></i>
 				</span>
 			</button>
-			<h2 v-if="!isEmailPasswordPage" class="title ml-3">Settings</h2>
-			<h2 v-if="isEmailPasswordPage" class="title ml-3">Email & Password</h2>
+			<h2 v-if="!isEmailPasswordPage" class="title ml-3">{{ $t('settings.SETTINGS_TITLE') }}</h2>
+			<h2 v-if="isEmailPasswordPage" class="title ml-3">{{ $t('settings.EMAIL_AND_PASSWORD') }}</h2>
 		</div>
 
 		<div class="divider just-space" />
@@ -21,7 +21,7 @@
 			>
 				<i class="fas fa-user-circle" />
 				<span class="text">
-					Email & Password
+					{{ $t('settings.EMAIL_AND_PASSWORD') }}
 				</span>
 				<span class="icon">
 					<i class="fas fa-chevron-right" />
@@ -31,7 +31,7 @@
 			<div data-cy="recoverySettings" key="recovery" class="settings-link is-flex is-align-items-center" @click="changeActive('recovery')">
 				<i class="fas fa-life-ring" />
 				<span class="text">
-					Trusted Account Recovery
+					{{ $t('settings.TRUSTED_ACCOUNT') }}
 				</span>
 				<span class="icon">
 					<i class="fas fa-chevron-right" />
@@ -41,7 +41,7 @@
 			<div data-cy="verificationSettings" key="2FA" class="settings-link is-flex is-align-items-center" @click="changeActive('2FA')">
 				<i class="fas fa-check-double" />
 				<span class="text">
-					2-Step Verification
+					{{ $t('settings.2_STEP_VERIFICATION') }}
 				</span>
 				<span class="icon">
 					<i class="fas fa-chevron-right" />
@@ -51,7 +51,7 @@
 			<div key="keys" class="settings-link is-flex is-align-items-center" data-cy="exportWalletButton" @click="changeActive('keys')">
 				<i class="fas fa-file-download" />
 				<span class="text">
-					Export Wallet
+					{{ $t('settings.EXPORT_WALLET') }}
 				</span>
 				<span class="icon">
 					<i class="fas fa-chevron-right" />
@@ -61,7 +61,7 @@
 			<div data-cy="deleteAccountSettings" key="delete" class="settings-link is-flex is-align-items-center" @click="changeActive('delete')">
 				<i class="fas fa-ban" />
 				<span class="text">
-					Delete Account
+					{{ $t('settings.DELETE_ACCOUNT') }}
 				</span>
 				<span class="icon">
 					<i class="fas fa-chevron-right" />
@@ -72,7 +72,7 @@
 		<div v-else class="settings-data">
 			<div key="email" class="settings-link email-password is-flex is-align-items-center reset-cursor">
 				<div class="data">
-					<p class="has-text-weight-bold">Email</p>
+					<p class="has-text-weight-bold">{{ $t('common.EMAIL') }}</p>
 					<p>{{ store.email }}</p>
 				</div>
 				<div class="link">
@@ -83,7 +83,7 @@
 			</div>
 			<div key="password" class="settings-link email-password is-flex is-align-items-center reset-cursor">
 				<div class="data">
-					<p class="has-text-weight-bold">Password</p>
+					<p class="has-text-weight-bold">{{ $t('common.PASSWORD') }}</p>
 					<p>********</p>
 				</div>
 				<div class="link">

@@ -7,19 +7,19 @@
 			class="mb-3"
 		/>
 		<img v-if="twoFaRequired.authenticator" src="@/assets/img/authenticator.svg" alt="Phone authenticator image" class="mb-3" />
-		<h2 data-cy="verificationTitle" class="title">2-Step Verification</h2>
+		<h2 data-cy="verificationTitle" class="title">{{ $t('settings.2_STEP_VERIFICATION') }}</h2>
 		<p v-if="(twoFaRequired.email || twoFaRequired.needConfirmation) && !twoFaRequired.authenticator" class="subtitle">
-			Please enter the code we sent to your email.
+			{{ $t('2fa.ENTER_EMAIL_CODE') }}
 		</p>
 		<p v-if="twoFaRequired.authenticator && !twoFaRequired.email && !twoFaRequired.needConfirmation" class="subtitle">
-			Please enter the code from your authenticator app.
+			{{ $t('2fa.ENTER_AUTH_CODE') }}
 		</p>
 		<p v-if="twoFaRequired.email && twoFaRequired.authenticator" class="subtitle">
-			Please input both code we sent you over the email and two FA Authenticator code.
+			{{ $t('2fa.ENTER_BOTH_CODES') }}
 		</p>
 		<form v-on:submit.prevent="validateCode" novalidate>
 			<div class="field" v-if="twoFaRequired.email || twoFaRequired.needConfirmation">
-				<label class="label">Email Code</label>
+				<label class="label">{{ $t('2fa.EMAIL_CODE') }}</label>
 				<div class="control">
 					<input
 						type="number"
@@ -35,7 +35,7 @@
 				</div>
 			</div>
 			<div class="field" v-if="twoFaRequired.authenticator">
-				<label class="label">Authenticator Code</label>
+				<label class="label">{{ $t('2fa.AUTH_CODE') }}</label>
 				<div class="control">
 					<input
 						type="number"
@@ -54,18 +54,21 @@
 			</div>
 
 			<button class="button is-green big-button is-login transition-faster mt-5" type="submit" data-cy="unlock">
-				<span>Submit</span>
+				<span>{{ $t('common.SUBMIT') }}</span>
 			</button>
 
 			<button v-on:click="logout()" tag="button" class="button is-ghost is-blue big-button medium-text transition-faster">
-				<span>Cancel</span>
+				<span>{{ $t('common.CANCEL') }}</span>
 			</button>
 		</form>
 
 		<p class="mt-5 transition-faster">
-			Having problems?
-			<a href="https://support.morpher.com/en/article/2fa-2-step-verification-troubleshooting-ejmssf/" target="__blank" class="login-router"
-				>2-Step Support</a
+			{{ $t('2fa.HAVING_PROBLEMS') }}
+			<a
+				href="https://support.morpher.com/en/article/2fa-2-step-verification-troubleshooting-ejmssf/"
+				target="__blank"
+				class="login-router"
+				>{{ $t('2fa.2_STEP_SUPPORT') }}</a
 			>
 		</p>
 	</div>
@@ -110,13 +113,13 @@ export default class TwoFA extends mixins(Global) {
 			return;
 		}
 		this.logonError = '';
-		this.showSpinner('Validating code...');
+		this.showSpinner(this.$t('loader.VALIDATING_CODE').toString());
 		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.authenticatorCode })
-			.then(nextroute => {
+			.then((nextroute) => {
 				this.hideSpinner();
 				this.router.push(nextroute).catch(() => undefined);
 			})
-			.catch(error => {
+			.catch((error) => {
 				this.hideSpinner();
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {
