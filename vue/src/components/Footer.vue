@@ -2,7 +2,7 @@
 	<footer class="footer">
 		<!-- NFT Background -->
 		<div v-if="NFTBackground" class="nft-details has-line-height-1">
-            <i class="fas fa-info-circle"></i> NFT Background <a :href="NFTBackground.link" target="__blank">{{ NFTBackground.artist }}</a>
+			<i class="fas fa-info-circle"></i> NFT Background <a :href="NFTBackground.link" target="__blank">{{ NFTBackground.artist }}</a>
 		</div>
 	</footer>
 </template>
@@ -13,8 +13,8 @@ import { BackgroundNFT } from '../utils/backgroundNFT';
 
 @Component({})
 export default class Footer extends Vue {
-    @Prop()
-    NFTBackground!: BackgroundNFT | null;
+	@Prop()
+	NFTBackground!: BackgroundNFT | null;
 }
 </script>
 
@@ -27,18 +27,18 @@ footer {
 	margin-top: auto;
 	background: none;
 	box-shadow: none;
-    z-index: 1;
-    
-    .nft-details {
-        background: rgba(255,255,255,0.7);
-        border-radius: 7px;
-        color: #333333;
-        padding: 7px 15px;
-    }
-    
-    a {
-        color: inherit;
-        text-decoration: underline;
-    }
+	z-index: 1;
+
+	.nft-details {
+		background: rgba(255, 255, 255, 0.7);
+		border-radius: 7px;
+		color: #333333;
+		padding: 7px 15px;
+	}
+
+	a {
+		color: inherit;
+		text-decoration: underline;
+	}
 }
 </style>

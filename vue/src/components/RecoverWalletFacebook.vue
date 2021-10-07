@@ -73,7 +73,7 @@ export default class RecoverWalletFacebook extends mixins(Global) {
 					});
 				})
 				.catch(error => {
-					this.logSentryError('facebookRecovery', error.toString(), data)
+					this.logSentryError('facebookRecovery', error.toString(), { userID });
 					this.facebook.FB.api('/me/permissions', 'DELETE', async () => {
 						this.facebook.scope.logout();
 						this.showSpinnerThenAutohide('No recovery found...');
@@ -86,7 +86,7 @@ export default class RecoverWalletFacebook extends mixins(Global) {
 					});
 				});
 		} catch (e) {
-			this.logSentryError('facebookRecovery', e.toString(), data)
+			this.logSentryError('facebookRecovery', e.toString(), {});
 			this.showSpinnerThenAutohide('Your Account was not found');
 			this.recoveryError = 'Your Account was not found.';
 			this.setPassword({

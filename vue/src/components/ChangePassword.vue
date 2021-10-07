@@ -82,7 +82,7 @@
 
 					<div class="mt-2">
 						<button
-							v-on:click="$router.push(hideOldPassword ? '/login' : '/settings?email_password=true').catch(() => undefined);"
+							v-on:click="$router.push(hideOldPassword ? '/login' : '/settings?email_password=true').catch(() => undefined)"
 							tag="button"
 							type="button"
 							class="button is-ghost is-blue big-button medium-text transition-faster"
@@ -184,7 +184,7 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 				this.currentPage = 1;
 
 				if (this.presetOldPassword !== undefined) {
-					this.$router.push('/login').catch(() => undefined);;
+					this.$router.push('/login').catch(() => undefined);
 				}
 			})
 			.catch(error => {

@@ -208,7 +208,7 @@ const store: Store<RootState> = new Vuex.Store({
 			state.hashedPassword = userData.hashedPassword;
 			Sentry.configureScope(scope => {
 				scope.setUser({ id: state.accounts && state.accounts.length > 0 ? state.accounts[0] : '', email: state.email });
-			});	
+			});
 
 			window.localStorage.setItem('email', userData.email);
 			saveSessionStore('password', userData.hashedPassword);
@@ -223,7 +223,7 @@ const store: Store<RootState> = new Vuex.Store({
 			saveSessionStore('password', seedCreatedData.hashedPassword);
 			Sentry.configureScope(scope => {
 				scope.setUser({ id: state.accounts && state.accounts.length > 0 ? state.accounts[0] : '', email: state.email });
-			});	
+			});
 		},
 		setPage(state: RootState, page) {
 			state.openPage = page;
@@ -233,16 +233,15 @@ const store: Store<RootState> = new Vuex.Store({
 			state.email = '';
 			state.hashedPassword = '';
 
-
 			localStorage.removeItem('encryptedSeed');
 			localStorage.removeItem('email');
 			localStorage.removeItem('iconSeed');
 			removeSessionStore('password');
 			state.loginRetryCount = 0;
-			router.push('/login').catch(() => undefined);;
+			router.push('/login').catch(() => undefined);
 			Sentry.configureScope(scope => {
 				scope.setUser({ id: '', email: '' });
-			});				
+			});
 		},
 		logout(state: RootState) {
 			state.email = '';
@@ -259,7 +258,7 @@ const store: Store<RootState> = new Vuex.Store({
 			localStorage.removeItem('encryptedSeed');
 			Sentry.configureScope(scope => {
 				scope.setUser({ id: '', email: '' });
-			});	
+			});
 		},
 		clearUser(state: RootState) {
 			state.email = '';
@@ -271,7 +270,7 @@ const store: Store<RootState> = new Vuex.Store({
 			state.token = '';
 			Sentry.configureScope(scope => {
 				scope.setUser({ id: '', email: '' });
-			});				
+			});
 		},
 		keystoreUnlocked(state: RootState, payload: TypeKeystoreUnlocked) {
 			state.keystore = payload.keystore;
@@ -281,8 +280,8 @@ const store: Store<RootState> = new Vuex.Store({
 			if (payload.accounts && payload.accounts[0])
 				Sentry.configureScope(scope => {
 					scope.setUser({ id: payload.accounts[0], email: state.email });
-				});			
-				window.localStorage.setItem('iconSeed', parseInt(payload.accounts[0].slice(2, 10), 16).toString());
+				});
+			window.localStorage.setItem('iconSeed', parseInt(payload.accounts[0].slice(2, 10), 16).toString());
 			saveSessionStore('password', payload.hashedPassword);
 		},
 		seedExported(state: RootState) {
@@ -439,7 +438,7 @@ const store: Store<RootState> = new Vuex.Store({
 						.then(() => {
 							reject('USER_ALREADY_EXISTS');
 						})
-						.catch(async e => {
+						.catch(async () => {
 							commit('authRequested');
 							commit('loading', 'Creating new Keystore...');
 							/**
@@ -449,18 +448,20 @@ const store: Store<RootState> = new Vuex.Store({
 
 							const accounts = getAccountsFromKeystore(createdKeystoreObj.keystore);
 
-							saveWalletEmailPassword(params.email, createdKeystoreObj.encryptedSeed, accounts[0]).then(() => {
-								commit('clearUser');
-								dispatch('fetchUser', { email: params.email, password: params.password })
-									.then(resolve)
-									.catch(e => {
-										reject(e);
-										commit('delayedSpinnerMessage', 'Unknown Error occurred during saving.');
-										reject(e);
-									});
-							}).catch((e) => {
-								reject(e);
-							});
+							saveWalletEmailPassword(params.email, createdKeystoreObj.encryptedSeed, accounts[0])
+								.then(() => {
+									commit('clearUser');
+									dispatch('fetchUser', { email: params.email, password: params.password })
+										.then(resolve)
+										.catch(e => {
+											reject(e);
+											commit('delayedSpinnerMessage', 'Unknown Error occurred during saving.');
+											reject(e);
+										});
+								})
+								.catch(e => {
+									reject(e);
+								});
 						});
 				});
 			});
@@ -486,13 +487,13 @@ const store: Store<RootState> = new Vuex.Store({
 
 				Sentry.configureScope(scope => {
 					scope.setUser({ id: state.accounts && state.accounts.length > 0 ? state.accounts[0] : '', email: state.email });
-				});			
+				});
 			}
 
 			dispatch('unlockWithStoredPassword')
 				.then(result => {
 					if (result) {
-						router.push('/').catch(() => undefined);;
+						router.push('/').catch(() => undefined);
 					}
 				})
 				.catch(error => {
@@ -503,7 +504,7 @@ const store: Store<RootState> = new Vuex.Store({
 		},
 		async logoutWallet({ commit }) {
 			await commit('logout');
-			if (router.currentRoute.path !== '/login') router.push('/login').catch(() => undefined);;
+			if (router.currentRoute.path !== '/login') router.push('/login').catch(() => undefined);
 		},
 		clearPage({ commit }) {
 			commit('setPage', '');
@@ -1028,7 +1029,7 @@ if (isIframe()) {
 								}
 								store.state.transactionDetails = txObj;
 								store.state.signResponse = null;
-								router.push('/signtx').catch(() => undefined);;
+								router.push('/signtx').catch(() => undefined);
 								const interval = setInterval(() => {
 									if (store.state.signResponse) {
 										clearInterval(interval);
@@ -1075,7 +1076,7 @@ if (isIframe()) {
 								const Web3Utils = require('web3-utils');
 								store.state.messageDetails = Web3Utils.toAscii(txObj.data);
 								store.state.signResponse = null;
-								router.push('/signmsg').catch(() => undefined);;
+								router.push('/signmsg').catch(() => undefined);
 
 								const interval = setInterval(() => {
 									if (store.state.signResponse) {

@@ -16,7 +16,12 @@
 			<p>⚠️ <span v-html="logonError"></span></p>
 		</div>
 
-		<button data-cy="confirmButton" @click="setCode()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!authenticatorCode">
+		<button
+			data-cy="confirmButton"
+			@click="setCode()"
+			class="button is-green big-button is-login transition-faster mt-5"
+			:disabled="!authenticatorCode"
+		>
 			<span>Submit</span>
 		</button>
 		<button v-on:click="pageBack()" class="button is-ghost is-blue big-button medium-text transition-faster">

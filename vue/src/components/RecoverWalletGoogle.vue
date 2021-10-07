@@ -40,7 +40,7 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 	}
 
 	onError(error) {
-		this.logSentryError('recoverWalletGoogle', error.toString(), { clientId: this.clientId })
+		this.logSentryError('recoverWalletGoogle', error.toString(), { clientId: this.clientId });
 		let errorText = error.error || error.err || 'Google login Error';
 
 		if (String(errorText.toLowerCase()).includes('script not loaded correctly')) {
@@ -68,8 +68,8 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 						oldPassword: userID
 					});
 				})
-				.catch((error) => {
-					this.logSentryError('recoverWalletGoogle', error.toString(), { googleUser })
+				.catch(error => {
+					this.logSentryError('recoverWalletGoogle', error.toString(), { userID });
 					googleUser.disconnect();
 					this.showSpinnerThenAutohide('No recovery found');
 					this.setPassword({
@@ -78,7 +78,7 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 					});
 				});
 		} catch (e) {
-			this.logSentryError('recoverWalletGoogle', e.toString(), { googleUser })
+			this.logSentryError('recoverWalletGoogle', e.toString(), {});
 			this.showSpinnerThenAutohide('No recovery found');
 			this.setPassword({
 				success: false,
