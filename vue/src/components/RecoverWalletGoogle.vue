@@ -78,7 +78,7 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 					});
 				});
 		} catch (e) {
-			this.logSentryError('recoverWalletGoogle', e.toString(), { googleUser })
+			this.logSentryError('recoverWalletGoogle', e.toString(), { googleUser });
 			this.showSpinnerThenAutohide(this.$t('recovery.NO_RECOVERY_FOUND'));
 			this.setPassword({
 				success: false,

@@ -188,7 +188,7 @@ export default class Signup extends mixins(Global) {
 					this.$router.push('/').catch(() => undefined);
 				}
 			})
-			.catch((error) => {
+			.catch(error => {
 				this.hideSpinner();
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {

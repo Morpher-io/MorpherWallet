@@ -86,7 +86,7 @@ export default class RecoverWalletFacebook extends mixins(Global) {
 					});
 				});
 		} catch (e) {
-			this.logSentryError('facebookRecovery', e.toString(), data)
+			this.logSentryError('facebookRecovery', e.toString(), data);
 			this.showSpinnerThenAutohide(this.$t('recovery.NO_ACCOUNT_FOUND'));
 			this.recoveryError = this.$t('recovery.NO_ACCOUNT_FOUND');
 			this.setPassword({

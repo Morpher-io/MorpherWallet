@@ -63,9 +63,7 @@
 			</span>
 			{{ $t('2fa.VERIFICATION_ENABLED') }}
 		</div>
-		<div class="alert warning mt-5 is-size-7 has-text-left">
-			⚠ {{ $t('2fa.VERIFICATION_LOSE') }}
-		</div>
+		<div class="alert warning mt-5 is-size-7 has-text-left">⚠ {{ $t('2fa.VERIFICATION_LOSE') }}</div>
 	</div>
 </template>
 

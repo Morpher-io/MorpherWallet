@@ -2,7 +2,7 @@
 	<footer class="footer">
 		<!-- NFT Background -->
 		<div v-if="NFTBackground" class="nft-details has-line-height-1">
-        	<i class="fas fa-info-circle"></i> NFT Background <a :href="NFTBackground.link" target="__blank">{{ NFTBackground.artist }}</a>
+			<i class="fas fa-info-circle"></i> NFT Background <a :href="NFTBackground.link" target="__blank">{{ NFTBackground.artist }}</a>
 		</div>
 		<!-- Language -->
 		<div class="language-selector has-line-height-1">
@@ -157,15 +157,15 @@ footer {
 	}
 
 	.nft-details {
-			background: rgba(255,255,255,0.7);
-			border-radius: 7px;
-			color: #333333;
-			padding: 7px 15px;
+		background: rgba(255, 255, 255, 0.7);
+		border-radius: 7px;
+		color: #333333;
+		padding: 7px 15px;
 	}
 
 	a {
-			color: inherit;
-			text-decoration: underline;
+		color: inherit;
+		text-decoration: underline;
 	}
 }
 </style>

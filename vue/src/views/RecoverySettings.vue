@@ -63,14 +63,21 @@
 			<div>
 				<img src="@/assets/img/checkmark.svg" alt="Checkmark image" class="mb-3" />
 				<h2 class="title">
-					{{ $t('recovery.RECOVERY_ENABLED', {
-						currentMethod,
-						isEnabled: $t(isEnabled ? 'common.ENABLED' : 'common.DISABLED'),
-					}) }}</h2>
+					{{
+						$t('recovery.RECOVERY_ENABLED', {
+							currentMethod,
+							isEnabled: $t(isEnabled ? 'common.ENABLED' : 'common.DISABLED')
+						})
+					}}
+				</h2>
 				<p class="subtitle">
-					{{ $t('recovery.TRUSTED_CHANGED', {
-						isActivated: $t(isEnabled ? 'common.ACTIVATED' : 'common.DEACTIVATED').toString().toLowerCase(),
-					}) }}
+					{{
+						$t('recovery.TRUSTED_CHANGED', {
+							isActivated: $t(isEnabled ? 'common.ACTIVATED' : 'common.DEACTIVATED')
+								.toString()
+								.toLowerCase()
+						})
+					}}
 				</p>
 
 				<button @click="resetData" tag="button" class="button outlined-button big-button transition-faster">

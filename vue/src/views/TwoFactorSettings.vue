@@ -23,17 +23,19 @@
 		<div v-if="currentPage === 3">
 			<div>
 				<img src="@/assets/img/checkmark.svg" alt="Checkmark image" class="mb-3" />
-				<h2 data-cy="2faConfirmedTitle"  class="title">{{ $t('2fa.2_STEP_ACTIVATED', {
-					isActivated: isEnabling ? $t('common.ACTIVATED') : $t('common.DEACTIVATED')
-				}) }}</h2>
+				<h2 data-cy="2faConfirmedTitle" class="title">
+					{{
+						$t('2fa.2_STEP_ACTIVATED', {
+							isActivated: isEnabling ? $t('common.ACTIVATED') : $t('common.DEACTIVATED')
+						})
+					}}
+				</h2>
 				<p data-cy="2faConfirmedDescription" v-if="isEnabling" class="subtitle">
 					{{ $t('2fa.2_STEP_ADDED') }}
 				</p>
 				<p data-cy="2faDisabledDescription" v-else class="subtitle">{{ $t('2fa.2_STEP_REMOVED') }}</p>
 
-				<div v-if="!isEnabling" class="alert warning mt-3 is-size-7 has-text-left mb-5">
-					⚠ {{ $t('2fa.2_STEP_REMOVED_WARNING') }}
-				</div>
+				<div v-if="!isEnabling" class="alert warning mt-3 is-size-7 has-text-left mb-5">⚠ {{ $t('2fa.2_STEP_REMOVED_WARNING') }}</div>
 
 				<button @click="resetData" tag="button" class="button outlined-button big-button transition-faster">
 					<span data-cy="closeButton">{{ $t('common.CLOSE') }}</span>

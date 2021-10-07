@@ -34,9 +34,11 @@
 				<span class="icon">
 					<i class="fas fa-check-circle"></i>
 				</span>
-				{{ $t('recovery.RECOVERY_ACTIVE', {
-					currentMethod: 'Google'
-				}) }}
+				{{
+					$t('recovery.RECOVERY_ACTIVE', {
+						currentMethod: 'Google'
+					})
+				}}
 			</div>
 		</div>
 	</div>
@@ -103,8 +105,13 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 					erorr: ''
 				});
 			})
-			.catch((error) => {
-			  	this.logSentryError('addGoogleRecovery', error.toString(), { hasRecoveryMethod: this.hasRecoveryMethod, clientId: this. clientId, recoveryTypeId: this.recoveryTypeId, googleUser })
+			.catch(error => {
+				this.logSentryError('addGoogleRecovery', error.toString(), {
+					hasRecoveryMethod: this.hasRecoveryMethod,
+					clientId: this.clientId,
+					recoveryTypeId: this.recoveryTypeId,
+					googleUser
+				});
 				this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_ERROR'));
 				this.processMethod({
 					success: false,
@@ -131,8 +138,13 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 					erorr: ''
 				});
 			})
-			.catch((error) => {
-			  this.logSentryError('deleteGoogleRecovery', error.toString(), { hasRecoveryMethod: this.hasRecoveryMethod, clientId: this. clientId, recoveryTypeId: this.recoveryTypeId, googleUser })
+			.catch(error => {
+				this.logSentryError('deleteGoogleRecovery', error.toString(), {
+					hasRecoveryMethod: this.hasRecoveryMethod,
+					clientId: this.clientId,
+					recoveryTypeId: this.recoveryTypeId,
+					googleUser
+				});
 				this.showSpinnerThenAutohide(this.$t('common.ERROR_FIND_USER'));
 				this.processMethod({
 					success: false,

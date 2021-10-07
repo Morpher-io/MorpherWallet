@@ -50,7 +50,7 @@ export async function sendEmail2FA(payload, email) {
         
             id: info.MessageId,
             aws_sent_status: 'success',
-            email: email,
+            email,
             email_template_id: email_template.id
         }
         
@@ -112,7 +112,7 @@ export async function sendEmailChanged(payload, email) {
         
             id: info.MessageId,
             aws_sent_status: 'success',
-            email: email,
+            email,
             email_template_id: email_template.id
         }
         

@@ -36,7 +36,8 @@
 		<p class="reset-line-height is-size-7 reset-mt">
 			<span v-if="currentMethod === 0">{{ $t('delete.SEED_TIP') }}</span>
 			<span v-if="currentMethod === 1"
-				>{{ $t('delete.DO_NOT_KNOW_KEYS') }} <router-link to="/settings/keys" class="login-router">{{ $t('delete.EXPORT_YOUR_WALLET') }}</router-link></span
+				>{{ $t('delete.DO_NOT_KNOW_KEYS') }}
+				<router-link to="/settings/keys" class="login-router">{{ $t('delete.EXPORT_YOUR_WALLET') }}</router-link></span
 			>
 		</p>
 
@@ -44,7 +45,12 @@
 			<p>⚠️ <span v-html="logonError"></span></p>
 		</div>
 
-		<button data-cy="confirmDeleteButton" @click="deleteAccount()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!input">
+		<button
+			data-cy="confirmDeleteButton"
+			@click="deleteAccount()"
+			class="button is-green big-button is-login transition-faster mt-5"
+			:disabled="!input"
+		>
 			<span>{{ $t('delete.VERIFY_AND_DELETE') }}</span>
 		</button>
 		<button v-on:click="pageBack()" class="button is-ghost is-blue big-button medium-text transition-faster">

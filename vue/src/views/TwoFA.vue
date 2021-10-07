@@ -115,11 +115,11 @@ export default class TwoFA extends mixins(Global) {
 		this.logonError = '';
 		this.showSpinner(this.$t('loader.VALIDATING_CODE').toString());
 		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.authenticatorCode })
-			.then((nextroute) => {
+			.then(nextroute => {
 				this.hideSpinner();
 				this.router.push(nextroute).catch(() => undefined);
 			})
-			.catch((error) => {
+			.catch(error => {
 				this.hideSpinner();
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {

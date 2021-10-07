@@ -23,7 +23,12 @@
 			<p>⚠️ <span data-cy="passwordError" v-html="logonError"></span></p>
 		</div>
 
-		<button data-cy="confirmAccessButton" @click="setPassword()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!walletPassword">
+		<button
+			data-cy="confirmAccessButton"
+			@click="setPassword()"
+			class="button is-green big-button is-login transition-faster mt-5"
+			:disabled="!walletPassword"
+		>
 			<span>{{ $t('common.CONTINUE') }}</span>
 		</button>
 		<button v-on:click="pageBack()" class="button is-ghost is-blue big-button medium-text transition-faster">

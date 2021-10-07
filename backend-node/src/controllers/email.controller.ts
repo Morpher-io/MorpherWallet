@@ -26,7 +26,7 @@ const emailNotification = async function(req: Request, res: Response) {
             Logger.info({
                 method: 'emailNotification',
                 message: 'invalid json value received for notification',
-                data: data
+                data
             });
             res.end('ok');
             return;

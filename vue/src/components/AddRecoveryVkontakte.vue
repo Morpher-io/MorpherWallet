@@ -25,9 +25,11 @@
 				<span class="icon">
 					<i class="fas fa-check-circle"></i>
 				</span>
-				{{ $t('recovery.RECOVERY_ACTIVE', {
-					currentMethod: 'VKontakte'
-				}) }}
+				{{
+					$t('recovery.RECOVERY_ACTIVE', {
+						currentMethod: 'VKontakte'
+					})
+				}}
 			</div>
 		</div>
 	</div>
@@ -119,8 +121,8 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 								erorr: ''
 							});
 						})
-						.catch((error) => {
-						  this.logSentryError('addRecoveryVK', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId })
+						.catch(error => {
+							this.logSentryError('addRecoveryVK', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId });
 							this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_ERROR'));
 							this.processMethod({
 								success: false,
@@ -177,8 +179,8 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 								erorr: ''
 							});
 						})
-						.catch((error) => {
-						  this.logSentryError('deleteRecoveryVK', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId })
+						.catch(error => {
+							this.logSentryError('deleteRecoveryVK', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId });
 							this.showSpinnerThenAutohide(this.$t('common.ERROR_FIND_USER'));
 							this.processMethod({
 								success: false,

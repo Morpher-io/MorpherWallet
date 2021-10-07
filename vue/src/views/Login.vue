@@ -33,7 +33,10 @@
 				</button>
 
 				<p class="forgot-password">
-					{{ $t('auth.FORGOT_PASSWORD') }} <router-link to="/recovery" class="login-router transition-faster"><span>{{ $t('auth.RECOVER_YOUR_WALLET') }}</span></router-link>
+					{{ $t('auth.FORGOT_PASSWORD') }}
+					<router-link to="/recovery" class="login-router transition-faster"
+						><span>{{ $t('auth.RECOVER_YOUR_WALLET') }}</span></router-link
+					>
 				</p>
 
 				<div class="divider"></div>
@@ -41,7 +44,7 @@
 				<div class="login-link">
 					<span>{{ $t('auth.DO_NOT_HAVE_WALLET') }}</span>
 					<router-link to="/signup" class="login-router transition-faster">
-						<span data-cy="signUpButton" >
+						<span data-cy="signUpButton">
 							{{ $t('auth.SIGNUP') }}
 						</span>
 					</router-link>

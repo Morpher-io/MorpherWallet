@@ -46,7 +46,10 @@
 			<span>{{ $t('auth.LOGIN') }}</span>
 		</button>
 		<p class="forgot-password">
-			{{ $t('auth.FORGOT_PASSWORD') }} <router-link to="/recovery" class="login-router transition-faster"><span>{{ $t('auth.RECOVER_YOUR_WALLET') }}</span></router-link>
+			{{ $t('auth.FORGOT_PASSWORD') }}
+			<router-link to="/recovery" class="login-router transition-faster"
+				><span>{{ $t('auth.RECOVER_YOUR_WALLET') }}</span></router-link
+			>
 		</p>
 	</div>
 </template>

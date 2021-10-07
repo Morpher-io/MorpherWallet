@@ -40,9 +40,11 @@
 				<span class="icon">
 					<i class="fas fa-check-circle"></i>
 				</span>
-				{{ $t('recovery.RECOVERY_ACTIVE', {
-					currentMethod: 'Facebook'
-				}) }}
+				{{
+					$t('recovery.RECOVERY_ACTIVE', {
+						currentMethod: 'Facebook'
+					})
+				}}
 			</div>
 		</div>
 	</div>
@@ -118,8 +120,8 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 					});
 				});
 			})
-			.catch((error) => {
-			  this.logSentryError('addFacebookRecovery', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId })
+			.catch(error => {
+				this.logSentryError('addFacebookRecovery', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId });
 				this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_ERROR'));
 				this.processing = false;
 				this.processMethod({
@@ -162,8 +164,8 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 					});
 				});
 			})
-			.catch((error) => {
-			  this.logSentryError('deleteFacebookRecovery', error.toString(), { data, recoveryTypeId: this.recoveryTypeId })
+			.catch(error => {
+				this.logSentryError('deleteFacebookRecovery', error.toString(), { data, recoveryTypeId: this.recoveryTypeId });
 				this.showSpinnerThenAutohide(this.$t('common.ERROR_FIND_USER'));
 				this.processing = false;
 				this.processMethod({
