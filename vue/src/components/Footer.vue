@@ -1,5 +1,9 @@
 <template>
 	<footer class="footer">
+		<!-- NFT Background -->
+		<div v-if="NFTBackground" class="nft-details has-line-height-1">
+        	<i class="fas fa-info-circle"></i> NFT Background <a :href="NFTBackground.link" target="__blank">{{ NFTBackground.artist }}</a>
+		</div>
 		<!-- Language -->
 		<div class="language-selector has-line-height-1">
 			<div
@@ -26,15 +30,11 @@
 				</div>
 			</div>
 		</div>
-		<!-- NFT Background -->
-		<div v-if="NFTBackground" class="nft-details has-line-height-1">
-        <i class="fas fa-info-circle"></i> NFT Background <a :href="NFTBackground.link" target="__blank">{{ NFTBackground.artist }}</a>
-		</div>
 	</footer>
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import Cookie from 'js-cookie';
 import { BackgroundNFT } from '../utils/backgroundNFT';
 

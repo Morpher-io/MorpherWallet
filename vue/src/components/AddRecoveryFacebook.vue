@@ -118,7 +118,7 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 					});
 				});
 			})
-			.catch(() => {
+			.catch((error) => {
 			  this.logSentryError('addFacebookRecovery', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId })
 				this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_ERROR'));
 				this.processing = false;
@@ -162,7 +162,7 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 					});
 				});
 			})
-			.catch(() => {
+			.catch((error) => {
 			  this.logSentryError('deleteFacebookRecovery', error.toString(), { data, recoveryTypeId: this.recoveryTypeId })
 				this.showSpinnerThenAutohide(this.$t('common.ERROR_FIND_USER'));
 				this.processing = false;

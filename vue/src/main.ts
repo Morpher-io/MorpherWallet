@@ -17,8 +17,6 @@ const supportedLocales: string[] = process.env.VUE_APP_I18N_SUPPORTED_LOCALE ? J
 const defaultLocale = process.env.VUE_APP_I18N_DEFAULT_LOCALE || 'en';
 const currentLocale = Cookie.get('locale');
 
-console.log(process.env);
-
 if (!currentLocale) {
   const language =
     (navigator.languages && navigator.languages[0]) || // Chrome / Firefox
@@ -54,7 +52,7 @@ if (!currentLocale) {
     document.querySelector("html")?.setAttribute("lang", currentLocale);
     if (currentLocale === "ar")
       document.querySelector("html")?.setAttribute("dir", "rtl");
-    else document.querySelector("html")?.setAttribute("dir", "");}
+    else document.querySelector("html")?.setAttribute("dir", "");
   }
 }
 
