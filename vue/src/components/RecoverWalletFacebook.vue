@@ -73,7 +73,7 @@ export default class RecoverWalletFacebook extends mixins(Global) {
 					});
 				})
 				.catch(error => {
-					this.logSentryError('facebookRecovery', error.toString(), data)
+					this.logSentryError('facebookRecovery', error.toString(), { userID });
 					this.facebook.FB.api('/me/permissions', 'DELETE', async () => {
 						this.facebook.scope.logout();
 						this.showSpinnerThenAutohide(this.$t('recovery.NO_RECOVERY_FOUND'));

@@ -3,7 +3,7 @@
 		<div v-if="currentPage === 0">
 			<div class="title-container has-text-left">
 				<button
-						data-cy="backArrowButton"
+					data-cy="backArrowButton"
 					@click="redirectUser"
 					tag="button"
 					class="button is-grey big-button outlined-button is-thick transition-faster is-icon-only"
@@ -114,7 +114,7 @@ export default class KeysSettings extends mixins(Global, Authenticated) {
 	copyToClipboard = copyToClipboard;
 
 	redirectUser() {
-		this.$router.push('/settings').catch(() => undefined);;
+		this.$router.push('/settings').catch(() => undefined);
 	}
 
 	setExport(page: string) {

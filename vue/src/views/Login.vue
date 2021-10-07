@@ -81,7 +81,7 @@ export default class Login extends mixins(Global) {
 			this.unlockWithStoredPassword()
 				.then(result => {
 					if (result) {
-						this.$router.push('/').catch(() => undefined);;
+						this.$router.push('/').catch(() => undefined);
 					}
 				})
 				.catch(error => {
@@ -130,12 +130,12 @@ export default class Login extends mixins(Global) {
 				this.hideSpinner();
 				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator || this.store.twoFaRequired.needConfirmation) {
 					// open 2fa page if 2fa is required
-					this.$router.push('/2fa').catch(() => undefined);;
+					this.$router.push('/2fa').catch(() => undefined);
 				} else {
 					this.unlockWithStoredPassword()
 						.then(() => {
 							// open root page after logon success
-							this.$router.push('/').catch(() => undefined);;
+							this.$router.push('/').catch(() => undefined);
 						})
 						.catch(() => {
 							this.logonError = getDictionaryValue('DECRYPT_FAILED');
@@ -151,7 +151,9 @@ export default class Login extends mixins(Global) {
 				if (error && error.toString() === 'TypeError: Failed to fetch') {
 					this.showNetworkError(true);
 				} else {
-					this.logSentryError('fetchUser', error.toString(), { email, password })
+					if (!error.error) {
+						this.logSentryError('fetchUser', error.toString(), { email });
+					}
 				}
 
 				if (error !== true && error !== false) {

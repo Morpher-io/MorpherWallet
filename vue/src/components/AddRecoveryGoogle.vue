@@ -70,7 +70,11 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 	}
 
 	onError(error) {
-		this.logSentryError('addGoogleRecovery', error.toString(), { hasRecoveryMethod: this.hasRecoveryMethod, clientId: this.clientId, recoveryTypeId: this.recoveryTypeId })
+		this.logSentryError('addGoogleRecovery', error.toString(), {
+			hasRecoveryMethod: this.hasRecoveryMethod,
+			clientId: this.clientId,
+			recoveryTypeId: this.recoveryTypeId
+		});
 		let errorText = error.error || error.err || 'Google login Error';
 
 		if (String(errorText.toLowerCase()).includes('script not loaded correctly')) {

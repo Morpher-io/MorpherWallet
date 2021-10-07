@@ -8,7 +8,14 @@
 			<label class="label">{{ $t('common.PASSWORD') }}</label>
 
 			<div class="control">
-				<input data-cy="confirmAccessPassword" type="password" class="input" name="walletPassword" v-model="walletPassword" @keypress="handleKeyPress" />
+				<input
+					data-cy="confirmAccessPassword"
+					type="password"
+					class="input"
+					name="walletPassword"
+					v-model="walletPassword"
+					@keypress="handleKeyPress"
+				/>
 			</div>
 		</div>
 
