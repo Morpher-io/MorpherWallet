@@ -77,17 +77,14 @@
                     "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:WALLET_VK_APP_ID::"
                 },
                 {
-                    "name": "ACCESS_KEY_ID",
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:ACCESS_KEY_ID::"
-                },
-                {
-                    "name": "ACCESS_KEY_SECRET",
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:ACCESS_KEY_SECRET::"
-                },
-                {
                     "name": "EMAIL_NOTIFICATIONS_NAME",
                     "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:EMAIL_NOTIFICATIONS_NAME::"
+                },
+                {
+                    "name": "SECRET_API_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_EMAIL_NOTIFICATIONS_SECRET::"
                 }
+
             ],
             "logConfiguration": {
                 "logDriver": "awslogs",
