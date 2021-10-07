@@ -1,12 +1,19 @@
 const WalletController = require('../../controllers/wallet.controller');
+const EmailController = require('../../controllers/email.controller');
 const ValidationController = require('../../controllers/validation.controller');
 const secureRoutes = require('./secure');
 
 const rateLimit = require('express-rate-limit');
+import { Logger } from '../../helpers/functions/winston';
+
+const limitReached = (req: any, res: any) => {
+    Logger.warn({ data: { ip: req.ip, method: req.method, path: req.path, url: req.originalUrl} , message: 'Rate limiter triggered'});
+};
 
 const limiter = new rateLimit({
     windowMs: 60 * 1000,
     max: 60,
+    onLimitReached: limitReached,
     keyGenerator(req, res) {
         return req.body.key;
     }
@@ -15,6 +22,7 @@ const limiter = new rateLimit({
 // The index route file which connects all the other files.
 module.exports = function(express) {
     const router = express.Router();
+    const { secret } = require('../../helpers/functions/middleware');
 
     if (process.env.ENVIRONMENT === 'development') {
         const testingRoutes = require('./testing')(express.Router());
@@ -49,6 +57,11 @@ module.exports = function(express) {
     router.post('/auth/addRecoveryMethod', WalletController.addRecoveryMethod);
     router.post('/auth/getRecoveryMethods', WalletController.getRecoveryMethods);
     router.post('/auth/deleteAccount', WalletController.deleteAccount);
+
+    /**
+     * Email Notifications
+     */
+     router.post('/emailNotification', secret, EmailController.emailNotification);
 
     return router;
 };
