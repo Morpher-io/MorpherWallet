@@ -30,6 +30,8 @@ const limiter = {
     max: 200 // limit each IP to 60 requests per minute
 };
 
+app.set('trust proxy', 1)
+
 if (process.env.ENVIRONMENT === 'development') {
     limiter.max = 600;
 }
