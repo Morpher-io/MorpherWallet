@@ -32,7 +32,7 @@ let ipRequestPayload = {};
  */
 const limiterGetPayload = new rateLimit({
     windowMs: 60 * 60 * 1000,
-    max: 4,
+    max: 10,
     onLimitReached: limitReached,
     keyGenerator(req, res) {
 
@@ -63,7 +63,7 @@ const limiterGetPayload = new rateLimit({
             /**
              * if there are not yet 3 addresses in there, add it so it won't rate limit
              */
-            if(ipRequestPayload[req.ip].keyRequests.length <= 3) {
+            if(ipRequestPayload[req.ip].keyRequests.length <= 10) {
                 ipRequestPayload[req.ip].keyRequests.push(req.body.key);
             }
             return req.ip;
