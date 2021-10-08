@@ -1,17 +1,17 @@
 <template>
 	<div class="container">
-		<h2 class="title">Change Email</h2>
-		<h4 class="subtitle">Enter a new email address.</h4>
+		<h2 class="title">{{ $t('email.EMAIL_SETTINGS_TITLE') }}</h2>
+		<h4 class="subtitle">{{ $t('email.EMAIL_SETTINGS_DESCRIPTION') }}</h4>
 		<ChangeEmail v-if="currentPage === 0" @setNewData="setNewData" :error="logonError" />
 		<Change2FAEmail v-if="currentPage === 1" @setCode="setCode" @pageBack="pageBack" :error="logonError" />
 		<div v-if="currentPage === 2">
 			<div>
 				<img src="@/assets/img/checkmark.svg" alt="Checkmark image" class="mb-3" />
-				<h2 data-cy="emailUpdatedTitle" class="title">Email Updated</h2>
-				<p data-cy="emailUpdatedDescription" class="subtitle">Your email was successfully updated!</p>
+				<h2 data-cy="emailUpdatedTitle" class="title">{{ $t('email.EMAIL_UPDATED_TITLE') }}</h2>
+				<p data-cy="emailUpdatedDescription" class="subtitle">{{ $t('email.EMAIL_UPDATED_DESCRIPTION') }}</p>
 
 				<button @click="resetData" tag="button" class="button outlined-button big-button transition-faster">
-					<span>Close</span>
+					<span>{{ $t('common.CLOSE') }}</span>
 				</button>
 			</div>
 		</div>
@@ -60,7 +60,7 @@ export default class EmailSettings extends mixins(Authenticated, Global) {
 			if (error && error.toString() === 'TypeError: Failed to fetch') {
 				this.showNetworkError(true);
 			} else {
-				this.logSentryError('setNewData', error.toString(), data)
+				this.logSentryError('setNewData', error.toString(), data);
 			}
 
 			this.logonError = getDictionaryValue(error.toString());
@@ -81,7 +81,7 @@ export default class EmailSettings extends mixins(Authenticated, Global) {
 			if (error && error.toString() === 'TypeError: Failed to fetch') {
 				this.showNetworkError(true);
 			} else {
-				this.logSentryError('setCode', error.toString(), { code })
+				this.logSentryError('setCode', error.toString(), { code });
 			}
 
 			this.logonError = getDictionaryValue(error.toString());
@@ -93,7 +93,7 @@ export default class EmailSettings extends mixins(Authenticated, Global) {
 	}
 
 	redirectUser() {
-		this.$router.push('/settings').catch(() => undefined);;
+		this.$router.push('/settings').catch(() => undefined);
 	}
 
 	resetData() {

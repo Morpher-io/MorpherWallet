@@ -4,7 +4,7 @@ dotEnv.config();
 import * as express from 'express';
 import * as http from 'http';
 import * as cors from 'cors';
-import * as morgan from 'morgan';
+import {loggingMiddleware} from './helpers/functions/logging-middleware';
 import * as helmet from 'helmet';
 import * as bodyParser from 'body-parser';
 import { sequelize } from './database/index';
@@ -19,8 +19,14 @@ const app = express();
 
 const rateLimit = require('express-rate-limit');
 
+const limitReached = (req: express.Request, res: express.Response) => {
+
+    Logger.warn({ data: { ip: req.ip, method: req.method, path: req.path, url: req.originalUrl} , message: 'Rate limiter triggered'});
+};
+
 const limiter = {
     windowMs: 60 * 1000, // 1 minute
+    onLimitReached: limitReached,
     max: 200 // limit each IP to 60 requests per minute
 };
 
@@ -49,7 +55,8 @@ app.use((req, res, next) => {
 app.use(cors());
 
 // Use morgan combined with winston for logging.
-app.use(morgan('combined'));
+//app.use(morgan('combined'));
+app.use(loggingMiddleware);
 
 // Use helmet and body parser library
 app.use(helmet());
@@ -67,7 +74,7 @@ app.get('/', async (req, res) => {
 const httpServer = http.createServer(app);
 
 process.on('unhandledRejection', (error: any, promise) => {
-    Logger.info(error.stack || error);
+    Logger.error({ source: 'unhandledRejection', data: error.stack  || error, message: error.message || error.toString() } );
 });
 
 async function quitBackend() {

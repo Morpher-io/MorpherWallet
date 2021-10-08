@@ -1,10 +1,10 @@
 <template>
 	<div class="card">
 		<div v-if="currentPage === 0">
-			<h2 v-if="!hideOldPassword" class="title">Change Password</h2>
-			<h2 v-else class="title">Reset Your Password</h2>
-			<h4 v-if="!hideOldPassword" class="subtitle">Create a new account password.</h4>
-			<h4 v-else class="subtitle">Account recovered successfully! Please reset your password below.</h4>
+			<h2 v-if="!hideOldPassword" class="title">{{ $t('password.CHANGE_PASSWORD_TITLE') }}</h2>
+			<h2 v-else class="title">{{ $t('password.RESET_PASSWORD_TITLE') }}</h2>
+			<h4 v-if="!hideOldPassword" class="subtitle">{{ $t('password.CHANGE_PASSWORD_DESCRIPTION') }}</h4>
+			<h4 v-else class="subtitle">{{ $t('password.RESET_PASSWORD_DESCRIPTION') }}</h4>
 			<form v-on:submit.prevent="changePasswordExecute">
 				<div>
 					<div class="field" v-if="!hideOldPassword">
@@ -14,12 +14,12 @@
 						</div>
 					</div>
 					<div class="field">
-						<label class="label">New Password</label>
+						<label class="label">{{ $t('common.NEW_PASSWORD') }}</label>
 						<div class="control">
 							<input type="password" name="newPassword" data-cy="newPassword" class="input password-input" v-model="walletPassword" />
 							<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial" />
 							<div class="password-help">
-								<p>Requirements:</p>
+								<p>{{ $t('password.REQUIREMENTS') }}</p>
 								<ul class="items">
 									<li
 										:class="{
@@ -27,7 +27,7 @@
 											fail: passwordChecks.min === 'fail'
 										}"
 									>
-										Min. 8 characters
+										{{ $t('password.MIN_CHARACTERS') }}
 									</li>
 									<li
 										:class="{
@@ -35,7 +35,7 @@
 											fail: passwordChecks.lowercase === 'fail'
 										}"
 									>
-										Lowercase letter
+										{{ $t('password.LOWERCASE_LETTER') }}
 									</li>
 									<li
 										:class="{
@@ -43,7 +43,7 @@
 											fail: passwordChecks.uppercase === 'fail'
 										}"
 									>
-										Uppercase letter
+										{{ $t('password.UPPERCASE_LETTER') }}
 									</li>
 									<li
 										:class="{
@@ -51,7 +51,7 @@
 											fail: passwordChecks.number === 'fail'
 										}"
 									>
-										Number
+										{{ $t('password.NUMBER') }}
 									</li>
 									<li
 										:class="{
@@ -59,14 +59,14 @@
 											fail: passwordChecks.match === 'fail'
 										}"
 									>
-										Passwords match
+										{{ $t('password.PASSWORD_MATCH') }}
 									</li>
 								</ul>
 							</div>
 						</div>
 					</div>
 					<div class="field">
-						<label class="label">Confirm Password</label>
+						<label class="label">{{ $t('common.CONFIRM_PASSWORD') }}</label>
 						<div class="control">
 							<input type="password" class="input" name="newPasswordRepeat" data-cy="newPasswordRepeat" v-model="walletPasswordRepeat" />
 						</div>
@@ -77,17 +77,17 @@
 					</div>
 
 					<button class="button is-green big-button is-login transition-faster mt-5" type="submit" data-cy="passwordSubmit">
-						<span>Update Password</span>
+						<span>{{ $t('common.UPDATE_PASSWORD') }}</span>
 					</button>
 
 					<div class="mt-2">
 						<button
-							v-on:click="$router.push(hideOldPassword ? '/login' : '/settings?email_password=true').catch(() => undefined);"
+							v-on:click="$router.push(hideOldPassword ? '/login' : '/settings?email_password=true').catch(() => undefined)"
 							tag="button"
 							type="button"
 							class="button is-ghost is-blue big-button medium-text transition-faster"
 						>
-							<span>Cancel</span>
+							<span>{{ $t('common.CANCEL') }}</span>
 						</button>
 					</div>
 				</div>
@@ -97,11 +97,11 @@
 		<div v-if="currentPage === 1">
 			<div>
 				<img src="@/assets/img/checkmark.svg" alt="Checkmark image" class="mb-3" />
-				<h2 data-cy="passwordChangeTitle" class="title">Password Updated</h2>
-				<p data-cy="passwordChangeDescription" class="subtitle">Your password was successfully updated!</p>
+				<h2 data-cy="passwordChangeTitle" class="title">{{ $t('password.PASSWORD_UPDATED_TITLE') }}</h2>
+				<p data-cy="passwordChangeDescription" class="subtitle">{{ $t('password.PASSWORD_UPDATED_DESCRIPTION') }}</p>
 
 				<button @click="resetData" tag="button" class="button outlined-button big-button transition-faster">
-					<span>Close</span>
+					<span>{{ $t('common.CLOSE') }}</span>
 				</button>
 			</div>
 		</div>
@@ -184,7 +184,7 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 				this.currentPage = 1;
 
 				if (this.presetOldPassword !== undefined) {
-					this.$router.push('/login').catch(() => undefined);;
+					this.$router.push('/login').catch(() => undefined);
 				}
 			})
 			.catch(error => {

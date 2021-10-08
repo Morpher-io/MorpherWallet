@@ -72,7 +72,7 @@ async function encrypt(text, secret) {
         if (err) {
             reject(err);
             return;
-        };
+        }
         resolve(derivedKey);  // '3745e48...08d59ae'
       });
     });
@@ -96,7 +96,7 @@ async function decrypt(text, secret) {
         if (err) {
             reject(err);
             return;
-        };
+        }
         resolve(derivedKey);  // '3745e48...08d59ae'
       });
     });

@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
 
-import { Email_Template } from '../../database/models';
+import { Logger } from './winston';
+import { Email_Template, Email_Log } from '../../database/models';
 
 export async function sendEmail2FA(payload, email) {
     const email_template = await Email_Template.findOne({where: { template_name: 'Email 2FA' }})
@@ -18,8 +19,6 @@ export async function sendEmail2FA(payload, email) {
     html = html.replace('{{2FA_CODE}}', payload)
     text = text.replace('{{2FA_CODE}}', payload)
     subject = subject.replace('{{2FA_CODE}}', payload)
-
-    
 
     const params = {
         Destination: {
@@ -41,17 +40,47 @@ export async function sendEmail2FA(payload, email) {
         Source: from_address
     };
 
-    await SES.sendEmail(params).promise();
+    if (process.env.EMAIL_NOTIFICATIONS_NAME) params['ConfigurationSetName'] = process.env.EMAIL_NOTIFICATIONS_NAME
+
+    const info = await SES.sendEmail(params).promise();
+
+    try {
+
+        const log:any = {
+        
+            id: info.MessageId,
+            aws_sent_status: 'success',
+            email,
+            email_template_id: email_template.id
+        }
+        
+        // Insert Email Logs
+        await Email_Log.create(log);
+    } catch (error){
+        Logger.error({ source: 'sendEmail2FA', data:  {email}, message: error.message || error.toString() } );
+    }
+    
 }
 
 export async function sendEmailChanged(payload, email) {
+
+    const email_template = await Email_Template.findOne({where: { template_name: 'Email Changed' }})
+
     const SES = new AWS.SES({
         accessKeyId: process.env.ACCESS_KEY_ID,
         secretAccessKey: process.env.ACCESS_KEY_SECRET,
         region: 'eu-west-1'
     });
 
-    const emailBody = `Your email address has changed to: ${payload}`;
+    
+    const from_address = email_template.from_address;
+    let html = email_template.template_html;
+    let text = email_template.template_text;
+    let subject = email_template.subject;
+
+    html = html.replace('{{EMAIL_ADDRESS}}', payload)
+    text = text.replace('{{EMAIL_ADDRESS}}', payload)
+    subject = subject.replace('{{EMAIL_ADDRESS}}', payload)
 
     const params = {
         Destination: {
@@ -60,15 +89,36 @@ export async function sendEmailChanged(payload, email) {
         Message: {
             Body: {
                 Text: {
-                    Data: emailBody
+                    Data: text
+                },
+                Html: {
+                    Data: html
                 }
             },
             Subject: {
-                Data: 'Morpher Wallet Email Has Changed!'
+                Data: subject
             }
         },
-        Source: 'team@morpher.com'
+        Source: from_address
     };
 
-    await SES.sendEmail(params).promise();
+    if (process.env.EMAIL_NOTIFICATIONS_NAME) params['ConfigurationSetName'] = process.env.EMAIL_NOTIFICATIONS_NAME
+
+    const info = await SES.sendEmail(params).promise();
+
+    try {
+
+        const log:any = {
+        
+            id: info.MessageId,
+            aws_sent_status: 'success',
+            email,
+            email_template_id: email_template.id
+        }
+        
+        // Insert Email Logs
+        await Email_Log.create(log);
+    } catch (error){
+        Logger.error({ source: 'sendEmail2FA', data:  {email}, message: error.message || error.toString() } );
+    }
 }

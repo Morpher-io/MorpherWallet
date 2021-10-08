@@ -23,7 +23,7 @@
 				<span class="icon is-small">
 					<i class="fas fa-lock"></i>
 				</span>
-				<span>Secured with AES | SHA-256 | PBKDF2</span>
+				<span>{{ $t('common.SECURED_WALLET') }}</span>
 			</div>
 		</section>
 		<Footer v-if="!iFrameDisplay" :NFTBackground="NFTBackground" />
@@ -72,9 +72,9 @@ export default class App extends Vue {
 				(await promise).onClose();
 
 				if (this.$store.getters.isLoggedIn) {
-					if (this.$router.currentRoute.path !== '/') this.$router.push('/').catch(() => undefined);;
+					if (this.$router.currentRoute.path !== '/') this.$router.push('/').catch(() => undefined);
 				} else {
-					if (this.$router.currentRoute.path !== '/login') this.$router.push('/login').catch(() => undefined);;
+					if (this.$router.currentRoute.path !== '/login') this.$router.push('/login').catch(() => undefined);
 				}
 			}
 		}

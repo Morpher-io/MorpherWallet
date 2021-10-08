@@ -595,7 +595,7 @@ describe('Wallet controller test cases', async () => {
             authenticator: false
         };
 
-        let user = await User.findOne();
+        const user = await User.findOne();
 
         email2FAData['nonce'] = user.nonce;
 

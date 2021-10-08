@@ -5,6 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve  --port 3001",
     "build": "vue-cli-service build",
+    "test:unit": "vue-cli-service test:unit",
     "tests": "npx cypress run --headed",
     "tests-headless": "npx cypress run --headless",
     "lint": "vue-cli-service lint"
@@ -21,11 +22,13 @@
     "downloadjs": "^1.4.7",
     "eslint-plugin-import": "^2.22.1",
     "ethereumjs-wallet": "^1.0.1",
+    "js-cookie": "^3.0.1",
     "penpal": "^5.3.0",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3",
     "vue-facebook-login-component": "^4.0.2",
     "vue-google-login": "^2.0.5",
+    "vue-i18n": "^8.25.1",
     "vue-password-strength-meter": "^1.7.2",
     "vue-property-decorator": "^8.4.2",
     "vue-router": "^3.2.0",
@@ -38,6 +41,7 @@
   "devDependencies": {
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/jest": "^24.0.19",
+    "@types/js-cookie": "^2.2.7",
     "@typescript-eslint/eslint-plugin": "^2.33.0",
     "@typescript-eslint/parser": "^2.33.0",
     "@vue/cli-plugin-babel": "~4.5.0",

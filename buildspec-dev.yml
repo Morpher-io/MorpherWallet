@@ -4,6 +4,8 @@ env:
     variables:
         NODE_ENV: 'development'
         VUE_APP_BACKEND_ENDPOINT: 'https://wallet-api-dev.morpher.com'
+        VUE_APP_I18N_DEFAULT_LOCALE: 'en'
+        VUE_APP_I18N_SUPPORTED_LOCALE: '["en", "ru", "bs"]'
     secrets-manager:
         VUE_APP_GOOGLE_APP_ID: "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_GOOGLE_APP_ID::"
         VUE_APP_FACEBOOK_APP_ID: "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_FACEBOOK_APP_ID::"
