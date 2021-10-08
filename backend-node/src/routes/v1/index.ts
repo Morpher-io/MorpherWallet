@@ -87,7 +87,7 @@ module.exports = function(express) {
     }
 
     router.post('/saveEmailPassword', WalletController.saveEmailPassword);
-    router.post('/getEncryptedSeed', limiter, WalletController.getEncryptedSeed);
+    router.post('/getEncryptedSeed', limiterGetPayload, limiter, WalletController.getEncryptedSeed);
 
     /**
      * Recovery Methods
@@ -95,11 +95,11 @@ module.exports = function(express) {
     router.post('/recoverSeedSocialRecovery', WalletController.recoverSeedSocialRecovery);
 
     router.post('/getPayload', limiterGetPayload, WalletController.getPayload);
-    router.post('/getNonce', WalletController.getNonce);
+    router.post('/getNonce',limiterGetPayload, WalletController.getNonce);
     router.post('/send2FAEmail', WalletController.send2FAEmail);
-    router.post('/verifyEmailCode', WalletController.verifyEmailCode);
-    router.post('/verifyEmailConfirmationCode', WalletController.verifyEmailConfirmationCode);
-    router.post('/verifyAuthenticatorCode', WalletController.verifyAuthenticatorCode);
+    router.post('/verifyEmailCode', limiterGetPayload, WalletController.verifyEmailCode);
+    router.post('/verifyEmailConfirmationCode', limiterGetPayload, WalletController.verifyEmailConfirmationCode);
+    router.post('/verifyAuthenticatorCode', limiterGetPayload, WalletController.verifyAuthenticatorCode);
     router.post('/validateInput', ValidationController.validateInput);
 
     /**
