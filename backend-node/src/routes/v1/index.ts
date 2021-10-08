@@ -18,6 +18,14 @@ const limiter = new rateLimit({
         return req.body.key;
     }
 });
+const limiterGetPayload = new rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 15,
+    onLimitReached: limitReached,
+    keyGenerator(req, res) {
+        return req.body.key;
+    }
+});
 
 // The index route file which connects all the other files.
 module.exports = function(express) {
@@ -37,7 +45,7 @@ module.exports = function(express) {
      */
     router.post('/recoverSeedSocialRecovery', WalletController.recoverSeedSocialRecovery);
 
-    router.post('/getPayload', WalletController.getPayload);
+    router.post('/getPayload', limiterGetPayload, WalletController.getPayload);
     router.post('/getNonce', WalletController.getNonce);
     router.post('/send2FAEmail', WalletController.send2FAEmail);
     router.post('/verifyEmailCode', WalletController.verifyEmailCode);
