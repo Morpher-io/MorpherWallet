@@ -4,7 +4,7 @@ dotEnv.config();
 import * as express from 'express';
 import * as http from 'http';
 import * as cors from 'cors';
-import * as morgan from 'morgan';
+import {loggingMiddleware} from './helpers/functions/logging-middleware';
 import * as helmet from 'helmet';
 import * as bodyParser from 'body-parser';
 import { sequelize } from './database/index';
@@ -55,7 +55,8 @@ app.use((req, res, next) => {
 app.use(cors());
 
 // Use morgan combined with winston for logging.
-app.use(morgan('combined'));
+//app.use(morgan('combined'));
+app.use(loggingMiddleware);
 
 // Use helmet and body parser library
 app.use(helmet());
