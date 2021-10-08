@@ -502,7 +502,7 @@ export async function getPayload(req, res) {
         const recovery = await Recovery.findOne({ where: { key } });
         if (recovery == null) {
             
-            Logger.error({ source: 'getPayload', data: req.body, message: error.message || error.toString() } );
+            Logger.error({ source: 'getPayload', data: req.body, message: "getPayload: User not found." } );
             return errorResponse(res, 'USER_NOT_FOUND', 404);
         }
         const user = await User.findOne({ where: { id: recovery.user_id }, raw: true });
