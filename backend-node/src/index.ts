@@ -27,7 +27,7 @@ const limitReached = (req: express.Request, res: express.Response) => {
 const limiter = {
     windowMs: 60 * 1000, // 1 minute
     onLimitReached: limitReached,
-    max: 200 // limit each IP to 60 requests per minute
+    max: 200000 // limit each IP to 60 requests per minute
 };
 
 app.set('trust proxy', 1)
