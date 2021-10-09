@@ -31,8 +31,8 @@ let ipRequestPayload = {};
  * 3 times the same ip with different keys will get then rate-limited.
  */
 const limiterGetPayload = new rateLimit({
-    windowMs: 60 * 60 * 1000,
-    max: 10,
+    windowMs: 24 * 60 * 60 * 1000,
+    max: 5,
     onLimitReached: limitReached,
     keyGenerator(req, res) {
 
@@ -46,16 +46,7 @@ const limiterGetPayload = new rateLimit({
             };
         }
 
-        /**
-         * If you haven't touched the getPayload for 60 minutes, erase your quota
-         */
-        if(Date.now() - ipRequestPayload[req.ip].lastAccess > 60*60*1000) {
-            ipRequestPayload[req.ip].keyRequests = [];
-        }
-        ipRequestPayload[req.ip].lastAccess = Date.now();
-
-
-        /**
+         /**
          * if you are trying a new key, return the IP as a keygenerator-key
          */
         if(!ipRequestPayload[req.ip].keyRequests.includes(req.body.key)) {
@@ -63,7 +54,7 @@ const limiterGetPayload = new rateLimit({
             /**
              * if there are not yet 3 addresses in there, add it so it won't rate limit
              */
-            if(ipRequestPayload[req.ip].keyRequests.length <= 10) {
+            if(ipRequestPayload[req.ip].keyRequests.length <= 5) {
                 ipRequestPayload[req.ip].keyRequests.push(req.body.key);
             }
             return req.ip;
