@@ -1,7 +1,7 @@
 import { Logger } from './winston';
 
 let ipAccessGetPath = {};
-let banlist = [];
+let banlist = require("./banlist.json");
 
 let warnedLog = [];
 
