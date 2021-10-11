@@ -301,7 +301,7 @@ export async function getEncryptedSeed(req, res) {
                     user.ip_address = ip_address;
                 }
     
-                if (ip_country !== user.ip_country) {
+                if (ip_country && ip_country !== user.ip_country) {
                     if (!user.payload.authenticator && !user.payload.email) {
                         user.payload.needConfirmation = true;
                         user.changed('payload', true)                
@@ -569,7 +569,7 @@ export async function getPayload(req, res) {
                 user.ip_address = ip_address;
             }
 
-            if (ip_country !== user.ip_country) {
+            if (ip_country && ip_country !== user.ip_country) {
                 if (!user.payload.authenticator && !user.payload.email) {
                     user.payload.needConfirmation = true;
                     user.changed('payload', true)                
