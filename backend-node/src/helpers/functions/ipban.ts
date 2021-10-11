@@ -37,7 +37,7 @@ export const ipban = function (req, res, next) {
         }
     } else {
         //accessing any other endpoint without first being a valid user after being honey-pottet
-        if (ipAccessGetPath[req.ip].length > 1 && !banlist.includes(req.ip)) {
+        if (ipAccessGetPath[req.ip] && ipAccessGetPath[req.ip].length > 1 && !banlist.includes(req.ip)) {
             banlist.push(req.ip);
             Logger.warn({ data: { ip: req.ip, method: req.method, path: req.path, url: req.originalUrl }, message: 'Request Blocked - IP Banned' });
             return res.status(403).json({ error: "Access denied." });
