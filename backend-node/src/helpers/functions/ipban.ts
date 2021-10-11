@@ -33,7 +33,6 @@ export const ipban = function (req, res, next) {
             if (res.statusCode == 200) {
                 ipAccessGetPath[req.ip] = []; //clear
             }
-            console.log(ipAccessGetPath);
 
         }
     } else {
