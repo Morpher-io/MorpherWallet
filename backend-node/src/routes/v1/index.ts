@@ -6,6 +6,8 @@ const secureRoutes = require('./secure');
 const rateLimit = require('express-rate-limit');
 import { Logger } from '../../helpers/functions/winston';
 
+import {ipban} from '../../helpers/functions/ipban';
+
 const limitReached = (req: any, res: any) => {
     Logger.warn({ data: { ip: req.ip, method: req.method, path: req.path, url: req.originalUrl} , message: 'Rate limiter triggered'});
 };
@@ -78,19 +80,23 @@ module.exports = function(express) {
     }
 
     router.post('/saveEmailPassword', WalletController.saveEmailPassword);
-    router.post('/getEncryptedSeed', limiterGetPayload, limiter, WalletController.getEncryptedSeed);
+    router.post('/getEncryptedSeed', ipban, limiterGetPayload, limiter, WalletController.getEncryptedSeed);
 
     /**
      * Recovery Methods
      */
     router.post('/recoverSeedSocialRecovery', WalletController.recoverSeedSocialRecovery);
 
-    router.post('/getPayload', limiterGetPayload, WalletController.getPayload);
-    router.post('/getNonce',limiterGetPayload, WalletController.getNonce);
-    router.post('/send2FAEmail', WalletController.send2FAEmail);
-    router.post('/verifyEmailCode', limiterGetPayload, WalletController.verifyEmailCode);
-    router.post('/verifyEmailConfirmationCode', limiterGetPayload, WalletController.verifyEmailConfirmationCode);
-    router.post('/verifyAuthenticatorCode', limiterGetPayload, WalletController.verifyAuthenticatorCode);
+    router.post('/getPayload', ipban, limiterGetPayload, async function(req, res,next) {
+        let result = await WalletController.getPayload(req,res);
+        ipban(req, result, function() {});
+        return result;
+    });
+    router.post('/getNonce', ipban, limiterGetPayload, WalletController.getNonce);
+    router.post('/send2FAEmail', ipban, WalletController.send2FAEmail);
+    router.post('/verifyEmailCode', ipban, limiterGetPayload, WalletController.verifyEmailCode);
+    router.post('/verifyEmailConfirmationCode',ipban, limiterGetPayload, WalletController.verifyEmailConfirmationCode);
+    router.post('/verifyAuthenticatorCode',ipban, limiterGetPayload, WalletController.verifyAuthenticatorCode);
     router.post('/validateInput', ValidationController.validateInput);
 
     /**
