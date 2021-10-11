@@ -134,7 +134,87 @@ function sortObject(object: any) {
     return newObject;
 }
 
+/**
+ * validate a recaptcha token passed by the web site
+ */
+ const validateRecaptcha = async function(recaptchaToken: string) {
+    try {
+
+        const axios = require('axios')
+
+        const response = await  axios.post(
+                'https://www.google.com/recaptcha/api/siteverify?secret=' +
+                process.env.RECAPTCHA_SECRET +
+                '&response=' +
+                recaptchaToken,
+                {},
+                {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
+                    }
+                }
+            )
+        
+
+        
+
+        // Check Recaptcha Response
+        if (response && response.data && !response.data.success) return 'Recaptcha Failed';
+
+        return null;
+    } catch(err) {
+        if (err) return 'Recaptcha Error: ' + err.message;
+    }
+};
+
+export const getIPCountryCode = async ip_address => {
+    const axios = require('axios')
+
+    let country_code = null;
+    if (!ip_address || ip_address === '127.0.0.1' || ip_address === '::ffff:127.0.0.1') {
+        return country_code;
+    }
+    try {
+            
+        
+        // check for geolocation using ipdata.co
+        const ipcheck1 = await axios.get(
+            'https://api.ipdata.co/' + ip_address + '?api-key=' + process.env.IP_DATA_KEY);
+
+        country_code = ipcheck1.data.country_code;
+    } catch (err) {
+        country_code = null;
+    }
+
+    if (!country_code) {
+        try {
+            // check for geolocation using ipinfo.io
+            const ipcheck1 = await axios.get('https://ipinfo.io/' + ip_address + '/json');
+
+            country_code = ipcheck1.data.country;
+
+        } catch (err) {
+            country_code = null;
+        }
+    }
+    if (!country_code) {
+        try {
+            // check for geolocation using geo.json
+            const ip_check = await axios.get('https://get.geojs.io/v1/ip/geo.json?ip=' + ip_address);
+
+            country_code = ip_check.data[0].country_code;
+
+        } catch (err) {
+            country_code = null;
+        }
+    }
+
+    return country_code;
+};
+
+
 export {
+    validateRecaptcha,
     errorResponse,
     successResponse,
     asyncForEach,

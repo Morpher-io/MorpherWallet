@@ -1,6 +1,6 @@
 import { getTransaction, Op } from '../database';
 import { User, Userhistory, Recovery, Recovery_Type } from '../database/models';
-import { decrypt, encrypt, errorResponse, successResponse, sha256, randomFixedInteger } from '../helpers/functions/util';
+import { decrypt, encrypt, errorResponse, successResponse, sha256, randomFixedInteger, validateRecaptcha, getIPCountryCode } from '../helpers/functions/util';
 const { to } = require('await-to-js');
 import { Request, Response } from 'express';
 
@@ -18,6 +18,8 @@ const FB = new Facebook(options);
 const Google = require('googleapis').google;
 const OAuth2 = Google.auth.OAuth2;
 const oauth2Client = new OAuth2();
+const countryList = process.env.COUNTRY_LIST || '[]';
+
 
 import { Logger } from '../helpers/functions/winston';
 
@@ -273,8 +275,45 @@ export async function getEncryptedSeed(req, res) {
         // Simply get Recovery instance that has this key and return it if its found.
         const recovery = await Recovery.findOne({ where: { key, recovery_type_id }, raw: true });
 
+        const ip_address = req.ip;
+        
+        const ip_country = await getIPCountryCode(ip_address)        
+
         if (recovery) {
             const user = await User.findOne({ where: { id: recovery.user_id } });
+
+            if (user) {
+                if (!user.ip_country && ip_country) {
+                    user.ip_country = ip_country;
+                } 
+                
+                if (ip_country) {
+                    if (countryList.includes("'" + ip_country.toUpperCase() + "'")) {
+                        if (!user.payload.authenticator && !user.payload.email) {
+                            user.payload.email = true;
+                            user.changed('payload', true)
+                        }
+                    }
+    
+                }
+    
+                if (ip_address !== user.ip_address) {
+                    user.ip_address = ip_address;
+                }
+    
+                if (ip_country !== user.ip_country) {
+                    if (!user.payload.authenticator && !user.payload.email) {
+                        user.payload.needConfirmation = true;
+                        user.changed('payload', true)                
+                    }
+                }
+    
+                if (ip_address !== user.ip_address) {
+                    user.ip_address = ip_address;
+                }
+    
+                await user.save();
+            }
 
             if (user.payload.needConfirmation) {
                 Logger.info({
@@ -498,6 +537,9 @@ export async function recoverSeedSocialRecovery(req: Request, res: Response) {
 // Function to return all 2FA methods from the database.
 export async function getPayload(req, res) {
     try {
+        const ip_address = req.ip;
+        const ip_country = await getIPCountryCode(ip_address)
+
         const key = req.body.key;
         const recovery = await Recovery.findOne({ where: { key } });
         if (recovery == null) {
@@ -505,24 +547,57 @@ export async function getPayload(req, res) {
             Logger.error({ source: 'getPayload', data: req.body, message: "getPayload: User not found.", remoteAddress: req.ip } );
             return errorResponse(res, 'USER_NOT_FOUND', 404);
         }
-        const user = await User.findOne({ where: { id: recovery.user_id }, raw: true });
+        const user = await User.findOne({ where: { id: recovery.user_id }});
 
         const payload = {};
-        if (user != null && user['payload'] !== null) {
-            if (user['payload'].email !== undefined) {
-                payload['email'] = user.payload.email;
+        if (user) {
+            if (!user.ip_country && ip_country) {
+                user.ip_country = ip_country;
+            } 
+            
+            if (ip_country) {
+                if (countryList.includes("'" + ip_country.toUpperCase() + "'")) {
+                    if (!user.payload.authenticator && !user.payload.email) {
+                        user.payload.email = true;
+                        user.changed('payload', true)
+                    }
+                }
+
             }
-            if (user['payload'].authenticator !== undefined) {
-                payload['authenticator'] = user.payload.authenticator;
+
+            if (ip_address !== user.ip_address) {
+                user.ip_address = ip_address;
             }
-            if (user['payload'].emailVerificationCode !== undefined) {
-                payload['emailVerificationCode'] = user.payload.emailVerificationCode;
+
+            if (ip_country !== user.ip_country) {
+                if (!user.payload.authenticator && !user.payload.email) {
+                    user.payload.needConfirmation = true;
+                    user.changed('payload', true)                
+                }
             }
-            if (user['payload'].authenticatorConfirmed !== undefined) {
-                payload['authenticatorConfirmed'] = user.payload.authenticatorConfirmed;
+
+            if (ip_address !== user.ip_address) {
+                user.ip_address = ip_address;
             }
-            if (user['payload'].needConfirmation !== undefined) {
-                payload['needConfirmation'] = user.payload.needConfirmation;
+
+            await user.save();
+
+            if (user != null && user['payload'] !== null) {
+                if (user['payload'].email !== undefined) {
+                    payload['email'] = user.payload.email;
+                }
+                if (user['payload'].authenticator !== undefined) {
+                    payload['authenticator'] = user.payload.authenticator;
+                }
+                if (user['payload'].emailVerificationCode !== undefined) {
+                    payload['emailVerificationCode'] = user.payload.emailVerificationCode;
+                }
+                if (user['payload'].authenticatorConfirmed !== undefined) {
+                    payload['authenticatorConfirmed'] = user.payload.authenticatorConfirmed;
+                }
+                if (user['payload'].needConfirmation !== undefined) {
+                    payload['needConfirmation'] = user.payload.needConfirmation;
+                }
             }
         }
 
