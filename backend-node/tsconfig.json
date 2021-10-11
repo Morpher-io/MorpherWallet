@@ -9,7 +9,8 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "noImplicitUseStrict": true,
-    "target": "es2017"
+    "target": "es2017",
+    "resolveJsonModule":true
   },
   "compileOnSave": true,
   "include": [
