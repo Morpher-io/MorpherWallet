@@ -297,20 +297,16 @@ export async function getEncryptedSeed(req, res) {
     
                 }
     
-                if (ip_address !== user.ip_address) {
-                    user.ip_address = ip_address;
-                }
+                user.ip_address = ip_address;
     
                 if (ip_country && ip_country !== user.ip_country) {
                     if (!user.payload.authenticator && !user.payload.email) {
                         user.payload.needConfirmation = true;
                         user.changed('payload', true)                
                     }
-                }
-    
-                if (ip_address !== user.ip_address) {
-                    user.ip_address = ip_address;
-                }
+                }    
+                
+                user.ip_country = ip_country;
     
                 await user.save();
             }
@@ -565,9 +561,7 @@ export async function getPayload(req, res) {
 
             }
 
-            if (ip_address !== user.ip_address) {
-                user.ip_address = ip_address;
-            }
+            user.ip_address = ip_address;
 
             if (ip_country && ip_country !== user.ip_country) {
                 if (!user.payload.authenticator && !user.payload.email) {
@@ -576,9 +570,7 @@ export async function getPayload(req, res) {
                 }
             }
 
-            if (ip_address !== user.ip_address) {
-                user.ip_address = ip_address;
-            }
+            user.ip_country = ip_country;
 
             await user.save();
 
