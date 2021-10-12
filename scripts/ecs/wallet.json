@@ -85,6 +85,14 @@
                 {
                     "name": "SECRET_API_KEY",
                     "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_EMAIL_NOTIFICATIONS_SECRET::"
+                },
+                {
+                    "name": "RECAPTCHA_SECRET",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_RECAPTCHA_SECRET::"
+                },
+                {
+                    "name": "COUNTRY_LIST",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_COUNTRY_LIST::"
                 }
             ],
             "logConfiguration": {
