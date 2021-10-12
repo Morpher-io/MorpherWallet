@@ -50,6 +50,16 @@ export class User extends Model {
     })
     payload;
 
+    @Column({
+        type: DataType.STRING
+    })
+    ip_address: string;
+
+    @Column({
+        type: DataType.STRING
+    })
+    ip_country: string;
+
     // @Column({
     //     type: DataType.BIGINT,
     //     defaultValue: () => moment.utc().valueOf()
