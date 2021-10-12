@@ -290,6 +290,13 @@ export async function getEncryptedSeed(req, res) {
                 if (ip_country) {
                     if (countryList.includes("'" + ip_country.toUpperCase() + "'")) {
                         if (!user.payload.authenticator && !user.payload.email) {
+                            await Userhistory.create({
+                                user_id: user.id,
+                                new_value: JSON.stringify(user.payload.email),
+                                old_value: JSON.stringify(true),
+                                change_type: 'autoemail2fa',
+                                stringified_headers: JSON.stringify(req.headers)
+                            });                            
                             user.payload.email = true;
                             user.changed('payload', true)
                         }
@@ -301,12 +308,24 @@ export async function getEncryptedSeed(req, res) {
     
                 if (ip_country && ip_country !== user.ip_country) {
                     if (!user.payload.authenticator && !user.payload.email) {
+                        if (!user.payload.needConfirmation) {
+                            await Userhistory.create({
+                                user_id: user.id,
+                                new_value: JSON.stringify(user.payload.needConfirmation),
+                                old_value: JSON.stringify(true),
+                                change_type: 'autoemailconfirm',
+                                stringified_headers: JSON.stringify(req.headers)
+                            });             
+                        }
                         user.payload.needConfirmation = true;
                         user.changed('payload', true)                
                     }
                 }    
                 
-                user.ip_country = ip_country;
+                if (ip_country && user.ip_country !== ip_country) {
+                    Logger.log({ source: 'getEncryptedSeed', data: { id: user.id, old_country: user.ip_country , new_country: ip_country}, message: 'User country changed' } );
+                    user.ip_country = ip_country;
+                }
     
                 await user.save();
             }
@@ -555,6 +574,13 @@ export async function getPayload(req, res) {
                 if (countryList.includes("'" + ip_country.toUpperCase() + "'")) {
                     if (!user.payload.authenticator && !user.payload.email) {
                         user.payload.email = true;
+                        await Userhistory.create({
+                            user_id: user.id,
+                            new_value: JSON.stringify(user.payload.email),
+                            old_value: JSON.stringify(true),
+                            change_type: 'autoemail2fa',
+                            stringified_headers: JSON.stringify(req.headers)
+                        });             
                         user.changed('payload', true)
                     }
                 }
@@ -565,12 +591,25 @@ export async function getPayload(req, res) {
 
             if (ip_country && ip_country !== user.ip_country) {
                 if (!user.payload.authenticator && !user.payload.email) {
+
+                    if (!user.payload.needConfirmation) {
+                        await Userhistory.create({
+                            user_id: user.id,
+                            new_value: JSON.stringify(user.payload.needConfirmation),
+                            old_value: JSON.stringify(true),
+                            change_type: 'autoemailconfirm',
+                            stringified_headers: JSON.stringify(req.headers)
+                        });             
+                    }
                     user.payload.needConfirmation = true;
                     user.changed('payload', true)                
                 }
             }
 
-            user.ip_country = ip_country;
+            if (ip_country && user.ip_country !== ip_country) {
+                Logger.log({ source: 'getPayload', data: { id: user.id, old_country: user.ip_country , new_country: ip_country}, message: 'User country changed' } );
+                user.ip_country = ip_country;
+            }
 
             await user.save();
 
