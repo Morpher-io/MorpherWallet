@@ -165,9 +165,10 @@ export default class Login extends mixins(Global, Recaptcha) {
 							this.$router.push('/').catch(() => undefined);
 						})
 						.catch((error) => {
-
-							console.log('error', error)
-
+							if (error.error === 'RECAPTCHA_REQUIRED') {
+								this.executeRecaptcha(this.login)
+								return;
+							}
 							this.logonError = getDictionaryValue('DECRYPT_FAILED');
 							this.loginErrorReturn(email, 'INVALID_PASSWORD');
 							this.showRecovery = true;

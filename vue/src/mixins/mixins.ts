@@ -229,7 +229,6 @@ export class Global extends Vue {
 	 * @param {*} errorDescription Error to be lodgged
 	 */
 	async logSentryError(source: string, errorDescription: string, customContext: any) {
-		console.log('logSentryError', errorDescription);
 
 		const vueData: any = { source };
 		// Get the component and props data
