@@ -1,6 +1,6 @@
 import { getTransaction, Op } from '../database';
 import { User, Userhistory, Recovery, Recovery_Type } from '../database/models';
-import { decrypt, encrypt, errorResponse, successResponse, sha256, randomFixedInteger, validateRecaptcha, getIPCountryCode } from '../helpers/functions/util';
+import { decrypt, encrypt, errorResponse, successResponse, sha256, randomFixedInteger, getIPCountryCode } from '../helpers/functions/util';
 const { to } = require('await-to-js');
 import { Request, Response } from 'express';
 

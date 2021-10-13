@@ -156,9 +156,6 @@ function sortObject(object: any) {
             )
         
 
-            console.log('validateRecaptcha', response)
-        
-
         // Check Recaptcha Response
         if (response && response.data && !response.data.success) return false;
 

@@ -79,15 +79,15 @@ module.exports = function(express) {
         router.use('/test', testingRoutes);
     }
 
-    router.post('/saveEmailPassword', WalletController.saveEmailPassword);
-    router.post('/getEncryptedSeed', ipban, limiterGetPayload, limiter, recaptcha, WalletController.getEncryptedSeed);
+    router.post('/saveEmailPassword', recaptcha, WalletController.saveEmailPassword);
+    router.post('/getEncryptedSeed', recaptcha, ipban, limiterGetPayload, limiter, WalletController.getEncryptedSeed); //recaptcha,
 
     /**
      * Recovery Methods
      */
     router.post('/recoverSeedSocialRecovery', WalletController.recoverSeedSocialRecovery);
 
-    router.post('/getPayload', ipban, limiterGetPayload, recaptcha, async function(req, res,next) {
+    router.post('/getPayload', recaptcha, ipban, limiterGetPayload, async function(req, res,next) {
         let result = await WalletController.getPayload(req,res);
         ipban(req, result, function() {});
         return result;

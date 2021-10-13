@@ -83,6 +83,7 @@
 									@error="onCaptchaError"
 									@expired="onCaptchaExpired"
 									@render="onCaptchaLoaded"
+									style="display:none"
 								/>
 			</div>
 		</div>

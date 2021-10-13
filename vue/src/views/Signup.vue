@@ -1,5 +1,16 @@
 <template>
 	<div>
+			<vue-recaptcha
+									ref="recaptcha"
+									size="invisible"
+									:sitekey="recaptchaSiteKey"
+									:load-recaptcha-script="true"
+									@verify="onCaptchaVerified"
+									@error="onCaptchaError"
+									@expired="onCaptchaExpired"
+									@render="onCaptchaLoaded"
+									style="display:none"
+								/>		
 		<div class="container">
 			<h2 data-cy="signUpTitle" class="title">{{ $t('auth.SIGNUP') }}</h2>
 			<p data-cy="signUpDescription" class="subtitle">{{ $t('auth.SIGNUP_DESCRIPTION') }}</p>
@@ -106,16 +117,18 @@ import { validateInput } from '../utils/backupRestore';
 
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
+import { Recaptcha } from '../mixins/recaptcha';
 
 import { Watch } from 'vue-property-decorator';
 import { getDictionaryValue } from '../utils/dictionary';
+
 
 @Component({
 	components: {
 		Password
 	}
 })
-export default class Signup extends mixins(Global) {
+export default class Signup extends mixins(Global, Recaptcha) {
 	// properties
 	walletEmail = '';
 	walletPassword = '';
@@ -146,7 +159,7 @@ export default class Signup extends mixins(Global) {
 		if (this.store.loading) {
 			return;
 		}
-		e.preventDefault();
+		if (e) e.preventDefault();
 		this.logonError = '';
 
 		this.passwordChecks = this.checkPassword(this.walletPassword, true, this.passwordChecks, this.walletPasswordRepeat);
@@ -177,8 +190,9 @@ export default class Signup extends mixins(Global) {
 
 		const email = this.walletEmail;
 
+		const recaptchaToken = this.recaptchaToken;
 		this.showSpinner('Creating Wallet...');
-		this.createWallet({ email, password: this.walletPassword })
+		this.createWallet({ email, password: this.walletPassword, recaptchaToken })
 			.then(() => {
 				this.hideSpinner();
 				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator || this.store.twoFaRequired.needConfirmation) {
@@ -190,6 +204,10 @@ export default class Signup extends mixins(Global) {
 			})
 			.catch(error => {
 				this.hideSpinner();
+				if (error.error === 'RECAPTCHA_REQUIRED') {
+					this.executeRecaptcha(this.signupExecute)
+					return;
+				}					
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {
 					this.showNetworkError(true);
