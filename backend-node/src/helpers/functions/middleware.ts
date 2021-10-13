@@ -19,6 +19,9 @@ function secret(req, res, next) {
 }
 
 function recaptcha(req, res, next) {
+    if (process.env.environment === 'development') {
+        return next();
+    }
     // skip recaptcha if it was processed in the last hour
     if (recaptcha_ip[req.ip] && recaptcha_ip[req.ip] > Date.now() - (1000 * 60 * 60) ) {
         return next();
