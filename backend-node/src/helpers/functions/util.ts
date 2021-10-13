@@ -156,14 +156,15 @@ function sortObject(object: any) {
             )
         
 
+            console.log('validateRecaptcha', response)
         
 
         // Check Recaptcha Response
-        if (response && response.data && !response.data.success) return 'Recaptcha Failed';
+        if (response && response.data && !response.data.success) return false;
 
-        return null;
+        return true;
     } catch(err) {
-        if (err) return 'Recaptcha Error: ' + err.message;
+        if (err) return false;
     }
 };
 

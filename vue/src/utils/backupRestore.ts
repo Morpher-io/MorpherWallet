@@ -165,7 +165,7 @@ const recoverSeedSocialRecovery = async (accessToken: string, signupEmail: strin
 			});
 	});
 
-const getPayload = (email: string) =>
+const getPayload = (email: string, recaptchaToken = '') =>
 	new Promise<TypePayloadData>(async (resolve, reject) => {
 		try {
 			const key = await sha256(email.toLowerCase());
@@ -176,7 +176,8 @@ const getPayload = (email: string) =>
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
-					key
+					key,
+					recaptcha: recaptchaToken
 				}),
 				mode: 'cors',
 				cache: 'default'
