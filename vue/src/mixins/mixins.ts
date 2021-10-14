@@ -256,6 +256,7 @@ export class Global extends Vue {
 @Component({
 	computed: {
 		...mapState({
+			ipCountry: (state: any) => state.ipCountry,
 			walletEmail: (state: any) => state.email,
 			keystore: (state: any) => state.keystore,
 			accounts: (state: any) => state.accounts

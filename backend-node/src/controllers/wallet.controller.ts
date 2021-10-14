@@ -634,6 +634,7 @@ export async function getPayload(req, res) {
 
         if (user) {
             Logger.info({ method: arguments.callee.name, type: 'Get Payload', user_id: user.id, user, headers: req.headers, body: req.body });
+            payload['ip_country'] = user.ip_country;
             return successResponse(res, payload);
         } else {
             return errorResponse(res, 'METHODS_2FA_NOT_FOUND', 404);
