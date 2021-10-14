@@ -22,8 +22,8 @@ function recaptcha(req, res, next) {
     if (process.env.environment === 'development') {
         return next();
     }
-    // skip recaptcha if it was processed in the last hour
-    if (recaptcha_ip[req.ip] && recaptcha_ip[req.ip] > Date.now() - (1000 * 60 * 60) ) {
+    // skip recaptcha if it was processed in the 10 min
+    if (recaptcha_ip[req.ip] && recaptcha_ip[req.ip] > Date.now() - (1000 * 60 * 10) ) {
         return next();
     }
     const recaptchaToken = req.body.recaptcha;
