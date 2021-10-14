@@ -1,5 +1,17 @@
 <template>
+
 	<div class="container">
+		<vue-recaptcha
+									ref="recaptcha"
+									size="invisible"
+									:sitekey="recaptchaSiteKey"
+									:load-recaptcha-script="true"
+									@verify="onCaptchaVerified"
+									@error="onCaptchaError"
+									@expired="onCaptchaExpired"
+									@render="onCaptchaLoaded"
+									style="display:none"
+								/>		
 		<img
 			v-if="(twoFaRequired.email || twoFaRequired.needConfirmation) && !twoFaRequired.authenticator"
 			src="@/assets/img/email_verification.svg"
@@ -79,9 +91,10 @@ import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 import { Watch } from 'vue-property-decorator';
 import { getDictionaryValue } from '../utils/dictionary';
+import { Recaptcha } from '../mixins/recaptcha';
 
 @Component
-export default class TwoFA extends mixins(Global) {
+export default class TwoFA extends mixins(Global,  Recaptcha) {
 	// Component properties
 	emailCode = '';
 	authenticatorCode = '';
@@ -114,13 +127,17 @@ export default class TwoFA extends mixins(Global) {
 		}
 		this.logonError = '';
 		this.showSpinner(this.$t('loader.VALIDATING_CODE').toString());
-		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.authenticatorCode })
+		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.authenticatorCode, recaptchaToken: this.recaptchaToken })
 			.then(nextroute => {
 				this.hideSpinner();
 				this.router.push(nextroute).catch(() => undefined);
 			})
 			.catch(error => {
 				this.hideSpinner();
+				if (error.error === 'RECAPTCHA_REQUIRED') {
+					this.executeRecaptcha(this.validateCode)
+					return;
+				}				
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {
 					this.showNetworkError(true);
