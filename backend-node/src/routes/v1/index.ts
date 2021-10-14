@@ -72,22 +72,22 @@ const limiterGetPayload = new rateLimit({
 // The index route file which connects all the other files.
 module.exports = function(express) {
     const router = express.Router();
-    const { secret } = require('../../helpers/functions/middleware');
+    const { secret, recaptcha } = require('../../helpers/functions/middleware');
 
     if (process.env.ENVIRONMENT === 'development') {
         const testingRoutes = require('./testing')(express.Router());
         router.use('/test', testingRoutes);
     }
 
-    router.post('/saveEmailPassword', WalletController.saveEmailPassword);
-    router.post('/getEncryptedSeed', ipban, limiterGetPayload, limiter, WalletController.getEncryptedSeed);
+    router.post('/saveEmailPassword', recaptcha, WalletController.saveEmailPassword);
+    router.post('/getEncryptedSeed', recaptcha, ipban, limiterGetPayload, limiter, WalletController.getEncryptedSeed); //recaptcha,
 
     /**
      * Recovery Methods
      */
     router.post('/recoverSeedSocialRecovery', WalletController.recoverSeedSocialRecovery);
 
-    router.post('/getPayload', ipban, limiterGetPayload, async function(req, res,next) {
+    router.post('/getPayload', recaptcha, ipban, limiterGetPayload, async function(req, res,next) {
         let result = await WalletController.getPayload(req,res);
         ipban(req, result, function() {});
         return result;
