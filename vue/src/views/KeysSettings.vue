@@ -16,7 +16,7 @@
 			</div>
 
 			<p class="has-text-left mt-2 transition-faster">
-				<span v-html="$t('export.EXPORT_WALLET_DESCRIPTION')"></span>
+				<span v-html="$t('export.EXPORT_WALLET_DESCRIPTION')">&nbsp;</span>
 				<a href="https://support.morpher.com/en/article/export-morpher-wallet-d6wr6g/" target="__blank" class="login-router">{{
 					$t('common.LEARN_MORE')
 				}}</a>

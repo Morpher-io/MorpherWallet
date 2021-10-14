@@ -3,6 +3,7 @@ const { cryptoEncrypt, cryptoDecrypt, sha256 } = require('./cryptoFunctions');
 
 import { TypeEncryptedSeed, TypePayloadData, TypeCreatedKeystore } from '../types/global-types';
 import { WalletBase } from 'web3-core';
+import { i18n } from '../plugins/i18n';
 
 const getBackendEndpoint = () => {
 	return process.env.VUE_APP_BACKEND_ENDPOINT || 'http://localhost:8080';
@@ -86,7 +87,7 @@ const validateInput = async (fieldName: string, inputFieldValue: string) => {
 		const response = await result.json();
 
 		if (fieldName === 'email') {
-			if (response.success === false) return 'Please input a valid email.';
+			if (response.success === false) return i18n.t('email.EMAIL_ERROR').toString();
 		}
 
 		if (fieldName === 'password') {
