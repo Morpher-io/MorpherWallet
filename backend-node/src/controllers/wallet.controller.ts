@@ -1,6 +1,6 @@
 import { getTransaction, Op } from '../database';
 import { User, Userhistory, Recovery, Recovery_Type } from '../database/models';
-import { decrypt, encrypt, errorResponse, successResponse, sha256, randomFixedInteger, validateRecaptcha, getIPCountryCode } from '../helpers/functions/util';
+import { decrypt, encrypt, errorResponse, successResponse, sha256, randomFixedInteger, getIPCountryCode } from '../helpers/functions/util';
 const { to } = require('await-to-js');
 import { Request, Response } from 'express';
 
@@ -634,6 +634,7 @@ export async function getPayload(req, res) {
 
         if (user) {
             Logger.info({ method: arguments.callee.name, type: 'Get Payload', user_id: user.id, user, headers: req.headers, body: req.body });
+            payload['ip_country'] = user.ip_country;
             return successResponse(res, payload);
         } else {
             return errorResponse(res, 'METHODS_2FA_NOT_FOUND', 404);

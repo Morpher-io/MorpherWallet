@@ -1,5 +1,17 @@
 <template>
 	<div>
+		<vue-recaptcha
+									ref="recaptcha"
+									size="invisible"
+									:sitekey="recaptchaSiteKey"
+									:load-recaptcha-script="true"
+									@verify="onCaptchaVerified"
+									@error="onCaptchaError"
+									@expired="onCaptchaExpired"
+									@render="onCaptchaLoaded"
+									style="display:none"
+								/>
+
 		<div class="container">
 			<h2 data-cy="logInTitle" class="title">{{ $t('auth.LOGIN') }}</h2>
 			<p data-cy="logInDescription" class="subtitle">{{ $t('auth.LOGIN_DESCRIPTION') }}</p>
@@ -59,18 +71,38 @@ import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 import Password from 'vue-password-strength-meter';
 import { getDictionaryValue } from '../utils/dictionary';
+import { Recaptcha } from '../mixins/recaptcha';
 
 @Component({
 	components: {
 		Password
 	}
 })
-export default class Login extends mixins(Global) {
+export default class Login extends mixins(Global, Recaptcha) {
 	// Component properties
 	walletEmail = '';
 	walletPassword = '';
 	showRecovery = false;
 	logonError = '';
+
+	unlock() {
+			this.unlockWithStoredPassword(this.recaptchaToken)
+				.then(result => {
+					if (result) {
+						this.$router.push('/').catch(() => undefined);
+					}
+				})
+				.catch(error => {
+					
+					if (error.error === 'RECAPTCHA_REQUIRED') {
+						this.executeRecaptcha(this.unlock)
+						return;
+					}
+					if (error !== true && error !== false) {
+						// console.log('Error in unlock', error);
+					}
+				});
+	}
 
 	/**
 	 * Cmponent mounted lifestyle hook
@@ -81,17 +113,8 @@ export default class Login extends mixins(Global) {
 		}
 		if (this.store.status !== 'invalid password' && this.store.email) {
 			// Check if the wallet can be unlocked using the local-storage stored password
-			this.unlockWithStoredPassword()
-				.then(result => {
-					if (result) {
-						this.$router.push('/').catch(() => undefined);
-					}
-				})
-				.catch(error => {
-					if (error !== true && error !== false) {
-						// console.log('Error in unlock', error);
-					}
-				});
+			this.unlock();
+
 		} else {
 			this.unlockUpdate();
 		}
@@ -126,21 +149,26 @@ export default class Login extends mixins(Global) {
 		this.store.loginComplete = false;
 		const email = this.walletEmail;
 		const password = this.walletPassword;
+		const recaptchaToken = this.recaptchaToken;
 
 		// Call the fetchUser store action to process the wallet logon
-		this.fetchUser({ email, password })
+		this.fetchUser({ email, password, recaptchaToken })
 			.then(() => {
 				this.hideSpinner();
 				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator || this.store.twoFaRequired.needConfirmation) {
 					// open 2fa page if 2fa is required
 					this.$router.push('/2fa').catch(() => undefined);
 				} else {
-					this.unlockWithStoredPassword()
+					this.unlockWithStoredPassword(this.recaptchaToken)
 						.then(() => {
 							// open root page after logon success
 							this.$router.push('/').catch(() => undefined);
 						})
-						.catch(() => {
+						.catch((error) => {
+							if (error.error === 'RECAPTCHA_REQUIRED') {
+								this.executeRecaptcha(this.login)
+								return;
+							}
 							this.logonError = getDictionaryValue('DECRYPT_FAILED');
 							this.loginErrorReturn(email, 'INVALID_PASSWORD');
 							this.showRecovery = true;
@@ -148,8 +176,13 @@ export default class Login extends mixins(Global) {
 				}
 			})
 			.catch(error => {
-				// Logon failed
 				this.hideSpinner();
+
+				if (error.error === 'RECAPTCHA_REQUIRED') {
+					this.executeRecaptcha(this.login)
+					return;
+				}
+				// Logon failed
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {
 					this.showNetworkError(true);
