@@ -1,5 +1,16 @@
 <template>
 	<div class="container">
+			<vue-recaptcha
+									ref="recaptcha"
+									size="invisible"
+									:sitekey="recaptchaSiteKey"
+									:load-recaptcha-script="true"
+									@verify="onCaptchaVerified"
+									@error="onCaptchaError"
+									@expired="onCaptchaExpired"
+									@render="onCaptchaLoaded"
+									style="display:none"
+								/>
 		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 
 		<h2 class="title">👋 {{ $t('auth.UNLOCK_TITLE') }}</h2>
@@ -60,9 +71,10 @@ import { Global } from '../mixins/mixins';
 import { sha256 } from '../utils/cryptoFunctions';
 import jazzicon from '@metamask/jazzicon';
 import { getDictionaryValue } from '../utils/dictionary';
+import { Recaptcha } from '../mixins/recaptcha';
 
 @Component({})
-export default class Unlock extends mixins(Global) {
+export default class Unlock extends mixins(Global, Recaptcha) {
 	// Component properties
 	walletPassword = '';
 	walletEmail = this.$store.getters.walletEmail;
@@ -84,7 +96,7 @@ export default class Unlock extends mixins(Global) {
 		this.generateImage(iconSeed);
 		this.showSpinner(this.$t('loader.LOADING_ACCOUNT').toString());
 		// Check if the wallet can be unlocked using the local-storage stored password
-		this.unlockWithStoredPassword()
+		this.unlockWithStoredPassword(this.recaptchaToken)
 			.then(result => {
 				this.hideSpinner();
 				if (result) {
@@ -112,15 +124,20 @@ export default class Unlock extends mixins(Global) {
 		this.logonError = '';
 		const password = await sha256(this.walletPassword);
 		this.showSpinnerThenAutohide(this.$t('loader.RECOVERY_LOG_IN').toString());
+		const recaptchaToken = this.recaptchaToken;
 
 		// Call the fetchUser store action to process the wallet logon
-		this.unlockWithPassword({ password })
+		this.unlockWithPassword({ password,  recaptchaToken})
 			.then(() => {
 				// open root page after logon success
 				this.$router.push('/').catch(() => undefined);
 			})
 			.catch(error => {
 				this.hideSpinner();
+				if (error.error === 'RECAPTCHA_REQUIRED') {
+					this.executeRecaptcha(this.login)
+					return;
+				}			
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {
 					this.showNetworkError(true);

@@ -56,7 +56,7 @@ export class Global extends Vue {
 	public fetchUser!: (params: TypeFetchUser) => Promise<unknown>;
 
 	@Action
-	public unlockWithStoredPassword!: () => Promise<unknown>;
+	public unlockWithStoredPassword!: (recaptchaToken: string) => Promise<unknown>;
 
 	@Action
 	public unlockUpdate!: () => Promise<unknown>;
@@ -229,7 +229,6 @@ export class Global extends Vue {
 	 * @param {*} errorDescription Error to be lodgged
 	 */
 	async logSentryError(source: string, errorDescription: string, customContext: any) {
-		console.log('logSentryError', errorDescription);
 
 		const vueData: any = { source };
 		// Get the component and props data

@@ -25,7 +25,7 @@ const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: TypeEncrypted
 			});
 	});
 
-const getEncryptedSeedFromMail = async (email: string, email2fa: string, authenticator2fa: string) =>
+const getEncryptedSeedFromMail = async (email: string, email2fa: string, authenticator2fa: string, recaptchaToken: string) =>
 	new Promise<TypeEncryptedSeed>((resolve, reject) => {
 		sha256(email.toLowerCase()).then((key: string) => {
 			const options: RequestInit = {
@@ -34,7 +34,7 @@ const getEncryptedSeedFromMail = async (email: string, email2fa: string, authent
 					Accept: 'application/json',
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ key, email2fa, authenticator2fa }),
+				body: JSON.stringify({ key, email2fa, authenticator2fa, recaptcha: recaptchaToken }),
 				mode: 'cors',
 				cache: 'default'
 			};
@@ -54,10 +54,14 @@ const getEncryptedSeedFromMail = async (email: string, email2fa: string, authent
 								 */
 								resolve(JSON.parse(responseBody.encryptedSeed));
 							}
-							reject('seed not found');
+							if (responseBody.error && responseBody.error === 'RECAPTCHA_REQUIRED') {
+								reject(responseBody)
+							} else {
+								reject('seed not found');
+							}
 						})
-						.catch(() => {
-							reject('seed not found');
+						.catch((err) => {
+							reject(err);
 						});
 				})
 				.catch(err => {
@@ -110,7 +114,7 @@ const validateInput = async (fieldName: string, inputFieldValue: string) => {
 	}
 };
 
-const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEncryptedSeed, ethAddress: string) => {
+const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEncryptedSeed, ethAddress: string, recaptchaToken :string) => {
 	const key = await sha256(userEmail.toLowerCase());
 	const options: RequestInit = {
 		method: 'POST',
@@ -122,7 +126,8 @@ const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEnc
 			key,
 			encryptedSeed,
 			email: userEmail.toLowerCase(),
-			ethAddress
+			ethAddress,
+			recaptcha: recaptchaToken
 		}),
 		mode: 'cors',
 		cache: 'default'
@@ -166,7 +171,7 @@ const recoverSeedSocialRecovery = async (accessToken: string, signupEmail: strin
 			});
 	});
 
-const getPayload = (email: string) =>
+const getPayload = (email: string, recaptchaToken = '') =>
 	new Promise<TypePayloadData>(async (resolve, reject) => {
 		try {
 			const key = await sha256(email.toLowerCase());
@@ -177,7 +182,8 @@ const getPayload = (email: string) =>
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
-					key
+					key,
+					recaptcha: recaptchaToken
 				}),
 				mode: 'cors',
 				cache: 'default'

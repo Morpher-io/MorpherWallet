@@ -73,6 +73,18 @@
 						>{{ $t('common.LEARN_MORE') }}</a
 					>
 				</p>
+
+				<vue-recaptcha
+									ref="recaptcha"
+									size="invisible"
+									:sitekey="recaptchaSiteKey"
+									:load-recaptcha-script="true"
+									@verify="onCaptchaVerified"
+									@error="onCaptchaError"
+									@expired="onCaptchaExpired"
+									@render="onCaptchaLoaded"
+									style="display:none"
+								/>
 			</div>
 		</div>
 		<div class="container">
@@ -88,6 +100,7 @@ import RecoverWalletGoogle from '../components/RecoverWalletGoogle.vue';
 import RecoverWalletFacebook from '../components/RecoverWalletFacebook.vue';
 import ChangePassword from '../components/ChangePassword.vue';
 import { Authenticated, Global } from '../mixins/mixins';
+import { Recaptcha } from '../mixins/recaptcha';
 import { getPayload, validateInput } from '../utils/backupRestore';
 import { getDictionaryValue } from '../utils/dictionary';
 
@@ -99,7 +112,7 @@ import { getDictionaryValue } from '../utils/dictionary';
 		ChangePassword
 	}
 })
-export default class Recovery extends mixins(Authenticated, Global) {
+export default class Recovery extends mixins(Authenticated, Global, Recaptcha) {
 	currentPage = 0;
 	newEmail = '';
 	logonError = '';
@@ -121,7 +134,7 @@ export default class Recovery extends mixins(Authenticated, Global) {
 		}
 
 		try {
-			const result: any = await getPayload(this.newEmail);
+			const result: any = await getPayload(this.newEmail, this.recaptchaToken);
 
 			if (result.success) {
 				this.setUsersEmail(this.newEmail);
@@ -133,6 +146,14 @@ export default class Recovery extends mixins(Authenticated, Global) {
 				this.logonError = getDictionaryValue(result.toString());
 			}
 		} catch (error) {
+
+			if (error.error === 'RECAPTCHA_REQUIRED') {
+				this.executeRecaptcha(this.checkEmail)
+				return;
+
+			}
+
+			
 			if (error && error.toString() === 'TypeError: Failed to fetch') {
 				this.showNetworkError(true);
 			} else {
@@ -141,7 +162,12 @@ export default class Recovery extends mixins(Authenticated, Global) {
 				}
 			}
 
-			this.logonError = getDictionaryValue(error.toString());
+			if (error.error) {
+				this.logonError = getDictionaryValue(error.error);
+			} else {
+				this.logonError = getDictionaryValue(error.toString());
+			}
+			
 		}
 	}
 

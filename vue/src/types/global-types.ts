@@ -34,12 +34,14 @@ export type TypeFetchUser = {
 	__typename?: 'TypeFetchUser';
 	email: string;
 	password: string;
+	recaptchaToken: string;
 };
 
 export type TypeUnlock2fa = {
 	__typename?: 'TypeUnlock2fa';
 	email2FA: string;
 	authenticator2FA: string;
+	recaptchaToken: string;
 };
 
 export type TypeState = {
@@ -54,11 +56,13 @@ export type TypeState = {
 	keystore: WalletBase;
 	token: string;
 	twoFaRequired: Type2FARequired;
+	
 };
 
 export type TypeUnlockWithPassword = {
 	__typename?: 'TypeUnlockWithPassword';
 	password: string;
+	recaptchaToken: string;
 };
 
 export type TypeUpdateRecovery = {

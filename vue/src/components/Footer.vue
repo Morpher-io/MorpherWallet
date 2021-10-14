@@ -30,6 +30,11 @@
 				</div>
 			</div>
 		</div>
+		<div class="recaptcha">
+			This site is protected by reCAPTCHA and the Google
+    <a href="https://policies.google.com/privacy">Privacy Policy</a> and
+    <a href="https://policies.google.com/terms">Terms of Service</a> apply.
+		</div>
 	</footer>
 </template>
 
@@ -79,6 +84,13 @@ footer {
 	background: none;
 	box-shadow: none;
 	z-index: 1;
+
+	.recaptcha {
+		position: absolute;
+		bottom: 5px;
+		color: #afafaf;
+		font-size: 10px
+	};
 
 	.language-selector {
 		margin-left: auto;
