@@ -1,7 +1,15 @@
-FROM node:12
+FROM public.ecr.aws/lts/ubuntu:latest
 
+RUN apt-get update
+RUN apt-get -y install curl gnupg
+RUN curl -sL https://deb.nodesource.com/setup_12.x  | bash -
+RUN apt-get -y install nodejs
+
+#ARG DEBIAN_FRONTEND=noninteractive
+#ENV TZ=Europe/Vienna
+#RUN apt-get install -y tzdata
 # Create app directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Install app dependencies
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
@@ -14,6 +22,9 @@ RUN npm install
 
 # Bundle app source
 COPY . .
+
+
+#RUN DEBIAN_FRONTEND=noninteractive apt-get -y install keyboard-configuration
 
 EXPOSE 3001
 CMD [ "npm", "run", "serve" ]
