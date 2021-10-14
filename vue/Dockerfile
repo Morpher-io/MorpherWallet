@@ -4,6 +4,10 @@ RUN apt-get update
 RUN apt-get -y install curl gnupg
 RUN curl -sL https://deb.nodesource.com/setup_12.x  | bash -
 RUN apt-get -y install nodejs
+
+#ARG DEBIAN_FRONTEND=noninteractive
+#ENV TZ=Europe/Vienna
+#RUN apt-get install -y tzdata
 # Create app directory
 WORKDIR /app
 
@@ -18,6 +22,9 @@ RUN npm install
 
 # Bundle app source
 COPY . .
+
+
+#RUN DEBIAN_FRONTEND=noninteractive apt-get -y install keyboard-configuration
 
 EXPOSE 3001
 CMD [ "npm", "run", "serve" ]
