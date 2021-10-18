@@ -35,7 +35,7 @@
 							})
 						"
 					>
-						<span>{{ $t('common.UPDATE_EMAIL') }}</span>
+						<span class="confirm-button">{{ $t('common.UPDATE_EMAIL') }}</span>
 					</button>
 					<button
 						v-on:click="$router.push('/settings?email_password=true').catch(() => undefined)"
@@ -103,3 +103,9 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 	}
 }
 </script>
+
+<style lang="scss" scoped>
+	.confirm-button{
+		font-size: 18px
+	}
+</style>

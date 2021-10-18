@@ -146,33 +146,34 @@
         "CHANGE_PASSWORD_DESCRIPTION": "Создайте новый пароль учетной записи.",
         "RESET_PASSWORD_DESCRIPTION": "Аккаунт успешно восстановлен! Пожалуйста, сбросьте ваш пароль ниже.",
         "REQUIREMENTS": "Требования:",
-        "MIN_CHARACTERS": "Минимум 8 знаков",
+        "MIN_CHARACTERS": "Мин. 8 знаков",
         "LOWERCASE_LETTER": "Мин. 1 строчная буква",
         "UPPERCASE_LETTER": "Мин. 1 заглавная буква",
         "NUMBER": "Мин. 1 цифра",
         "PASSWORD_MATCH": "Пароли совпадают",
         "PASSWORD_UPDATED_TITLE": "Пароль обновлен",
-        "PASSWORD_UPDATED_DESCRIPTION": "Ваш пароль успешно обновлен!"
+        "PASSWORD_UPDATED_DESCRIPTION": "Ваш пароль успешно обновлен!",
+        "OLD_PASSWORD": "Старый пароль"
     },
     "email": {
         "EMAIL_SETTINGS_TITLE": "Изменить e-mail",
         "EMAIL_SETTINGS_DESCRIPTION": "Введите новый адрес электронной почты.",
         "EMAIL_UPDATED_TITLE": "Электронная почта обновлена",
         "EMAIL_UPDATED_DESCRIPTION": "Ваш адрес электронной почты был успешно обновлен!",
-        "EMAIL_ERROR": "Please input a valid email"
+        "EMAIL_ERROR": "Пожалуйста, введите действительный электронный адрес"
     },
     "export": {
         "EXPORT_WALLET_TITLE": "Экспортировать кошелек",
-        "EXPORT_WALLET_DESCRIPTION": "<span class='has-text-weight-medium'>Только для опытных пользователей!</span> Экспортируйте seed-фразу и закрытый ключ кошелька для резервного копирования или изменения кошелька.",
+        "EXPORT_WALLET_DESCRIPTION": "<span class='has-text-weight-medium'>Только для опытных пользователей!</span> Экспортируйте seed-фразу и закрытый ключ кошелька для резервного копирования или изменения кошелька. ",
         "EXPORT_SEED": "Экспортировать seed-фразу",
         "EXPORT_KEY": "Экспортировать закрытый ключ",
         "ADDITIONAL_OPTIONS": "Вы также можете:",
         "EXPORT_SEED_DESCRIPTION": "Сохраните seed-фразу в надежном месте (никогда не делитесь ею).",
         "EXPORT_KEY_DESCRIPTION": "Сохраните свой закрытый ключ в надежном месте (никогда не делитесь им).",
         "KEY_PASSWORD_PROTECTED": "Файл JSON с закрытым ключом защищен паролем вашего кошелька.",
-        "SEED_PHRASE_SUCCESSFUL": "Seed Phrase retrieved successfully",
-        "PRIVATE_KEY_SUCCESSFUL": "Private Key exported successfully",
-        "KEYSTORE_SUCCESSFUL": "Keystore exported successfully"
+        "SEED_PHRASE_SUCCESSFUL": "Seed-фраза успешно извлечена",
+        "PRIVATE_KEY_SUCCESSFUL": "Закрытый ключ успешно экспортирован ",
+        "KEYSTORE_SUCCESSFUL": "Хранилище ключей успешно экпортировано"
     },
     "confirm": {
         "CONFIRM_ACCESS_TITLE": "Подтвердить доступ",
