@@ -93,7 +93,7 @@
 				</div>
 
 				<button type="submit" data-cy="createNewWallet" class="button is-green big-button is-login transition-faster">
-					<span>{{ $t('auth.CREATE_WALLET') }}</span>
+					<span class="text">{{ $t('auth.CREATE_WALLET') }}</span>
 				</button>
 
 				<div class="divider"></div>

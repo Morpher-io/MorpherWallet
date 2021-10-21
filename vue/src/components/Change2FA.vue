@@ -19,7 +19,7 @@
 							data-cy="emailToggle"
 							@click="setCurrentMethod('email', !store.twoFaRequired.email)"
 						>
-							<span>{{ !store.twoFaRequired.email ? $t('common.ENABLE') : $t('common.DISABLE') }}</span>
+							<span class="text">{{ !store.twoFaRequired.email ? $t('common.ENABLE') : $t('common.DISABLE') }}</span>
 						</button>
 					</div>
 				</div>
@@ -51,7 +51,7 @@
 							data-cy="authenticatorToggle"
 							@click="setCurrentMethod('authenticator', !store.twoFaRequired.authenticator)"
 						>
-							<span>{{ !store.twoFaRequired.authenticator ? $t('common.ENABLE') : $t('common.DISABLE') }}</span>
+							<span class="text">{{ !store.twoFaRequired.authenticator ? $t('common.ENABLE') : $t('common.DISABLE') }}</span>
 						</button>
 					</div>
 				</div>

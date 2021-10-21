@@ -902,6 +902,7 @@ input[type="checkbox"]:checked {
 
 		.text {
 			margin-left: 10px;
+			text-align: left;
 		}
 
 		.icon {
@@ -1149,4 +1150,13 @@ a {
 	.main {
 		margin-top: 20px;
 	}
+}
+
+button {
+	overflow: hidden;
+}
+
+button .text {
+	overflow: hidden;
+	text-overflow: ellipsis;
 }

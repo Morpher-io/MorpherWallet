@@ -19,7 +19,7 @@
 				<span class="icon img">
 					<img src="@/assets/img/vk_logo_white.svg" alt="VKontakte Logo" />
 				</span>
-				<span>{{ $t('recovery.REVOKE_ACCESS') }}</span>
+				<span class="text">{{ $t('recovery.REVOKE_ACCESS') }}</span>
 			</button>
 			<div class="recovery-active is-text-small">
 				<span class="icon">

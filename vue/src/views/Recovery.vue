@@ -58,10 +58,10 @@
 					</div>
 
 					<button data-cy="confirmButton" type="submit" class="button is-green big-button is-login transition-faster">
-						<span>{{ $t('common.CONTINUE') }}</span>
+						<span class="text">{{ $t('common.CONTINUE') }}</span>
 					</button>
 					<router-link to="/login" tag="button" class="button is-ghost is-blue big-button medium-text transition-faster">
-						<span>{{ $t('common.BACK') }}</span>
+						<span class="text">{{ $t('common.BACK') }}</span>
 					</router-link>
 				</form>
 				<p class="is-size-7 mt-5 transition-faster">

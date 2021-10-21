@@ -41,7 +41,7 @@
 				</div>
 
 				<button type="submit" data-cy="submit" class="button is-green big-button is-login transition-faster">
-					<span>{{ $t('auth.LOGIN') }}</span>
+					<span class="text">{{ $t('auth.LOGIN') }}</span>
 				</button>
 
 				<p class="forgot-password">

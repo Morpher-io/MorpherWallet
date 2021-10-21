@@ -22,7 +22,7 @@
 						<span class="icon is-small">
 							<i class="fas fa-paper-plane"></i>
 						</span>
-						<span data-cy="sendButton">{{ $t('common.SEND') }}</span>
+						<span data-cy="sendButton" class="text">{{ $t('common.SEND') }}</span>
 						<div class="tooltip" v-if="!this.isIframe()">
 							{{ $t('common.SEND_DESCRIPTION') }}
 						</div>
@@ -37,7 +37,7 @@
 			</div>
 		</div>
 
-		<p class="mt-5 has-text-weight-medium is-size-6 is-flex is-align-items-center important-font">
+		<p class="mt-5 has-text-weight-medium is-size-6 is-flex is-align-items-center important-font has-text-left">
 			<i class="fas fa-life-ring is-size-6 mr-1"></i>
 			{{ noRecoveryMethods ? $t('common.RECOVERY_MISSING') : $t('common.RECOVERY') }}
 		</p>
@@ -78,7 +78,7 @@
 			</div>
 		</div>
 
-		<p class="mt-4 has-text-weight-medium is-size-6 is-flex is-align-items-center important-font">
+		<p class="mt-4 has-text-weight-medium is-size-6 is-flex is-align-items-center important-font has-text-left">
 			<i class="fas fa-shield-alt is-size-6 mr-1"></i> {{ $t('common.SECURITY') }}
 		</p>
 

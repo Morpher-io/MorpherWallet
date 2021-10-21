@@ -35,14 +35,14 @@
 							})
 						"
 					>
-						<span>{{ $t('common.UPDATE_EMAIL') }}</span>
+						<span class="text">{{ $t('common.UPDATE_EMAIL') }}</span>
 					</button>
 					<button
 						v-on:click="$router.push('/settings?email_password=true').catch(() => undefined)"
 						tag="button"
 						class="button is-ghost is-blue big-button medium-text transition-faster"
 					>
-						<span>{{ $t('common.CANCEL') }}</span>
+						<span class="text">{{ $t('common.CANCEL') }}</span>
 					</button>
 				</div>
 			</div>

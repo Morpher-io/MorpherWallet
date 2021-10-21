@@ -4,7 +4,7 @@
 			<span class="icon img">
 				<img src="@/assets/img/vk_logo.svg" alt="VKontakte Logo" />
 			</span>
-			<span>VKontakte</span>
+			<span class="text">VKontakte</span>
 		</button>
 	</div>
 </template>

@@ -28,7 +28,7 @@
 				type="submit"
 				@click="setExport('seed')"
 			>
-				<span>{{ $t('export.EXPORT_SEED') }}</span>
+				<span class="text">{{ $t('export.EXPORT_SEED') }}</span>
 			</button>
 
 			<div class="divider just-space" />
@@ -40,7 +40,7 @@
 				tag="button"
 				class="button outlined-button is-thick big-button transition-faster mt-2"
 			>
-				<span>{{ $t('export.EXPORT_KEY') }}</span>
+				<span class="text">{{ $t('export.EXPORT_KEY') }}</span>
 			</button>
 		</div>
 
@@ -66,7 +66,7 @@
 			</div>
 
 			<button @click="resetData()" tag="button" class="button outlined-button is-thick big-button transition-faster mt-4">
-				<span>{{ $t('common.CLOSE') }}</span>
+				<span class="text">{{ $t('common.CLOSE') }}</span>
 			</button>
 		</div>
 
@@ -98,7 +98,7 @@
 				class="button is-blue big-button is-login transition-faster mt-4"
 				@click="exportPhrase(store.accounts[0])"
 			>
-				<span>{{
+				<span class="text">{{
 					$t('common.DOWNLOAD_TYPE', {
 						type: 'JSON'
 					})
@@ -111,7 +111,7 @@
 				tag="button"
 				class="button outlined-button is-thick big-button transition-faster mt-4"
 			>
-				<span>{{ $t('common.CLOSE') }}</span>
+				<span class="text">{{ $t('common.CLOSE') }}</span>
 			</button>
 		</div>
 	</div>
