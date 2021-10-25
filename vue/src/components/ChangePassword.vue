@@ -8,7 +8,7 @@
 			<form v-on:submit.prevent="changePasswordExecute">
 				<div>
 					<div class="field" v-if="!hideOldPassword">
-						<label class="label">Old Password</label>
+						<label class="label">{{ $t('password.OLD_PASSWORD') }}</label>
 						<div class="control">
 							<input type="password" data-cy="oldPassword" name="oldPassword" class="input" v-model="oldPassword" />
 						</div>

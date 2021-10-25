@@ -6,7 +6,7 @@
 					<span class="icon is-small">
 						<i class="fas fa-life-ring"></i>
 					</span>
-					<span>{{ $t('recovery.ADD_ACCOUNT_RECOVERY') }}</span>
+					<span class="smaller-font">{{ $t('recovery.ADD_ACCOUNT_RECOVERY') }}</span>
 				</router-link>
 			</div>
 		</div>
@@ -20,3 +20,8 @@ import Component from 'vue-class-component';
 @Component({})
 export default class AccountRecovery extends Vue {}
 </script>
+<style scoped>
+	.smaller-font{
+	font-size: 14px;
+}
+</style>

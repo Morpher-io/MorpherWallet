@@ -50,7 +50,7 @@
 					tag="button"
 					class="button is-light-green is-small-button has-text-weight-bold transition-faster mt-3"
 				>
-					<span>{{ $t('recovery.ADD_ACCOUNT_RECOVERY') }}</span>
+					<span class="smaller-font">{{ $t('recovery.ADD_ACCOUNT_RECOVERY') }}</span>
 				</router-link>
 			</div>
 			<div v-else class="details has-text-left">
@@ -239,5 +239,8 @@ a {
 }
 .copy-button {
 	margin-left: auto;
+}
+.smaller-font{
+	font-size: 14px;
 }
 </style>

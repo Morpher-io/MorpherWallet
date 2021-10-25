@@ -152,13 +152,15 @@
         "NUMBER": "Number",
         "PASSWORD_MATCH": "Passwords match",
         "PASSWORD_UPDATED_TITLE": "Password Updated",
-        "PASSWORD_UPDATED_DESCRIPTION": "Your password was successfully updated!"
+        "PASSWORD_UPDATED_DESCRIPTION": "Your password was successfully updated!",
+        "OLD_PASSWORD": "Old Password"
     },
     "email": {
         "EMAIL_SETTINGS_TITLE": "Change Email",
         "EMAIL_SETTINGS_DESCRIPTION": "Enter a new email address.",
         "EMAIL_UPDATED_TITLE": "Email Updated",
-        "EMAIL_UPDATED_DESCRIPTION": "Your email was successfully updated!"
+        "EMAIL_UPDATED_DESCRIPTION": "Your email was successfully updated!",
+        "EMAIL_ERROR": "Please input a valid email"
     },
     "export": {
         "EXPORT_WALLET_TITLE": "Export Wallet",
@@ -168,7 +170,10 @@
         "ADDITIONAL_OPTIONS": "Additional options:",
         "EXPORT_SEED_DESCRIPTION": "Save your seed phrase in a safe place (never share it).",
         "EXPORT_KEY_DESCRIPTION": "Save your private key in a safe place (never share it).",
-        "KEY_PASSWORD_PROTECTED": "The private key JSON file is password protected using your wallet password."
+        "KEY_PASSWORD_PROTECTED": "The private key JSON file is password protected using your wallet password.",
+        "SEED_PHRASE_SUCCESSFUL": "Seed Phrase retrieved successfully",
+        "PRIVATE_KEY_SUCCESSFUL": "Private Key exported successfully",
+        "KEYSTORE_SUCCESSFUL": "Keystore exported successfully"
     },
     "confirm": {
         "CONFIRM_ACCESS_TITLE": "Confirm Access",
