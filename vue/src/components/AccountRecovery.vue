@@ -6,7 +6,7 @@
 					<span class="icon is-small">
 						<i class="fas fa-life-ring"></i>
 					</span>
-					<span class="smaller-font">{{ $t('recovery.ADD_ACCOUNT_RECOVERY') }}</span>
+					<span class="text smaller-font">{{ $t('recovery.ADD_ACCOUNT_RECOVERY') }}</span>
 				</router-link>
 			</div>
 		</div>
