@@ -161,6 +161,12 @@ export type TypeAddRecoveryParams = {
 	recoveryTypeId: number;
 };
 
+export type TypeUpdateUserPayload = {
+	__typename?: 'TypeUpdateUserPayload';
+	column: string;
+	value: string;
+};
+
 export type TypeExportPhraseKeyVariables = {
 	__typename?: 'TypeExportPhraseKeyVariables';
 	account: string;

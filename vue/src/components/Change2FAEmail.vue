@@ -25,7 +25,7 @@
 			<span class="text">{{ $t('common.SUBMIT') }}</span>
 		</button>
 		<button v-on:click="pageBack()" class="button is-ghost is-blue big-button medium-text transition-faster">
-			<span> class="text"{{ $t('common.CANCEL') }}</span>
+			<span class="text">{{ $t('common.CANCEL') }}</span>
 		</button>
 	</div>
 </template>

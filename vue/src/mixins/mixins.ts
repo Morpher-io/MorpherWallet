@@ -13,6 +13,7 @@ import {
 	Type2FAUpdateParams,
 	TypeRecoveryParams,
 	TypeAddRecoveryParams,
+	TypeUpdateUserPayload,
 	TypeResetRecovery,
 	TypeExportPhraseKeyVariables,
 	TypeShowPhraseKeyVariables
@@ -287,4 +288,7 @@ export class Authenticated extends Global {
 
 	@Action
 	public updateRecoveryMethods!: () => void;
+
+	@Action
+	public updateUserPayload!: (params: TypeUpdateUserPayload) => void;
 }

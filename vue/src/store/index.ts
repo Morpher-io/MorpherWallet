@@ -42,7 +42,8 @@ import {
 	TypeUpdateSeedPhrase,
 	TypeShowPhraseKeyVariables,
 	TypeExportPhraseKeyVariables,
-	TypeUpdateRecovery
+	TypeUpdateRecovery,
+	TypeUpdateUserPayload
 } from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
@@ -684,6 +685,17 @@ const store: Store<RootState> = new Vuex.Store({
 						})
 						.catch(reject);
 				}
+			});
+		},
+		updateUserPayload({ commit, dispatch }, params: TypeUpdateUserPayload) {
+			return new Promise((resolve, reject) => {
+				dispatch('sendSignedRequest', {
+					body: { column: params.column, value: params.value },
+					method: 'POST',
+					url: getBackendEndpoint() + '/v1/auth/updateUserPayload'
+				})
+					.then(() => { resolve(true) })
+					.catch(reject);
 			});
 		},
 		changePassword({ commit, state, dispatch }, params: TypeChangePassword) {

@@ -1,10 +1,12 @@
 const AWS = require('aws-sdk');
 
 import { Logger } from './winston';
-import { Email_Template, Email_Log } from '../../database/models';
+import { Email_Template, Email_Log, User } from '../../database/models';
 
-export async function sendEmail2FA(payload, email) {
-    const email_template = await Email_Template.findOne({where: { template_name: 'Email 2FA' }})
+export async function sendEmail2FA(payload, email, user) {
+    const lang = user.payload.app_lang || 'en';
+
+    const email_template = await Email_Template.findOne({ where: { template_name: 'Email 2FA', lang }})
     const SES = new AWS.SES({
         accessKeyId: process.env.ACCESS_KEY_ID,
         secretAccessKey: process.env.ACCESS_KEY_SECRET,
@@ -62,9 +64,9 @@ export async function sendEmail2FA(payload, email) {
     
 }
 
-export async function sendEmailChanged(payload, email) {
-
-    const email_template = await Email_Template.findOne({where: { template_name: 'Email Changed' }})
+export async function sendEmailChanged(payload, email, user) {
+    const lang = user.payload.app_lang || 'en';
+    const email_template = await Email_Template.findOne({ where: { template_name: 'Email Changed', lang }})
 
     const SES = new AWS.SES({
         accessKeyId: process.env.ACCESS_KEY_ID,
