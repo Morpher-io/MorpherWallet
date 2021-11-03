@@ -27,7 +27,7 @@
 			</p>
 			<div class="field is-grouped mb-5">
 				<button data-cy="deleteAccountButton" @click="setNewPage()" tag="button" class="button big-button is-danger transition-faster">
-					<span>{{ $t('delete.DELETE_ACCOUNT_TITLE') }}</span>
+					<span class="text">{{ $t('delete.DELETE_ACCOUNT_TITLE') }}</span>
 				</button>
 			</div>
 

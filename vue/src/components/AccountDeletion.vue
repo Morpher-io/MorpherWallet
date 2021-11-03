@@ -51,10 +51,10 @@
 			class="button is-green big-button is-login transition-faster mt-5"
 			:disabled="!input"
 		>
-			<span>{{ $t('delete.VERIFY_AND_DELETE') }}</span>
+			<span class="text">{{ $t('delete.VERIFY_AND_DELETE') }}</span>
 		</button>
 		<button v-on:click="pageBack()" class="button is-ghost is-blue big-button medium-text transition-faster">
-			<span>{{ $t('common.CANCEL') }}</span>
+			<span class="text">{{ $t('common.CANCEL') }}</span>
 		</button>
 	</div>
 </template>

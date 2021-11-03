@@ -11,7 +11,7 @@
 				<p data-cy="emailUpdatedDescription" class="subtitle">{{ $t('email.EMAIL_UPDATED_DESCRIPTION') }}</p>
 
 				<button @click="resetData" tag="button" class="button outlined-button big-button transition-faster">
-					<span>{{ $t('common.CLOSE') }}</span>
+					<span class="text">{{ $t('common.CLOSE') }}</span>
 				</button>
 			</div>
 		</div>

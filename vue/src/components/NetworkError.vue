@@ -7,7 +7,7 @@
 					{{ $t('errors.NETWORK_ERROR_DESCRIPTION') }}
 				</p>
 				<button class="button is-light-green is-small-button has-text-weight-bold transition-faster mt-3" @click="() => hide()">
-					{{ $t('common.OKAY') }}
+					<span class="text">{{ $t('common.OKAY') }}</span>
 				</button>
 			</div>
 		</div>

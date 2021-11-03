@@ -213,7 +213,7 @@ export async function updateEmail(req: Request, res: Response) {
                 } else {
                     // 2FA tokens in query params
                     // Attempt to get user from database.
-                    if (verifyEmail2FA(user.id.toString(), email2faVerification)) {
+                    if (await verifyEmail2FA(user.id.toString(), email2faVerification, true)) {
                         //2fa passed here
                         Userhistory.create({
                             user_id: user.id,
@@ -247,6 +247,8 @@ export async function updateEmail(req: Request, res: Response) {
                         // Commit changes to database and return successfully.
                         await transaction.commit();
                         return successResponse(res, { updated: true });
+                    } else {
+                        return errorResponse(res, 'EMAIL_2FA_WRONG', 400);
                     }
                 }
             } else {
@@ -1034,9 +1036,9 @@ export async function deleteAccount(req, res) {
     }
 }
 
-async function verifyEmail2FA(user_id: string, code: string): Promise<boolean> {
+async function verifyEmail2FA(user_id: string, code: string, isEmailChange: boolean = false): Promise<boolean> {
     const user = await User.findOne({ where: { id: user_id } });
-    if (user.payload.needConfirmation) {
+    if (user.payload.needConfirmation || isEmailChange) {
         return user.email_verification_code === Number(code)
     }
 

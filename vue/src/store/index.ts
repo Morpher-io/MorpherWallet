@@ -861,7 +861,7 @@ const store: Store<RootState> = new Vuex.Store({
 			if (storedPassword === params.password) {
 				if (state.keystore !== null) {
 					const privateKey = state.keystore[0].privateKey.substring(2);
-					commit('delayedSpinnerMessage', 'Private key exported successfully');
+					commit('delayedSpinnerMessage', i18n.t('export.PRIVATE_KEY_SUCCESSFUL'));
 					commit('updatePrivateKey', { privateKey });
 				}
 			} else {
@@ -886,7 +886,7 @@ const store: Store<RootState> = new Vuex.Store({
 			if (storedPassword === params.password) {
 				if (state.keystore !== null) {
 					downloadEncryptedKeystore(state.keystore[0].encrypt(params.password), params.account);
-					commit('delayedSpinnerMessage', 'Keystore exported successfully');
+					commit('delayedSpinnerMessage', i18n.t('export.KEYSTORE_SUCCESSFUL'));
 					commit('keystoreExported');
 				}
 			} else {
@@ -901,7 +901,7 @@ const store: Store<RootState> = new Vuex.Store({
 					const seed = state.encryptedSeed;
 					if (seed.ciphertext !== undefined && seed.iv !== undefined && seed.salt !== undefined) {
 						cryptoDecrypt(params.password, seed.ciphertext, seed.iv, seed.salt).then(mnemonic => {
-							commit('delayedSpinnerMessage', 'Seed Phrase retrieved successfully');
+							commit('delayedSpinnerMessage', i18n.t('export.SEED_PHRASE_SUCCESSFUL'));
 							commit('updateSeedPhrase', { seedPhrase: mnemonic });
 						});
 					} else {

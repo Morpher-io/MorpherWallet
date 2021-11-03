@@ -8,7 +8,7 @@
 			<form v-on:submit.prevent="changePasswordExecute">
 				<div>
 					<div class="field" v-if="!hideOldPassword">
-						<label class="label">Old Password</label>
+						<label class="label">{{ $t('password.OLD_PASSWORD') }}</label>
 						<div class="control">
 							<input type="password" data-cy="oldPassword" name="oldPassword" class="input" v-model="oldPassword" />
 						</div>
@@ -77,7 +77,7 @@
 					</div>
 
 					<button class="button is-green big-button is-login transition-faster mt-5" type="submit" data-cy="passwordSubmit">
-						<span>{{ $t('common.UPDATE_PASSWORD') }}</span>
+						<span class="text">{{ $t('common.UPDATE_PASSWORD') }}</span>
 					</button>
 
 					<div class="mt-2">
@@ -87,7 +87,7 @@
 							type="button"
 							class="button is-ghost is-blue big-button medium-text transition-faster"
 						>
-							<span>{{ $t('common.CANCEL') }}</span>
+							<span class="text">{{ $t('common.CANCEL') }}</span>
 						</button>
 					</div>
 				</div>
@@ -101,7 +101,7 @@
 				<p data-cy="passwordChangeDescription" class="subtitle">{{ $t('password.PASSWORD_UPDATED_DESCRIPTION') }}</p>
 
 				<button @click="resetData" tag="button" class="button outlined-button big-button transition-faster">
-					<span>{{ $t('common.CLOSE') }}</span>
+					<span class="text">{{ $t('common.CLOSE') }}</span>
 				</button>
 			</div>
 		</div>

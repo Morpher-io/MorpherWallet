@@ -38,7 +38,7 @@
 				<div v-if="!isEnabling" class="alert warning mt-3 is-size-7 has-text-left mb-5">⚠ {{ $t('2fa.2_STEP_REMOVED_WARNING') }}</div>
 
 				<button @click="resetData" tag="button" class="button outlined-button big-button transition-faster">
-					<span data-cy="closeButton">{{ $t('common.CLOSE') }}</span>
+					<span data-cy="closeButton" class="text">{{ $t('common.CLOSE') }}</span>
 				</button>
 
 				<div v-if="isEnabling">

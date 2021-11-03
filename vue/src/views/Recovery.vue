@@ -7,7 +7,7 @@
 				<p class="subtitle">{{ $t('recovery.RECOVERY_DESCRIPTION') }}</p>
 
 				<div class="error alert warning is-size-7" v-if="logonError">
-					<p data-cy="loginError">⚠️ <span v-html="logonError"></span></p>
+					<p data-cy="loginError">⚠️ <span v-html="logonError">&nbsp;</span></p>
 					<a
 						v-if="showMore"
 						href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/"
@@ -32,7 +32,7 @@
 				</router-link>
 
 				<p class="is-size-7 mt-5 transition-faster">
-					{{ $t('recovery.RECOVERY_NEED_HELP') }}
+					{{ $t('recovery.RECOVERY_NEED_HELP') }}&nbsp;
 					<a
 						href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/"
 						target="__blank"
@@ -58,14 +58,14 @@
 					</div>
 
 					<button data-cy="confirmButton" type="submit" class="button is-green big-button is-login transition-faster">
-						<span>{{ $t('common.CONTINUE') }}</span>
+						<span class="text">{{ $t('common.CONTINUE') }}</span>
 					</button>
 					<router-link to="/login" tag="button" class="button is-ghost is-blue big-button medium-text transition-faster">
-						<span>{{ $t('common.BACK') }}</span>
+						<span class="text">{{ $t('common.BACK') }}</span>
 					</router-link>
 				</form>
 				<p class="is-size-7 mt-5 transition-faster">
-					{{ $t('recovery.RECOVERY_NEED_HELP') }}
+					{{ $t('recovery.RECOVERY_NEED_HELP') }}&nbsp;
 					<a
 						href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/"
 						target="__blank"

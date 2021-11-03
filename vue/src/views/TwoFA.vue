@@ -66,11 +66,11 @@
 			</div>
 
 			<button class="button is-green big-button is-login transition-faster mt-5" type="submit" data-cy="unlock">
-				<span>{{ $t('common.SUBMIT') }}</span>
+				<span class="text">{{ $t('common.SUBMIT') }}</span>
 			</button>
 
 			<button v-on:click="logout()" tag="button" class="button is-ghost is-blue big-button medium-text transition-faster">
-				<span>{{ $t('common.CANCEL') }}</span>
+				<span class="text">{{ $t('common.CANCEL') }}</span>
 			</button>
 		</form>
 
