@@ -54,7 +54,7 @@
 		</div>
 
 		<button @click="login()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!walletPassword">
-			<span>{{ $t('auth.LOGIN') }}</span>
+			<span class="text">{{ $t('auth.LOGIN') }}</span>
 		</button>
 		<p class="forgot-password">
 			{{ $t('auth.FORGOT_PASSWORD') }}

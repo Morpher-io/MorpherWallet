@@ -29,10 +29,10 @@
 			class="button is-green big-button is-login transition-faster mt-5"
 			:disabled="!walletPassword"
 		>
-			<span>{{ $t('common.CONTINUE') }}</span>
+			<span class="text">{{ $t('common.CONTINUE') }}</span>
 		</button>
 		<button v-on:click="pageBack()" class="button is-ghost is-blue big-button medium-text transition-faster">
-			<span>{{ $t('common.BACK') }}</span>
+			<span class="text">{{ $t('common.BACK') }}</span>
 		</button>
 	</div>
 </template>

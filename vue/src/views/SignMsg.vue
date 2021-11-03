@@ -16,11 +16,11 @@
 			</div>
 
 			<button class="button is-green big-button is-login transition-faster mt-5" @click="sign()">
-				<span>{{ $t('common.SIGN') }}</span>
+				<span class="text">{{ $t('common.SIGN') }}</span>
 			</button>
 
 			<button @click="cancel()" class="button is-ghost is-blue big-button medium-text transition-faster">
-				<span>{{ $t('common.CANCEL') }}</span>
+				<span class="text">{{ $t('common.CANCEL') }}</span>
 			</button>
 		</div>
 	</div>
