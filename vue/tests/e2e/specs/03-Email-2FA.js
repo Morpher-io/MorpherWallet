@@ -141,6 +141,47 @@ describe('Email 2FA', () => {
 		});
 	});
 
+	it('Change Login Email Error', () => {
+		cy.visit('/');
+
+		cy.get('[data-cy=walletEmail]')
+			.type(email)
+			.should('have.value', email);
+
+		cy.get('[data-cy=walletPassword]')
+			.type(password)
+			.should('have.value', password);
+
+		cy.get('[data-cy=submit]').click();
+
+		cy.waitUntil(() => cy.get('[data-cy=currentEmail]').contains(email));
+
+		cy.get('[data-cy=sendButton]').contains('Send');
+		cy.get('[data-cy=settingsButton]').contains('Settings');
+
+		cy.get('[data-cy=settingsButton]').click();
+		cy.get('[data-cy=emailPasswordButton]').click();
+		cy.get('[data-cy=emailChangeButton]').click();
+
+		cy.get('[data-cy=newEmail]')
+			.type(secondEmail)
+			.should('have.value', secondEmail);
+
+		cy.get('[data-cy=confirmPassword]')
+			.type(password)
+			.should('have.value', password);
+
+		cy.get('[data-cy=updateEmailButton]').click();
+
+		cy.waitUntil(() => cy.get('[data-cy=emailConfirmationTitle]').contains('Email Confirmation'));
+
+		cy.get('[data-cy=2faEmailCode]').type('111111');
+
+		cy.get('[data-cy=confirmButton]').click();
+
+		cy.waitUntil(() => cy.get('[data-cy=2faEmailError]').contains('Incorrect Email 2FA code. Check your email and Try again.'));
+	});
+
 	it('Change Login Email', () => {
 		cy.visit('/');
 
