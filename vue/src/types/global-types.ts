@@ -106,6 +106,7 @@ export type TypePayloadData = {
 	authenticator: boolean;
 	authenticatorConfirmed?: boolean;
 	needConfirmation?: boolean;
+	ip_country?: string;
 };
 
 export type Type2FAUpdateParams = {

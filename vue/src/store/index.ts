@@ -93,6 +93,7 @@ export interface RootState {
 	unlocking: boolean;
 	redirectPath: string;
 	loginRetryCount: number;
+	ipCountry: string;
 }
 
 /**
@@ -152,7 +153,8 @@ function initialState(): RootState {
 		ethBalance: '0',
 		unlocking: true,
 		redirectPath: '',
-		loginRetryCount: 0
+		loginRetryCount: 0,
+		ipCountry: ''
 	} as RootState;
 }
 
@@ -206,6 +208,9 @@ const store: Store<RootState> = new Vuex.Store({
 			state.twoFaRequired.authenticator = payload.authenticator;
 			state.twoFaRequired.authenticatorConfirmed = payload.authenticatorConfirmed;
 			state.twoFaRequired.needConfirmation = payload.needConfirmation || false;
+		},
+		ipCountry(state: RootState, ipCountry: string) {
+			state.ipCountry = ipCountry || '';
 		},
 		userFound(state: RootState, userData: TypeUserFoundData) {
 			state.email = userData.email;
@@ -333,6 +338,7 @@ const store: Store<RootState> = new Vuex.Store({
 						getPayload(email, recaptchaToken)
 							.then(payload => {
 								rootState.loginRetryCount = 0;
+								commit('ipCountry', payload.ip_country);
 								commit('userFound', { email, hashedPassword });
 								commit('updatePayload', payload);
 
@@ -649,6 +655,7 @@ const store: Store<RootState> = new Vuex.Store({
 						commit('keystoreUnlocked', { keystore, accounts, hashedPassword: params.password });
 						getPayload(state.email, params.recaptchaToken)
 							.then(payload => {
+								commit('ipCountry', payload.ip_country);
 								commit('updatePayload', payload);
 								dispatch('updateRecoveryMethods', { dbUpdate: false }).then(() => {
 									resolve(true);

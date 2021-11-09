@@ -16,6 +16,7 @@
 								'button is-light-green is-small-button has-text-weight-bold transition-faster': true,
 								'is-light-danger': store.twoFaRequired.email
 							}"
+							:disabled="ipCountry=='RU'"
 							data-cy="emailToggle"
 							@click="setCurrentMethod('email', !store.twoFaRequired.email)"
 						>

@@ -6,10 +6,8 @@ const secureRoutes = require('./secure');
 const rateLimit = require('express-rate-limit');
 import { Logger } from '../../helpers/functions/winston';
 
-import {ipban} from '../../helpers/functions/ipban';
-
 const limitReached = (req: any, res: any) => {
-    Logger.warn({ data: { ip: req.ip, method: req.method, path: req.path, url: req.originalUrl} , message: 'Rate limiter triggered'});
+    Logger.warn({ data: { ip: req.ip, method: req.method, path: req.path, url: req.originalUrl }, message: 'Rate limiter triggered' });
 };
 
 const limiter = new rateLimit({
@@ -30,33 +28,33 @@ let ipRequestPayload = {};
  * 
  * If the getPayload-Key was not requested yet, it returns the actual IP as a key for the keyGenerator
  * 
- * 3 times the same ip with different keys will get then rate-limited.
+ * 15 times the same ip with different keys will get then rate-limited.
  */
 const limiterGetPayload = new rateLimit({
     windowMs: 24 * 60 * 60 * 1000,
-    max: 5,
+    max: 15,
     onLimitReached: limitReached,
     keyGenerator(req, res) {
 
         /**
          * if the requests are not existing yet, define them
          */
-        if(ipRequestPayload[req.ip] == undefined) {
+        if (ipRequestPayload[req.ip] == undefined) {
             ipRequestPayload[req.ip] = {
                 lastAccess: Date.now(),
                 keyRequests: []
             };
         }
 
-         /**
-         * if you are trying a new key, return the IP as a keygenerator-key
-         */
-        if(!ipRequestPayload[req.ip].keyRequests.includes(req.body.key)) {
+        /**
+        * if you are trying a new key, return the IP as a keygenerator-key
+        */
+        if (!ipRequestPayload[req.ip].keyRequests.includes(req.body.key)) {
 
             /**
-             * if there are not yet 3 addresses in there, add it so it won't rate limit
+             * if there are not yet 15 addresses in there, add it so it won't rate limit
              */
-            if(ipRequestPayload[req.ip].keyRequests.length <= 5) {
+            if (ipRequestPayload[req.ip].keyRequests.length <= 15) {
                 ipRequestPayload[req.ip].keyRequests.push(req.body.key);
             }
             return req.ip;
@@ -70,7 +68,7 @@ const limiterGetPayload = new rateLimit({
 });
 
 // The index route file which connects all the other files.
-module.exports = function(express) {
+module.exports = function (express) {
     const router = express.Router();
     const { secret, recaptcha } = require('../../helpers/functions/middleware');
 
@@ -80,23 +78,19 @@ module.exports = function(express) {
     }
 
     router.post('/saveEmailPassword', recaptcha, WalletController.saveEmailPassword);
-    router.post('/getEncryptedSeed', recaptcha, ipban, limiterGetPayload, limiter, WalletController.getEncryptedSeed); //recaptcha,
+    router.post('/getEncryptedSeed', recaptcha, limiterGetPayload, limiter, WalletController.getEncryptedSeed); //recaptcha,
 
     /**
      * Recovery Methods
      */
     router.post('/recoverSeedSocialRecovery', WalletController.recoverSeedSocialRecovery);
 
-    router.post('/getPayload', recaptcha, ipban, limiterGetPayload, async function(req, res,next) {
-        let result = await WalletController.getPayload(req,res);
-        ipban(req, result, function() {});
-        return result;
-    });
-    router.post('/getNonce', ipban, limiterGetPayload, WalletController.getNonce);
-    router.post('/send2FAEmail', ipban, WalletController.send2FAEmail);
-    router.post('/verifyEmailCode', ipban, limiterGetPayload, WalletController.verifyEmailCode);
-    router.post('/verifyEmailConfirmationCode',ipban, limiterGetPayload, WalletController.verifyEmailConfirmationCode);
-    router.post('/verifyAuthenticatorCode',ipban, limiterGetPayload, WalletController.verifyAuthenticatorCode);
+    router.post('/getPayload', recaptcha, limiterGetPayload, WalletController.getPayload);
+    router.post('/getNonce', limiterGetPayload, WalletController.getNonce);
+    router.post('/send2FAEmail', WalletController.send2FAEmail);
+    router.post('/verifyEmailCode', limiterGetPayload, WalletController.verifyEmailCode);
+    router.post('/verifyEmailConfirmationCode', limiterGetPayload, WalletController.verifyEmailConfirmationCode);
+    router.post('/verifyAuthenticatorCode', limiterGetPayload, WalletController.verifyAuthenticatorCode);
     router.post('/validateInput', ValidationController.validateInput);
 
     /**
@@ -116,7 +110,7 @@ module.exports = function(express) {
     /**
      * Email Notifications
      */
-     router.post('/emailNotification', secret, EmailController.emailNotification);
+    router.post('/emailNotification', secret, EmailController.emailNotification);
 
     return router;
 };
