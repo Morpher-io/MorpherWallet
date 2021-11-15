@@ -1,10 +1,17 @@
 const AWS = require('aws-sdk');
 
 import { Logger } from './winston';
-import { Email_Template, Email_Log } from '../../database/models';
+import { Email_Template, Email_Log, User } from '../../database/models';
 
-export async function sendEmail2FA(payload, email) {
-    const email_template = await Email_Template.findOne({where: { template_name: 'Email 2FA' }})
+export async function sendEmail2FA(payload, email, user) {
+    const lang = user.payload.app_lang || 'en';
+
+    let email_template = await Email_Template.findOne({ where: { template_name: 'Email 2FA', lang }})
+    // Fallback in case we add new languages and don't have a template yet.
+    if(!email_template){
+        email_template = await Email_Template.findOne({ where: { template_name: 'Email 2FA', lang: 'en' }})
+    }
+
     const SES = new AWS.SES({
         accessKeyId: process.env.ACCESS_KEY_ID,
         secretAccessKey: process.env.ACCESS_KEY_SECRET,
@@ -62,9 +69,14 @@ export async function sendEmail2FA(payload, email) {
     
 }
 
-export async function sendEmailChanged(payload, email) {
+export async function sendEmailChanged(payload, email, user) {
+    const lang = user.payload.app_lang || 'en';
+    let email_template = await Email_Template.findOne({ where: { template_name: 'Email Changed', lang }});
 
-    const email_template = await Email_Template.findOne({where: { template_name: 'Email Changed' }})
+    // Fallback in case we add new languages and don't have a template yet.
+    if(!email_template){
+        email_template = await Email_Template.findOne({ where: { template_name: 'Email Changed', lang: 'en' }})
+    }
 
     const SES = new AWS.SES({
         accessKeyId: process.env.ACCESS_KEY_ID,

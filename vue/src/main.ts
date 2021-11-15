@@ -31,12 +31,22 @@ if (!currentLocale) {
 		if (lang === 'ar') document.querySelector('html')?.setAttribute('dir', 'rtl');
 		else document.querySelector('html')?.setAttribute('dir', '');
 		Cookie.set('locale', lang);
+
+		if(store.state.keystore){
+			store.dispatch('updateUserPayload', { column: 'app_lang', value: lang });
+		}
+
 	} else {
 		i18n.locale = defaultLocale;
 		document.querySelector('html')?.setAttribute('lang', defaultLocale);
 		if (defaultLocale === 'ar') document.querySelector('html')?.setAttribute('dir', 'rtl');
 		else document.querySelector('html')?.setAttribute('dir', '');
 		Cookie.set('locale', defaultLocale);
+
+		if(store.state.keystore){
+			store.dispatch('updateUserPayload', { column: 'app_lang', value: defaultLocale });
+		}
+
 	}
 } else {
 	if (!supportedLocales.includes(currentLocale)) {
@@ -45,11 +55,17 @@ if (!currentLocale) {
 		if (defaultLocale === 'ar') document.querySelector('html')?.setAttribute('dir', 'rtl');
 		else document.querySelector('html')?.setAttribute('dir', '');
 		i18n.locale = defaultLocale;
+		if(store.state.keystore){
+			store.dispatch('updateUserPayload', { column: 'app_lang', value: defaultLocale });
+		}		
 	} else {
 		i18n.locale = currentLocale;
 		document.querySelector('html')?.setAttribute('lang', currentLocale);
 		if (currentLocale === 'ar') document.querySelector('html')?.setAttribute('dir', 'rtl');
 		else document.querySelector('html')?.setAttribute('dir', '');
+		if(store.state.keystore){
+			store.dispatch('updateUserPayload', { column: 'app_lang', value: currentLocale });
+		}				
 	}
 }
 

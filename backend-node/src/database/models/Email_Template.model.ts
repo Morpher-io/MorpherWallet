@@ -33,4 +33,10 @@ export class Email_Template extends Model {
     })
     template_text;
 
+    @Column({
+        type: DataType.ENUM,
+        values: ['en', 'ru'],
+        defaultValue: 'en'
+    })
+    lang;
 }

@@ -42,7 +42,8 @@ import {
 	TypeUpdateSeedPhrase,
 	TypeShowPhraseKeyVariables,
 	TypeExportPhraseKeyVariables,
-	TypeUpdateRecovery
+	TypeUpdateRecovery,
+	TypeUpdateUserPayload
 } from '../types/global-types';
 
 import isIframe from '../utils/isIframe';
@@ -291,6 +292,11 @@ const store: Store<RootState> = new Vuex.Store({
 				});
 			window.localStorage.setItem('iconSeed', parseInt(payload.accounts[0].slice(2, 10), 16).toString());
 			saveSessionStore('password', payload.hashedPassword);
+
+			const currentLocale = Cookie.get('locale');			
+			if (currentLocale) {
+				store.dispatch('updateUserPayload', { column: 'app_lang', value: currentLocale });				
+			}
 		},
 		seedExported(state: RootState) {
 			state.seedExported = true;
@@ -691,6 +697,17 @@ const store: Store<RootState> = new Vuex.Store({
 						})
 						.catch(reject);
 				}
+			});
+		},
+		updateUserPayload({ commit, dispatch }, params: TypeUpdateUserPayload) {
+			return new Promise((resolve, reject) => {
+				dispatch('sendSignedRequest', {
+					body: { column: params.column, value: params.value },
+					method: 'POST',
+					url: getBackendEndpoint() + '/v1/auth/updateUserPayload'
+				})
+					.then(() => { resolve(true) })
+					.catch(reject);
 			});
 		},
 		changePassword({ commit, state, dispatch }, params: TypeChangePassword) {
@@ -1170,6 +1187,10 @@ if (isIframe()) {
 					if (lang === 'ar') document.querySelector('html')?.setAttribute('dir', 'rtl');
 					else document.querySelector('html')?.setAttribute('dir', '');
 					Cookie.set('locale', lang);
+
+					if(store.state.keystore){
+						store.dispatch('updateUserPayload', { column: 'app_lang', value: lang });
+					  }
 				}
 			}
 		}
