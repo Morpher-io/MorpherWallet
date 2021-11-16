@@ -50,12 +50,14 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator';
+import { Prop } from 'vue-property-decorator';
+import Component, { mixins } from 'vue-class-component';
 import Cookie from 'js-cookie';
 import { BackgroundNFT } from '../utils/backgroundNFT';
+import { Authenticated, Global } from "@/mixins/mixins";
 
 @Component({})
-export default class Footer extends Vue {
+export default class Footer extends mixins(Global, Authenticated) {
 	@Prop()
 	NFTBackground!: BackgroundNFT | null;
 
@@ -112,6 +114,10 @@ export default class Footer extends Vue {
 			if (lang === 'ar') document.querySelector('html')?.setAttribute('dir', 'rtl');
 			else document.querySelector('html')?.setAttribute('dir', '');
 			Cookie.set('locale', lang);
+
+      if(this.store.keystore){
+        this.updateUserPayload({ column: 'app_lang', value: lang });
+      }
 		}
 	}
 

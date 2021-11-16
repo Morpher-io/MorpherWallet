@@ -13,7 +13,7 @@
 		</div>
 
 		<div class="error mt-3" v-if="logonError">
-			<p>⚠️ <span v-html="logonError"></span></p>
+			<p>⚠️ <span data-cy="2faEmailError" v-html="logonError"></span></p>
 		</div>
 
 		<button

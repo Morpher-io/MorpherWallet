@@ -206,7 +206,7 @@ export async function updateEmail(req: Request, res: Response) {
                 if (email2faVerification === undefined) {
                     const verificationCode = await updateEmail2fa(user.id);
                     if (environment !== 'development') {
-                        await sendEmail2FA(verificationCode, newEmail);
+                        await sendEmail2FA(verificationCode, newEmail, user);
                     }
                     transaction.commit(); //close the transaction after the 2fa was sent
                     return successResponse(res, 'sent 2fa code to new email address');
@@ -223,7 +223,7 @@ export async function updateEmail(req: Request, res: Response) {
                             stringified_headers: JSON.stringify(req.headers)
                         });
                         if (environment !== 'development') {
-                            await sendEmailChanged(newEmail, user.email);
+                            await sendEmailChanged(newEmail, user.email, user);
                         } //send the old user an info-mail that his email address got updated.
 
                         Logger.info({
@@ -694,7 +694,7 @@ export async function change2FAMethods(req, res) {
                     const verificationCode = await updateEmail2fa(user.id);
 
                     if (environment !== 'development') {
-                        await sendEmail2FA(verificationCode, user.email);
+                        await sendEmail2FA(verificationCode, user.email, user);
                     }
                     
                     Logger.info({
@@ -873,7 +873,7 @@ export async function send2FAEmail(req, res) {
             const verificationCode = await updateEmail2fa(user.id);
 
             if (environment !== 'development') {
-                await sendEmail2FA(verificationCode, user.email);
+                await sendEmail2FA(verificationCode, user.email, user);
             }
 
             Logger.info({
@@ -1058,4 +1058,29 @@ async function verifyGoogle2FA(user_id: string, code: string, getSeed: boolean =
     if (getSeed) {
         return user.payload.authenticator === false || authenticator.check(code, user.authenticator_secret);
     } else return authenticator.check(code, user.authenticator_secret);
+}
+
+export async function updateUserPayload(req, res) {
+    try {
+        const key = req.header('key');
+        const payloadColumn = req.body.column;
+        const payloadValue = req.body.value;
+
+        // Create a new recovery method.
+        const recovery = await Recovery.findOne({ where: { key, recovery_type_id: 1 } });
+        const user = await User.findOne({ where: { id: recovery.user_id }});
+
+        if(user){
+            user.payload[payloadColumn] = payloadValue;
+            user.changed('payload', true);
+            await user.save();
+
+            return successResponse(res, true);
+        }
+    } catch (error) {
+        Logger.error({ source: 'updateUserPayload', data: req.body, message: error.message || error.toString() } );
+        return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
+    }
+    //error out in any other case
+    return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
 }
