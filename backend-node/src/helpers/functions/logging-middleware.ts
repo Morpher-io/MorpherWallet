@@ -22,6 +22,7 @@ function jsonFormat(tokens, req, res) {
         'req-header': tokens['req'](req, res, 'header'),
         'res-header': tokens['res'](req, res, 'header'),
         'response-time-ms': tokens['response-time'](req, res),
-        'total-time-ms': tokens['total-time'](req, res)
+        'total-time-ms': tokens['total-time'](req, res),
+        'message': `${tokens['method'](req, res)} ${tokens['url'](req, res)} [${tokens['status'](req, res)}] ${tokens['remote-addr'](req, res)}`
     });
 }
