@@ -4,7 +4,7 @@ import router from './router';
 import store from './store';
 import * as Sentry from '@sentry/vue';
 import { Integrations } from '@sentry/tracing';
-
+import VueGtag from "vue-gtag";
 import Cookie from 'js-cookie';
 
 Vue.config.productionTip = false;
@@ -86,6 +86,30 @@ if (process.env.VUE_APP_SENTRY_ENDPOINT) {
 		tracesSampleRate: 1.0
 	});
 }
+
+Vue.use(
+    VueGtag,
+    {
+      config: {
+        id: process.env.VUE_APP_GOOGLE_ANALYTICS_API_KEY,
+      },
+      params: {
+        anonymize_ip: true,
+        allow_google_signals: false,
+      },      		  
+      set: [
+        {
+          field: "anonymize_ip",
+          value: true,
+        },
+        {
+          field: "allow_google_signals",
+          value: false,
+        },
+      ],
+    },
+    router
+  );
 
 // Click outside directive
 Vue.directive('click-outside', {

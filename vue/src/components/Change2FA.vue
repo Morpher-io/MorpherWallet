@@ -77,6 +77,15 @@ import { Authenticated } from '../mixins/mixins';
 export default class Change2FA extends mixins(Authenticated) {
 	@Emit('setCurrentMethod')
 	setCurrentMethod(method: string, isEnabling: boolean) {
+
+		const self: any = this;
+		const win: any = window;
+		if (isEnabling && self.$gtag && win.gtag)
+			win.gtag('event', 'add_2fa', {
+				method
+			});
+						
+
 		return { method, isEnabling };
 	}
 }
