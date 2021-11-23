@@ -107,10 +107,8 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 
 		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
 			.then(async () => {
-				const self = this;
-				const win = window;
-				if (self.$gtag && win.gtag)
-					win.gtag('event', 'add_recovery', {
+				if (this.$gtag && window.gtag)
+					window.gtag('event', 'add_recovery', {
 						method: 'fb'
 					});
 
@@ -126,7 +124,6 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 						erorr: ''
 					});
 				});
-
 			})
 			.catch(error => {
 				this.logSentryError('addFacebookRecovery', error.toString(), { key, password: userID, recoveryTypeId: this.recoveryTypeId });

@@ -56,7 +56,6 @@ export type TypeState = {
 	keystore: WalletBase;
 	token: string;
 	twoFaRequired: Type2FARequired;
-	
 };
 
 export type TypeUnlockWithPassword = {

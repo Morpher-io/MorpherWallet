@@ -1,16 +1,16 @@
 <template>
 	<div>
 		<vue-recaptcha
-									ref="recaptcha"
-									size="invisible"
-									:sitekey="recaptchaSiteKey"
-									:load-recaptcha-script="true"
-									@verify="onCaptchaVerified"
-									@error="onCaptchaError"
-									@expired="onCaptchaExpired"
-									@render="onCaptchaLoaded"
-									style="display:none"
-								/>
+			ref="recaptcha"
+			size="invisible"
+			:sitekey="recaptchaSiteKey"
+			:load-recaptcha-script="true"
+			@verify="onCaptchaVerified"
+			@error="onCaptchaError"
+			@expired="onCaptchaExpired"
+			@render="onCaptchaLoaded"
+			style="display:none"
+		/>
 
 		<div class="container">
 			<h2 data-cy="logInTitle" class="title">{{ $t('auth.LOGIN') }}</h2>
@@ -86,22 +86,21 @@ export default class Login extends mixins(Global, Recaptcha) {
 	logonError = '';
 
 	unlock() {
-			this.unlockWithStoredPassword(this.recaptchaToken)
-				.then(result => {
-					if (result) {
-						this.$router.push('/').catch(() => undefined);
-					}
-				})
-				.catch(error => {
-					
-					if (error.error === 'RECAPTCHA_REQUIRED') {
-						this.executeRecaptcha(this.unlock)
-						return;
-					}
-					if (error !== true && error !== false) {
-						// console.log('Error in unlock', error);
-					}
-				});
+		this.unlockWithStoredPassword(this.recaptchaToken)
+			.then(result => {
+				if (result) {
+					this.$router.push('/').catch(() => undefined);
+				}
+			})
+			.catch(error => {
+				if (error.error === 'RECAPTCHA_REQUIRED') {
+					this.executeRecaptcha(this.unlock);
+					return;
+				}
+				if (error !== true && error !== false) {
+					// console.log('Error in unlock', error);
+				}
+			});
 	}
 
 	/**
@@ -114,7 +113,6 @@ export default class Login extends mixins(Global, Recaptcha) {
 		if (this.store.status !== 'invalid password' && this.store.email) {
 			// Check if the wallet can be unlocked using the local-storage stored password
 			this.unlock();
-
 		} else {
 			this.unlockUpdate();
 		}
@@ -164,9 +162,9 @@ export default class Login extends mixins(Global, Recaptcha) {
 							// open root page after logon success
 							this.$router.push('/').catch(() => undefined);
 						})
-						.catch((error) => {
+						.catch(error => {
 							if (error.error === 'RECAPTCHA_REQUIRED') {
-								this.executeRecaptcha(this.login)
+								this.executeRecaptcha(this.login);
 								return;
 							}
 							this.logonError = getDictionaryValue('DECRYPT_FAILED');
@@ -179,7 +177,7 @@ export default class Login extends mixins(Global, Recaptcha) {
 				this.hideSpinner();
 
 				if (error.error === 'RECAPTCHA_REQUIRED') {
-					this.executeRecaptcha(this.login)
+					this.executeRecaptcha(this.login);
 					return;
 				}
 				// Logon failed

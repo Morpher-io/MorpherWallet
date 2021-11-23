@@ -240,7 +240,7 @@ a {
 .copy-button {
 	margin-left: auto;
 }
-.smaller-font{
+.smaller-font {
 	font-size: 14px;
 }
 </style>

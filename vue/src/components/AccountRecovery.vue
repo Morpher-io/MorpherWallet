@@ -21,7 +21,7 @@ import Component from 'vue-class-component';
 export default class AccountRecovery extends Vue {}
 </script>
 <style scoped>
-	.smaller-font{
+.smaller-font {
 	font-size: 14px;
 }
 </style>

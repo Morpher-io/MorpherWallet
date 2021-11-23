@@ -95,10 +95,8 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 		const key = await sha256(this.clientId + userID);
 		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
 			.then(async () => {
-				const self = this;
-				const win = window;
-				if (self.$gtag && win.gtag)
-					win.gtag('event', 'add_recovery', {
+				if (this.$gtag && window.gtag)
+					window.gtag('event', 'add_recovery', {
 						method: 'google'
 					});
 

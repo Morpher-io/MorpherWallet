@@ -54,7 +54,7 @@ import { Prop } from 'vue-property-decorator';
 import Component, { mixins } from 'vue-class-component';
 import Cookie from 'js-cookie';
 import { BackgroundNFT } from '../utils/backgroundNFT';
-import { Authenticated, Global } from "@/mixins/mixins";
+import { Authenticated, Global } from '@/mixins/mixins';
 
 @Component({})
 export default class Footer extends mixins(Global, Authenticated) {
@@ -115,9 +115,9 @@ export default class Footer extends mixins(Global, Authenticated) {
 			else document.querySelector('html')?.setAttribute('dir', '');
 			Cookie.set('locale', lang);
 
-      if(this.store.keystore){
-        this.updateUserPayload({ column: 'app_lang', value: lang });
-      }
+			if (this.store.keystore) {
+				this.updateUserPayload({ column: 'app_lang', value: lang });
+			}
 		}
 	}
 

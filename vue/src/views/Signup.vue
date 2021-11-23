@@ -1,16 +1,16 @@
 <template>
 	<div>
-			<vue-recaptcha
-									ref="recaptcha"
-									size="invisible"
-									:sitekey="recaptchaSiteKey"
-									:load-recaptcha-script="true"
-									@verify="onCaptchaVerified"
-									@error="onCaptchaError"
-									@expired="onCaptchaExpired"
-									@render="onCaptchaLoaded"
-									style="display:none"
-								/>		
+		<vue-recaptcha
+			ref="recaptcha"
+			size="invisible"
+			:sitekey="recaptchaSiteKey"
+			:load-recaptcha-script="true"
+			@verify="onCaptchaVerified"
+			@error="onCaptchaError"
+			@expired="onCaptchaExpired"
+			@render="onCaptchaLoaded"
+			style="display:none"
+		/>
 		<div class="container">
 			<h2 data-cy="signUpTitle" class="title">{{ $t('auth.SIGNUP') }}</h2>
 			<p data-cy="signUpDescription" class="subtitle">{{ $t('auth.SIGNUP_DESCRIPTION') }}</p>
@@ -122,7 +122,6 @@ import { Recaptcha } from '../mixins/recaptcha';
 import { Watch } from 'vue-property-decorator';
 import { getDictionaryValue } from '../utils/dictionary';
 
-
 @Component({
 	components: {
 		Password
@@ -205,9 +204,9 @@ export default class Signup extends mixins(Global, Recaptcha) {
 			.catch(error => {
 				this.hideSpinner();
 				if (error.error === 'RECAPTCHA_REQUIRED') {
-					this.executeRecaptcha(this.signupExecute)
+					this.executeRecaptcha(this.signupExecute);
 					return;
-				}					
+				}
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {
 					this.showNetworkError(true);
