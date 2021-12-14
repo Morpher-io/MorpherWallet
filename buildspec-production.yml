@@ -6,7 +6,7 @@ env:
         VUE_APP_BACKEND_ENDPOINT: 'https://wallet-api.morpher.com'
         VUE_APP_I18N_DEFAULT_LOCALE: 'en'
         VUE_APP_I18N_SUPPORTED_LOCALE: '["en", "ru", "bs"]'
-        VUE_APP_GOOGLE_ANALYTICS_API_KEY: 'G-R3CXKXFP4N'
+        VUE_APP_GOOGLE_ANALYTICS_API_KEY: 'G-ZKPQS232M6'
     secrets-manager:
         VUE_APP_GOOGLE_APP_ID: "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:WALLET_GOOGLE_APP_ID::"
         VUE_APP_FACEBOOK_APP_ID: "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:WALLET_FACEBOOK_APP_ID::"
