@@ -293,9 +293,9 @@ const store: Store<RootState> = new Vuex.Store({
 			window.localStorage.setItem('iconSeed', parseInt(payload.accounts[0].slice(2, 10), 16).toString());
 			saveSessionStore('password', payload.hashedPassword);
 
-			const currentLocale = Cookie.get('locale');			
+			const currentLocale = Cookie.get('locale');
 			if (currentLocale) {
-				store.dispatch('updateUserPayload', { column: 'app_lang', value: currentLocale });				
+				store.dispatch('updateUserPayload', { column: 'app_lang', value: currentLocale });
 			}
 		},
 		seedExported(state: RootState) {
@@ -454,9 +454,9 @@ const store: Store<RootState> = new Vuex.Store({
 						.then(() => {
 							reject('USER_ALREADY_EXISTS');
 						})
-						.catch(async (error) => {
+						.catch(async error => {
 							if (error.error && error.error === 'RECAPTCHA_REQUIRED') {
-								return reject(error)
+								return reject(error);
 							}
 							commit('authRequested');
 							commit('loading', 'Creating new Keystore...');
@@ -699,14 +699,16 @@ const store: Store<RootState> = new Vuex.Store({
 				}
 			});
 		},
-		updateUserPayload({ commit, dispatch }, params: TypeUpdateUserPayload) {
+		updateUserPayload({ dispatch }, params: TypeUpdateUserPayload) {
 			return new Promise((resolve, reject) => {
 				dispatch('sendSignedRequest', {
 					body: { column: params.column, value: params.value },
 					method: 'POST',
 					url: getBackendEndpoint() + '/v1/auth/updateUserPayload'
 				})
-					.then(() => { resolve(true) })
+					.then(() => {
+						resolve(true);
+					})
 					.catch(reject);
 			});
 		},
@@ -1188,9 +1190,9 @@ if (isIframe()) {
 					else document.querySelector('html')?.setAttribute('dir', '');
 					Cookie.set('locale', lang);
 
-					if(store.state.keystore){
+					if (store.state.keystore) {
 						store.dispatch('updateUserPayload', { column: 'app_lang', value: lang });
-					  }
+					}
 				}
 			}
 		}

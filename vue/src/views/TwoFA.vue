@@ -1,17 +1,16 @@
 <template>
-
 	<div class="container">
 		<vue-recaptcha
-									ref="recaptcha"
-									size="invisible"
-									:sitekey="recaptchaSiteKey"
-									:load-recaptcha-script="true"
-									@verify="onCaptchaVerified"
-									@error="onCaptchaError"
-									@expired="onCaptchaExpired"
-									@render="onCaptchaLoaded"
-									style="display:none"
-								/>		
+			ref="recaptcha"
+			size="invisible"
+			:sitekey="recaptchaSiteKey"
+			:load-recaptcha-script="true"
+			@verify="onCaptchaVerified"
+			@error="onCaptchaError"
+			@expired="onCaptchaExpired"
+			@render="onCaptchaLoaded"
+			style="display:none"
+		/>
 		<img
 			v-if="(twoFaRequired.email || twoFaRequired.needConfirmation) && !twoFaRequired.authenticator"
 			src="@/assets/img/email_verification.svg"
@@ -94,7 +93,7 @@ import { getDictionaryValue } from '../utils/dictionary';
 import { Recaptcha } from '../mixins/recaptcha';
 
 @Component
-export default class TwoFA extends mixins(Global,  Recaptcha) {
+export default class TwoFA extends mixins(Global, Recaptcha) {
 	// Component properties
 	emailCode = '';
 	authenticatorCode = '';
@@ -135,9 +134,9 @@ export default class TwoFA extends mixins(Global,  Recaptcha) {
 			.catch(error => {
 				this.hideSpinner();
 				if (error.error === 'RECAPTCHA_REQUIRED') {
-					this.executeRecaptcha(this.validateCode)
+					this.executeRecaptcha(this.validateCode);
 					return;
-				}				
+				}
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {
 					this.showNetworkError(true);

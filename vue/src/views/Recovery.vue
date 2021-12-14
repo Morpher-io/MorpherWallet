@@ -75,16 +75,16 @@
 				</p>
 
 				<vue-recaptcha
-									ref="recaptcha"
-									size="invisible"
-									:sitekey="recaptchaSiteKey"
-									:load-recaptcha-script="true"
-									@verify="onCaptchaVerified"
-									@error="onCaptchaError"
-									@expired="onCaptchaExpired"
-									@render="onCaptchaLoaded"
-									style="display:none"
-								/>
+					ref="recaptcha"
+					size="invisible"
+					:sitekey="recaptchaSiteKey"
+					:load-recaptcha-script="true"
+					@verify="onCaptchaVerified"
+					@error="onCaptchaError"
+					@expired="onCaptchaExpired"
+					@render="onCaptchaLoaded"
+					style="display:none"
+				/>
 			</div>
 		</div>
 		<div class="container">
@@ -146,14 +146,11 @@ export default class Recovery extends mixins(Authenticated, Global, Recaptcha) {
 				this.logonError = getDictionaryValue(result.toString());
 			}
 		} catch (error) {
-
 			if (error.error === 'RECAPTCHA_REQUIRED') {
-				this.executeRecaptcha(this.checkEmail)
+				this.executeRecaptcha(this.checkEmail);
 				return;
-
 			}
 
-			
 			if (error && error.toString() === 'TypeError: Failed to fetch') {
 				this.showNetworkError(true);
 			} else {
@@ -167,7 +164,6 @@ export default class Recovery extends mixins(Authenticated, Global, Recaptcha) {
 			} else {
 				this.logonError = getDictionaryValue(error.toString());
 			}
-			
 		}
 	}
 

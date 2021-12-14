@@ -1,16 +1,16 @@
 <template>
 	<div class="container">
-			<vue-recaptcha
-									ref="recaptcha"
-									size="invisible"
-									:sitekey="recaptchaSiteKey"
-									:load-recaptcha-script="true"
-									@verify="onCaptchaVerified"
-									@error="onCaptchaError"
-									@expired="onCaptchaExpired"
-									@render="onCaptchaLoaded"
-									style="display:none"
-								/>
+		<vue-recaptcha
+			ref="recaptcha"
+			size="invisible"
+			:sitekey="recaptchaSiteKey"
+			:load-recaptcha-script="true"
+			@verify="onCaptchaVerified"
+			@error="onCaptchaError"
+			@expired="onCaptchaExpired"
+			@render="onCaptchaLoaded"
+			style="display:none"
+		/>
 		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 
 		<h2 class="title">👋 {{ $t('auth.UNLOCK_TITLE') }}</h2>
@@ -127,7 +127,7 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 		const recaptchaToken = this.recaptchaToken;
 
 		// Call the fetchUser store action to process the wallet logon
-		this.unlockWithPassword({ password,  recaptchaToken})
+		this.unlockWithPassword({ password, recaptchaToken })
 			.then(() => {
 				// open root page after logon success
 				this.$router.push('/').catch(() => undefined);
@@ -135,9 +135,9 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 			.catch(error => {
 				this.hideSpinner();
 				if (error.error === 'RECAPTCHA_REQUIRED') {
-					this.executeRecaptcha(this.login)
+					this.executeRecaptcha(this.login);
 					return;
-				}			
+				}
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {
 					this.showNetworkError(true);

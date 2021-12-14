@@ -107,6 +107,11 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 
 		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
 			.then(async () => {
+				if (this.$gtag && window.gtag)
+					window.gtag('event', 'add_recovery', {
+						method: 'fb'
+					});
+
 				this.facebook.FB.api('/me/permissions', 'DELETE', async () => {
 					this.facebook.scope.logout();
 					this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_SUCCESSFULLY'));

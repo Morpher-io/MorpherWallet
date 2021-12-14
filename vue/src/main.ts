@@ -4,7 +4,7 @@ import router from './router';
 import store from './store';
 import * as Sentry from '@sentry/vue';
 import { Integrations } from '@sentry/tracing';
-
+import VueGtag from 'vue-gtag';
 import Cookie from 'js-cookie';
 
 Vue.config.productionTip = false;
@@ -32,10 +32,9 @@ if (!currentLocale) {
 		else document.querySelector('html')?.setAttribute('dir', '');
 		Cookie.set('locale', lang);
 
-		if(store.state.keystore){
+		if (store.state.keystore) {
 			store.dispatch('updateUserPayload', { column: 'app_lang', value: lang });
 		}
-
 	} else {
 		i18n.locale = defaultLocale;
 		document.querySelector('html')?.setAttribute('lang', defaultLocale);
@@ -43,10 +42,9 @@ if (!currentLocale) {
 		else document.querySelector('html')?.setAttribute('dir', '');
 		Cookie.set('locale', defaultLocale);
 
-		if(store.state.keystore){
+		if (store.state.keystore) {
 			store.dispatch('updateUserPayload', { column: 'app_lang', value: defaultLocale });
 		}
-
 	}
 } else {
 	if (!supportedLocales.includes(currentLocale)) {
@@ -55,17 +53,17 @@ if (!currentLocale) {
 		if (defaultLocale === 'ar') document.querySelector('html')?.setAttribute('dir', 'rtl');
 		else document.querySelector('html')?.setAttribute('dir', '');
 		i18n.locale = defaultLocale;
-		if(store.state.keystore){
+		if (store.state.keystore) {
 			store.dispatch('updateUserPayload', { column: 'app_lang', value: defaultLocale });
-		}		
+		}
 	} else {
 		i18n.locale = currentLocale;
 		document.querySelector('html')?.setAttribute('lang', currentLocale);
 		if (currentLocale === 'ar') document.querySelector('html')?.setAttribute('dir', 'rtl');
 		else document.querySelector('html')?.setAttribute('dir', '');
-		if(store.state.keystore){
+		if (store.state.keystore) {
 			store.dispatch('updateUserPayload', { column: 'app_lang', value: currentLocale });
-		}				
+		}
 	}
 }
 
@@ -86,6 +84,30 @@ if (process.env.VUE_APP_SENTRY_ENDPOINT) {
 		tracesSampleRate: 1.0
 	});
 }
+
+Vue.use(
+	VueGtag,
+	{
+		config: {
+			id: process.env.VUE_APP_GOOGLE_ANALYTICS_API_KEY
+		},
+		params: {
+			anonymizeIp: true,
+			allowGoogleSignals: false
+		},
+		set: [
+			{
+				field: 'anonymize_ip',
+				value: true
+			},
+			{
+				field: 'allow_google_signals',
+				value: false
+			}
+		]
+	},
+	router
+);
 
 // Click outside directive
 Vue.directive('click-outside', {

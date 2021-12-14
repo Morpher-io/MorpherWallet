@@ -16,7 +16,7 @@
 								'button is-light-green is-small-button has-text-weight-bold transition-faster': true,
 								'is-light-danger': store.twoFaRequired.email
 							}"
-							:disabled="ipCountry=='RU'"
+							:disabled="ipCountry == 'RU'"
 							data-cy="emailToggle"
 							@click="setCurrentMethod('email', !store.twoFaRequired.email)"
 						>
@@ -77,6 +77,11 @@ import { Authenticated } from '../mixins/mixins';
 export default class Change2FA extends mixins(Authenticated) {
 	@Emit('setCurrentMethod')
 	setCurrentMethod(method: string, isEnabling: boolean) {
+		if (isEnabling && (this as any).$gtag && (window as any).gtag)
+			(window as any).gtag('event', 'add_2fa', {
+				method
+			});
+
 		return { method, isEnabling };
 	}
 }

@@ -112,6 +112,10 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 					const key = await sha256(this.clientId + userID);
 					this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
 						.then(async () => {
+							if (this.$gtag && window.gtag)
+								window.gtag('event', 'add_recovery', {
+									method: 'vk'
+								});
 							this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_SUCCESSFULLY'));
 							this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 							this.processMethod({
