@@ -55,12 +55,12 @@ const getEncryptedSeedFromMail = async (email: string, email2fa: string, authent
 								resolve(JSON.parse(responseBody.encryptedSeed));
 							}
 							if (responseBody.error && responseBody.error === 'RECAPTCHA_REQUIRED') {
-								reject(responseBody)
+								reject(responseBody);
 							} else {
 								reject('seed not found');
 							}
 						})
-						.catch((err) => {
+						.catch(err => {
 							reject(err);
 						});
 				})
@@ -114,7 +114,7 @@ const validateInput = async (fieldName: string, inputFieldValue: string) => {
 	}
 };
 
-const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEncryptedSeed, ethAddress: string, recaptchaToken :string) => {
+const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEncryptedSeed, ethAddress: string, recaptchaToken: string) => {
 	const key = await sha256(userEmail.toLowerCase());
 	const options: RequestInit = {
 		method: 'POST',

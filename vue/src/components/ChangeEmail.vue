@@ -105,7 +105,7 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 </script>
 
 <style lang="scss" scoped>
-	.confirm-button{
-		font-size: 18px
-	}
+.confirm-button {
+	font-size: 18px;
+}
 </style>
