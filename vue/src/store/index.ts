@@ -295,7 +295,11 @@ const store: Store<RootState> = new Vuex.Store({
 
 			const currentLocale = Cookie.get('locale');
 			if (currentLocale) {
-				store.dispatch('updateUserPayload', { column: 'app_lang', value: currentLocale });
+				setTimeout(
+					() => {
+						store.dispatch('updateUserPayload', { column: 'app_lang', value: currentLocale });				
+					}, 10000
+				)
 			}
 		},
 		seedExported(state: RootState) {
