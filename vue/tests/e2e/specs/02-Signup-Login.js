@@ -8,23 +8,17 @@ describe('Signup and Login', () => {
 	it('Signup and Login', () => {
 		cy.visit('/signup');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(email)
-			.should('have.value', email);
+		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
-		cy.get('[data-cy=walletPasswordRepeat]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPasswordRepeat]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=createNewWallet]').click();
 
 		cy.waitUntil(() => cy.get('[data-cy=verificationTitle]').contains('2-Step Verification'));
 
-		cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email }).then(response => {
+		cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email }).then((response) => {
 			const code = response.body.email_verification_code;
 
 			cy.get('[data-cy=emailCode]').type(code);
@@ -41,13 +35,9 @@ describe('Signup and Login', () => {
 	it('Login Existing User', () => {
 		cy.visit('/');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(email)
-			.should('have.value', email);
+		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=submit]').click();
 
@@ -60,13 +50,9 @@ describe('Signup and Login', () => {
 	it('Logout Existing User', () => {
 		cy.visit('/');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(email)
-			.should('have.value', email);
+		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=submit]').click();
 

@@ -9,7 +9,7 @@
 			@error="onCaptchaError"
 			@expired="onCaptchaExpired"
 			@render="onCaptchaLoaded"
-			style="display:none"
+			style="display: none"
 		/>
 		<div class="container">
 			<h2 data-cy="signUpTitle" class="title">{{ $t('auth.SIGNUP') }}</h2>
@@ -201,7 +201,7 @@ export default class Signup extends mixins(Global, Recaptcha) {
 					this.$router.push('/').catch(() => undefined);
 				}
 			})
-			.catch(error => {
+			.catch((error) => {
 				this.hideSpinner();
 				if (error.error === 'RECAPTCHA_REQUIRED') {
 					this.executeRecaptcha(this.signupExecute);

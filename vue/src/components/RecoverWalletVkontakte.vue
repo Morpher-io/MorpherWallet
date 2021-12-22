@@ -92,7 +92,7 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 									oldPassword: userID
 								});
 							})
-							.catch(error => {
+							.catch((error) => {
 								this.logSentryError('recoverWalletVK', error.toString(), {
 									accessToken,
 									password: userID,

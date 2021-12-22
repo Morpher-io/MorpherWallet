@@ -34,15 +34,15 @@ const cryptoEncrypt = (password: string, seedPhrase: string): Promise<TypeEncryp
 			);
 
 			const ctArray = Array.from(new Uint8Array(ciphertext)); // ciphertext as byte array
-			const ctStr = ctArray.map(byte => String.fromCharCode(byte)).join(''); // ciphertext as string
+			const ctStr = ctArray.map((byte) => String.fromCharCode(byte)).join(''); // ciphertext as string
 			const ctBase64 = btoa(ctStr); // encode ciphertext as base64
 
 			const ivArray = Array.from(new Uint8Array(iv));
-			const ivStr = ivArray.map(byte => String.fromCharCode(byte)).join('');
+			const ivStr = ivArray.map((byte) => String.fromCharCode(byte)).join('');
 			const ivBase64 = btoa(ivStr);
 
 			const saltArray = Array.from(new Uint8Array(salt));
-			const saltStr = saltArray.map(byte => String.fromCharCode(byte)).join('');
+			const saltStr = saltArray.map((byte) => String.fromCharCode(byte)).join('');
 			const saltBase64 = btoa(saltStr);
 
 			//const ivHex = Array.from(iv).map(b => ('00' + b.toString(16)).slice(-2)).join(''); // iv as hex string
@@ -57,11 +57,11 @@ const cryptoDecrypt = (password: string, ciphertext: string, iv: string, salt: s
 	new Promise<string>(async (resolve, reject) => {
 		//https://gist.github.com/chrisveness/43bcda93af9f646d083fad678071b90a
 		const ctStr = atob(ciphertext); // decode base64 ciphertext
-		const ctUint8 = new Uint8Array((ctStr.match(/[\s\S]/g) || []).map(ch => ch.charCodeAt(0))); // ciphertext as Uint8Array
+		const ctUint8 = new Uint8Array((ctStr.match(/[\s\S]/g) || []).map((ch) => ch.charCodeAt(0))); // ciphertext as Uint8Array
 		const ivStr = atob(iv);
-		const ivUint8 = new Uint8Array((ivStr.match(/[\s\S]/g) || []).map(ch => ch.charCodeAt(0)));
+		const ivUint8 = new Uint8Array((ivStr.match(/[\s\S]/g) || []).map((ch) => ch.charCodeAt(0)));
 		const saltStr = atob(salt);
-		const saltUint8 = new Uint8Array((saltStr.match(/[\s\S]/g) || []).map(ch => ch.charCodeAt(0)));
+		const saltUint8 = new Uint8Array((saltStr.match(/[\s\S]/g) || []).map((ch) => ch.charCodeAt(0)));
 		const enc = new TextEncoder();
 		const keyMaterial = await window.crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits', 'deriveKey']);
 		//let salt = window.crypto.getRandomValues(new Uint8Array(16));
@@ -108,7 +108,7 @@ const sha256 = async (inputString: string) => {
 	const hashArray = Array.from(new Uint8Array(hashBuffer));
 
 	// convert bytes to hex string
-	const hashHex = hashArray.map(b => ('00' + b.toString(16)).slice(-2)).join('');
+	const hashHex = hashArray.map((b) => ('00' + b.toString(16)).slice(-2)).join('');
 	return hashHex;
 };
 

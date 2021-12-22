@@ -8,13 +8,9 @@ describe('Export Wallet', () => {
 	it('Export Private Key Error on Wrong Password', () => {
 		cy.visit('/');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(email)
-			.should('have.value', email);
+		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=submit]').click();
 
@@ -29,9 +25,7 @@ describe('Export Wallet', () => {
 
 		cy.get('[data-cy=confirmAccessTitle]').contains('Please enter your password before making changes.');
 
-		cy.get('[data-cy=confirmAccessPassword]')
-			.type('123456')
-			.should('have.value', '123456');
+		cy.get('[data-cy=confirmAccessPassword]').type('123456').should('have.value', '123456');
 
 		cy.get('[data-cy=confirmAccessButton]').click();
 
@@ -41,13 +35,9 @@ describe('Export Wallet', () => {
 	it('Export Seed Phrase Error on Wrong Password', () => {
 		cy.visit('/');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(email)
-			.should('have.value', email);
+		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=submit]').click();
 
@@ -62,9 +52,7 @@ describe('Export Wallet', () => {
 
 		cy.get('[data-cy=confirmAccessTitle]').contains('Please enter your password before making changes.');
 
-		cy.get('[data-cy=confirmAccessPassword]')
-			.type('123456')
-			.should('have.value', '123456');
+		cy.get('[data-cy=confirmAccessPassword]').type('123456').should('have.value', '123456');
 
 		cy.get('[data-cy=confirmAccessButton]').click();
 
@@ -74,13 +62,9 @@ describe('Export Wallet', () => {
 	it('Export Private Key', () => {
 		cy.visit('/');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(email)
-			.should('have.value', email);
+		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=submit]').click();
 
@@ -95,15 +79,13 @@ describe('Export Wallet', () => {
 
 		cy.get('[data-cy=confirmAccessTitle]').contains('Please enter your password before making changes.');
 
-		cy.get('[data-cy=confirmAccessPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=confirmAccessPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=confirmAccessButton]').click();
 
 		cy.waitUntil(() => cy.get('[data-cy=privateKeySuccess]').contains('Save your private key in a safe place (never share it).'));
 
-		cy.get('[data-cy=privateKeyValue]').should($element => {
+		cy.get('[data-cy=privateKeyValue]').should(($element) => {
 			privateKey = $element.text();
 		});
 
@@ -115,13 +97,9 @@ describe('Export Wallet', () => {
 	it('Export Seed Phrase', () => {
 		cy.visit('/');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(email)
-			.should('have.value', email);
+		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=submit]').click();
 
@@ -136,9 +114,7 @@ describe('Export Wallet', () => {
 
 		cy.get('[data-cy=confirmAccessTitle]').contains('Please enter your password before making changes.');
 
-		cy.get('[data-cy=confirmAccessPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=confirmAccessPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=confirmAccessButton]').click();
 
@@ -148,13 +124,9 @@ describe('Export Wallet', () => {
 	it('Delete Account', () => {
 		cy.visit('/');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(email)
-			.should('have.value', email);
+		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=submit]').click();
 
@@ -169,9 +141,7 @@ describe('Export Wallet', () => {
 
 		cy.get('[data-cy=confirmAccessTitle]').contains('Please enter your password before making changes.');
 
-		cy.get('[data-cy=confirmAccessPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=confirmAccessPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=confirmAccessButton]').click();
 
@@ -186,17 +156,13 @@ describe('Export Wallet', () => {
 
 		cy.get('[data-cy=confirmAccessTitle]').contains('Please enter your password before making changes.');
 
-		cy.get('[data-cy=confirmAccessPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=confirmAccessPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=confirmAccessButton]').click();
 
 		cy.get('[data-cy=privateKeyOption]').click();
 
-		cy.get('[data-cy=privateKeyInput]')
-			.type(privateKey)
-			.should('have.value', privateKey);
+		cy.get('[data-cy=privateKeyInput]').type(privateKey).should('have.value', privateKey);
 
 		cy.get('[data-cy=confirmDeleteButton]').click();
 

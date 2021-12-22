@@ -7,7 +7,7 @@
 					<div class="ml-3">
 						<p class="medium-text has-text-weight-medium">
 							<span class="important-font"> {{ formatEthAddress(accounts[0]) }} </span>
-							<span class="copy-icon" @click="copyETHAddress(accounts[0])"><i class="fas fa-copy"/></span>
+							<span class="copy-icon" @click="copyETHAddress(accounts[0])"><i class="fas fa-copy" /></span>
 						</p>
 						<p data-cy="currentEmail">{{ store.email }}</p>
 					</div>

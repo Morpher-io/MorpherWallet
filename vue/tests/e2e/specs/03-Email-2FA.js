@@ -9,13 +9,9 @@ describe('Email 2FA', () => {
 	it('Activate Email 2FA', () => {
 		cy.visit('/');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(email)
-			.should('have.value', email);
+		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=submit]').click();
 
@@ -33,15 +29,13 @@ describe('Email 2FA', () => {
 
 		cy.get('[data-cy=confirmAccessTitle]').contains('Please enter your password before making changes.');
 
-		cy.get('[data-cy=confirmAccessPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=confirmAccessPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=confirmAccessButton]').click();
 
 		cy.waitUntil(() => cy.get('[data-cy=emailConfirmationTitle]').contains('Email Confirmation'));
 
-		cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email }).then(response => {
+		cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email }).then((response) => {
 			const code = response.body.email_verification_code;
 
 			cy.get('[data-cy=2faEmailCode]').type(code);
@@ -64,19 +58,15 @@ describe('Email 2FA', () => {
 	it('Login with Email 2FA Activated', () => {
 		cy.visit('/');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(email)
-			.should('have.value', email);
+		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=submit]').click();
 
 		cy.waitUntil(() => cy.get('[data-cy=verificationTitle]').contains('2-Step Verification'));
 
-		cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email }).then(response => {
+		cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email }).then((response) => {
 			const code = response.body.email_verification_code;
 
 			cy.get('[data-cy=emailCode]').type(code);
@@ -95,19 +85,15 @@ describe('Email 2FA', () => {
 	it('Disable Email 2FA', () => {
 		cy.visit('/');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(email)
-			.should('have.value', email);
+		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=submit]').click();
 
 		cy.waitUntil(() => cy.get('[data-cy=verificationTitle]').contains('2-Step Verification'));
 
-		cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email }).then(response => {
+		cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email }).then((response) => {
 			const code = response.body.email_verification_code;
 
 			cy.get('[data-cy=emailCode]').type(code);
@@ -128,9 +114,7 @@ describe('Email 2FA', () => {
 
 			cy.get('[data-cy=confirmAccessTitle]').contains('Please enter your password before making changes.');
 
-			cy.get('[data-cy=confirmAccessPassword]')
-				.type(password)
-				.should('have.value', password);
+			cy.get('[data-cy=confirmAccessPassword]').type(password).should('have.value', password);
 
 			cy.get('[data-cy=confirmAccessButton]').click();
 
@@ -144,13 +128,9 @@ describe('Email 2FA', () => {
 	it('Change Login Email Error', () => {
 		cy.visit('/');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(email)
-			.should('have.value', email);
+		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=submit]').click();
 
@@ -163,13 +143,9 @@ describe('Email 2FA', () => {
 		cy.get('[data-cy=emailPasswordButton]').click();
 		cy.get('[data-cy=emailChangeButton]').click();
 
-		cy.get('[data-cy=newEmail]')
-			.type(secondEmail)
-			.should('have.value', secondEmail);
+		cy.get('[data-cy=newEmail]').type(secondEmail).should('have.value', secondEmail);
 
-		cy.get('[data-cy=confirmPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=confirmPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=updateEmailButton]').click();
 
@@ -185,13 +161,9 @@ describe('Email 2FA', () => {
 	it('Change Login Email', () => {
 		cy.visit('/');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(email)
-			.should('have.value', email);
+		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=submit]').click();
 
@@ -204,19 +176,15 @@ describe('Email 2FA', () => {
 		cy.get('[data-cy=emailPasswordButton]').click();
 		cy.get('[data-cy=emailChangeButton]').click();
 
-		cy.get('[data-cy=newEmail]')
-			.type(secondEmail)
-			.should('have.value', secondEmail);
+		cy.get('[data-cy=newEmail]').type(secondEmail).should('have.value', secondEmail);
 
-		cy.get('[data-cy=confirmPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=confirmPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=updateEmailButton]').click();
 
 		cy.waitUntil(() => cy.get('[data-cy=emailConfirmationTitle]').contains('Email Confirmation'));
 
-		cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email }).then(response => {
+		cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email }).then((response) => {
 			const code = response.body.email_verification_code;
 
 			cy.get('[data-cy=2faEmailCode]').type(code);
@@ -232,13 +200,9 @@ describe('Email 2FA', () => {
 	it('Login new Email', () => {
 		cy.visit('/');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(secondEmail)
-			.should('have.value', secondEmail);
+		cy.get('[data-cy=walletEmail]').type(secondEmail).should('have.value', secondEmail);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=submit]').click();
 
@@ -251,13 +215,9 @@ describe('Email 2FA', () => {
 	it('Change Login Email Back to Original', () => {
 		cy.visit('/');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(secondEmail)
-			.should('have.value', secondEmail);
+		cy.get('[data-cy=walletEmail]').type(secondEmail).should('have.value', secondEmail);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=submit]').click();
 
@@ -270,19 +230,15 @@ describe('Email 2FA', () => {
 		cy.get('[data-cy=emailPasswordButton]').click();
 		cy.get('[data-cy=emailChangeButton]').click();
 
-		cy.get('[data-cy=newEmail]')
-			.type(email)
-			.should('have.value', email);
+		cy.get('[data-cy=newEmail]').type(email).should('have.value', email);
 
-		cy.get('[data-cy=confirmPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=confirmPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=updateEmailButton]').click();
 
 		cy.waitUntil(() => cy.get('[data-cy=emailConfirmationTitle]').contains('Email Confirmation'));
 
-		cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email: secondEmail }).then(response => {
+		cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email: secondEmail }).then((response) => {
 			const code = response.body.email_verification_code;
 
 			cy.get('[data-cy=2faEmailCode]').type(code);
