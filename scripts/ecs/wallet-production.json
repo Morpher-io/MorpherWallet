@@ -8,7 +8,7 @@
             "name": "morpher-wallet-backend-production",
             "image": "612970435624.dkr.ecr.eu-central-1.amazonaws.com/morpher-wallet-backend-production",
             "cpu": 0,
-            "memory": 256,
+            "memory": 512,
             "portMappings": [
                 {
                     "containerPort": 80,
