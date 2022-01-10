@@ -27,7 +27,7 @@ function setI18nLanguage(lang: string) {
 export function loadLanguageAsync(lang: string): any {
 	if (i18n.locale !== lang) {
 		if (!loadedLanguages.includes(lang)) {
-			return import(/* webpackChunkName: "lang-[request]" */ `@/lang/locales/${lang}`).then(msgs => {
+			return import(/* webpackChunkName: "lang-[request]" */ `@/lang/locales/${lang}`).then((msgs) => {
 				i18n.setLocaleMessage(lang, msgs.default);
 				loadedLanguages.push(lang);
 				return setI18nLanguage(lang);

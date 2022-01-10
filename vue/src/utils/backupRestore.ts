@@ -40,10 +40,10 @@ const getEncryptedSeedFromMail = async (email: string, email2fa: string, authent
 			};
 
 			fetch(getBackendEndpoint() + '/v1/getEncryptedSeed', options)
-				.then(response => {
+				.then((response) => {
 					response
 						.json()
-						.then(responseBody => {
+						.then((responseBody) => {
 							/**
 							 * Login /Create Wallet is in one function
 							 * @todo: Separate Login and Create Wallet into separate functions so that upon failed "login" a recovery can be suggested
@@ -60,11 +60,11 @@ const getEncryptedSeedFromMail = async (email: string, email2fa: string, authent
 								reject('seed not found');
 							}
 						})
-						.catch(err => {
+						.catch((err) => {
 							reject(err);
 						});
 				})
-				.catch(err => {
+				.catch((err) => {
 					reject(err);
 				});
 		});
@@ -155,8 +155,8 @@ const recoverSeedSocialRecovery = async (accessToken: string, signupEmail: strin
 			cache: 'default'
 		};
 		fetch(getBackendEndpoint() + '/v1/recoverSeedSocialRecovery', options)
-			.then(r => {
-				r.json().then(async responseBody => {
+			.then((r) => {
+				r.json().then(async (responseBody) => {
 					if (responseBody.success) {
 						//initiate recovery
 						const encryptedSeed = JSON.parse(responseBody.encryptedSeed);
@@ -166,7 +166,7 @@ const recoverSeedSocialRecovery = async (accessToken: string, signupEmail: strin
 					}
 				});
 			})
-			.catch(err => {
+			.catch((err) => {
 				reject(err);
 			});
 	});

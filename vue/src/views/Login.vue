@@ -9,7 +9,7 @@
 			@error="onCaptchaError"
 			@expired="onCaptchaExpired"
 			@render="onCaptchaLoaded"
-			style="display:none"
+			style="display: none"
 		/>
 
 		<div class="container">
@@ -87,12 +87,12 @@ export default class Login extends mixins(Global, Recaptcha) {
 
 	unlock() {
 		this.unlockWithStoredPassword(this.recaptchaToken)
-			.then(result => {
+			.then((result) => {
 				if (result) {
 					this.$router.push('/').catch(() => undefined);
 				}
 			})
-			.catch(error => {
+			.catch((error) => {
 				if (error.error === 'RECAPTCHA_REQUIRED') {
 					this.executeRecaptcha(this.unlock);
 					return;
@@ -162,7 +162,7 @@ export default class Login extends mixins(Global, Recaptcha) {
 							// open root page after logon success
 							this.$router.push('/').catch(() => undefined);
 						})
-						.catch(error => {
+						.catch((error) => {
 							if (error.error === 'RECAPTCHA_REQUIRED') {
 								this.executeRecaptcha(this.login);
 								return;
@@ -173,7 +173,7 @@ export default class Login extends mixins(Global, Recaptcha) {
 						});
 				}
 			})
-			.catch(error => {
+			.catch((error) => {
 				this.hideSpinner();
 
 				if (error.error === 'RECAPTCHA_REQUIRED') {

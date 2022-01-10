@@ -9,7 +9,7 @@
 			@error="onCaptchaError"
 			@expired="onCaptchaExpired"
 			@render="onCaptchaLoaded"
-			style="display:none"
+			style="display: none"
 		/>
 		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
 
@@ -97,13 +97,13 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 		this.showSpinner(this.$t('loader.LOADING_ACCOUNT').toString());
 		// Check if the wallet can be unlocked using the local-storage stored password
 		this.unlockWithStoredPassword(this.recaptchaToken)
-			.then(result => {
+			.then((result) => {
 				this.hideSpinner();
 				if (result) {
 					this.$router.push('/').catch(() => undefined);
 				}
 			})
-			.catch(error => {
+			.catch((error) => {
 				this.hideSpinner();
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {
@@ -132,7 +132,7 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 				// open root page after logon success
 				this.$router.push('/').catch(() => undefined);
 			})
-			.catch(error => {
+			.catch((error) => {
 				this.hideSpinner();
 				if (error.error === 'RECAPTCHA_REQUIRED') {
 					this.executeRecaptcha(this.login);

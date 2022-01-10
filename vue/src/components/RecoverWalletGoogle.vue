@@ -68,7 +68,7 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 						oldPassword: userID
 					});
 				})
-				.catch(error => {
+				.catch((error) => {
 					this.logSentryError('recoverWalletGoogle', error.toString(), { userID });
 					googleUser.disconnect();
 					this.showSpinnerThenAutohide(this.$t('recovery.NO_RECOVERY_FOUND'));
