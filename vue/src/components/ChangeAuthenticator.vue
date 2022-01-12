@@ -21,7 +21,7 @@
 			<label class="label">{{ $t('2fa.VERIFICATION_CODE') }}</label>
 
 			<div class="control">
-				<input data-cy="2faAuthenticatorCode" type="number" inputmode="decimal" class="input" v-model="authenticatorCode" />
+				<input data-cy="2faAuthenticatorCode" type="number" inputmode="numeric" class="input" v-model="authenticatorCode" />
 			</div>
 		</div>
 
