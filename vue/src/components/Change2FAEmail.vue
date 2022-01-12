@@ -8,7 +8,7 @@
 			<label class="label">{{ $t('2fa.VERIFICATION_CODE') }}</label>
 
 			<div class="control">
-				<input data-cy="2faEmailCode" type="text" class="input" v-model="authenticatorCode" />
+				<input data-cy="2faEmailCode" type="number" inputmode="decimal" class="input" v-model="authenticatorCode" />
 			</div>
 		</div>
 

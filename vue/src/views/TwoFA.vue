@@ -34,6 +34,7 @@
 				<div class="control">
 					<input
 						type="number"
+						inputmode="decimal"
 						min="100000"
 						max="999999"
 						class="input"
@@ -50,6 +51,7 @@
 				<div class="control">
 					<input
 						type="number"
+						inputmode="decimal"
 						class="input"
 						name="authenticatorCode"
 						id="authenticatorCode"
