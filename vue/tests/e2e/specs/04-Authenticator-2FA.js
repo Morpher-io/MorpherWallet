@@ -8,13 +8,9 @@ describe('Authenticator 2FA', () => {
 	it('Error on Bad Authenticator Code', () => {
 		cy.visit('/');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(email)
-			.should('have.value', email);
+		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=submit]').click();
 
@@ -31,15 +27,11 @@ describe('Authenticator 2FA', () => {
 
 		cy.get('[data-cy=confirmAccessTitle]').contains('Please enter your password before making changes.');
 
-		cy.get('[data-cy=confirmAccessPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=confirmAccessPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=confirmAccessButton]').click();
 
-		cy.get('[data-cy=2faAuthenticatorCode]')
-			.type('123456')
-			.should('have.value', '123456');
+		cy.get('[data-cy=2faAuthenticatorCode]').type('123456').should('have.value', '123456');
 
 		cy.get('[data-cy=confirm2faButton]').click();
 
@@ -49,13 +41,9 @@ describe('Authenticator 2FA', () => {
 	it('Successfully Enable Authenticator 2FA', { retries: 5 }, () => {
 		cy.visit('/');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(email)
-			.should('have.value', email);
+		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=submit]').click();
 
@@ -72,16 +60,14 @@ describe('Authenticator 2FA', () => {
 
 		cy.get('[data-cy=confirmAccessTitle]').contains('Please enter your password before making changes.');
 
-		cy.get('[data-cy=confirmAccessPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=confirmAccessPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=confirmAccessButton]').click();
 
-		cy.request('POST', `${backendUrl}/v1/test/getUserSecret`, { email }).then(response => {
+		cy.request('POST', `${backendUrl}/v1/test/getUserSecret`, { email }).then((response) => {
 			const secret = response.body.authenticator_secret;
 
-			cy.task('generateOTP', secret).then(token => {
+			cy.task('generateOTP', secret).then((token) => {
 				cy.get('[data-cy=2faAuthenticatorCode]').type(token);
 
 				cy.get('[data-cy=confirm2faButton]').click();
@@ -103,22 +89,18 @@ describe('Authenticator 2FA', () => {
 	it('Login After Authenticator Enable', { retries: 5 }, () => {
 		cy.visit('/');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(email)
-			.should('have.value', email);
+		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=submit]').click();
 
 		cy.waitUntil(() => cy.get('[data-cy=verificationTitle]').contains('2-Step Verification'));
 
-		cy.request('POST', `${backendUrl}/v1/test/getUserSecret`, { email }).then(response => {
+		cy.request('POST', `${backendUrl}/v1/test/getUserSecret`, { email }).then((response) => {
 			const secret = response.body.authenticator_secret;
 
-			cy.task('generateOTP', secret).then(token => {
+			cy.task('generateOTP', secret).then((token) => {
 				cy.get('[data-cy=authenticatorCode]').type(token);
 
 				cy.waitUntil(() => cy.get('[data-cy=currentEmail]').contains(email));
@@ -134,22 +116,18 @@ describe('Authenticator 2FA', () => {
 	it('Disable 2FA Authenticator', { retries: 5 }, () => {
 		cy.visit('/');
 
-		cy.get('[data-cy=walletEmail]')
-			.type(email)
-			.should('have.value', email);
+		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
-		cy.get('[data-cy=walletPassword]')
-			.type(password)
-			.should('have.value', password);
+		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
 		cy.get('[data-cy=submit]').click();
 
 		cy.waitUntil(() => cy.get('[data-cy=verificationTitle]').contains('2-Step Verification'));
 
-		cy.request('POST', `${backendUrl}/v1/test/getUserSecret`, { email }).then(response => {
+		cy.request('POST', `${backendUrl}/v1/test/getUserSecret`, { email }).then((response) => {
 			const secret = response.body.authenticator_secret;
 
-			cy.task('generateOTP', secret).then(token => {
+			cy.task('generateOTP', secret).then((token) => {
 				cy.get('[data-cy=authenticatorCode]').type(token);
 
 				cy.waitUntil(() => cy.get('[data-cy=currentEmail]').contains(email));
@@ -168,9 +146,7 @@ describe('Authenticator 2FA', () => {
 
 				cy.get('[data-cy=confirmAccessTitle]').contains('Please enter your password before making changes.');
 
-				cy.get('[data-cy=confirmAccessPassword]')
-					.type(password)
-					.should('have.value', password);
+				cy.get('[data-cy=confirmAccessPassword]').type(password).should('have.value', password);
 
 				cy.get('[data-cy=confirmAccessButton]').click();
 

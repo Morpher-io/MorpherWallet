@@ -137,7 +137,7 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
-	if (to.matched.some(record => record.meta.requiresAuth)) {
+	if (to.matched.some((record) => record.meta.requiresAuth)) {
 		if (store.getters.isLoggedIn) {
 			if (store.state.redirectPath) {
 				const path = store.state.redirectPath;
@@ -163,7 +163,7 @@ router.beforeEach((to, from, next) => {
 			return;
 		}
 		next('/login');
-	} else if (to.matched.some(record => record.meta.requires2fa)) {
+	} else if (to.matched.some((record) => record.meta.requires2fa)) {
 		if (store.getters.twoFaRequired) {
 			next();
 			return;

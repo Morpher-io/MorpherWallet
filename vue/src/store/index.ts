@@ -104,7 +104,7 @@ function initialState(): RootState {
 	const iconSeed = parseInt(localStorage.getItem('iconSeed') || '') || null;
 	const hashedPassword = '';
 
-	Sentry.configureScope(scope => {
+	Sentry.configureScope((scope) => {
 		scope.setUser({ id: '', email: email });
 	});
 
@@ -215,7 +215,7 @@ const store: Store<RootState> = new Vuex.Store({
 		userFound(state: RootState, userData: TypeUserFoundData) {
 			state.email = userData.email;
 			state.hashedPassword = userData.hashedPassword;
-			Sentry.configureScope(scope => {
+			Sentry.configureScope((scope) => {
 				scope.setUser({ id: state.accounts && state.accounts.length > 0 ? state.accounts[0] : '', email: state.email });
 			});
 
@@ -230,7 +230,7 @@ const store: Store<RootState> = new Vuex.Store({
 			localStorage.setItem('email', seedCreatedData.email);
 			localStorage.setItem('encryptedSeed', JSON.stringify(seedCreatedData.encryptedSeed));
 			saveSessionStore('password', seedCreatedData.hashedPassword);
-			Sentry.configureScope(scope => {
+			Sentry.configureScope((scope) => {
 				scope.setUser({ id: state.accounts && state.accounts.length > 0 ? state.accounts[0] : '', email: state.email });
 			});
 		},
@@ -248,7 +248,7 @@ const store: Store<RootState> = new Vuex.Store({
 			removeSessionStore('password');
 			state.loginRetryCount = 0;
 			router.push('/login').catch(() => undefined);
-			Sentry.configureScope(scope => {
+			Sentry.configureScope((scope) => {
 				scope.setUser({ id: '', email: '' });
 			});
 		},
@@ -265,7 +265,7 @@ const store: Store<RootState> = new Vuex.Store({
 			localStorage.removeItem('recoveryMethods');
 			removeSessionStore('password');
 			localStorage.removeItem('encryptedSeed');
-			Sentry.configureScope(scope => {
+			Sentry.configureScope((scope) => {
 				scope.setUser({ id: '', email: '' });
 			});
 		},
@@ -277,7 +277,7 @@ const store: Store<RootState> = new Vuex.Store({
 
 			state.status = '';
 			state.token = '';
-			Sentry.configureScope(scope => {
+			Sentry.configureScope((scope) => {
 				scope.setUser({ id: '', email: '' });
 			});
 		},
@@ -287,7 +287,7 @@ const store: Store<RootState> = new Vuex.Store({
 			state.hashedPassword = payload.hashedPassword;
 
 			if (payload.accounts && payload.accounts[0])
-				Sentry.configureScope(scope => {
+				Sentry.configureScope((scope) => {
 					scope.setUser({ id: payload.accounts[0], email: state.email });
 				});
 			window.localStorage.setItem('iconSeed', parseInt(payload.accounts[0].slice(2, 10), 16).toString());
@@ -295,11 +295,9 @@ const store: Store<RootState> = new Vuex.Store({
 
 			const currentLocale = Cookie.get('locale');
 			if (currentLocale) {
-				setTimeout(
-					() => {
-						store.dispatch('updateUserPayload', { column: 'app_lang', value: currentLocale });				
-					}, 10000
-				)
+				setTimeout(() => {
+					store.dispatch('updateUserPayload', { column: 'app_lang', value: currentLocale });
+				}, 10000);
 			}
 		},
 		seedExported(state: RootState) {
@@ -343,9 +341,9 @@ const store: Store<RootState> = new Vuex.Store({
 			return new Promise((resolve, reject) => {
 				commit('authRequested');
 				sha256(password)
-					.then(hashedPassword => {
+					.then((hashedPassword) => {
 						getPayload(email, recaptchaToken)
-							.then(payload => {
+							.then((payload) => {
 								rootState.loginRetryCount = 0;
 								commit('ipCountry', payload.ip_country);
 								commit('userFound', { email, hashedPassword });
@@ -357,7 +355,7 @@ const store: Store<RootState> = new Vuex.Store({
 											commit('updateUnlocking', false);
 											resolve;
 										})
-										.catch(e => {
+										.catch((e) => {
 											commit('updateUnlocking', false);
 											reject(e);
 										});
@@ -365,7 +363,7 @@ const store: Store<RootState> = new Vuex.Store({
 
 								if (!payload.email && !payload.authenticator && !payload.needConfirmation) {
 									getEncryptedSeedFromMail(email, '', '', recaptchaToken)
-										.then(encryptedSeed => {
+										.then((encryptedSeed) => {
 											commit('updateUnlocking', false);
 											commit('seedFound', { encryptedSeed });
 											resolve(true);
@@ -379,7 +377,7 @@ const store: Store<RootState> = new Vuex.Store({
 									resolve(true);
 								}
 							})
-							.catch(err => {
+							.catch((err) => {
 								commit('updateUnlocking', false);
 								commit('authError', "The user wasn't found: Signup first!");
 								reject(err);
@@ -395,7 +393,7 @@ const store: Store<RootState> = new Vuex.Store({
 			commit('updateUnlocking', true);
 			return new Promise((resolve, reject) => {
 				recoverSeedSocialRecovery(params.accessToken, state.email, params.recoveryTypeId)
-					.then(encryptedSeed => {
+					.then((encryptedSeed) => {
 						commit('seedFound', { encryptedSeed });
 						getKeystoreFromEncryptedSeed(state.encryptedSeed, params.password)
 							.then((keystore: WalletBase) => {
@@ -442,7 +440,7 @@ const store: Store<RootState> = new Vuex.Store({
 		hasRecovery({ state }, id: number) {
 			return (
 				state.recoveryMethods
-					.map(obj => {
+					.map((obj) => {
 						return obj.id;
 					})
 					.indexOf(id) !== -1
@@ -453,12 +451,12 @@ const store: Store<RootState> = new Vuex.Store({
 		 */
 		createWallet({ commit, dispatch }, params: TypeFetchUser) {
 			return new Promise((resolve, reject) => {
-				sha256(params.password).then(hashedPassword => {
+				sha256(params.password).then((hashedPassword) => {
 					getPayload(params.email, params.recaptchaToken)
 						.then(() => {
 							reject('USER_ALREADY_EXISTS');
 						})
-						.catch(async error => {
+						.catch(async (error) => {
 							if (error.error && error.error === 'RECAPTCHA_REQUIRED') {
 								return reject(error);
 							}
@@ -476,13 +474,13 @@ const store: Store<RootState> = new Vuex.Store({
 									commit('clearUser');
 									dispatch('fetchUser', { email: params.email, password: params.password, recaptchaToken: params.recaptchaToken })
 										.then(resolve)
-										.catch(e => {
+										.catch((e) => {
 											reject(e);
 											commit('delayedSpinnerMessage', 'Unknown Error occurred during saving.');
 											reject(e);
 										});
 								})
-								.catch(e => {
+								.catch((e) => {
 									reject(e);
 								});
 						});
@@ -508,18 +506,18 @@ const store: Store<RootState> = new Vuex.Store({
 				state.hashedPassword = hashedPassword;
 				state.encryptedSeed = encryptedSeed;
 
-				Sentry.configureScope(scope => {
+				Sentry.configureScope((scope) => {
 					scope.setUser({ id: state.accounts && state.accounts.length > 0 ? state.accounts[0] : '', email: state.email });
 				});
 			}
 
 			dispatch('unlockWithStoredPassword', recaptchaToken)
-				.then(result => {
+				.then((result) => {
 					if (result) {
 						router.push('/').catch(() => undefined);
 					}
 				})
-				.catch(error => {
+				.catch((error) => {
 					if (error !== true && error !== false) {
 						// console.log('Error in unlock', error);
 					}
@@ -590,7 +588,7 @@ const store: Store<RootState> = new Vuex.Store({
 
 				if (emailCorrect && authenticatorCorrect && userConfirmed) {
 					getEncryptedSeedFromMail(rootState.email, params.email2FA, params.authenticator2FA, params.recaptchaToken)
-						.then(encryptedSeed => {
+						.then((encryptedSeed) => {
 							//const encryptedSeed = state.encryptedSeed; //normally that would need decrypting using 2fa codes
 							//commit('updatePayload', { email: false, authenticator: false });
 							commit('seedFound', { encryptedSeed });
@@ -608,7 +606,7 @@ const store: Store<RootState> = new Vuex.Store({
 								resolve('/unlock');
 							}
 						})
-						.catch(err => {
+						.catch((err) => {
 							if (err.toString() === 'seed not found') {
 								commit('authError', '2FA Authentication code not correct');
 								reject('2FA Authentication not correct');
@@ -637,7 +635,7 @@ const store: Store<RootState> = new Vuex.Store({
 							commit('updateUnlocking', false);
 							resolve(true);
 						})
-						.catch(e => {
+						.catch((e) => {
 							commit('updateUnlocking', false);
 							reject(e);
 						});
@@ -663,19 +661,19 @@ const store: Store<RootState> = new Vuex.Store({
 
 						commit('keystoreUnlocked', { keystore, accounts, hashedPassword: params.password });
 						getPayload(state.email, params.recaptchaToken)
-							.then(payload => {
+							.then((payload) => {
 								commit('ipCountry', payload.ip_country);
 								commit('updatePayload', payload);
 								dispatch('updateRecoveryMethods', { dbUpdate: false }).then(() => {
 									resolve(true);
 								});
 							})
-							.catch(e => {
+							.catch((e) => {
 								reject(e);
 							});
 						commit('updateUnlocking', false);
 					})
-					.catch(err => {
+					.catch((err) => {
 						commit('updateUnlocking', false);
 						state.loginRetryCount += 1;
 						if (state.loginRetryCount >= 3) commit('authError', "The user wasn't found: Signup first!");
@@ -695,7 +693,7 @@ const store: Store<RootState> = new Vuex.Store({
 						method: 'POST',
 						url: getBackendEndpoint() + '/v1/auth/getRecoveryMethods'
 					})
-						.then(methods => {
+						.then((methods) => {
 							commit('recoveryMethodsFound', methods);
 							resolve(true);
 						})
@@ -813,11 +811,11 @@ const store: Store<RootState> = new Vuex.Store({
 					method: 'POST',
 					url: getBackendEndpoint() + '/v1/auth/change2FAMethods'
 				})
-					.then(response => {
+					.then((response) => {
 						commit('updatePayload', params);
 						resolve(response);
 					})
-					.catch(e => {
+					.catch((e) => {
 						reject(e);
 					});
 			});
@@ -873,7 +871,7 @@ const store: Store<RootState> = new Vuex.Store({
 							resolve(true);
 						});
 					})
-					.catch(e => {
+					.catch((e) => {
 						reject(e);
 					});
 			});
@@ -923,7 +921,7 @@ const store: Store<RootState> = new Vuex.Store({
 				if (state.keystore !== null) {
 					const seed = state.encryptedSeed;
 					if (seed.ciphertext !== undefined && seed.iv !== undefined && seed.salt !== undefined) {
-						cryptoDecrypt(params.password, seed.ciphertext, seed.iv, seed.salt).then(mnemonic => {
+						cryptoDecrypt(params.password, seed.ciphertext, seed.iv, seed.salt).then((mnemonic) => {
 							commit('delayedSpinnerMessage', i18n.t('export.SEED_PHRASE_SUCCESSFUL'));
 							commit('updateSeedPhrase', { seedPhrase: mnemonic });
 						});
@@ -958,7 +956,7 @@ const store: Store<RootState> = new Vuex.Store({
 				if (state.keystore !== null) {
 					const seed = state.encryptedSeed;
 					if (seed.ciphertext !== undefined && seed.iv !== undefined && seed.salt !== undefined) {
-						cryptoDecrypt(params.password, seed.ciphertext, seed.iv, seed.salt).then(mnemonic => {
+						cryptoDecrypt(params.password, seed.ciphertext, seed.iv, seed.salt).then((mnemonic) => {
 							const now = new Date();
 							download(mnemonic, 'seed' + '--' + now.toISOString() + '--' + params.account);
 							commit('delayedSpinnerMessage', 'Seed Phrase exported successfully');
@@ -1001,7 +999,7 @@ const store: Store<RootState> = new Vuex.Store({
 								resolve(true);
 							});
 						})
-						.catch(e => {
+						.catch((e) => {
 							reject(e);
 						});
 				} else {
@@ -1014,18 +1012,18 @@ const store: Store<RootState> = new Vuex.Store({
 		}
 	},
 	getters: {
-		isLoggedIn: state => {
+		isLoggedIn: (state) => {
 			return state.keystore !== undefined && state.keystore !== null;
 		},
-		twoFaRequired: state => {
+		twoFaRequired: (state) => {
 			return (
 				(state.twoFaRequired.email || state.twoFaRequired.authenticator || state.twoFaRequired.needConfirmation) &&
 				state.encryptedSeed.ciphertext === undefined
 			);
 		},
-		authStatus: state => state.status,
-		walletEmail: state => state.email,
-		hasEncryptedKeystore: state => state.encryptedSeed.ciphertext !== undefined
+		authStatus: (state) => state.status,
+		walletEmail: (state) => state.email,
+		hasEncryptedKeystore: (state) => state.encryptedSeed.ciphertext !== undefined
 	}
 });
 
@@ -1156,7 +1154,7 @@ if (isIframe()) {
 				let counter = 0;
 
 				const waitForUnlock = () => {
-					return new Promise(resolve => {
+					return new Promise((resolve) => {
 						setTimeout(resolve, 200);
 					});
 				};

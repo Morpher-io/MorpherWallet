@@ -9,7 +9,7 @@
 			@error="onCaptchaError"
 			@expired="onCaptchaExpired"
 			@render="onCaptchaLoaded"
-			style="display:none"
+			style="display: none"
 		/>
 		<img
 			v-if="(twoFaRequired.email || twoFaRequired.needConfirmation) && !twoFaRequired.authenticator"
@@ -127,11 +127,11 @@ export default class TwoFA extends mixins(Global, Recaptcha) {
 		this.logonError = '';
 		this.showSpinner(this.$t('loader.VALIDATING_CODE').toString());
 		this.unlock2FA({ email2FA: this.emailCode, authenticator2FA: this.authenticatorCode, recaptchaToken: this.recaptchaToken })
-			.then(nextroute => {
+			.then((nextroute) => {
 				this.hideSpinner();
 				this.router.push(nextroute).catch(() => undefined);
 			})
-			.catch(error => {
+			.catch((error) => {
 				this.hideSpinner();
 				if (error.error === 'RECAPTCHA_REQUIRED') {
 					this.executeRecaptcha(this.validateCode);
