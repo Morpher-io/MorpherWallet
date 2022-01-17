@@ -1,6 +1,6 @@
 import store from '../store/index';
 // check for sesion storage events from other tabs. This will logout if other tabs logged out, log in if other tabs logged in or fetch the the password from the session storage in other tabs
-const sessionStorageTransfer = function(event: any) {
+const sessionStorageTransfer = function (event: any) {
 	if (!event) {
 		event = window.event;
 	}

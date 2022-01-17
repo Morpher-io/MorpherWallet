@@ -110,7 +110,7 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 					erorr: ''
 				});
 			})
-			.catch(error => {
+			.catch((error) => {
 				this.logSentryError('addGoogleRecovery', error.toString(), {
 					hasRecoveryMethod: this.hasRecoveryMethod,
 					clientId: this.clientId,
@@ -143,7 +143,7 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 					erorr: ''
 				});
 			})
-			.catch(error => {
+			.catch((error) => {
 				this.logSentryError('deleteGoogleRecovery', error.toString(), {
 					hasRecoveryMethod: this.hasRecoveryMethod,
 					clientId: this.clientId,
