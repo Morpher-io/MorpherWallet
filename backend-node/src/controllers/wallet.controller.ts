@@ -635,6 +635,15 @@ export async function getPayload(req, res) {
             await user.save();
 
             if (user != null && user['payload'] !== null) {
+                // default app language to en 
+                if (!user['payload'].app_lang) {
+                    user['payload'].app_lang = 'en';
+                    user.changed('payload', true)
+                    await user.save();
+                }
+
+                payload['app_lang'] = user['payload'].app_lang;
+                
                 if (user['payload'].email !== undefined) {
                     payload['email'] = user.payload.email;
                 }
@@ -1138,7 +1147,11 @@ export async function updateUserPayload(req, res) {
         const key = req.header('key');
         const payloadColumn = req.body.column;
         const payloadValue = req.body.value;
-
+        
+        // only allow updates to app lang payload column
+        if (payloadColumn !== 'app_lang') {
+            return res.status(403).json({ error: "INVALID_REQUEST" });
+        }
         // Create a new recovery method.
         const recovery = await Recovery.findOne({ where: { key, recovery_type_id: 1 } });
         const user = await User.findOne({ where: { id: recovery.user_id } });
