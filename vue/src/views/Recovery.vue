@@ -27,8 +27,10 @@
 					<RecoverWalletVkontakte @setPassword="setPassword"></RecoverWalletVkontakte>
 				</div>
 
-				<router-link to="/login" tag="button" class="button is-ghost is-blue big-button medium-text transition-faster">
-					<span>{{ $t('common.CANCEL') }}</span>
+				<router-link to="/login">
+					<button class="button is-ghost is-blue big-button medium-text transition-faster">				
+						<span>{{ $t('common.CANCEL') }}</span>
+					</button>
 				</router-link>
 
 				<p class="is-size-7 mt-5 transition-faster">
@@ -60,8 +62,10 @@
 					<button data-cy="confirmButton" type="submit" class="button is-green big-button is-login transition-faster">
 						<span class="text">{{ $t('common.CONTINUE') }}</span>
 					</button>
-					<router-link to="/login" tag="button" class="button is-ghost is-blue big-button medium-text transition-faster">
-						<span class="text">{{ $t('common.BACK') }}</span>
+					<router-link to="/login">
+						<button class="button is-ghost is-blue big-button medium-text transition-faster">
+							<span class="text">{{ $t('common.BACK') }}</span>
+						</button>
 					</router-link>
 				</form>
 				<p class="is-size-7 mt-5 transition-faster">

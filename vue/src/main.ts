@@ -3,9 +3,10 @@ import App from './App.vue';
 import router from './router';
 import store from './store';
 import * as Sentry from '@sentry/vue';
-import { Integrations } from '@sentry/tracing';
+import * as Integrations from '@sentry/integrations';
 import VueGtag from 'vue-gtag';
 import Cookie from 'js-cookie';
+import { checkErrorFilter } from './utils/sentry'
 
 Vue.config.productionTip = false;
 
@@ -71,17 +72,20 @@ if (process.env.VUE_APP_SENTRY_ENDPOINT) {
 	Sentry.init({
 		Vue,
 		dsn: process.env.VUE_APP_SENTRY_ENDPOINT,
-		release: 'morpger-wallet@' + process.env.VUE_APP_RELEASE_VERSION,
-		integrations: [
-			new Integrations.BrowserTracing({
-				routingInstrumentation: Sentry.vueRouterInstrumentation(router),
-				tracingOrigins: ['localhost', 'morpher.com', /^\//]
-			})
-		],
-		// Set tracesSampleRate to 1.0 to capture 100%
-		// of transactions for performance monitoring.
-		// We recommend adjusting this value in production
-		tracesSampleRate: 1.0
+		release: 'morpher-wallet@' + process.env.VUE_APP_RELEASE_VERSION,
+		integrations: [new Integrations.Vue({ Vue, attachProps: true })],
+		beforeSend(event) {
+			if (event.exception) {
+				const exception = JSON.stringify(event.exception).toLowerCase();
+
+				if (!checkErrorFilter(exception)) {
+					//console.log('Error Filtered',exception)
+					return null;
+				}
+			}
+
+			return event;
+		}
 	});
 }
 

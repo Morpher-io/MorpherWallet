@@ -27,11 +27,13 @@
 							{{ $t('common.SEND_DESCRIPTION') }}
 						</div>
 					</button>
-					<router-link to="/settings" tag="button" class="button is-light-blue is-small-button has-text-weight-bold transition-faster">
-						<span class="icon is-small">
-							<i class="fas fa-cog"></i>
-						</span>
-						<span data-cy="settingsButton">{{ $t('settings.SETTINGS_TITLE') }}</span>
+					<router-link to="/settings">
+						<button class="button is-light-blue is-small-button has-text-weight-bold transition-faster">
+							<span class="icon is-small">
+								<i class="fas fa-cog"></i>
+							</span>
+							<span data-cy="settingsButton">{{ $t('settings.SETTINGS_TITLE') }}</span>
+						</button>	
 					</router-link>
 				</div>
 			</div>
@@ -47,10 +49,10 @@
 				<p v-html="$t('recovery.ACCOUNT_AT_RISK')"></p>
 				<router-link
 					to="/settings/recovery"
-					tag="button"
-					class="button is-light-green is-small-button has-text-weight-bold transition-faster mt-3"
 				>
-					<span class="text smaller-font">{{ $t('recovery.ADD_ACCOUNT_RECOVERY') }}</span>
+					<button class="button is-light-green is-small-button has-text-weight-bold transition-faster mt-3">
+						<span class="text smaller-font">{{ $t('recovery.ADD_ACCOUNT_RECOVERY') }}</span>
+					</button>
 				</router-link>
 			</div>
 			<div v-else class="details has-text-left">
