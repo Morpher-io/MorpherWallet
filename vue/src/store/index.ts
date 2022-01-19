@@ -94,6 +94,7 @@ export interface RootState {
 	redirectPath: string;
 	loginRetryCount: number;
 	ipCountry: string;
+	app_lang: string
 }
 
 /**
@@ -154,7 +155,8 @@ function initialState(): RootState {
 		unlocking: true,
 		redirectPath: '',
 		loginRetryCount: 0,
-		ipCountry: ''
+		ipCountry: '',
+		app_lang: ''
 	} as RootState;
 }
 
@@ -208,6 +210,7 @@ const store: Store<RootState> = new Vuex.Store({
 			state.twoFaRequired.authenticator = payload.authenticator;
 			state.twoFaRequired.authenticatorConfirmed = payload.authenticatorConfirmed;
 			state.twoFaRequired.needConfirmation = payload.needConfirmation || false;
+			state.app_lang = payload.app_lang || '';
 		},
 		ipCountry(state: RootState, ipCountry: string) {
 			state.ipCountry = ipCountry || '';
@@ -295,9 +298,7 @@ const store: Store<RootState> = new Vuex.Store({
 
 			const currentLocale = Cookie.get('locale');
 			if (currentLocale) {
-				setTimeout(() => {
-					store.dispatch('updateUserPayload', { column: 'app_lang', value: currentLocale });
-				}, 10000);
+				store.dispatch('updateUserPayload', { column: 'app_lang', value: currentLocale });
 			}
 		},
 		seedExported(state: RootState) {
@@ -701,17 +702,33 @@ const store: Store<RootState> = new Vuex.Store({
 				}
 			});
 		},
-		updateUserPayload({ dispatch }, params: TypeUpdateUserPayload) {
+		updateUserPayload({ dispatch, state }, params: TypeUpdateUserPayload) {
 			return new Promise((resolve, reject) => {
-				dispatch('sendSignedRequest', {
-					body: { column: params.column, value: params.value },
-					method: 'POST',
-					url: getBackendEndpoint() + '/v1/auth/updateUserPayload'
-				})
-					.then(() => {
-						resolve(true);
+				setTimeout(() => {
+					// only update the app language if it has changed
+					if (params.column !=='app_lang') {
+						return resolve(true);
+					}
+
+					if (!state.app_lang || state.app_lang == '') {
+						return resolve(true);
+					}
+					if (!state.email || !state.accounts || state.accounts.length < 1 || !state.accounts[0] || !params.value) {
+						return resolve(true);
+					}
+					if (params.value.toLowerCase() == state.app_lang.toLowerCase()) {
+						return resolve(true);
+					}
+					dispatch('sendSignedRequest', {
+						body: { column: params.column, value: params.value },
+						method: 'POST',
+						url: getBackendEndpoint() + '/v1/auth/updateUserPayload'
 					})
-					.catch(reject);
+						.then(() => {
+							return resolve(true);
+						})
+						.catch(reject);
+				}, 2000);
 			});
 		},
 		changePassword({ commit, state, dispatch }, params: TypeChangePassword) {

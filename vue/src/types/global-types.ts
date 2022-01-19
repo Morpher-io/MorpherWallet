@@ -14,6 +14,7 @@ export type Type2FARequired = {
 	authenticator: boolean;
 	authenticatorConfirmed: boolean;
 	needConfirmation?: boolean;
+	app_lang?: string;
 };
 
 export type TypeSeedFoundData = {
