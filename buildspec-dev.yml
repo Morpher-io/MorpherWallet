@@ -3,7 +3,6 @@ version: 0.2
 env:
     variables:
         NODE_ENV: 'development'
-        ENVIRONMENT: 'development'
         VUE_APP_BACKEND_ENDPOINT: 'https://wallet-api-dev.morpher.com'
         VUE_APP_I18N_DEFAULT_LOCALE: 'en'
         VUE_APP_I18N_SUPPORTED_LOCALE: '["en", "ru", "bs"]'

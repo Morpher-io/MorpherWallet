@@ -27,6 +27,10 @@
                     "value": "production"
                 },
                 {
+                    "name": "SEND_EMAILS",
+                    "value": "true"
+                },
+                {
                     "name": "DB_PORT",
                     "value": "5432"
                 },
