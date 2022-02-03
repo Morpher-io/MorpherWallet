@@ -322,7 +322,11 @@ export async function getEncryptedSeed(req, res) {
                                 stringified_headers: JSON.stringify(req.headers)
                             });
                         }
-                        user.payload.needConfirmation = true;
+
+                        if(process.env.ENVIRONMENT !== 'development'){
+                            user.payload.needConfirmation = true;
+                        }
+
                         user.changed('payload', true)
                     }
                 }
