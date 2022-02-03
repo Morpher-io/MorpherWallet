@@ -24,7 +24,11 @@
                 },
                 {
                     "name": "ENVIRONMENT",
-                    "value": "production"
+                    "value": "development"
+                },
+                {
+                    "name": "SEND_EMAILS",
+                    "value": "true"
                 },
                 {
                     "name": "DB_PORT",
