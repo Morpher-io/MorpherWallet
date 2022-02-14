@@ -140,6 +140,9 @@ function sortObject(object: any) {
  const validateRecaptcha = async function(recaptchaToken: string) {
     try {
 
+        if (process.env.RECAPTCHA_SECRET == 'DISABLED') {
+            return true;
+        }
         const axios = require('axios')
 
         const response = await  axios.post(

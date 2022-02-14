@@ -19,7 +19,7 @@ function secret(req, res, next) {
 }
 
 function recaptcha(req, res, next) {
-    if (process.env.ENVIRONMENT === 'development') {
+    if (process.env.ENVIRONMENT === 'development' || process.env.RECAPTCHA_SECRET == 'DISABLED') {
         return next();
     }
     // skip recaptcha if it was processed in the 10 min

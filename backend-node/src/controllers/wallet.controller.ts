@@ -196,7 +196,7 @@ export async function updateEmail(req: Request, res: Response) {
         const email2faVerification = req.body.email2faVerification;
         const key = req.header('key');
         const recoveryTypeId = 1;
-        const environment = process.env.ENVIRONMENT;
+        const sendEmails = process.env.SEND_EMAILS;
 
         const recovery = await Recovery.findOne({ where: { key, recovery_type_id: recoveryTypeId }, transaction });
         if (recovery != null) {
@@ -207,7 +207,7 @@ export async function updateEmail(req: Request, res: Response) {
                 //email 2FA alredy sent out to verify new email address exists?
                 if (email2faVerification === undefined) {
                     const verificationCode = await updateEmail2fa(user.id);
-                    if (environment !== 'development') {
+                    if (sendEmails === 'true') {
                         await sendEmail2FA(verificationCode, newEmail, user);
                     }
                     transaction.commit(); //close the transaction after the 2fa was sent
@@ -224,7 +224,7 @@ export async function updateEmail(req: Request, res: Response) {
                             change_type: 'updateEmail',
                             stringified_headers: JSON.stringify(req.headers)
                         });
-                        if (environment !== 'development') {
+                        if (sendEmails === 'true') {
                             await sendEmailChanged(newEmail, user.email, user);
                         } //send the old user an info-mail that his email address got updated.
 
@@ -322,7 +322,11 @@ export async function getEncryptedSeed(req, res) {
                                 stringified_headers: JSON.stringify(req.headers)
                             });
                         }
-                        user.payload.needConfirmation = true;
+
+                        if(process.env.ENVIRONMENT !== 'development'){
+                            user.payload.needConfirmation = true;
+                        }
+
                         user.changed('payload', true)
                     }
                 }
@@ -622,7 +626,11 @@ export async function getPayload(req, res) {
                             stringified_headers: JSON.stringify(req.headers)
                         });
                     }
-                    user.payload.needConfirmation = true;
+
+                    if(process.env.ENVIRONMENT !== 'development'){
+                        user.payload.needConfirmation = true;
+                    }
+                    
                     user.changed('payload', true)
                 }
             }
@@ -704,7 +712,7 @@ export async function change2FAMethods(req, res) {
         let toggleAuthenticator = req.body.authenticator;
         const email2faVerification = req.body.email2faVerification;
         const authenticator2faVerification = req.body.authenticator2faVerification;
-        const environment = process.env.ENVIRONMENT;
+        const sendEmails = process.env.SEND_EMAILS;
 
         // only allow one
         if (toggleAuthenticator) toggleEmail = false;
@@ -721,7 +729,7 @@ export async function change2FAMethods(req, res) {
 
                     const verificationCode = await updateEmail2fa(user.id);
 
-                    if (environment !== 'development') {
+                    if (sendEmails === 'true') {
                         await sendEmail2FA(verificationCode, user.email, user);
                     }
 
@@ -901,12 +909,12 @@ export async function send2FAEmail(req, res) {
         const key = req.body.key;
         const recovery = await Recovery.findOne({ where: { key } });
         const user = await User.findOne({ where: { id: recovery.user_id } });
-        const environment = process.env.ENVIRONMENT;
+        const sendEmails = process.env.SEND_EMAILS;
 
         try {
             const verificationCode = await updateEmail2fa(user.id);
 
-            if (environment !== 'development') {
+            if (sendEmails === 'true') {
                 await sendEmail2FA(verificationCode, user.email, user);
             }
 
