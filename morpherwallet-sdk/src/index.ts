@@ -341,6 +341,14 @@ export default class MorpherWallet {
           const widgetCommunication = (await this.widget).communication;
          
           txParams.chainId = self.getChainId();
+          if (txParams.maxFeePerGas !== undefined && txParams.maxPriorityFeePerGas !== undefined && txParams.gasPrice !== undefined) 
+            delete txParams.gasPrice;
+
+          if (txParams.maxFeePerGas !== undefined && txParams.maxPriorityFeePerGas !== undefined && txParams.chainId && Number(txParams['chainId']) !== 21 ) {
+            txParams.chain = 'mainnet';
+            txParams.hardfork = 'london';
+          }          
+          
           if (this.config?.show_transaction || this.config?.confirm_transaction || Number(txParams.chainId) !== 21)
             this.showWallet();
           const result = await widgetCommunication.signTransaction(txParams, this.config, this.wsRPCEndpointUrl);
