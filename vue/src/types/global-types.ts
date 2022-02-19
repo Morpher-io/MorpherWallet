@@ -1,5 +1,6 @@
+import * as zksync from 'zksync';
+
 export type Maybe<T> = T | null;
-import { WalletBase } from 'web3-core';
 
 export type TypeEncryptedSeed = {
 	__typename?: 'TypeEncryptedSeed';
@@ -43,6 +44,17 @@ export type TypeUnlock2fa = {
 	email2FA: string;
 	authenticator2FA: string;
 	recaptchaToken: string;
+};
+
+export type WalletBase = {
+	__typename?: 'WalletBase';
+	address: string;
+	privateKey: string;
+	accountId: number | undefined;
+	sign: (msg: string)=> Promise<string>;
+	transfer: (txObject: TransactionObject)=> Promise<TransactionReceipt>;
+	encrypt: (password: string)=> Promise<string>;
+	
 };
 
 export type TypeState = {
@@ -135,6 +147,25 @@ export type MorpherWalletConfig = {
 	show_message: boolean;
 	confirm_message: boolean;
 } | null;
+
+export type TransactionObject = {
+	to: string,
+	token: string;
+	amount: number;
+	fee: number;
+	nonce: number;
+	type: string;
+}
+
+export type TransactionReceipt = {
+	txId: string,
+	date: number;
+	amount: number;
+	fee: number;
+	token: string;
+	type: string;
+	txUrl: string;
+}
 
 export type TypeKeystoreUnlocked = {
 	__typename?: 'TypeKeystoreUnlocked';

@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import * as zksync from 'zksync';
 import Vuex, { Store } from 'vuex';
 import { cryptoDecrypt, sha256 } from '../utils/cryptoFunctions';
 import {
@@ -15,12 +16,14 @@ import {
 	recoverSeedSocialRecovery,
 	verifyEmailConfirmationCode
 } from '../utils/backupRestore';
-import { downloadEncryptedKeystore, getAccountsFromKeystore, sortObject } from '../utils/utils';
+import { downloadEncryptedKeystore, sortObject } from '../utils/utils';
 import { getKeystore } from '../utils/keystore';
 import { getSessionStore, saveSessionStore, removeSessionStore } from '../utils/sessionStore';
 import * as Sentry from '@sentry/vue';
 
 import {
+	WalletBase,
+	TransactionReceipt,
 	Type2FARequired,
 	TypeSeedFoundData,
 	TypeSeedCreatedData,
@@ -48,7 +51,7 @@ import {
 
 import isIframe from '../utils/isIframe';
 import { connectToParent } from 'penpal';
-import { WalletBase, SignedTransaction } from 'web3-core';
+import { SignedTransaction } from 'web3-core';
 import { CallSender, Connection } from 'penpal/lib/types';
 import router from '@/router';
 import download from 'downloadjs';
@@ -397,11 +400,10 @@ const store: Store<RootState> = new Vuex.Store({
 					.then((encryptedSeed) => {
 						commit('seedFound', { encryptedSeed });
 						getKeystoreFromEncryptedSeed(state.encryptedSeed, params.password)
-							.then((keystore: WalletBase) => {
+							.then(async (keystore: WalletBase) => {
 								state.loginRetryCount = 0;
-								const accounts = getAccountsFromKeystore(keystore);
 								//not setting any password here, this is simply for the password change mechanism
-								commit('keystoreUnlocked', { keystore, accounts, hashedPassword: '' });
+								commit('keystoreUnlocked', { keystore, accounts: [keystore.address], hashedPassword: '' });
 								commit('updateUnlocking', false);
 								resolve(true);
 							})
@@ -467,10 +469,7 @@ const store: Store<RootState> = new Vuex.Store({
 							 * If no wallet was found, then create a new one (seed = false) otherwise use the decrypted seed from above
 							 */
 							const createdKeystoreObj = await getKeystore(hashedPassword, {}, 1);
-
-							const accounts = getAccountsFromKeystore(createdKeystoreObj.keystore);
-
-							saveWalletEmailPassword(params.email, createdKeystoreObj.encryptedSeed, accounts[0], params.recaptchaToken)
+							saveWalletEmailPassword(params.email, createdKeystoreObj.encryptedSeed, createdKeystoreObj.keystore.address, params.recaptchaToken)
 								.then(() => {
 									commit('clearUser');
 									dispatch('fetchUser', { email: params.email, password: params.password, recaptchaToken: params.recaptchaToken })
@@ -656,11 +655,10 @@ const store: Store<RootState> = new Vuex.Store({
 			commit('updateUnlocking', true);
 			return new Promise((resolve, reject) => {
 				getKeystoreFromEncryptedSeed(state.encryptedSeed, params.password)
-					.then((keystore: WalletBase) => {
-						const accounts = getAccountsFromKeystore(keystore);
+					.then(async (keystore: WalletBase) => {
 						state.loginRetryCount = 0;
 
-						commit('keystoreUnlocked', { keystore, accounts, hashedPassword: params.password });
+						commit('keystoreUnlocked', { keystore, accounts: [keystore.address], hashedPassword: params.password });
 						getPayload(state.email, params.recaptchaToken)
 							.then((payload) => {
 								commit('ipCountry', payload.ip_country);
@@ -845,7 +843,7 @@ const store: Store<RootState> = new Vuex.Store({
 					body.nonce = (await getNonce(key)).nonce;
 					const signMessage = JSON.stringify(sortObject(body));
 					if (state.keystore != null) {
-						const signature = await state.keystore[0].sign(signMessage);
+						const signature = await state.keystore.sign(signMessage);
 						const options: RequestInit = {
 							method: params.method,
 							headers: {
@@ -898,7 +896,7 @@ const store: Store<RootState> = new Vuex.Store({
 
 			if (storedPassword === params.password) {
 				if (state.keystore !== null) {
-					const privateKey = state.keystore[0].privateKey.substring(2);
+					const privateKey = state.keystore.privateKey;
 					commit('delayedSpinnerMessage', i18n.t('export.PRIVATE_KEY_SUCCESSFUL'));
 					commit('updatePrivateKey', { privateKey });
 				}
@@ -911,25 +909,26 @@ const store: Store<RootState> = new Vuex.Store({
 
 			if (storedPassword === params.password) {
 				if (state.keystore !== null) {
-					const privateKey = state.keystore[0].privateKey.substring(2);
-					return privateKey;
+					return state.keystore.privateKey;
 				}
 			}
 
 			return null;
 		},
 		exportKeystore({ commit, state }, params: TypeExportPhraseKeyVariables) {
-			const storedPassword = state.hashedPassword;
+			return new Promise(async(resolve, reject) => {
+				const storedPassword = state.hashedPassword;
 
-			if (storedPassword === params.password) {
-				if (state.keystore !== null) {
-					downloadEncryptedKeystore(state.keystore[0].encrypt(params.password), params.account);
-					commit('delayedSpinnerMessage', i18n.t('export.KEYSTORE_SUCCESSFUL'));
-					commit('keystoreExported');
+				if (storedPassword === params.password) {
+					if (state.keystore !== null) {
+						downloadEncryptedKeystore(await state.keystore.encrypt(params.password), params.account);
+						commit('delayedSpinnerMessage', i18n.t('export.KEYSTORE_SUCCESSFUL'));
+						commit('keystoreExported');
+					}
+				} else {
+					commit('delayedSpinnerMessage', 'Wrong password for Keystore');
 				}
-			} else {
-				commit('delayedSpinnerMessage', 'Wrong password for Keystore');
-			}
+			});
 		},
 		showSeedPhrase({ commit, state }, params: TypeShowPhraseKeyVariables) {
 			const storedPassword = state.hashedPassword;
@@ -1087,12 +1086,11 @@ if (isIframe()) {
 										clearInterval(interval);
 										if (store.state.signResponse === 'confirm') {
 											store.state.signResponse = null;
-
 											if (store.state.keystore !== null) {
-												store.state.keystore[0]
-													.signTransaction(txObj)
-													.then((tran: SignedTransaction) => {
-														resolve(tran.rawTransaction);
+												store.state.keystore
+													.transfer(txObj)
+													.then((txReceipt: TransactionReceipt) => {
+														resolve(txReceipt);
 													})
 													.catch(reject);
 											} else {
@@ -1105,10 +1103,10 @@ if (isIframe()) {
 									}
 								}, 500);
 							} else {
-								store.state.keystore[0]
-									.signTransaction(txObj)
-									.then((tran: SignedTransaction) => {
-										resolve(tran.rawTransaction);
+								store.state.keystore
+									.transfer(txObj)
+									.then((txReceipt: TransactionReceipt) => {
+										resolve(txReceipt);
 									})
 									.catch(reject);
 							}
@@ -1120,7 +1118,7 @@ if (isIframe()) {
 				return signedTx;
 			},
 			async signMessage(txObj: any, config: MorpherWalletConfig) {
-				const signedTx = await new Promise((resolve, reject) => {
+				const signedTx = await new Promise(async(resolve, reject) => {
 					//see if we are logged in?!
 					try {
 						if (store.state.keystore !== null) {
@@ -1130,14 +1128,14 @@ if (isIframe()) {
 								store.state.signResponse = null;
 								router.push('/signmsg').catch(() => undefined);
 
-								const interval = setInterval(() => {
+								const interval = setInterval(async() => {
 									if (store.state.signResponse) {
 										clearInterval(interval);
 										if (store.state.signResponse === 'confirm') {
 											store.state.signResponse = null;
 											if (store.state.keystore !== null) {
-												const signedData = store.state.keystore[0].sign(txObj.data); //
-												resolve(signedData.signature);
+												const signature = await store.state.keystore.sign(txObj.data);
+												resolve(signature);
 											} else {
 												resolve(null);
 											}
@@ -1148,9 +1146,8 @@ if (isIframe()) {
 									}
 								}, 500);
 							} else {
-								const signedData = store.state.keystore[0].sign(txObj.data); //
-
-								resolve(signedData.signature);
+								const signature = await store.state.keystore.sign(txObj.data);
+								resolve(signature);
 							}
 						}
 					} catch (e) {
