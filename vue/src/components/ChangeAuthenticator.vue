@@ -9,10 +9,14 @@
 			</figure>
 		</div>
 		<p class="is-size-7 mt-2 transition-faster">
-			{{
-				$t('2fa.NEED_AUTHENTICATOR_HELP')
-			}}
-			<a href='https://authy.com/download/' target='_blank' class='login-router'>Authy</a> {{ $t('2fa.NEED_AUTHENTICATOR_OR') }} <a href='https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US' target='_blank' class='login-router'>Google Authenticator</a>.
+			{{ $t('2fa.NEED_AUTHENTICATOR_HELP') }}
+			<a href="https://authy.com/download/" target="_blank" class="login-router">Authy</a> {{ $t('2fa.NEED_AUTHENTICATOR_OR') }}
+			<a
+				href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US"
+				target="_blank"
+				class="login-router"
+				>Google Authenticator</a
+			>.
 		</p>
 
 		<div class="field">

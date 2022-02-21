@@ -33,7 +33,7 @@
 								<i class="fas fa-cog"></i>
 							</span>
 							<span data-cy="settingsButton">{{ $t('settings.SETTINGS_TITLE') }}</span>
-						</button>	
+						</button>
 					</router-link>
 				</div>
 			</div>
@@ -47,9 +47,7 @@
 		<div class="mt-1 user-details settings-data">
 			<div v-if="noRecoveryMethods" class="details has-text-left">
 				<p v-html="$t('recovery.ACCOUNT_AT_RISK')"></p>
-				<router-link
-					to="/settings/recovery"
-				>
+				<router-link to="/settings/recovery">
 					<button class="button is-light-green is-small-button has-text-weight-bold transition-faster mt-3">
 						<span class="text smaller-font">{{ $t('recovery.ADD_ACCOUNT_RECOVERY') }}</span>
 					</button>

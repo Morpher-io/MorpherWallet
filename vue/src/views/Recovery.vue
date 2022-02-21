@@ -28,7 +28,7 @@
 				</div>
 
 				<router-link to="/login">
-					<button class="button is-ghost is-blue big-button medium-text transition-faster">				
+					<button class="button is-ghost is-blue big-button medium-text transition-faster">
 						<span>{{ $t('common.CANCEL') }}</span>
 					</button>
 				</router-link>
