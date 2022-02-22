@@ -94,7 +94,7 @@ export interface RootState {
 	redirectPath: string;
 	loginRetryCount: number;
 	ipCountry: string;
-	app_lang: string
+	app_lang: string;
 }
 
 /**
@@ -706,7 +706,7 @@ const store: Store<RootState> = new Vuex.Store({
 			return new Promise((resolve, reject) => {
 				setTimeout(() => {
 					// only update the app language if it has changed
-					if (params.column !=='app_lang') {
+					if (params.column !== 'app_lang') {
 						return resolve(true);
 					}
 

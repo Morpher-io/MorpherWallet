@@ -6,7 +6,7 @@ import * as Sentry from '@sentry/vue';
 import * as Integrations from '@sentry/integrations';
 import VueGtag from 'vue-gtag';
 import Cookie from 'js-cookie';
-import { checkErrorFilter } from './utils/sentry'
+import { checkErrorFilter } from './utils/sentry';
 
 Vue.config.productionTip = false;
 

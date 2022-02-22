@@ -21,7 +21,7 @@ import { Email_Template } from './Email_Template.model';
         }
     ]
 })
-export class Email_Log extends Model<Email_Log> {
+export class Email_Log extends Model {
     @PrimaryKey
     @Unique
     @Column({
