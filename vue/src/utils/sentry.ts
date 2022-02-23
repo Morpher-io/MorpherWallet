@@ -13,7 +13,7 @@ const errorFilter = [
  * used to filter out known errors so that they are not logged to sentry
  */
 export const checkErrorFilter = (error: string): boolean => {
-	const filterErr = errorFilter.find(filter => error.toLowerCase().includes(filter.toLowerCase()));
+	const filterErr = errorFilter.find((filter) => error.toLowerCase().includes(filter.toLowerCase()));
 	if (filterErr) {
 		return false;
 	} else {

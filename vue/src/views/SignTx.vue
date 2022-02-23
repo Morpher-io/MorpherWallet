@@ -37,12 +37,21 @@
 				<div class="details-group">
 					<p class="subtitle has-text-weight-medium">{{ $t('common.GAS_FEE') }}</p>
 					<p class="text">
-						{{ roundFormatter((Number(store.transactionDetails.gasPrice || store.transactionDetails.maxFeePerGas ) * Number(store.transactionDetails.gas)) / Math.pow(10, 18)) }} ETH
+						{{
+							roundFormatter(
+								(Number(store.transactionDetails.gasPrice || store.transactionDetails.maxFeePerGas) *
+									Number(store.transactionDetails.gas)) /
+									Math.pow(10, 18)
+							)
+						}}
+						ETH
 					</p>
 				</div>
 				<div class="details-group small">
 					<p class="subtitle">{{ $t('common.GAS_PRICE') }}</p>
-					<p class="text">{{ roundFormatter(Number(store.transactionDetails.gasPrice || store.transactionDetails.maxFeePerGas ) / Math.pow(10, 9)) }} gwei</p>
+					<p class="text">
+						{{ roundFormatter(Number(store.transactionDetails.gasPrice || store.transactionDetails.maxFeePerGas) / Math.pow(10, 9)) }} gwei
+					</p>
 				</div>
 				<div class="details-group small">
 					<p class="subtitle">{{ $t('common.GAS_LIMIT') }}</p>
@@ -57,7 +66,9 @@
 						{{
 							roundFormatter(
 								Number(store.transactionDetails.value || 0) / Math.pow(10, 18) +
-									(Number(store.transactionDetails.gasPrice || store.transactionDetails.maxFeePerGas ) * Number(store.transactionDetails.gas)) / Math.pow(10, 18)
+									(Number(store.transactionDetails.gasPrice || store.transactionDetails.maxFeePerGas) *
+										Number(store.transactionDetails.gas)) /
+										Math.pow(10, 18)
 							)
 						}}
 						ETH
@@ -69,7 +80,13 @@
 						<span class="is-block has-text-right reset-line-height">{{ roundFormatter(mphValue) }} MPH</span>
 						<span class="is-block has-text-right reset-line-height mt-1"
 							>+
-							{{ roundFormatter((Number(store.transactionDetails.gasPrice || store.transactionDetails.maxFeePerGas ) * Number(store.transactionDetails.gas)) / Math.pow(10, 18)) }}
+							{{
+								roundFormatter(
+									(Number(store.transactionDetails.gasPrice || store.transactionDetails.maxFeePerGas) *
+										Number(store.transactionDetails.gas)) /
+										Math.pow(10, 18)
+								)
+							}}
 							ETH</span
 						>
 					</p>
