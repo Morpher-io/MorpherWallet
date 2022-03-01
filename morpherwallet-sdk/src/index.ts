@@ -56,6 +56,8 @@ export default class MorpherWallet {
 	chainId: number;
 	widget: any;
 	provider: Web3ProviderEngine;
+  _on2FAUpdateCallback: any;
+  _onRecoveryUpdateCallback: any;
 	_onLoginCallback: any;
   _onLoginErrorCallback: any;
 	_onLogoutCallback: any;
@@ -97,6 +99,10 @@ export default class MorpherWallet {
 		
     //window.morpherwallet = this;
   }
+ 
+  setConfig(config: MorpherWalletConfig) {
+     this.config = config;
+  }
 
   getProvider() {
     return this.provider;
@@ -119,6 +125,14 @@ export default class MorpherWallet {
 
   onLogin(callback: any) {
     this._onLoginCallback = callback;
+  }
+
+  on2FAUpdate(callback: any) {
+    this._on2FAUpdateCallback = callback;
+  }
+
+  onRecoveryUpdate(callback: any) {
+    this._onRecoveryUpdateCallback = callback;
   }
 
   onLoginError(callback: any) {
@@ -302,6 +316,8 @@ export default class MorpherWallet {
         setHeight: this._setHeight.bind(this),
         getWindowSize: this._getWindowSize.bind(this),
 				onLogin: this._onLogin.bind(this),
+        on2FAUpdate: this._on2FAUpdate.bind(this),
+        onRecoveryUpdate: this._onRecoveryUpdate.bind(this),
         onLoginError: this._onLoginError.bind(this),
 				onClose: this._onClose.bind(this),
         onLogout: this._onLogout.bind(this),
@@ -344,7 +360,7 @@ export default class MorpherWallet {
           if (txParams.maxFeePerGas !== undefined && txParams.maxPriorityFeePerGas !== undefined && txParams.gasPrice !== undefined) 
             delete txParams.gasPrice;
 
-          if (txParams.maxFeePerGas !== undefined && txParams.maxPriorityFeePerGas !== undefined && txParams.chainId && Number(txParams['chainId']) !== 21 ) {
+          if (txParams.maxFeePerGas !== undefined && txParams.maxPriorityFeePerGas !== undefined && txParams.chainId && Number(txParams['chainId']) !== 21) {
             txParams.chain = 'mainnet';
             txParams.hardfork = 'london';
           }          
@@ -421,19 +437,6 @@ export default class MorpherWallet {
             this.hideWallet();    
           return result;                     
 				},
-				/*
-        estimateGas: async (txParams: any, cb: any) => {
-					console.log('wallet provider - estimateGas')
-					//const gas = await getTxGas(query, txParams);
-					const gas = 0;
-          cb(null, gas);
-        },
-        getGasPrice: async (cb: any) => {
-					console.log('wallet provider - getGasPrice')
-          cb(null, '');
-				},
-				*/
-        
       }),
     );
 
@@ -447,16 +450,6 @@ export default class MorpherWallet {
         })
       );
 
-			
-/*
-    engine.on('error', () => {
-      if (error && error.message && error.message.includes('PollingBlockTracker')) {
-        console.warn('If you see this warning constantly, there might be an error with your RPC node.');
-      } else {
-        console.error(error);
-      }
-    });
-*/
     engine.start();
     return engine;
   }
@@ -479,6 +472,18 @@ export default class MorpherWallet {
       this._onLoginCallback(walletAddress, email);
     }
 	}
+
+  _on2FAUpdate(method: any, enabled: any) {
+    if (this._on2FAUpdateCallback) {
+      this._on2FAUpdateCallback(method, enabled);
+    }
+  }
+
+  _onRecoveryUpdate(method: any, enabled: any) {
+    if (this._onRecoveryUpdateCallback) {
+      this._onRecoveryUpdateCallback(method, enabled);
+    }    
+  }
 
   _onLoginError(email: any, error: any) {
     if (this._onLoginErrorCallback) {
