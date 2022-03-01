@@ -454,7 +454,7 @@ const store: Store<RootState> = new Vuex.Store({
 
 								}
 							} catch {
-								resolve(true);	
+								console.error('Error calling onRecoveryUpdate callback')
 							}						
 							resolve(true);
 						});
@@ -862,7 +862,7 @@ const store: Store<RootState> = new Vuex.Store({
 								(await promise).on2FAUpdate('authenticator', params.authenticator);
 							}
 						} catch {
-							commit('updatePayload', params);
+							console.error('Error calling on2FAUpdate callback')
 						 }
 						
 						commit('updatePayload', params);
@@ -943,7 +943,7 @@ const store: Store<RootState> = new Vuex.Store({
 
 								}
 							} catch {
-								resolve(true);	
+								console.error('Error calling onRecoveryUpdate callback')
 							}								
 							resolve(true);
 						});
