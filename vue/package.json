@@ -17,6 +17,7 @@
     "@sentry/vue": "^6.16.1",
     "@types/downloadjs": "^1.4.2",
     "bip39": "^3.0.3",
+    "buefy": "^0.9.19",
     "bulma-tooltip": "^3.0.2",
     "core-js": "^3.6.5",
     "downloadjs": "^1.4.7",

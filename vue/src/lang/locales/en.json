@@ -228,5 +228,7 @@
         "LOADING_ACCOUNT": "Loading account...",
         "VALIDATING_CODE": "Validating code...",
         "LOADING": "Loading"
-    }
+    },
+    "COPY_CLIPBOARD_FAIL": "Error copying wallet address to clipboard",
+    "COPY_CLIPBOARD_SUCCESS": "Successfully copied to clipboard"
 }

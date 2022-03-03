@@ -27,14 +27,15 @@
 							{{ $t('common.SEND_DESCRIPTION') }}
 						</div>
 					</button>
-					<router-link to="/settings">
-						<button class="button is-light-blue is-small-button has-text-weight-bold transition-faster">
-							<span class="icon is-small">
-								<i class="fas fa-cog"></i>
-							</span>
-							<span data-cy="settingsButton">{{ $t('settings.SETTINGS_TITLE') }}</span>
-						</button>
-					</router-link>
+					<button
+						@click="$router.push('/settings').catch()"
+						class="button is-light-blue is-small-button has-text-weight-bold transition-faster"
+					>
+						<span class="icon is-small">
+							<i class="fas fa-cog"></i>
+						</span>
+						<span data-cy="settingsButton">{{ $t('settings.SETTINGS_TITLE') }}</span>
+					</button>
 				</div>
 			</div>
 		</div>

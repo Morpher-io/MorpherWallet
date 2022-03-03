@@ -7,6 +7,7 @@ import * as Integrations from '@sentry/integrations';
 import VueGtag from 'vue-gtag';
 import Cookie from 'js-cookie';
 import { checkErrorFilter } from './utils/sentry';
+import Buefy from 'buefy';
 
 Vue.config.productionTip = false;
 
@@ -127,6 +128,8 @@ Vue.directive('click-outside', {
 		document.body.removeEventListener('click', el.clickOutsideEvent);
 	}
 });
+
+Vue.use(Buefy);
 
 new Vue({
 	data: {
