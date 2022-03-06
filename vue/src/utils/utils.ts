@@ -1,15 +1,9 @@
 import download from 'downloadjs';
-import { WalletBase, EncryptedKeystoreV3Json } from 'web3-core';
+import {ethers} from 'ethers';
 
-function getAccountsFromKeystore(keystore: WalletBase) {
-	const accounts: Array<string> = [];
-	for (let i = 0; i < keystore.length; i++) {
-		accounts.push(keystore[i].address);
-	}
-	return accounts;
-}
+const {BigNumber} = ethers;
 
-function downloadEncryptedKeystore(exportedSeed: EncryptedKeystoreV3Json, account: string) {
+function downloadEncryptedKeystore(exportedSeed: string, account: string) {
 	const now = new Date();
 	download(JSON.stringify(exportedSeed), 'keystore' + '--' + now.toISOString() + '--' + account + '.json');
 }
@@ -81,4 +75,43 @@ const formatEthAddress = (ethAddress: string) => {
 	return ethAddress ? ethAddress.substr(0, 5) + '...' + ethAddress.substr(ethAddress.length - 3) : '';
 };
 
-export { getAccountsFromKeystore, downloadEncryptedKeystore, sortObject, copyToClipboard, formatEthAddress };
+
+const toBaseUnit = function (value: string, decimals: number) {
+    // if (!isString(value)) {
+    //   throw new Error('Pass strings to prevent floating point precision issues.')
+    // }
+
+    const base = BigNumber.from(10).pow(decimals);
+  
+    if (value.charAt(0) === '-') {
+      value = value.substring(1);
+    }
+  
+    if (value === '.') { 
+      throw new Error(
+      `Invalid value ${value} cannot be converted to`
+      + ` base unit with ${decimals} decimals.`); 
+    }
+  
+    // Split it into a whole and fractional part
+    const comps = value.split('.');
+    if (comps.length > 2) { throw new Error('Too many decimal points'); }
+  
+    let whole = comps[0], fraction = comps[1];
+  
+    if (!whole) { whole = '0'; }
+    if (!fraction) { fraction = '0'; }
+    if (fraction.length > decimals) { 
+      throw new Error('Too many decimal places'); 
+    }
+  
+    while (fraction.length < decimals) {
+      fraction += '0';
+    }
+  
+    const wholeNumber = BigNumber.from(whole);
+    const fractionBN = BigNumber.from(fraction);    
+    return BigNumber.from(wholeNumber.mul(base).add(fractionBN).toString());
+}
+
+export { downloadEncryptedKeystore, sortObject, copyToClipboard, formatEthAddress };

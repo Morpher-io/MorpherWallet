@@ -1,8 +1,8 @@
 const { getKeystore } = require('./keystore');
 const { cryptoEncrypt, cryptoDecrypt, sha256 } = require('./cryptoFunctions');
 
-import { TypeEncryptedSeed, TypePayloadData, TypeCreatedKeystore } from '../types/global-types';
-import { WalletBase } from 'web3-core';
+import { TypeEncryptedSeed, TypePayloadData, TypeCreatedKeystore, WalletBase } from '../types/global-types';
+// import { WalletBase } from 'web3-core';
 import { i18n } from '../plugins/i18n';
 
 const getBackendEndpoint = () => {
