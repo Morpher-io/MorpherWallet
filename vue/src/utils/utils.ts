@@ -1,5 +1,7 @@
+import { i18n } from '@/plugins/i18n';
 import download from 'downloadjs';
 import { WalletBase, EncryptedKeystoreV3Json } from 'web3-core';
+import { SnackbarProgrammatic as Snackbar } from 'buefy';
 
 function getAccountsFromKeystore(keystore: WalletBase) {
 	const accounts: Array<string> = [];
@@ -63,13 +65,37 @@ const copyToClipboard = (text: string) => {
 
 		if (successful) {
 			document.body.removeChild(textArea);
+			Snackbar.open({
+				duration: 5000,
+				message: i18n.t('COPY_CLIPBOARD_SUCCESS').toString(),
+				type: 'is-success',
+				position: 'is-bottom-left',
+				actionText: 'OK',
+				queue: true
+			});
 			return 'COPY_CLIPBOARD_SUCCESS';
 		} else {
 			document.body.removeChild(textArea);
+			Snackbar.open({
+				duration: 5000,
+				message: i18n.t('COPY_CLIPBOARD_FAIL').toString(),
+				type: 'is-success',
+				position: 'is-bottom-left',
+				actionText: 'OK',
+				queue: true
+			});
 			return 'COPY_CLIPBOARD_FAIL';
 		}
 	} catch (err) {
 		document.body.removeChild(textArea);
+		Snackbar.open({
+			duration: 5000,
+			message: i18n.t('COPY_CLIPBOARD_FAIL').toString(),
+			type: 'is-success',
+			position: 'is-bottom-left',
+			actionText: 'OK',
+			queue: true
+		});
 		//console.error('Fallback: Oops, unable to copy', err);
 		return 'COPY_CLIPBOARD_FAIL';
 	}

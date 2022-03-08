@@ -431,7 +431,31 @@ const store: Store<RootState> = new Vuex.Store({
 					url: getBackendEndpoint() + '/v1/auth/addRecoveryMethod'
 				})
 					.then(() => {
-						dispatch('updateRecoveryMethods', { dbUpdate: true }).then(() => {
+						dispatch('updateRecoveryMethods', { dbUpdate: true }).then(async () => {
+							try {
+								if (state.connection && state.connection !== null) {
+									const promise = state.connection.promise;
+
+									let type;
+									if (params.recoveryTypeId == 2) {
+										type = 'fb'
+									}
+									if (params.recoveryTypeId == 3) {
+										type = 'google'
+									}
+
+									if (params.recoveryTypeId == 5) {
+										type = 'vk'
+									}
+
+									if (type) {
+										(await promise).onRecoveryUpdate(type, true);
+									}
+
+								}
+							} catch {
+								console.error('Error calling onRecoveryUpdate callback')
+							}						
 							resolve(true);
 						});
 					})
@@ -821,14 +845,26 @@ const store: Store<RootState> = new Vuex.Store({
 					.catch(reject);
 			});
 		},
-		change2FAMethods({ dispatch, commit }, params: Type2FAUpdateParams) {
+		change2FAMethods({ dispatch, commit, state }, params: Type2FAUpdateParams) {
 			return new Promise((resolve, reject) => {
 				dispatch('sendSignedRequest', {
 					body: params,
 					method: 'POST',
 					url: getBackendEndpoint() + '/v1/auth/change2FAMethods'
 				})
-					.then((response) => {
+					.then(async (response) => {
+						
+						try {
+							if (state.connection && state.connection !== null) {
+								const promise = state.connection.promise;
+				
+								(await promise).on2FAUpdate('email', params.email);
+								(await promise).on2FAUpdate('authenticator', params.authenticator);
+							}
+						} catch {
+							console.error('Error calling on2FAUpdate callback')
+						 }
+						
 						commit('updatePayload', params);
 						resolve(response);
 					})
@@ -876,7 +912,7 @@ const store: Store<RootState> = new Vuex.Store({
 				}
 			});
 		},
-		resetRecoveryMethod({ dispatch }, params: TypeResetRecovery) {
+		resetRecoveryMethod({ dispatch, state }, params: TypeResetRecovery) {
 			return new Promise((resolve, reject) => {
 				dispatch('sendSignedRequest', {
 					body: { key: params.key, recoveryTypeId: params.recoveryTypeId },
@@ -884,7 +920,31 @@ const store: Store<RootState> = new Vuex.Store({
 					url: getBackendEndpoint() + '/v1/auth/resetRecovery'
 				})
 					.then(() => {
-						dispatch('updateRecoveryMethods', { dbUpdate: true }).then(() => {
+						dispatch('updateRecoveryMethods', { dbUpdate: true }).then(async () => {
+							try {
+								if (state.connection && state.connection !== null) {
+									const promise = state.connection.promise;
+
+									let type;
+									if (params.recoveryTypeId == '2') {
+										type = 'fb'
+									}
+									if (params.recoveryTypeId == '3') {
+										type = 'google'
+									}
+
+									if (params.recoveryTypeId == '5') {
+										type = 'vk'
+									}
+
+									if (type) {
+										(await promise).onRecoveryUpdate(type, false);
+									}
+
+								}
+							} catch {
+								console.error('Error calling onRecoveryUpdate callback')
+							}								
 							resolve(true);
 						});
 					})
