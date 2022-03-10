@@ -108,15 +108,7 @@ function initialState(): RootState {
 	Sentry.configureScope((scope) => {
 		scope.setUser({ id: '', email: email });
 	});
-
-	let encryptedSeed: TypeEncryptedSeed = {};
-	if (localStorage.getItem('encryptedSeed')) {
-		try {
-			encryptedSeed = JSON.parse(String(localStorage.getItem('encryptedSeed')));
-		} catch {
-			encryptedSeed = {};
-		}
-	}
+	
 
 	return {
 		loading: false,
@@ -127,7 +119,7 @@ function initialState(): RootState {
 		email,
 		iconSeed,
 		hashedPassword,
-		encryptedSeed,
+		encryptedSeed: {},
 		encryptedWallet: '',
 		keystore: null,
 		accounts: [],
@@ -196,7 +188,8 @@ const store: Store<RootState> = new Vuex.Store({
 		seedFound(state: RootState, seedFoundData: TypeSeedFoundData) {
 			state.status = 'success';
 			state.encryptedSeed = seedFoundData.encryptedSeed;
-			localStorage.setItem('encryptedSeed', JSON.stringify(seedFoundData.encryptedSeed));
+			sessionStorage.setItem('encryptedSeed', JSON.stringify(seedFoundData.encryptedSeed));
+			localStorage.setItem('login', 'true')
 		},
 		recoveryMethodsFound(state: RootState, recoveryMethodsData: Array<any>) {
 			localStorage.setItem('recoveryMethods', JSON.stringify(recoveryMethodsData));
@@ -231,7 +224,8 @@ const store: Store<RootState> = new Vuex.Store({
 			state.encryptedSeed = seedCreatedData.encryptedSeed;
 			state.hashedPassword = seedCreatedData.hashedPassword;
 			localStorage.setItem('email', seedCreatedData.email);
-			localStorage.setItem('encryptedSeed', JSON.stringify(seedCreatedData.encryptedSeed));
+			sessionStorage.setItem('encryptedSeed', JSON.stringify(seedCreatedData.encryptedSeed));
+			localStorage.setItem('login', 'true')
 			saveSessionStore('password', seedCreatedData.hashedPassword);
 			Sentry.configureScope((scope) => {
 				scope.setUser({ id: state.accounts && state.accounts.length > 0 ? state.accounts[0] : '', email: state.email });
@@ -245,7 +239,12 @@ const store: Store<RootState> = new Vuex.Store({
 			state.email = '';
 			state.hashedPassword = '';
 
-			localStorage.removeItem('encryptedSeed');
+			sessionStorage.removeItem('encryptedSeed');
+			localStorage.removeItem('login')
+			const email = localStorage.getItem('email')
+			if (email)
+				localStorage.setItem('lastEmail', email);
+
 			localStorage.removeItem('email');
 			localStorage.removeItem('iconSeed');
 			removeSessionStore('password');
@@ -263,11 +262,16 @@ const store: Store<RootState> = new Vuex.Store({
 
 			state.status = '';
 			state.token = '';
+			const email = localStorage.getItem('email')
+			if (email)
+				localStorage.setItem('lastEmail', email);
+
 			localStorage.removeItem('email');
 			localStorage.removeItem('iconSeed');
 			localStorage.removeItem('recoveryMethods');
 			removeSessionStore('password');
-			localStorage.removeItem('encryptedSeed');
+			sessionStorage.removeItem('encryptedSeed');
+			localStorage.removeItem('login')
 			Sentry.configureScope((scope) => {
 				scope.setUser({ id: '', email: '' });
 			});
@@ -329,6 +333,22 @@ const store: Store<RootState> = new Vuex.Store({
 		},
 		showNetworkError({ commit }, isNetworkError: boolean) {
 			commit('updateNetworkError', isNetworkError);
+		},
+		async loadEncryptedSeed({ commit }) {
+			let encryptedSeed: TypeEncryptedSeed = {};
+			const sessionEncryptedSeed = await getSessionStore('encryptedSeed')
+			if (sessionEncryptedSeed) {
+				try {
+					encryptedSeed = JSON.parse(String(sessionEncryptedSeed));
+					if (encryptedSeed && encryptedSeed.ciphertext)
+						await commit('seedFound', { encryptedSeed });
+				} catch {
+					encryptedSeed = {};
+				}
+			}
+
+			
+
 		},
 		/**
 		 * Fetch the user data from the database and attempt to unlock the wallet using the mail encrypted seed
@@ -519,9 +539,10 @@ const store: Store<RootState> = new Vuex.Store({
 				const hashedPassword = await getSessionStore('password');
 
 				let encryptedSeed: TypeEncryptedSeed = {};
-				if (localStorage.getItem('encryptedSeed')) {
+				const sessionEncryptedSeed = await getSessionStore('encryptedSeed')
+				if (sessionEncryptedSeed) {
 					try {
-						encryptedSeed = JSON.parse(String(localStorage.getItem('encryptedSeed')));
+						encryptedSeed = JSON.parse(String(sessionEncryptedSeed));
 					} catch {
 						encryptedSeed = {};
 					}
@@ -649,6 +670,10 @@ const store: Store<RootState> = new Vuex.Store({
 		 */
 		async unlockWithStoredPassword({ dispatch, commit, state }, recaptchaToken: string) {
 			commit('updateUnlocking', true);
+
+			if (!state.encryptedSeed || !state.encryptedSeed.ciphertext) {
+				await dispatch('loadEncryptedSeed');
+			}
 
 			if (!state.hashedPassword) {
 				await dispatch('loadPassword');
