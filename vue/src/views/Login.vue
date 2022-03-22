@@ -110,6 +110,12 @@ export default class Login extends mixins(Global, Recaptcha) {
 		if (this.store.email) {
 			this.walletEmail = this.store.email;
 		}
+		if (!this.walletEmail) {
+			const email = localStorage.getItem('lastEmail')
+			if (email)
+				this.walletEmail = email;
+		}
+		
 		if (this.store.status !== 'invalid password' && this.store.email) {
 			// Check if the wallet can be unlocked using the local-storage stored password
 			this.unlock();
@@ -152,17 +158,20 @@ export default class Login extends mixins(Global, Recaptcha) {
 		// Call the fetchUser store action to process the wallet logon
 		this.fetchUser({ email, password, recaptchaToken })
 			.then(() => {
-				this.hideSpinner();
 				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator || this.store.twoFaRequired.needConfirmation) {
+					this.hideSpinner();
 					// open 2fa page if 2fa is required
 					this.$router.push('/2fa').catch(() => undefined);
 				} else {
 					this.unlockWithStoredPassword(this.recaptchaToken)
 						.then(() => {
+							this.hideSpinner();
+
 							// open root page after logon success
 							this.$router.push('/').catch(() => undefined);
 						})
 						.catch((error) => {
+							this.hideSpinner();
 							if (error.error === 'RECAPTCHA_REQUIRED') {
 								this.executeRecaptcha(this.login);
 								return;

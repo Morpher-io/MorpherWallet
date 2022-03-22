@@ -19,6 +19,19 @@ const limiter = new rateLimit({
     }
 });
 
+const limiterUser = new rateLimit({
+    windowMs: 60 * 1000,
+    max: 10,
+    onLimitReached: limitReached,
+    keyGenerator(req, res) {
+        if (req.body.key && req.body.key) {
+            return req.body.key;
+        } else {
+            return Date.now();
+        }
+    }
+});
+
 let ipRequestPayload = {};
 
 /**
@@ -88,9 +101,9 @@ module.exports = function (express) {
     router.post('/getPayload', recaptcha, limiterGetPayload, WalletController.getPayload);
     router.post('/getNonce', limiterGetPayload, WalletController.getNonce);
     router.post('/send2FAEmail', WalletController.send2FAEmail);
-    router.post('/verifyEmailCode', limiterGetPayload, WalletController.verifyEmailCode);
-    router.post('/verifyEmailConfirmationCode', limiterGetPayload, WalletController.verifyEmailConfirmationCode);
-    router.post('/verifyAuthenticatorCode', limiterGetPayload, WalletController.verifyAuthenticatorCode);
+    router.post('/verifyEmailCode', limiterGetPayload, limiterUser, WalletController.verifyEmailCode);
+    router.post('/verifyEmailConfirmationCode', limiterGetPayload, limiterUser, WalletController.verifyEmailConfirmationCode);
+    router.post('/verifyAuthenticatorCode', limiterGetPayload, limiterUser, WalletController.verifyAuthenticatorCode);
     router.post('/validateInput', ValidationController.validateInput);
 
     /**
