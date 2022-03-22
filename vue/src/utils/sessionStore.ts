@@ -5,7 +5,7 @@ const sessionStorageTransfer = function (event: any) {
 		event = window.event;
 	}
 	// check for logout/login events from other tabs
-	if (event.key == 'encryptedSeed') {
+	if (event.key == 'login') {
 		if (event.newValue) {
 			if (!store.state.encryptedSeed.ciphertext) {
 				store.dispatch('loginWallet');
@@ -23,6 +23,15 @@ const sessionStorageTransfer = function (event: any) {
 	}
 
 	if (event.key == 'getWalletSessionStorage') {
+
+		const encryptedSeed = sessionStorage.getItem('encryptedSeed');
+		if (encryptedSeed) {
+			// another tab asked for the sessionStorage -> send it
+			localStorage.setItem('setWalletEncryptedSeed', encryptedSeed);
+			// the other tab should now have it, so we're done with it.
+			localStorage.removeItem('setWalletEncryptedSeed'); // <- could do short timeout as well.
+		}
+
 		const password = sessionStorage.getItem('password');
 		if (password) {
 			// another tab asked for the sessionStorage -> send it
@@ -33,6 +42,10 @@ const sessionStorageTransfer = function (event: any) {
 	} else if (event.key == 'setWalletSessionStorage') {
 		// another tab sent data <- get it
 		sessionStorage.setItem('password', event.newValue);
+	} else if (event.key == 'setWalletEncryptedSeed') {
+		// another tab sent data <- get it
+		sessionStorage.setItem('encryptedSeed', event.newValue);
+		localStorage.setItem('login', 'true')
 	}
 };
 

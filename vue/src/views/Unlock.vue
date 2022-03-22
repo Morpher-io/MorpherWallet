@@ -85,7 +85,7 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 	/**
 	 * Cmponent mounted lifestyle hook
 	 */
-	mounted() {
+	async mounted() {
 		// set focus to the password field when the control opens
 		window.setTimeout(() => {
 			const passwordEmelemt: any = this.$refs.unlock_password;
@@ -94,23 +94,39 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 
 		const iconSeed = localStorage.getItem('iconSeed') || '';
 		this.generateImage(iconSeed);
-		this.showSpinner(this.$t('loader.LOADING_ACCOUNT').toString());
-		// Check if the wallet can be unlocked using the local-storage stored password
-		this.unlockWithStoredPassword(this.recaptchaToken)
-			.then((result) => {
-				this.hideSpinner();
-				if (result) {
-					this.$router.push('/').catch(() => undefined);
-				}
-			})
-			.catch((error) => {
-				this.hideSpinner();
 
-				if (error && error.toString() === 'TypeError: Failed to fetch') {
-					this.showNetworkError(true);
-				}
-				// error
-			});
+		if (!this.$store.state.encryptedSeed || !this.$store.state.encryptedSeed.ciphertext) {
+			await this.loadEncryptedSeed();
+		}
+
+		if (!this.$store.state.hashedPassword) {
+			await this.loadPassword();
+		}
+
+		if (this.$store.state.hashedPassword && this.$store.state.encryptedSeed.ciphertext !== undefined) {
+
+			this.showSpinner(this.$t('loader.LOADING_ACCOUNT').toString());
+
+			
+			// Check if the wallet can be unlocked using the local-storage stored password
+			this.unlockWithStoredPassword(this.recaptchaToken)
+				.then((result) => {
+					this.hideSpinner();
+					if (result) {
+						this.$router.push('/').catch(() => undefined);
+					}
+				})
+				.catch((error) => {
+					this.hideSpinner();
+
+					if (error && error.toString() === 'TypeError: Failed to fetch') {
+						this.showNetworkError(true);
+					}
+					// error
+				});
+		} else{
+			this.unlockUpdate();
+		}
 	}
 
 	/**
@@ -126,32 +142,101 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 		this.showSpinnerThenAutohide(this.$t('loader.RECOVERY_LOG_IN').toString());
 		const recaptchaToken = this.recaptchaToken;
 
+		if (this.$store.state.encryptedSeed && this.$store.state.encryptedSeed.ciphertext) {
+
+
+			// Call the fetchUser store action to process the wallet logon
+			this.unlockWithPassword({ password, recaptchaToken })
+				.then(() => {
+					// open root page after logon success
+					this.$router.push('/').catch(() => undefined);
+				})
+				.catch((error) => {
+					this.hideSpinner();
+					if (error.error === 'RECAPTCHA_REQUIRED') {
+						this.executeRecaptcha(this.login);
+						return;
+					}
+
+					if (error && error.toString() === 'TypeError: Failed to fetch') {
+						this.showNetworkError(true);
+					} else {
+						this.logSentryError('Unlock', error.toString(), {});
+					}
+
+					// Logon failed
+					this.logonError = getDictionaryValue('DECRYPT_FAILED');
+				});
+		} else {
+			this.loginEmail();
+		}
+
+	}
+
+	loginEmail() {
+		this.logonError = '';
+		this.showSpinner(this.$t('loader.LOADING_ACCOUNT').toString());
+		this.store.loginComplete = false;
+		const email = this.walletEmail;
+		const password = this.walletPassword;
+		const recaptchaToken = this.recaptchaToken;
+
 		// Call the fetchUser store action to process the wallet logon
-		this.unlockWithPassword({ password, recaptchaToken })
+		this.fetchUser({ email, password, recaptchaToken })
 			.then(() => {
-				// open root page after logon success
-				this.$router.push('/').catch(() => undefined);
+				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator || this.store.twoFaRequired.needConfirmation) {
+					this.hideSpinner();
+					// open 2fa page if 2fa is required
+					this.$router.push('/2fa').catch(() => undefined);
+				} else {
+					this.unlockWithStoredPassword(this.recaptchaToken)
+						.then(() => {
+							this.hideSpinner();
+							// open root page after logon success
+							this.$router.push('/').catch(() => undefined);
+						})
+						.catch((error) => {
+							this.hideSpinner();
+							if (error.error === 'RECAPTCHA_REQUIRED') {
+								this.executeRecaptcha(this.login);
+								return;
+							}
+							this.logonError = getDictionaryValue('DECRYPT_FAILED');
+							this.showRecovery = true;
+						});
+				}
 			})
 			.catch((error) => {
 				this.hideSpinner();
+
 				if (error.error === 'RECAPTCHA_REQUIRED') {
 					this.executeRecaptcha(this.login);
 					return;
 				}
+				// Logon failed
 
 				if (error && error.toString() === 'TypeError: Failed to fetch') {
 					this.showNetworkError(true);
 				} else {
-					this.logSentryError('Unlock', error.toString(), {});
+					if (!error.error) {
+						this.logSentryError('fetchUser', error.toString(), { email });
+					}
 				}
 
-				// Logon failed
-				this.logonError = getDictionaryValue('DECRYPT_FAILED');
+				if (error !== true && error !== false) {
+					if (error.success === false) {
+						this.logonError = getDictionaryValue(error.error);
+					} else {
+						// console.log('Error in login', error);
+					}
+				}
 			});
 	}
 
 	logout() {
+		localStorage.removeItem('lastEmail');
 		this.logoutWallet();
+
 		//this.$router.push('/login').catch(() => undefined);;
 	}
 
