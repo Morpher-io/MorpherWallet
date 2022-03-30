@@ -323,7 +323,12 @@ export async function getEncryptedSeed(req, res) {
                             });
                         }
 
-                        if(process.env.ENVIRONMENT !== 'development'){
+                        let ignoreCountry = false;
+                        if (user.payload && user.payload.ignoreCountry == true) {
+                            ignoreCountry = true;
+                        }
+
+                        if(process.env.ENVIRONMENT !== 'development' && ignoreCountry == false){
                             user.payload.needConfirmation = true;
                         }
 
@@ -627,7 +632,12 @@ export async function getPayload(req, res) {
                         });
                     }
 
-                    if(process.env.ENVIRONMENT !== 'development'){
+                    let ignoreCountry = false;
+                    if (user.payload && user.payload.ignoreCountry == true) {
+                        ignoreCountry = true;
+                    }
+
+                    if(process.env.ENVIRONMENT !== 'development' && ignoreCountry == false){
                         user.payload.needConfirmation = true;
                     }
                     
