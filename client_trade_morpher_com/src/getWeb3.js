@@ -15,7 +15,7 @@ const getWeb3 = () =>
       //     await window.ethereum.enable();
       //     // Acccounts now exposed
       //     resolve(web3);
-      //   } catch (error) {
+      //   } catch (error:any) {
       //     reject(error);
       //   }
       // }
@@ -32,7 +32,7 @@ const getWeb3 = () =>
       //   try {
       //     await window.morpherwallet.enable();
       //     resolve(web3);
-      //   } catch (error) {
+      //   } catch (error:any) {
       //     reject(error);
       //   }
       // }

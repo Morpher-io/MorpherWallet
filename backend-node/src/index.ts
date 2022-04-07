@@ -5,7 +5,7 @@ import * as express from 'express';
 import * as http from 'http';
 import * as cors from 'cors';
 import {loggingMiddleware} from './helpers/functions/logging-middleware';
-import * as helmet from 'helmet';
+import helmet from "helmet";
 import * as bodyParser from 'body-parser';
 import { sequelize } from './database/index';
 import { successResponse } from './helpers/functions/util';
