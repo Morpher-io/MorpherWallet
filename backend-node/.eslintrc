@@ -1,7 +1,7 @@
 {
     "extends": [
         "prettier",
-        "prettier/@typescript-eslint",
+        //"prettier/@typescript-eslint",
         // "plugin:import/errors",
         "plugin:import/warnings",
         "plugin:import/typescript"

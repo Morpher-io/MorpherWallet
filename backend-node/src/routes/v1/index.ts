@@ -3,14 +3,15 @@ const EmailController = require('../../controllers/email.controller');
 const ValidationController = require('../../controllers/validation.controller');
 const secureRoutes = require('./secure');
 
-const rateLimit = require('express-rate-limit');
+import rateLimit from 'express-rate-limit'
+
 import { Logger } from '../../helpers/functions/winston';
 
 const limitReached = (req: any, res: any) => {
     Logger.warn({ data: { ip: req.ip, method: req.method, path: req.path, url: req.originalUrl }, message: 'Rate limiter triggered' });
 };
 
-const limiter = new rateLimit({
+const limiter = rateLimit({
     windowMs: 60 * 1000,
     max: 60,
     onLimitReached: limitReached,
@@ -19,7 +20,7 @@ const limiter = new rateLimit({
     }
 });
 
-const limiterUser = new rateLimit({
+const limiterUser = rateLimit({
     windowMs: 60 * 1000,
     max: 10,
     onLimitReached: limitReached,
@@ -43,7 +44,7 @@ let ipRequestPayload = {};
  * 
  * 15 times the same ip with different keys will get then rate-limited.
  */
-const limiterGetPayload = new rateLimit({
+const limiterGetPayload =  rateLimit({
     windowMs: 24 * 60 * 60 * 1000,
     max: 15,
     onLimitReached: limitReached,
