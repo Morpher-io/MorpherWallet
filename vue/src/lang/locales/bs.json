@@ -223,5 +223,7 @@
         "LOADING_ACCOUNT": "Učitavanje računa...",
         "VALIDATING_CODE": "Validacija koda...",
         "LOADING": "Učitavanje"
-    }
+    },
+    "COPY_CLIPBOARD_FAIL": "Greška pri kopiranju adrese u clipboard",
+    "COPY_CLIPBOARD_SUCCESS": "Adresa uspješno kopirana u clipboard"
 }

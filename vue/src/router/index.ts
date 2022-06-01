@@ -136,7 +136,7 @@ const router = new VueRouter({
 	routes
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
 	if (to.matched.some((record) => record.meta.requiresAuth)) {
 		if (store.getters.isLoggedIn) {
 			if (store.state.redirectPath) {
@@ -158,7 +158,8 @@ router.beforeEach((to, from, next) => {
 			return;
 		}
 
-		if (store.getters.hasEncryptedKeystore && store.state.email) {
+		await store.dispatch('loadEncryptedSeed')
+		if (store.state.email) {
 			next('/unlock');
 			return;
 		}

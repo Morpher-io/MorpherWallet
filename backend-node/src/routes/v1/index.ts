@@ -3,19 +3,33 @@ const EmailController = require('../../controllers/email.controller');
 const ValidationController = require('../../controllers/validation.controller');
 const secureRoutes = require('./secure');
 
-const rateLimit = require('express-rate-limit');
+import rateLimit from 'express-rate-limit'
+
 import { Logger } from '../../helpers/functions/winston';
 
 const limitReached = (req: any, res: any) => {
     Logger.warn({ data: { ip: req.ip, method: req.method, path: req.path, url: req.originalUrl }, message: 'Rate limiter triggered' });
 };
 
-const limiter = new rateLimit({
+const limiter = rateLimit({
     windowMs: 60 * 1000,
     max: 60,
     onLimitReached: limitReached,
     keyGenerator(req, res) {
         return req.body.key;
+    }
+});
+
+const limiterUser = rateLimit({
+    windowMs: 60 * 1000,
+    max: 10,
+    onLimitReached: limitReached,
+    keyGenerator(req, res) {
+        if (req.body.key && req.body.key) {
+            return req.body.key;
+        } else {
+            return Date.now();
+        }
     }
 });
 
@@ -30,7 +44,7 @@ let ipRequestPayload = {};
  * 
  * 15 times the same ip with different keys will get then rate-limited.
  */
-const limiterGetPayload = new rateLimit({
+const limiterGetPayload =  rateLimit({
     windowMs: 24 * 60 * 60 * 1000,
     max: 15,
     onLimitReached: limitReached,
@@ -88,9 +102,9 @@ module.exports = function (express) {
     router.post('/getPayload', recaptcha, limiterGetPayload, WalletController.getPayload);
     router.post('/getNonce', limiterGetPayload, WalletController.getNonce);
     router.post('/send2FAEmail', WalletController.send2FAEmail);
-    router.post('/verifyEmailCode', limiterGetPayload, WalletController.verifyEmailCode);
-    router.post('/verifyEmailConfirmationCode', limiterGetPayload, WalletController.verifyEmailConfirmationCode);
-    router.post('/verifyAuthenticatorCode', limiterGetPayload, WalletController.verifyAuthenticatorCode);
+    router.post('/verifyEmailCode', limiterGetPayload, limiterUser, WalletController.verifyEmailCode);
+    router.post('/verifyEmailConfirmationCode', limiterGetPayload, limiterUser, WalletController.verifyEmailConfirmationCode);
+    router.post('/verifyAuthenticatorCode', limiterGetPayload, limiterUser, WalletController.verifyAuthenticatorCode);
     router.post('/validateInput', ValidationController.validateInput);
 
     /**

@@ -63,6 +63,12 @@ export class Global extends Vue {
 	public unlockUpdate!: () => Promise<unknown>;
 
 	@Action
+	public loadEncryptedSeed!: () => Promise<unknown>;
+		
+	@Action
+	public loadPassword!: () => Promise<unknown>;
+
+	@Action
 	public unlock2FA!: (params: TypeUnlock2fa) => Promise<string>;
 
 	@Action
