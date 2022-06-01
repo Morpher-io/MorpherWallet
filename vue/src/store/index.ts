@@ -1075,7 +1075,7 @@ if (isIframe()) {
 					//see if we are logged in?!
 					try {
 						if (store.state.keystore !== null) {
-							if (config?.confirm_transaction || Number(txObj.chainId) !== 21) {
+							if (config?.confirm_transaction || (Number(txObj.chainId) !== 21 && Number(txObj.chainId) !== 210 && Number(txObj.chainId) !== 2100)) {
 								if (txObj.amount && !txObj.value) {
 									txObj.value = txObj.amount;
 								}

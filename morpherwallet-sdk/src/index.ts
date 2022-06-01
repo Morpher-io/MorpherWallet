@@ -344,16 +344,16 @@ export default class MorpherWallet {
           if (txParams.maxFeePerGas !== undefined && txParams.maxPriorityFeePerGas !== undefined && txParams.gasPrice !== undefined) 
             delete txParams.gasPrice;
 
-          if (txParams.maxFeePerGas !== undefined && txParams.maxPriorityFeePerGas !== undefined && txParams.chainId && Number(txParams['chainId']) !== 21 ) {
+          if (txParams.maxFeePerGas !== undefined && txParams.maxPriorityFeePerGas !== undefined && txParams.chainId && Number(txParams['chainId']) !== 21 && Number(txParams['chainId']) !== 210 && Number(txParams['chainId']) !== 2100) {
             txParams.chain = 'mainnet';
             txParams.hardfork = 'london';
           }          
           
-          if (this.config?.show_transaction || this.config?.confirm_transaction || Number(txParams.chainId) !== 21)
+          if (this.config?.show_transaction || this.config?.confirm_transaction || (Number(txParams.chainId) !== 21 && Number(txParams.chainId) !== 210 && Number(txParams.chainId) !== 2100))
             this.showWallet();
           const result = await widgetCommunication.signTransaction(txParams, this.config, this.wsRPCEndpointUrl);
 
-          if (this.config?.show_transaction || this.config?.confirm_transaction || Number(txParams.chainId) !== 21)
+          if (this.config?.show_transaction || this.config?.confirm_transaction || (Number(txParams.chainId) !== 21 && Number(txParams.chainId) !== 210 && Number(txParams.chainId) !== 2100))
             this.hideWallet();  
 
 					if(cb) {
