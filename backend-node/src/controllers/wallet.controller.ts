@@ -55,7 +55,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
         if (user == null) {
             // If it exists, set the userId and delete the associated recovery method.
             // If it doesnt exist create a new one.
-            const payload = { email: false, authenticator: false, authenticatorConfirmed: false, needConfirmation: true };
+            const payload = { email: false, authenticator: false, authenticatorConfirmed: false, needConfirmation: true, registerConfirmation: true };
 
             const nonce = 1;
 
@@ -1012,6 +1012,7 @@ export async function verifyEmailConfirmationCode(req, res) {
             if (user != null) {
                 if (await verifyEmail2FA(recovery.user_id, code)) {
                     user.payload.needConfirmation = false;
+                    user.payload.registerConfirmation = false;
                     user.changed('payload', true);
                     await user.save();
 
