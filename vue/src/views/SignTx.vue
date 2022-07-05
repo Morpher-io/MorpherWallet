@@ -128,6 +128,14 @@ export default class SignTx extends mixins(Global, Authenticated) {
 			return 'Morpher Sidechain';
 		}
 
+		if (this.store.transactionDetails && Number(this.store.transactionDetails.chainId) === 210) {
+			return 'Morpher Dev Sidechain';
+		}
+		
+		if (this.store.transactionDetails && Number(this.store.transactionDetails.chainId) === 2100) {
+			return 'Morpher Staging Sidechain';
+		}		
+
 		if (this.store.transactionDetails && Number(this.store.transactionDetails.chainId) === 1) {
 			return 'Etherum Mainchain';
 		}

@@ -6,10 +6,16 @@ import { Email_Template, Email_Log, User } from '../../database/models';
 export async function sendEmail2FA(payload, email, user) {
     const lang = user.payload.app_lang || 'en';
 
-    let email_template = await Email_Template.findOne({ where: { template_name: 'Email 2FA', lang }})
+    let email_name = 'Email 2FA'
+
+    if (user.payload.registerConfirmation == true) {
+        email_name = 'Email 2FA Register'
+    }
+
+    let email_template = await Email_Template.findOne({ where: { template_name: email_name, lang }})
     // Fallback in case we add new languages and don't have a template yet.
     if(!email_template){
-        email_template = await Email_Template.findOne({ where: { template_name: 'Email 2FA', lang: 'en' }})
+        email_template = await Email_Template.findOne({ where: { template_name: email_name, lang: 'en' }})
     }
 
     const SES = new AWS.SES({
