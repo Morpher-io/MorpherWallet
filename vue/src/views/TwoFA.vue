@@ -122,6 +122,8 @@ export default class TwoFA extends mixins(Global, Recaptcha) {
 	 * Process email 2fa authentication
 	 */
 	async validateCode() {
+		if (!this.recaptchaToken && (!localStorage.getItem('recaptcha_date') || Number(localStorage.getItem('recaptcha_date')) < Date.now() - (1000 * 60 * 8))) return this.executeRecaptcha(this.validateCode);
+
 		// block if 2fa validation is already executing
 		if (this.store.loading) {
 			return;

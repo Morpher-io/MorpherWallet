@@ -105,34 +105,44 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 
 		if (this.$store.state.hashedPassword && this.$store.state.encryptedSeed.ciphertext !== undefined) {
 
-			this.showSpinner(this.$t('loader.LOADING_ACCOUNT').toString());
-
-			
-			// Check if the wallet can be unlocked using the local-storage stored password
-			this.unlockWithStoredPassword(this.recaptchaToken)
-				.then((result) => {
-					this.hideSpinner();
-					if (result) {
-						this.$router.push('/').catch(() => undefined);
-					}
-				})
-				.catch((error) => {
-					this.hideSpinner();
-
-					if (error && error.toString() === 'TypeError: Failed to fetch') {
-						this.showNetworkError(true);
-					}
-					// error
-				});
+			this.loadAccount();
 		} else{
 			this.unlockUpdate();
 		}
+	}
+
+	async loadAccount() {
+		this.showSpinner(this.$t('loader.LOADING_ACCOUNT').toString());
+
+		if (!this.recaptchaToken && (!localStorage.getItem('recaptcha_date') || Number(localStorage.getItem('recaptcha_date')) < Date.now() - (1000 * 60 * 8))) return this.executeRecaptcha(this.loadAccount);
+		
+		// Check if the wallet can be unlocked using the local-storage stored password
+		this.unlockWithStoredPassword(this.recaptchaToken)
+			.then((result) => {
+				this.hideSpinner();
+				if (result) {
+					this.$router.push('/').catch(() => undefined);
+				}
+			})
+			.catch((error) => {
+				this.hideSpinner();
+
+				if (error.error === 'RECAPTCHA_REQUIRED') {
+					this.executeRecaptcha(this.loadAccount);
+				}
+
+				if (error && error.toString() === 'TypeError: Failed to fetch') {
+					this.showNetworkError(true);
+				}
+				// error
+			});
 	}
 
 	/**
 	 * Execute the logon
 	 */
 	async login() {
+		if (!this.recaptchaToken && (!localStorage.getItem('recaptcha_date') || Number(localStorage.getItem('recaptcha_date')) < Date.now() - (1000 * 60 * 8))) return this.executeRecaptcha(this.login);
 		// block if unlock is already executing
 		if (this.store.loading) {
 			return;
@@ -174,6 +184,8 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 	}
 
 	loginEmail() {
+		if (!this.recaptchaToken && (!localStorage.getItem('recaptcha_date') || Number(localStorage.getItem('recaptcha_date')) < Date.now() - (1000 * 60 * 8))) return this.executeRecaptcha(this.loginEmail);
+
 		this.logonError = '';
 		this.showSpinner(this.$t('loader.LOADING_ACCOUNT').toString());
 		this.store.loginComplete = false;
@@ -198,7 +210,7 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 						.catch((error) => {
 							this.hideSpinner();
 							if (error.error === 'RECAPTCHA_REQUIRED') {
-								this.executeRecaptcha(this.login);
+								this.executeRecaptcha(this.loginEmail);
 								return;
 							}
 							this.logonError = getDictionaryValue('DECRYPT_FAILED');
@@ -210,7 +222,7 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 				this.hideSpinner();
 
 				if (error.error === 'RECAPTCHA_REQUIRED') {
-					this.executeRecaptcha(this.login);
+					this.executeRecaptcha(this.loginEmail);
 					return;
 				}
 				// Logon failed
