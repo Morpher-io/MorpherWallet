@@ -110,6 +110,15 @@ export async function getRecoveryMethods(req: Request, res: Response) {
     }
 }
 
+export async function addRecoveryMethodApple(req: Request, res: Response) {
+    try {
+        
+    } catch (error) {
+        Logger.error({ source: 'addRecoveryMethod', data: req.body, message: error.message || error.toString() });
+        return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
+    }        
+}
+
 export async function addRecoveryMethod(req: Request, res: Response) {
     try {
         const key = req.header('key');
