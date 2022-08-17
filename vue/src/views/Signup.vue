@@ -154,6 +154,8 @@ export default class Signup extends mixins(Global, Recaptcha) {
 
 	// Methods
 	async signupExecute(e: any) {
+		if (!this.recaptchaToken && (!localStorage.getItem('recaptcha_date') || Number(localStorage.getItem('recaptcha_date')) < Date.now() - (1000 * 60 * 8))) return this.executeRecaptcha(this.signupExecute);
+
 		// block if signup is already executing
 		if (this.store.loading) {
 			return;

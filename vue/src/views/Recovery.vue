@@ -129,6 +129,7 @@ export default class Recovery extends mixins(Authenticated, Global, Recaptcha) {
 		if (!this.newEmail) {
 			return;
 		}
+		if (!this.recaptchaToken && (!localStorage.getItem('recaptcha_date') || Number(localStorage.getItem('recaptcha_date')) < Date.now() - (1000 * 60 * 8))) return this.executeRecaptcha(this.checkEmail);
 
 		const emailMessage = await validateInput('email', this.newEmail);
 
@@ -149,7 +150,7 @@ export default class Recovery extends mixins(Authenticated, Global, Recaptcha) {
 
 				this.logonError = getDictionaryValue(result.toString());
 			}
-		} catch (error) {
+		} catch (error: any) {
 			if (error.error === 'RECAPTCHA_REQUIRED') {
 				this.executeRecaptcha(this.checkEmail);
 				return;

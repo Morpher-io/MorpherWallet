@@ -400,7 +400,8 @@ const store: Store<RootState> = new Vuex.Store({
 							})
 							.catch((err) => {
 								commit('updateUnlocking', false);
-								commit('authError', "The user wasn't found: Signup first!");
+								
+								if (err.error !== 'RECAPTCHA_REQUIRED') commit('authError', "The user wasn't found: Signup first!");
 								reject(err);
 							});
 					})
@@ -425,9 +426,9 @@ const store: Store<RootState> = new Vuex.Store({
 								commit('updateUnlocking', false);
 								resolve(true);
 							})
-							.catch(() => {
+							.catch((err) => {
 								state.loginRetryCount += 1;
-								if (state.loginRetryCount >= 3) commit('authError', 'Cannot unlock the Keystore, wrong ID');
+								if (state.loginRetryCount >= 3 && err.error !== 'RECAPTCHA_REQUIRED')  commit('authError', 'Cannot unlock the Keystore, wrong ID');
 								commit('updateUnlocking', false);
 								reject(false);
 							});
