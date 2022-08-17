@@ -7,6 +7,7 @@ env:
         VUE_APP_I18N_DEFAULT_LOCALE: 'en'
         VUE_APP_I18N_SUPPORTED_LOCALE: '["en", "ru", "bs"]'
         VUE_APP_GOOGLE_ANALYTICS_API_KEY: 'G-ZKPQS232M6'
+        VUE_APP_RECAPTCHA: '6Ld8v7gcAAAAAEZzYPP4vdaz17EymX7zTXjPQspT'
     secrets-manager:
         VUE_APP_GOOGLE_APP_ID: "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:WALLET_GOOGLE_APP_ID::"
         VUE_APP_FACEBOOK_APP_ID: "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:WALLET_FACEBOOK_APP_ID::"

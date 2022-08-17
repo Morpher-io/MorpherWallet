@@ -28,12 +28,13 @@ export class Recaptcha extends Vue {
 	racaptchaCallback: any = null;
 
 	onCaptchaVerified(data: any) {
+		localStorage.setItem('recaptcha_date', Date.now().toString())
 		this.recaptchaToken = data;
 		this.racaptchaCallback();
 	}
 
 	onCaptchaError(data: any) {
-		//console.log('onCaptchaError', data);
+		console.log('onCaptchaError', data);
 	}
 
 	onCaptchaExpired(data: any) {
@@ -46,6 +47,11 @@ export class Recaptcha extends Vue {
 
 	executeRecaptcha(callback: any) {
 		this.racaptchaCallback = callback;
+		if (this.recaptchaSiteKey == 'DISABLED') {
+			this.recaptchaToken = 'disabled';
+			this.racaptchaCallback();
+			return;
+		}
 		this.recaptchaExecuting = true;
 		if (this.recaptchaLoaded) {
 			if (this.$refs.recaptcha) {

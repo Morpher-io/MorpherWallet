@@ -31,7 +31,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
 
     try {
         // Get variables from request body.
-        const email = req.body.email;
+        const email = req.body.email.toLowerCase();
         const key = req.body.key;
         const encryptedSeed = req.body.encryptedSeed;
         const recoveryTypeId = req.body.recoveryTypeId || 1;
@@ -201,7 +201,7 @@ export async function updateEmail(req: Request, res: Response) {
 
     try {
         // Get variables from request body.
-        const newEmail = req.body.newEmail;
+        const newEmail = req.body.newEmail.toLowerCase();
         const email2faVerification = req.body.email2faVerification;
         const key = req.header('key');
         const recoveryTypeId = 1;
@@ -432,7 +432,7 @@ async function getFacebookEncryptedSeed(req, res) {
     try {
         // Get access token and email from request body.
         const accessToken = req.body.accessToken;
-        const signupEmail = req.body.signupEmail;
+        const signupEmail = req.body.signupEmail.toLowerCase();
 
         // Set facebook access token and make the query for the current profile.
         FB.setAccessToken(accessToken);
@@ -477,7 +477,7 @@ async function getGoogleEncryptedSeed(req, res) {
     try {
         // Get access token and email from request body.
         const accessToken = req.body.accessToken;
-        const signupEmail = req.body.signupEmail;
+        const signupEmail = req.body.signupEmail.toLowerCase();
 
         // Set google access token and make the query for the current profile.
         oauth2Client.setCredentials({ access_token: accessToken });
@@ -533,7 +533,7 @@ async function getVKontakteEncryptedSeed(req, res) {
     try {
         // Get access token and email from request body.
         const accessToken = req.body.accessToken;
-        const signupEmail = req.body.signupEmail;
+        const signupEmail = req.body.signupEmail.toLowerCase();
 
         // Set vkontakte access token and make the query for the current profile.
         const vk = new VK({
@@ -1107,7 +1107,7 @@ export async function resetRecovery(req, res) {
 
 export async function deleteAccount(req, res) {
     try {
-        const user = await User.findOne({ where: { email: req.body.email } });
+        const user = await User.findOne({ where: { email: req.body.email.toLowerCase() } });
         if (user !== null) {
             try {
                 await user.destroy();
@@ -1122,7 +1122,7 @@ export async function deleteAccount(req, res) {
                     type: 'User Account Deleted',
                     headers: req.headers,
                     body: req.body,
-                    message: `deleteAccount: User deleted [${req.body.email}] [${user.id}]`
+                    message: `deleteAccount: User deleted [${req.body.email.toLowerCase()}] [${user.id}]`
                 });
                 return successResponse(res, true);
             } catch (e) {
@@ -1135,7 +1135,7 @@ export async function deleteAccount(req, res) {
             type: 'Error: User Not Found',
             headers: req.headers,
             body: req.body,
-            message: `deleteAccount: User Not Found [${req.body.email}]`
+            message: `deleteAccount: User Not Found [${req.body.email.toLowerCase()}]`
         });
 
 
