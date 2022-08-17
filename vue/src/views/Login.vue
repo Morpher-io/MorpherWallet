@@ -86,6 +86,8 @@ export default class Login extends mixins(Global, Recaptcha) {
 	logonError = '';
 
 	unlock() {
+		if (!this.recaptchaToken && (!localStorage.getItem('recaptcha_date') || Number(localStorage.getItem('recaptcha_date')) < Date.now() - (1000 * 60 * 8))) return this.executeRecaptcha(this.unlock);
+
 		this.unlockWithStoredPassword(this.recaptchaToken)
 			.then((result) => {
 				if (result) {
@@ -144,6 +146,8 @@ export default class Login extends mixins(Global, Recaptcha) {
 	 * Execute the logon
 	 */
 	login() {
+		if (!this.recaptchaToken && (!localStorage.getItem('recaptcha_date') || Number(localStorage.getItem('recaptcha_date')) < Date.now() - (1000 * 60 * 8))) return this.executeRecaptcha(this.login);
+		
 		// block if login is already executing
 		if (this.store.loading) {
 			return;
