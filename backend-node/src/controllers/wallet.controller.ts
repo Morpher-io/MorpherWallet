@@ -22,9 +22,65 @@ const countryList = process.env.COUNTRY_LIST || '[]';
 
 
 import { Logger } from '../helpers/functions/winston';
+import appleSigninAuth from 'apple-signin-auth';
 
 // Function to save new signups to the database.
 export async function saveEmailPassword(req: Request, res: Response) {
+    const recoveryTypeId = Number(req.body.recovery_type || 1);
+    const crypto = require('crypto');
+    if (recoveryTypeId == 6) {
+        let token = req.body.access_token;
+
+        if (!token) {
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                                
+        }
+        token = JSON.parse(token)
+        try {
+            const appleIdTokenClaims = await appleSigninAuth.verifyIdToken(token.identityToken, {
+                /** sha256 hex hash of raw nonce */
+                nonce: token.nonce ? crypto.createHash('sha256').update(token.nonce).digest('hex') : undefined,
+            });
+
+            if (!appleIdTokenClaims || !appleIdTokenClaims.email || appleIdTokenClaims.email.toLowerCase() !== req.body.email.toLowerCase()) {
+                return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                            
+            }
+
+        } catch (err) {
+            console.log('err', err)
+            if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);            
+        }
+
+
+        
+    }
+
+    if (recoveryTypeId == 3) {
+        const token = req.body.access_token
+        const CLIENT_ID = '110832256161-1h90sr0brbog9emgmg1lrollro987mlu.apps.googleusercontent.com';
+
+        const {OAuth2Client} = require('google-auth-library');
+        const client = new OAuth2Client(CLIENT_ID);
+
+        try {
+            const ticket = await client.verifyIdToken({
+                idToken: token,
+                audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
+                // Or, if multiple clients access the backend:
+                //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+            });
+            const payload = ticket.getPayload();
+            const userid = payload['sub'];
+            if (!userid) {
+                return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                            
+            }
+
+        } catch (err) {
+            console.log('err', err)
+            if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);            
+        }
+
+    }
+    
     // Get sequelize transactions to rollback changes in case of failure.
     const [err, transaction] = await to(getTransaction());
     if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
@@ -34,7 +90,6 @@ export async function saveEmailPassword(req: Request, res: Response) {
         const email = req.body.email.toLowerCase();
         const key = req.body.key;
         const encryptedSeed = req.body.encryptedSeed;
-        const recoveryTypeId = req.body.recoveryTypeId || 1;
         const eth_address = req.body.ethAddress;
 
         if (
@@ -55,7 +110,13 @@ export async function saveEmailPassword(req: Request, res: Response) {
         if (user == null) {
             // If it exists, set the userId and delete the associated recovery method.
             // If it doesnt exist create a new one.
-            const payload = { email: false, authenticator: false, authenticatorConfirmed: false, needConfirmation: true, registerConfirmation: true };
+            let needConfirmation = true;
+            let registerConfirmation = true;
+            if (recoveryTypeId == 3 || recoveryTypeId == 6) {
+                needConfirmation = false;
+                registerConfirmation = false;
+            }
+            const payload = { email: false, authenticator: false, authenticatorConfirmed: false, needConfirmation, registerConfirmation };
 
             const nonce = 1;
 
@@ -96,8 +157,9 @@ export async function saveEmailPassword(req: Request, res: Response) {
 
 export async function getRecoveryMethods(req: Request, res: Response) {
     try {
+        const recovery_type_id = Number(req.body.recovery_type || 1);
         const key = req.header('key');
-        const recoveryEmail = await Recovery.findOne({ where: { key, recovery_type_id: 1 } });
+        const recoveryEmail = await Recovery.findOne({ where: { key, recovery_type_id: recovery_type_id } });
         const recovery = await Recovery.findAll({ where: { user_id: recoveryEmail.user_id }, include: [Recovery_Type] });
         const recoveryTypes = [];
         for (let i = 0; i < recovery.length; i++) {
@@ -284,8 +346,8 @@ export async function getEncryptedSeed(req, res) {
         const key = req.body.key;
         const email2fa = req.body.email2fa;
         const authenticator2fa = req.body.authenticator2fa;
-        const recovery_type_id = 1;
-
+        const recovery_type_id = Number(req.body.recovery_type || 1);
+        
         // Simply get Recovery instance that has this key and return it if its found.
         const recovery = await Recovery.findOne({ where: { key, recovery_type_id }, raw: true });
 
@@ -1180,8 +1242,11 @@ export async function updateUserPayload(req, res) {
         if (payloadColumn !== 'app_lang') {
             return res.status(403).json({ error: "INVALID_REQUEST" });
         }
+
+        const recovery_type_id = Number(req.body.recovery_type || 1);
+        
         // Create a new recovery method.
-        const recovery = await Recovery.findOne({ where: { key, recovery_type_id: 1 } });
+        const recovery = await Recovery.findOne({ where: { key, recovery_type_id: recovery_type_id } });
         const user = await User.findOne({ where: { id: recovery.user_id } });
 
         if (user) {
