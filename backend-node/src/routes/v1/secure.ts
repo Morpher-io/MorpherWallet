@@ -19,6 +19,7 @@ module.exports = async function(req, res, next) {
 
             if (user.eth_address === addr) {
                 user.nonce = user.nonce + 1;
+                user.nonce_timestamp = null;
                 await user.save();
                 return next();
             } else {

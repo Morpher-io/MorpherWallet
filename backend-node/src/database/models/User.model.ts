@@ -46,6 +46,11 @@ export class User extends Model {
     nonce;
 
     @Column({
+        type: DataType.BIGINT
+    })
+    nonce_timestamp;
+
+    @Column({
         type: DataType.JSONB
     })
     payload;

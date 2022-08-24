@@ -232,12 +232,12 @@ export class Global extends Vue {
 		);
 	}
 	filterError(error: string) {
-		const filters = ['popup_closed_by_user']
-
+		const filters = ['popup_closed_by_user', 'Keystore not found', 'EMAIL_2FA_WRONG', 'Non-Error promise rejection captured with value: Timeout']
+		
 		let allow = true;
 
 		filters.forEach(filter => {
-			if (error.toUpperCase().includes(filter.toUpperCase())) {
+			if (error.toUpperCase().includes(filter.toUpperCase()) || error.toUpperCase() == 'TRUE' || error.toUpperCase() == 'FALSE') {
 				allow = false;
 			}
 
