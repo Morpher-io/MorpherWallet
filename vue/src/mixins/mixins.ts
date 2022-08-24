@@ -231,6 +231,20 @@ export class Global extends Vue {
 			(name ? 'component <' + name + '>' : 'anonymous component') + (vm._isVue && vm.$options.__file ? ' at ' + vm.$options.__file : '')
 		);
 	}
+	filterError(error: string) {
+		const filters = ['popup_closed_by_user']
+
+		let allow = true;
+
+		filters.forEach(filter => {
+			if (error.toUpperCase().includes(filter.toUpperCase())) {
+				allow = false;
+			}
+
+		})
+
+		return allow;
+	}
 	/**
 	 * Log an error to sentry and include all relevant information from vue
 	 * @param {*} errorDescription Error to be lodgged
@@ -249,9 +263,11 @@ export class Global extends Vue {
 
 		Sentry.setContext('vue', vueData);
 
-		// Capture the exception
-		if (errorDescription && errorDescription.toLowerCase() !== 'error') {
-			Sentry.captureException(errorDescription);
+		if (this.filterError(errorDescription)) {
+			// Capture the exception
+			if (errorDescription && errorDescription.toLowerCase() !== 'error') {
+				Sentry.captureException(errorDescription);
+			}
 		}
 	}
 }

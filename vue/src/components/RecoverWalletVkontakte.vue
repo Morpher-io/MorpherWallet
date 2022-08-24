@@ -93,7 +93,10 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 								});
 							})
 							.catch((error) => {
-								this.logSentryError('recoverWalletVK', error.toString(), {
+								let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
+								console.log('fetchWalletFromRecovery error', errorMessage)
+
+								this.logSentryError('recoverWalletVK',errorMessage, {
 									accessToken,
 									password: userID,
 									recoveryTypeId: this.recoveryTypeId
@@ -104,12 +107,15 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 									error: error
 								});
 							});
-					} catch (e) {
-						this.logSentryError('recoverWalletVK', e.toString(), {});
+					} catch (error) {
+						let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
+						console.log('error', errorMessage)
+
+						this.logSentryError('recoverWalletVK', errorMessage, {});
 						this.showSpinnerThenAutohide(this.$t('loader.NO_RECOVERY_FOUND'));
 						this.setPassword({
 							success: false,
-							error: e.toString()
+							error: errorMessage
 						});
 					}
 				}
