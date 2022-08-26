@@ -100,6 +100,12 @@ export type TypeUserFoundData = {
 	hashedPassword: string;
 };
 
+
+export type TypeNonceData = {
+	__typename?: 'TypePayloadData';
+	nonce: number;
+};
+
 export type TypePayloadData = {
 	__typename?: 'TypePayloadData';
 	email: boolean;
