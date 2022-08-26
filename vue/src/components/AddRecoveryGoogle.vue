@@ -72,7 +72,9 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 	}
 
 	onError(error) {
-		this.logSentryError('addGoogleRecovery', error.toString(), {
+		let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
+		console.log('onError', errorMessage)
+		this.logSentryError('addGoogleRecovery', errorMessage, {
 			hasRecoveryMethod: this.hasRecoveryMethod,
 			clientId: this.clientId,
 			recoveryTypeId: this.recoveryTypeId
@@ -111,7 +113,9 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 				});
 			})
 			.catch((error) => {
-				this.logSentryError('addGoogleRecovery', error.toString(), {
+				let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
+				console.log('onLogin error', errorMessage)				
+				this.logSentryError('addGoogleRecovery', errorMessage, {
 					hasRecoveryMethod: this.hasRecoveryMethod,
 					clientId: this.clientId,
 					recoveryTypeId: this.recoveryTypeId,
@@ -144,7 +148,9 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 				});
 			})
 			.catch((error) => {
-				this.logSentryError('deleteGoogleRecovery', error.toString(), {
+				let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
+				console.log('onDelete error', errorMessage)					
+				this.logSentryError('deleteGoogleRecovery', errorMessage, {
 					hasRecoveryMethod: this.hasRecoveryMethod,
 					clientId: this.clientId,
 					recoveryTypeId: this.recoveryTypeId,

@@ -19,10 +19,17 @@ module.exports = async function(req, res, next) {
 
             if (user.eth_address === addr) {
                 user.nonce = user.nonce + 1;
+                user.nonce_timestamp = null;
                 await user.save();
                 return next();
+            } else {
+                return errorResponse(res, 'AUTH_ERROR - eth_address', 400);    
             }
+        } else {
+            return errorResponse(res, 'AUTH_ERROR - Nonce', 400);    
         }
+    } else {
+        return errorResponse(res, 'AUTH_ERROR - No Signature', 400);    
     }
 
     return errorResponse(res, 'AUTH_ERROR', 400);

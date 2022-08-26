@@ -1,7 +1,7 @@
 const { getKeystore } = require('./keystore');
 const { cryptoEncrypt, cryptoDecrypt, sha256 } = require('./cryptoFunctions');
 
-import { TypeEncryptedSeed, TypePayloadData, TypeCreatedKeystore } from '../types/global-types';
+import { TypeEncryptedSeed, TypePayloadData, TypeCreatedKeystore, TypeNonceData } from '../types/global-types';
 import { WalletBase } from 'web3-core';
 import { i18n } from '../plugins/i18n';
 
@@ -200,23 +200,38 @@ const getPayload = (email: string, recaptchaToken = '') =>
 		}
 	});
 
-const getNonce = async (key: string) => {
-	const options: RequestInit = {
-		method: 'POST',
-		headers: {
-			Accept: 'application/json',
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			key
-		}),
-		mode: 'cors',
-		cache: 'default'
-	};
-	const result = await fetch(getBackendEndpoint() + '/v1/getNonce', options);
+const getNonce = async (key: string, retry = 0) => {
+	return new Promise<TypeNonceData>(async (resolve, reject) => {
+		const options: RequestInit = {
+			method: 'POST',
+			headers: {
+				Accept: 'application/json',
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				key, retry
+			}),
+			mode: 'cors',
+			cache: 'default'
+		};
+		const result = await fetch(getBackendEndpoint() + '/v1/getNonce', options);
 
-	const response = await result.json();
-	return response;
+		const response = await result.json();
+
+		if(response.nonce == null) {
+			retry +=1
+			
+			if (retry > 10) {
+				return resolve(response);		
+			} else {
+				setTimeout(async ()=> {
+					return resolve(await getNonce(key, retry))
+				}, 1000)
+			}
+		} else {
+			return resolve(response);
+		}
+	})
 };
 
 const send2FAEmail = async (email: string) => {
