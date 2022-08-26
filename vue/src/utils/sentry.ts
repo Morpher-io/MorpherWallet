@@ -6,7 +6,10 @@ const errorFilter = [
 	'Missing credentials in config',
 	'Response not successful: Received status code 400',
 	'Network error: Failed to fetch',
-	'400 (Bad Request)'
+	'400 (Bad Request)',
+	'Keystore not found',
+	'EMAIL_2FA_WRONG',
+	'Non-Error promise rejection captured with value: Timeout'
 ];
 
 /*
@@ -14,7 +17,7 @@ const errorFilter = [
  */
 export const checkErrorFilter = (error: string): boolean => {
 	const filterErr = errorFilter.find((filter) => error.toLowerCase().includes(filter.toLowerCase()));
-	if (filterErr) {
+	if (filterErr || error.toLowerCase() == 'false' || error.toLowerCase() == 'true') {
 		return false;
 	} else {
 		return true;

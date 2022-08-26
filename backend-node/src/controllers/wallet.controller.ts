@@ -765,6 +765,9 @@ export async function getPayload(req, res) {
 }
 
 export async function getNonce(req, res) {
+    const [err, transaction] = await to(getTransaction());
+    if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
+
     try {
         const key = req.body.key;
         const recovery = await Recovery.findOne({ where: { key } });
@@ -772,7 +775,19 @@ export async function getNonce(req, res) {
             Logger.info({ method: arguments.callee.name, type: 'Error: User Not found', key, headers: req.headers, body: req.body, message: `getNonce: User not found [${key.substr(0, 10)}...]` });
             return errorResponse(res, 'USER_NOT_FOUND', 404);
         }
-        const user = await User.findOne({ where: { id: recovery.user_id }, raw: true });
+
+        let user = await User.findOne({ where: { id: recovery.user_id }, lock: true, transaction });
+
+        if (user.nonce_timestamp && user.nonce_timestamp > Date.now() - (1000 * 10)) {
+            transaction.rollback();    
+            return successResponse(res, { nonce: null });
+        }
+
+        user.nonce_timestamp = Date.now();
+        await user.save({transaction});
+
+        await transaction.commit();
+
 
         if (user) {
             Logger.info({ method: arguments.callee.name, type: 'Get Nonce', user_id: user.id, user, headers: req.headers, body: req.body, message: `getNonce: User found [${user.id}]` });
@@ -781,6 +796,14 @@ export async function getNonce(req, res) {
             return errorResponse(res, 'NONCE_NOT_FOUND', 404);
         }
     } catch (error) {
+        if (transaction) {
+            try {
+                transaction.rollback();
+            } catch (err) {
+
+            }
+        }
+        
         Logger.error({ source: 'getNonce', data: req.body, message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
