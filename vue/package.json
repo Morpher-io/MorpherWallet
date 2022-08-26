@@ -26,6 +26,7 @@
     "js-cookie": "^3.0.1",
     "penpal": "^5.3.0",
     "vue": "^2.6.11",
+    "vue-apple-login": "^1.0.0",
     "vue-class-component": "^7.2.3",
     "vue-facebook-login-component": "^4.0.2",
     "vue-google-login": "^2.0.5",

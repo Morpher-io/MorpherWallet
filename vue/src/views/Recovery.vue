@@ -21,6 +21,9 @@
 					<RecoverWalletGoogle @setPassword="setPassword"></RecoverWalletGoogle>
 				</div>
 				<div class="field is-grouped">
+					<RecoverWalletApple @setPassword="setPassword"></RecoverWalletApple>
+				</div>				
+				<div class="field is-grouped">
 					<RecoverWalletFacebook @setPassword="setPassword"></RecoverWalletFacebook>
 				</div>
 				<div class="field is-grouped">
@@ -101,6 +104,7 @@
 import Component, { mixins } from 'vue-class-component';
 import RecoverWalletVkontakte from '../components/RecoverWalletVkontakte.vue';
 import RecoverWalletGoogle from '../components/RecoverWalletGoogle.vue';
+import RecoverWalletApple from '../components/RecoverWalletApple.vue';
 import RecoverWalletFacebook from '../components/RecoverWalletFacebook.vue';
 import ChangePassword from '../components/ChangePassword.vue';
 import { Authenticated, Global } from '../mixins/mixins';
@@ -113,6 +117,7 @@ import { getDictionaryValue } from '../utils/dictionary';
 		RecoverWalletVkontakte,
 		RecoverWalletFacebook,
 		RecoverWalletGoogle,
+		RecoverWalletApple,
 		ChangePassword
 	}
 })
