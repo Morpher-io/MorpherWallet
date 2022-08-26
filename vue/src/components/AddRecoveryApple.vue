@@ -4,50 +4,41 @@
 		<vue-apple-login
 			mode="center-align"
 			type="sign in"
-			color="black"
+			color="white"
 			:border="true"
 			:radius="15"
 			width="100%"
-			height="100%"
-			logoSize="medium"
+			height="45px"
+			logoSize="large"
 			:logoPosition="0"
 			:labelPosition="0"
 			className="vue-apple-login"
 			:onSuccess="onLogin"
 			:onFailure="onError"
 			>
-						<span class="icon img">
-					<img src="@/assets/img/google_logo.svg" alt="Google Logo" />
-				</span>
-				<span>Apple</span>
-			
+		
 			</vue-apple-login>
 
 
 		</div>
 		<div v-if="hasRecoveryMethod" class="has-text-centered">
 			<div class="control is-expanded" v-if="hasRecoveryMethod">
-
-				<vue-apple-login
-			mode="center-align"
-			type="sign in"
-			color="black"
-			:border="true"
-			:radius="15"
-			width="100%"
-			height="100%"
-			logoSize="medium"
-			:logoPosition="0"
-			:labelPosition="0"
-			className="vue-apple-login"
-			:onSuccess="onDelete"
-			:onFailure="onError"
+			<vue-apple-login
+				mode="center-align"
+				type="sign in"
+				color="white"
+				:border="true"
+				:radius="15"
+				width="100%"
+				height="45px"
+				logoSize="large"
+				:logoPosition="0"
+				:labelPosition="0"
+				className="vue-apple-login"
+				:onSuccess="onDelete"
+				:onFailure="onError"
 			>
-				<span class="icon img">
-						<img src="@/assets/img/google_logo_white.svg" alt="Google Logo" />
-					</span>
-					<span>{{ $t('recovery.REVOKE_ACCESS') }}</span>
-			
+		
 			</vue-apple-login>
 			</div>
 			<div class="recovery-active is-text-small">
@@ -92,7 +83,17 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 	}
 
 	onError(error) {
-		this.logSentryError('addGoogleRecovery', error.toString(), {
+		if (error && error.detail && error.detail.error  && error.detail.error == "popup_closed_by_user") {
+			return;
+		}
+		let errorMessage = error.error || error.err || error.message || JSON.stringify(error)		
+		if (error && error.detail && error.detail.error  && error.detail.error) {
+			errorMessage = error.detail.error
+		}
+		
+		console.log('onError', errorMessage)
+
+		this.logSentryError('addAppleRecovery', errorMessage, {
 			hasRecoveryMethod: this.hasRecoveryMethod,
 			clientId: this.clientId,
 			recoveryTypeId: this.recoveryTypeId
@@ -110,7 +111,7 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 	}
 
 	async onLogin(googleUser) {
-		console.log('success, googleUser')
+		console.log('success', googleUser)
 		
 		// this.showSpinner(this.$t('loader.SAVING_KEYSTORE_RECOVERY'));
 		// const userID = googleUser.getBasicProfile().getId();
@@ -133,7 +134,9 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 		// 		});
 		// 	})
 		// 	.catch((error) => {
-		// 		this.logSentryError('addGoogleRecovery', error.toString(), {
+		// let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
+		// 		console.log('onLogin error', errorMessage)					
+		// 		this.logSentryError('addAppleRecovery', errorMessage, {
 		// 			hasRecoveryMethod: this.hasRecoveryMethod,
 		// 			clientId: this.clientId,
 		// 			recoveryTypeId: this.recoveryTypeId,
