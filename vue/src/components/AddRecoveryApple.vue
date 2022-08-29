@@ -2,12 +2,8 @@
 	<div class="field">
 		<!-- <div id="appleid-signin" data-color="black" data-border="true" data-type="sign in"></div> -->
 		<div class="control is-expanded" v-if="!hasRecoveryMethod">
-			<button
-				class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
-				@click="doLogin"
-				v-if="!hasRecoveryMethod"
-				data-cy="vkontakteButton"
-			>
+			<button class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
+				@click="doLogin" v-if="!hasRecoveryMethod" data-cy="vkontakteButton">
 				<span class="icon img">
 					<img src="@/assets/img/apple_logo.svg" alt="Apple Logo" />
 				</span>
@@ -18,28 +14,25 @@
 		</div>
 		<div v-if="hasRecoveryMethod" class="has-text-centered">
 			<div class="control is-expanded" v-if="hasRecoveryMethod">
-			<button
-				class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
-				@click="doLogin"
-				v-if="hasRecoveryMethod"
-				data-cy="vkontakteButton"
-			>
-				<span class="icon img">
-					<img src="@/assets/img/apple_logo.svg" alt="Apple Logo" />
-				</span>
-				<span>Revoke Access</span>
-			</button>
-		
-			
+				<button class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
+					@click="doLogin" v-if="hasRecoveryMethod" data-cy="vkontakteButton">
+					<span class="icon img">
+						<img src="@/assets/img/apple_logo.svg" alt="Apple Logo" />
+					</span>
+					<span>Revoke Access</span>
+				</button>
+
+
 			</div>
 			<div class="recovery-active is-text-small">
 				<span class="icon">
 					<i class="fas fa-check-circle"></i>
 				</span>
 				{{
-					$t('recovery.RECOVERY_ACTIVE', {
-						currentMethod: 'Apple'
-					})
+				 $t('recovery.RECOVERY_ACTIVE', {
+				 	currentMethod: 'Apple'
+				 })
+
 				}}
 			</div>
 		</div>
@@ -60,7 +53,7 @@ const state = uuid();
 
 @Component({
 	components: {
-		
+
 	}
 })
 export default class AddRecoveryApple extends mixins(Global, Authenticated) {
@@ -75,16 +68,16 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 
 	async mounted() {
 		try {
-		    
+
 			await window.AppleID.auth.init({
-					clientId : this.clientId,
-					scope : 'email',
-					redirectURI : 'https://wallet-dev.morpher.com',
-					state : state,
-					nonce : rawNonce,
-					usePopup : true
-				});
-				
+				clientId: this.clientId,
+				scope: 'email',
+				redirectURI: 'https://wallet-dev.morpher.com',
+				state: state,
+				nonce: rawNonce,
+				usePopup: true
+			});
+
 			this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 
 		} catch (err) {
@@ -100,7 +93,7 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 			}).catch(err => {
 				this.onError(err)
 			})
-		
+
 		} catch (err) {
 			this.onError(err)
 		}
@@ -108,11 +101,11 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 	}
 
 	onError(error) {
-		if (error && error.detail && error.detail.error  && error.detail.error == "popup_closed_by_user") {
+		if (error && error.detail && error.detail.error && error.detail.error == "popup_closed_by_user") {
 			return;
 		}
-		let errorMessage = error.error || error.err || error.message || JSON.stringify(error)		
-		if (error && error.detail && error.detail.error  && error.detail.error) {
+		let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
+		if (error && error.detail && error.detail.error && error.detail.error) {
 			errorMessage = error.detail.error
 		}
 		if (errorMessage == 'popup_closed_by_user' || errorMessage == 'user_trigger_new_signin_flow') {
@@ -137,7 +130,7 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 	}
 
 	async onLogin(appleUser) {
-		
+
 		this.showSpinner(this.$t('loader.SAVING_KEYSTORE_RECOVERY'));
 		const userID = appleUser.authorizedData.userId;
 		const key = await sha256(this.clientId + userID);
@@ -159,8 +152,8 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 				});
 			})
 			.catch((error) => {
-		let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
-				console.log('onLogin error', errorMessage)					
+				let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
+				console.log('onLogin error', errorMessage)
 				this.logSentryError('addAppleRecovery', errorMessage, {
 					hasRecoveryMethod: this.hasRecoveryMethod,
 					clientId: this.clientId,

@@ -104,6 +104,7 @@ export type TypeUserFoundData = {
 	hashedPassword: string;
 	token: string
 	recoveryTypeId: number
+	fetch_key: string
 };
 
 

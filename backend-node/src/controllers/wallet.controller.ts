@@ -46,7 +46,6 @@ export async function saveEmailPassword(req: Request, res: Response) {
             }
 
         } catch (err) {
-            console.log('err', err)
             if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);            
         }
 
@@ -75,7 +74,6 @@ export async function saveEmailPassword(req: Request, res: Response) {
             }
 
         } catch (err) {
-            console.log('err', err)
             if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);            
         }
 

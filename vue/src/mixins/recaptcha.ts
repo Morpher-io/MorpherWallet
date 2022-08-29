@@ -34,7 +34,7 @@ export class Recaptcha extends Vue {
 	}
 
 	onCaptchaError(data: any) {
-		console.log('onCaptchaError', data);
+		//console.log('onCaptchaError', data);
 	}
 
 	onCaptchaExpired(data: any) {

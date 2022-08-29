@@ -16,7 +16,6 @@ const changePasswordEncryptedSeed = async (encryptedSeed: TypeEncryptedSeed, old
 
 const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: TypeEncryptedSeed, password: string): Promise<WalletBase> =>
 	new Promise((resolve, reject) => {
-		console.log(0, password, encryptedWalletObject)
 		getKeystore(password, encryptedWalletObject)
 			.then((returnObj: TypeCreatedKeystore) => {
 				resolve(returnObj.keystore);

@@ -68,6 +68,7 @@ export interface RootState {
 	spinnerStatusText: string;
 	message: string;
 	email: string;
+	fetch_key: string;
 	
 	iconSeed: number;
 	hashedPassword: string;
@@ -131,6 +132,7 @@ function initialState(): RootState {
 			authenticatorConfirmed: false,
 			needConfirmation: false
 		},
+		fetch_key: '',
 		token: '',
 		recoveryTypeId: 1,
 		connection: null,
@@ -217,6 +219,7 @@ const store: Store<RootState> = new Vuex.Store({
 			state.email = userData.email;
 			state.token = userData.token;
 			state.recoveryTypeId = userData.recoveryTypeId;
+			state.fetch_key = userData.fetch_key;
 
 			Sentry.configureScope((scope) => {
 				scope.setUser({ id: state.accounts && state.accounts.length > 0 ? state.accounts[0] : '', email: state.email });
@@ -369,7 +372,6 @@ const store: Store<RootState> = new Vuex.Store({
 			const token: string = params.token;
 			const recoveryTypeId: number = params.recoveryTypeId;
 
-			console.log('password', password)
 			commit('logout');
 			return new Promise((resolve, reject) => {
 				commit('authRequested');
@@ -379,7 +381,7 @@ const store: Store<RootState> = new Vuex.Store({
 							.then((payload) => {
 								rootState.loginRetryCount = 0;
 								commit('ipCountry', payload.ip_country);
-								commit('userFound', { email, hashedPassword, token: params.token, recoveryTypeId: params.recoveryTypeId });
+								commit('userFound', { email, hashedPassword, token: params.token, recoveryTypeId: params.recoveryTypeId, fetch_key });
 								commit('updatePayload', payload);
 
 								if (payload.email || payload.needConfirmation) {
@@ -650,7 +652,6 @@ const store: Store<RootState> = new Vuex.Store({
 				if (emailCorrect && authenticatorCorrect && userConfirmed) {
 					getEncryptedSeedFromMail(rootState.email, params.email2FA, params.authenticator2FA, params.recaptchaToken, rootState.token, rootState.recoveryTypeId)
 						.then((encryptedSeed) => {
-							console.log('encryptedSeed', encryptedSeed, state.hashedPassword)
 							//const encryptedSeed = state.encryptedSeed; //normally that would need decrypting using 2fa codes
 							//commit('updatePayload', { email: false, authenticator: false });
 							commit('seedFound', { encryptedSeed });
@@ -658,7 +659,6 @@ const store: Store<RootState> = new Vuex.Store({
 								dispatch('unlockWithStoredPassword', params.recaptchaToken)
 									.then(() => resolve('/'))
 									.catch((err) => {
-										console.log('unlock reject', err)
 										const email = rootState.email;
 										commit('logout');
 										rootState.email = email;
@@ -686,35 +686,27 @@ const store: Store<RootState> = new Vuex.Store({
 		 * Unlock wallet using the password stored in local state
 		 */
 		async unlockWithStoredPassword({ dispatch, commit, state }, recaptchaToken: string) {
-			console.log(1)
 			commit('updateUnlocking', true);
 
 			if (!state.encryptedSeed || !state.encryptedSeed.ciphertext) {
-				console.log(2)
 				await dispatch('loadEncryptedSeed');
 			}
 
 			if (!state.hashedPassword) {
-				console.log(3)
 				await dispatch('loadPassword');
 			}
 			return new Promise((resolve, reject) => {
-				console.log(4, state.hashedPassword )
 				if (state.hashedPassword && state.encryptedSeed.ciphertext !== undefined) {
-					console.log(5)
 					dispatch('unlockWithPassword', { password: state.hashedPassword, recaptchaToken })
 						.then(() => {
-							console.log(6)
 							commit('updateUnlocking', false);
 							resolve(true);
 						})
 						.catch((e) => {
-							console.log(7)
 							commit('updateUnlocking', false);
 							reject(e);
 						});
 				} else {
-					console.log(8)
 					commit('updateUnlocking', false);
 					reject(new Error());
 				}
@@ -727,19 +719,16 @@ const store: Store<RootState> = new Vuex.Store({
 		 * Unlock wallet using the password entered on the logon form
 		 */
 		unlockWithPassword({ commit, state, dispatch }, params: TypeUnlockWithPassword) {
-			console.log('a')
 			commit('updateUnlocking', true);
 			return new Promise((resolve, reject) => {
 				getKeystoreFromEncryptedSeed(state.encryptedSeed, params.password)
 					.then((keystore: WalletBase) => {
-						console.log('b')
 						const accounts = getAccountsFromKeystore(keystore);
 						state.loginRetryCount = 0;
 
 						commit('keystoreUnlocked', { keystore, accounts, hashedPassword: params.password });
 						getPayload(state.email, params.recaptchaToken)
 							.then((payload) => {
-								console.log('d')
 								commit('ipCountry', payload.ip_country);
 								commit('updatePayload', payload);
 								dispatch('updateRecoveryMethods', { dbUpdate: false, recoveryTypeId: state.recoveryTypeId }).then(() => {
@@ -747,13 +736,11 @@ const store: Store<RootState> = new Vuex.Store({
 								});
 							})
 							.catch((e) => {
-								console.log('e')
 								reject(e);
 							});
 						commit('updateUnlocking', false);
 					})
 					.catch((err) => {
-						console.log('c', err)
 						commit('updateUnlocking', false);
 						state.loginRetryCount += 1;
 						if (state.loginRetryCount >= 3) commit('authError', "The user wasn't found: Signup first!");
@@ -932,7 +919,7 @@ const store: Store<RootState> = new Vuex.Store({
 			return new Promise(async (resolve, reject) => {
 				try {
 					const body = params.body;
-					const key = await sha256(state.email.toLowerCase());
+					const key = await sha256(state.fetch_key || state.email.toLowerCase());
 					body.nonce = (await getNonce(key)).nonce;
 					const signMessage = JSON.stringify(sortObject(body));
 					if (state.keystore != null) {

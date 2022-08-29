@@ -1,16 +1,13 @@
 <template>
 	<div class="field">
 		<!-- <div id="appleid-signin" data-color="black" data-border="true" data-type="sign in"></div> -->
-		<div class="control is-expanded" >
-			<button
-				class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
-				@click="doLogin"
-				data-cy="vkontakteButton"
-			>
+		<div class="control is-expanded">
+			<button class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
+				@click="doLogin" data-cy="vkontakteButton">
 				<span class="icon img">
 					<img src="@/assets/img/apple_logo.svg" alt="Apple Logo" />
 				</span>
-				<span>{{signIn == true ? 'Sign up' : 'Login'}} with Apple</span>
+				<span>{{ signIn == true ? 'Sign up' : 'Login' }} with Apple</span>
 			</button>
 
 
@@ -33,7 +30,7 @@ const state = uuid();
 
 @Component({
 	components: {
-		
+
 	}
 })
 export default class AddRecoveryApple extends mixins(Global, Authenticated) {
@@ -41,7 +38,7 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 	clientId = process.env.VUE_APP_APPLE_CLIENT_ID;
 	recoveryTypeId = 6;
 
-	@Prop({default: false})
+	@Prop({ default: false })
 	signIn;
 
 	@Emit('processMethod')
@@ -51,16 +48,16 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 
 	async mounted() {
 		try {
-		    
+
 			await window.AppleID.auth.init({
-					clientId : this.clientId,
-					scope : 'email',
-					redirectURI : 'https://wallet-dev.morpher.com',
-					state : state,
-					nonce : rawNonce,
-					usePopup : true
-				});
-				
+				clientId: this.clientId,
+				scope: 'email',
+				redirectURI: 'https://wallet-dev.morpher.com',
+				state: state,
+				nonce: rawNonce,
+				usePopup: true
+			});
+
 			this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 
 		} catch (err) {
@@ -76,7 +73,7 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 			}).catch(err => {
 				this.onError(err)
 			})
-		
+
 		} catch (err) {
 			this.onError(err)
 		}
@@ -84,11 +81,11 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 	}
 
 	onError(error) {
-		if (error && error.detail && error.detail.error  && error.detail.error == "popup_closed_by_user") {
+		if (error && error.detail && error.detail.error && error.detail.error == "popup_closed_by_user") {
 			return;
 		}
-		let errorMessage = error.error || error.err || error.message || JSON.stringify(error)		
-		if (error && error.detail && error.detail.error  && error.detail.error) {
+		let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
+		if (error && error.detail && error.detail.error && error.detail.error) {
 			errorMessage = error.detail.error
 		}
 		if (errorMessage == 'popup_closed_by_user' || errorMessage == 'user_trigger_new_signin_flow') {
@@ -116,57 +113,19 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 		console.log('login apple', appleUser)
 
 		const authorizationCode = appleUser.code || appleUser.authorizationCode;
-    	const identityToken = appleUser.id_token || appleUser.identityToken;
-    	const nonce = appleUser.nonce;
-    	const decoded = jwt_decode(identityToken);
-    	const userID = decoded.sub;
-    	const email = decoded.email;
+		const identityToken = appleUser.id_token || appleUser.identityToken;
+		const nonce = appleUser.nonce;
+		const decoded = jwt_decode(identityToken);
+		const userID = decoded.sub;
+		const email = decoded.email;
 		const key = this.clientId + userID
 
-		 this.processMethod({
-		 	success: true,
-		 	userID,key, token: JSON.stringify({ identityToken, authorizationCode, nonce }), recoveryTypeId: this.recoveryTypeId, email: email
-		 });
-		
+		this.processMethod({
+			success: true,
+			userID, key, token: JSON.stringify({ identityToken, authorizationCode, nonce }), recoveryTypeId: this.recoveryTypeId, email: email
+		});
+
 		return;
-		
-		// this.showSpinner(this.$t('loader.SAVING_KEYSTORE_RECOVERY'));
-		// const userID = appleUser.authorizedData.userId;
-		// const key = await sha256(this.clientId + userID);
-
-		// this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
-		// 	.then(async () => {
-		// 		if (this.$gtag && window.gtag)
-		// 			window.gtag('event', 'add_recovery', {
-		// 				method: 'apple'
-		// 			});
-
-		// 		this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_SUCCESSFULLY'));
-		// 		this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
-		// 		this.processMethod({
-		// 			success: true,
-		// 			method: 'Apple',
-		// 			enabled: true,
-		// 			erorr: ''
-		// 		});
-		// 	})
-		// 	.catch((error) => {
-		// let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
-		// 		console.log('onLogin error', errorMessage)					
-		// 		this.logSentryError('addAppleRecovery', errorMessage, {
-		// 			hasRecoveryMethod: this.hasRecoveryMethod,
-		// 			clientId: this.clientId,
-		// 			recoveryTypeId: this.recoveryTypeId,
-		// 			appleUser
-		// 		});
-		// 		this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_ERROR'));
-		// 		this.processMethod({
-		// 			success: false,
-		// 			method: 'Apple',
-		// 			enabled: true,
-		// 			erorr: ''
-		// 		});
-		// 	});
 	}
 
 	async onDelete(appleUser) {
