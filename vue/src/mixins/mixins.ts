@@ -232,8 +232,7 @@ export class Global extends Vue {
 		);
 	}
 	filterError(error: string) {
-		const filters = ['popup_closed_by_user', 'Keystore not found', 'EMAIL_2FA_WRONG', 'Non-Error promise rejection captured with value: Timeout']
-		
+		const filters = ['popup_closed_by_user', 'Keystore not found', 'EMAIL_2FA_WRONG', 'Non-Error promise rejection captured with value: Timeout', 'user_trigger_new_signin_flow']
 		let allow = true;
 
 		filters.forEach(filter => {

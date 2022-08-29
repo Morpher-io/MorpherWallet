@@ -193,8 +193,10 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 		const password = this.walletPassword;
 		const recaptchaToken = this.recaptchaToken;
 
+		
+
 		// Call the fetchUser store action to process the wallet logon
-		this.fetchUser({ email, password, recaptchaToken })
+		this.fetchUser({ email, password, recaptchaToken, token: '',recoveryTypeId: 1, fetch_key: email })
 			.then(() => {
 				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator || this.store.twoFaRequired.needConfirmation) {
 					this.hideSpinner();

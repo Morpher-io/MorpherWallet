@@ -5,7 +5,6 @@
 				class="button is-grey big-button outlined-button is-thick transition-faster"
 				:params="{ clientId }"
 				:onSuccess="onLogin"
-				:onCurrentUser="onLogin"
 				:onFailure="onError"
 				data-cy="googleButton"
 			>
@@ -21,7 +20,6 @@
 					class="button is-danger big-button is-thick transition-faster"
 					:params="{ clientId }"
 					:onSuccess="onDelete"
-					:onCurrentUser="onDelete"
 					:onFailure="onError"
 				>
 					<span class="icon img">
@@ -95,6 +93,7 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 		this.showSpinner(this.$t('loader.SAVING_KEYSTORE_RECOVERY'));
 		const userID = googleUser.getBasicProfile().getId();
 		const key = await sha256(this.clientId + userID);
+		
 		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
 			.then(async () => {
 				if (this.$gtag && window.gtag)

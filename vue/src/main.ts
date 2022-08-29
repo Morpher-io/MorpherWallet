@@ -8,7 +8,6 @@ import VueGtag from 'vue-gtag';
 import Cookie from 'js-cookie';
 import { checkErrorFilter } from './utils/sentry';
 import Buefy from 'buefy';
-import VueAppleLogin from 'vue-apple-login';
 
 
 Vue.config.productionTip = false;
@@ -92,13 +91,6 @@ if (process.env.VUE_APP_SENTRY_ENDPOINT) {
 	});
 }
 
-Vue.use(VueAppleLogin, {
-	clientId: process.env.VUE_APP__APPLE_CLIENT_ID,
-	scope: 'name email',
-	redirectURI: 'https://wallet-dev.morpher.com',
-	state: Date.now().toString(),
-	usePopup: true,
-  });
 
 Vue.use(
 	VueGtag,

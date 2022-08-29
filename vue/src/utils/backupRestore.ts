@@ -16,6 +16,7 @@ const changePasswordEncryptedSeed = async (encryptedSeed: TypeEncryptedSeed, old
 
 const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: TypeEncryptedSeed, password: string): Promise<WalletBase> =>
 	new Promise((resolve, reject) => {
+		console.log(0, password, encryptedWalletObject)
 		getKeystore(password, encryptedWalletObject)
 			.then((returnObj: TypeCreatedKeystore) => {
 				resolve(returnObj.keystore);
@@ -25,7 +26,7 @@ const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: TypeEncrypted
 			});
 	});
 
-const getEncryptedSeedFromMail = async (email: string, email2fa: string, authenticator2fa: string, recaptchaToken: string) =>
+const getEncryptedSeedFromMail = async (email: string, email2fa: string, authenticator2fa: string, recaptchaToken: string, token: string, recoveryTypeId: number) =>
 	new Promise<TypeEncryptedSeed>((resolve, reject) => {
 		sha256(email.toLowerCase()).then((key: string) => {
 			const options: RequestInit = {
@@ -34,7 +35,7 @@ const getEncryptedSeedFromMail = async (email: string, email2fa: string, authent
 					Accept: 'application/json',
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ key, email2fa, authenticator2fa, recaptcha: recaptchaToken }),
+				body: JSON.stringify({ key, email2fa, authenticator2fa, recaptcha: recaptchaToken, token, recovery_type: recoveryTypeId }),
 				mode: 'cors',
 				cache: 'default'
 			};
@@ -114,8 +115,9 @@ const validateInput = async (fieldName: string, inputFieldValue: string) => {
 	}
 };
 
-const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEncryptedSeed, ethAddress: string, recaptchaToken: string) => {
-	const key = await sha256(userEmail.toLowerCase());
+const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEncryptedSeed, ethAddress: string, recaptchaToken: string, recoveryTypeId: number, token: string, fetch_key: string) => {
+	
+	const key = await sha256(fetch_key.toLowerCase() || userEmail.toLowerCase());
 	const options: RequestInit = {
 		method: 'POST',
 		headers: {
@@ -127,7 +129,9 @@ const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEnc
 			encryptedSeed,
 			email: userEmail.toLowerCase(),
 			ethAddress,
-			recaptcha: recaptchaToken
+			recaptcha: recaptchaToken,
+			recovery_type: recoveryTypeId,
+			access_token: token
 		}),
 		mode: 'cors',
 		cache: 'default'
@@ -175,6 +179,7 @@ const getPayload = (email: string, recaptchaToken = '') =>
 	new Promise<TypePayloadData>(async (resolve, reject) => {
 		try {
 			const key = await sha256(email.toLowerCase());
+
 			const options: RequestInit = {
 				method: 'POST',
 				headers: {

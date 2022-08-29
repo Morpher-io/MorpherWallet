@@ -36,6 +36,9 @@ export type TypeFetchUser = {
 	email: string;
 	password: string;
 	recaptchaToken: string;
+	token: string;
+	recoveryTypeId: number
+	fetch_key: string;
 };
 
 export type TypeUnlock2fa = {
@@ -68,6 +71,7 @@ export type TypeUnlockWithPassword = {
 export type TypeUpdateRecovery = {
 	__typename?: 'TypeUpdateRecovery';
 	dbUpdate: boolean;
+	recoveryTypeId: string;
 };
 
 export type TypeChangePassword = {
@@ -98,6 +102,8 @@ export type TypeUserFoundData = {
 	__typename?: 'TypeUserFoundData';
 	email: string;
 	hashedPassword: string;
+	token: string
+	recoveryTypeId: number
 };
 
 

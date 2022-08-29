@@ -56,7 +56,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
 
     if (recoveryTypeId == 3) {
         const token = req.body.access_token
-        const CLIENT_ID = '110832256161-1h90sr0brbog9emgmg1lrollro987mlu.apps.googleusercontent.com';
+        const CLIENT_ID = process.env.GOOGLE_APP_ID;
 
         const {OAuth2Client} = require('google-auth-library');
         const client = new OAuth2Client(CLIENT_ID);

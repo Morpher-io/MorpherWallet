@@ -4,7 +4,6 @@
 			class="button is-grey big-button outlined-button is-thick transition-faster"
 			:params="{ client_id: clientId }"
 			:onSuccess="onLogin"
-			:onCurrentUser="onLogin"
 			:onFailure="onError"
 		>
 			<span class="icon img">
