@@ -727,7 +727,7 @@ const store: Store<RootState> = new Vuex.Store({
 						state.loginRetryCount = 0;
 
 						commit('keystoreUnlocked', { keystore, accounts, hashedPassword: params.password });
-						getPayload(state.email, params.recaptchaToken)
+						getPayload(state.fetch_key || state.email, params.recaptchaToken)
 							.then((payload) => {
 								commit('ipCountry', payload.ip_country);
 								commit('updatePayload', payload);

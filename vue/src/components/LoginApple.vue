@@ -110,12 +110,15 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 	}
 
 	async onLogin(appleUser) {
-		console.log('login apple', appleUser)
+		if (appleUser.authorization)
+		appleUser = appleUser.authorization;
 
 		const authorizationCode = appleUser.code || appleUser.authorizationCode;
 		const identityToken = appleUser.id_token || appleUser.identityToken;
 		const nonce = appleUser.nonce;
+
 		const decoded = jwt_decode(identityToken);
+
 		const userID = decoded.sub;
 		const email = decoded.email;
 		const key = this.clientId + userID
@@ -128,40 +131,6 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 		return;
 	}
 
-	async onDelete(appleUser) {
-		console.log('onDelete', appleUser)
-
-		return;
-		// this.showSpinner(this.$t('loader.DELETING_KEYSTORE_RECOVERY'));
-		// const userID = appleUser.getBasicProfile().getId();
-		// const key = await sha256(this.clientId + userID);
-		// this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId })
-		// 	.then(async () => {
-		// 		this.showSpinnerThenAutohide(this.$t('loader.DELETED_KEYSTORE_SUCCESSFULLY'));
-		// 		this.hasRecoveryMethod = false;
-		// 		this.processMethod({
-		// 			success: true,
-		// 			method: 'Apple',
-		// 			enabled: false,
-		// 			erorr: ''
-		// 		});
-		// 	})
-		// 	.catch((error) => {
-		// 		this.logSentryError('deleteAppleRecovery', error.toString(), {
-		// 			hasRecoveryMethod: this.hasRecoveryMethod,
-		// 			clientId: this.clientId,
-		// 			recoveryTypeId: this.recoveryTypeId,
-		// 			appleUser
-		// 		});
-		// 		this.showSpinnerThenAutohide(this.$t('common.ERROR_FIND_USER'));
-		// 		this.processMethod({
-		// 			success: false,
-		// 			method: 'Apple',
-		// 			enabled: false,
-		// 			erorr: ''
-		// 		});
-		// 	});
-	}
 }
 </script>
 
