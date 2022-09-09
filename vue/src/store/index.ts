@@ -68,6 +68,7 @@ export interface RootState {
 	spinnerStatusText: string;
 	message: string;
 	email: string;
+	loginEmail: string;
 	fetch_key: string;
 	
 	iconSeed: number;
@@ -122,6 +123,7 @@ function initialState(): RootState {
 		spinnerStatusText: '',
 		message: '',
 		email,
+		loginEmail: '',
 		iconSeed,
 		hashedPassword,
 		encryptedSeed: {},
@@ -229,6 +231,10 @@ const store: Store<RootState> = new Vuex.Store({
 			state.recoveryTypeId = userData.recoveryTypeId;
 			state.fetch_key = userData.fetch_key;
 
+			if (userData.loginEmail) {
+				state.loginEmail = userData.loginEmail;
+			}		
+
 			Sentry.configureScope((scope) => {
 				scope.setUser({ id: state.accounts && state.accounts.length > 0 ? state.accounts[0] : '', email: state.email });
 			});
@@ -260,6 +266,7 @@ const store: Store<RootState> = new Vuex.Store({
 			state.email = '';
 			state.hashedPassword = '';
 			state.unlocked = false;
+			state.loginEmail = '';
 
 			sessionStorage.removeItem('encryptedSeed');
 			localStorage.removeItem('login')
@@ -282,6 +289,7 @@ const store: Store<RootState> = new Vuex.Store({
 			state.hashedPassword = '';
 			state.encryptedSeed = {};
 			state.keystore = null;
+			state.loginEmail = '';
 
 			state.status = '';
 			state.token = '';
@@ -398,7 +406,7 @@ const store: Store<RootState> = new Vuex.Store({
 							.then((payload) => {
 								rootState.loginRetryCount = 0;
 								commit('ipCountry', payload.ip_country);
-								commit('userFound', { email: payload.user_email || email, hashedPassword, token: params.token, recoveryTypeId: params.recoveryTypeId, fetch_key });
+								commit('userFound', { email: payload.user_email || email, loginEmail: email, hashedPassword, token: params.token, recoveryTypeId: params.recoveryTypeId, fetch_key });
 								commit('updatePayload', payload);
 
 								if (payload.email || payload.needConfirmation) {
@@ -672,7 +680,7 @@ const store: Store<RootState> = new Vuex.Store({
 				}
 
 				if (emailCorrect && authenticatorCorrect && userConfirmed) {
-					getEncryptedSeedFromMail(rootState.fetch_key || rootState.email, rootState.email, params.email2FA, params.authenticator2FA, params.recaptchaToken, rootState.token, rootState.recoveryTypeId)
+					getEncryptedSeedFromMail(rootState.fetch_key || rootState.email, rootState.loginEmail || rootState.email, params.email2FA, params.authenticator2FA, params.recaptchaToken, rootState.token, rootState.recoveryTypeId)
 						.then((encryptedSeed) => {
 							//const encryptedSeed = state.encryptedSeed; //normally that would need decrypting using 2fa codes
 							//commit('updatePayload', { email: false, authenticator: false });

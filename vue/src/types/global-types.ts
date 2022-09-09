@@ -108,6 +108,7 @@ export type TypeUserFoundData = {
 	token: string
 	recoveryTypeId: number
 	fetch_key: string
+	loginEmail?: string;
 };
 
 
