@@ -62,6 +62,13 @@
 					<p class="mr-1">{{ $t('recovery.GOOGLE_RECOVERY') }}</p>
 					<span class="enabled">{{ $t('common.ENABLED') }}</span>
 				</div>
+				<div class="protection-enabled mt-1" v-if="whatRecovery.apple">
+					<span class="icon img mr-1">
+						<img src="@/assets/img/apple_logo.svg" alt="Apple Logo" />
+					</span>
+					<p class="mr-1">{{ $t('recovery.APPLE_RECOVERY') }}</p>
+					<span class="enabled">{{ $t('common.ENABLED') }}</span>
+				</div>				
 				<div class="protection-enabled mt-1" v-if="whatRecovery.facebook">
 					<span class="icon img mr-1">
 						<img src="@/assets/img/fb_logo.svg" alt="Facebook Logo" />
@@ -143,7 +150,8 @@ export default class Wallet extends mixins(Global, Authenticated) {
 	whatRecovery = {
 		facebook: false,
 		google: false,
-		vkontakte: false
+		vkontakte: false,
+		apple: false
 	};
 
 	async mounted() {
@@ -171,11 +179,14 @@ export default class Wallet extends mixins(Global, Authenticated) {
 		const facebook = await this.hasRecovery(2);
 		const google = await this.hasRecovery(3);
 		const vkontakte = await this.hasRecovery(5);
+		const apple = await this.hasRecovery(6);
+		
 
 		this.whatRecovery = {
 			facebook,
 			google,
-			vkontakte
+			vkontakte,
+			apple
 		};
 
 		this.store.loginComplete = true;

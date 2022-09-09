@@ -118,6 +118,7 @@
         "REVOKE_ACCESS": "Revoke Access",
         "ACCOUNT_AT_RISK": "Your account is at risk, <b>losing your password means losing all your funds</b>. We recommend adding a trusted recovery account.",
         "GOOGLE_RECOVERY": "Google Recovery",
+        "APPLE_RECOVERY": "Apple Recovery",
         "FACEBOOK_RECOVERY": "Facebook Recovery",
         "VKONTAKTE_RECOVERY": "VKontakte Recovery"
     },
