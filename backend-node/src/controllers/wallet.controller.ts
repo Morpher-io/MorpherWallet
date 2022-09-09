@@ -414,8 +414,7 @@ export async function getEncryptedSeed(req, res) {
             let token = req.body.access_token;
     
             if (!token) {
-                return errorResponse(res, 'MISSING_APPLE_TOKEN', 500);                                
-                //return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                                
+                return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                                
             }
             token = JSON.parse(token)
             try {
@@ -426,11 +425,11 @@ export async function getEncryptedSeed(req, res) {
     
                 if (!appleIdTokenClaims || !appleIdTokenClaims.email || appleIdTokenClaims.email.toLowerCase().replace(/ /g, '') !== req.body.email.toLowerCase().replace(/ /g, '')) {
 
-                    return errorResponse(res, 'APPLEVERIFICATION_ERROR' + JSON.stringify(appleIdTokenClaims), 500);                            
+                    return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
                 }
     
             } catch (err) {
-                if (err) return errorResponse(res, 'APPLEVERIFICATION_ERROR' + err.toString(), 500);            
+                return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
             }
     
     
@@ -465,7 +464,7 @@ export async function getEncryptedSeed(req, res) {
         }
         
         // Simply get Recovery instance that has this key and return it if its found.
-        const recovery = await Recovery.findOne({ where: { key, recovery_type_id }, raw: true });
+        const recovery = await Recovery.findOne({ where: { key, recovery_type_id } });
 
         const ip_address = req.ip;
 
