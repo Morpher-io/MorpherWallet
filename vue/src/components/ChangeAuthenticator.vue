@@ -73,7 +73,7 @@ export default class ChangeAuthenticator extends mixins(Authenticated) {
 	}
 
 	async confirmAuthenticator() {
-		const confirmCode = await verifyAuthenticatorCode(this.store.email, this.authenticatorCode);
+		const confirmCode = await verifyAuthenticatorCode(this.store.fetch_key || this.store.email, this.authenticatorCode);
 
 		if (confirmCode.success) {
 			this.logonError = '';

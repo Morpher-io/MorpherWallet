@@ -23,7 +23,7 @@
 
 					<button
 						class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
-						@click="passwordSignin = true"
+						@click="logonError = ''; showSignUp = false; passwordSignin = true"
 						data-cy="vkontakteButton"
 					>
 						<span class="icon img">
@@ -31,13 +31,25 @@
 						</span>
 						<span>Login Using Email</span>
 					</button>
+
+					<div class="error mt-5" v-if="logonError">
+						<p data-cy="loginError">
+							⚠️ <span v-html="logonError"></span>
+							<router-link v-if="showSignUp" to="/signup" class="login-router transition-faster"
+								><span class="ml-1">{{ $t('auth.SIGN_UP_WALLET_QUESTION') }}</span></router-link
+							>							
+							<router-link v-if="showRecovery" to="/recovery" class="login-router transition-faster"
+								><span class="ml-1">{{ $t('auth.RECOVER_YOUR_WALLET_QUESTION') }}</span></router-link
+							>
+						</p>
+					</div>
 				</div>
 				<!-- Signin with email/password -->
 				<div v-else>
 					<div class="field">
 						<label class="label">{{ $t('common.EMAIL') }}</label>
 						<div class="control">
-							<input type="email" class="input" data-cy="walletEmail" name="walletEmail" v-model="walletEmail" />
+							<input type="email" class="input" data-cy="walletEmail" @keydown="checkKeyPress" name="walletEmail" v-model="walletEmail"    />
 						</div>
 					</div>
 
@@ -45,13 +57,16 @@
 						<label class="label">{{ $t('common.PASSWORD') }}</label>
 
 						<div class="control">
-							<input type="password" class="input" data-cy="walletPassword" name="walletPassword" v-model="walletPassword" />
+							<input type="password" ref="login_password" class="input" data-cy="walletPassword" @keydown="checkKeyPress" name="walletPassword" v-model="walletPassword" />
 						</div>
 					</div>
 
 					<div class="error" v-if="logonError">
 						<p data-cy="loginError">
 							⚠️ <span v-html="logonError"></span>
+							<router-link v-if="showSignUp" to="/signup" class="login-router transition-faster"
+								><span class="ml-1">{{ $t('auth.SIGN_UP_WALLET_QUESTION') }}</span></router-link
+							>
 							<router-link v-if="showRecovery" to="/recovery" class="login-router transition-faster"
 								><span class="ml-1">{{ $t('auth.RECOVER_YOUR_WALLET_QUESTION') }}</span></router-link
 							>
@@ -107,6 +122,7 @@ export default class Login extends mixins(Global, Recaptcha) {
 	showRecovery = false;
 	logonError = '';
 	passwordSignin = false;
+	showSignUp = false;
 	loginUser: any = {};
 
 	unlock() {
@@ -154,10 +170,12 @@ export default class Login extends mixins(Global, Recaptcha) {
 			if (this.walletEmail) this.loginErrorReturn(this.walletEmail, 'INVALID_PASSWORD');
 			this.showRecovery = true;
 		}
+
 	}
 
 	processMethod(data: any): void {
 		this.logonError = '';
+		this.showSignUp = false;
 
 		if (data.success) {
 			this.loginUser = data;
@@ -171,6 +189,19 @@ export default class Login extends mixins(Global, Recaptcha) {
 				this.logonError = getDictionaryValue('GOOGLE_SCRIPT_BLOCKED');
 			} else {
 				this.logonError = data.method + ': ' + getDictionaryValue(data.error);
+			}
+		}
+	}
+	checkKeyPress(e: any) {
+		if (e.key == 'Enter') {
+			if (this.walletPassword) {
+				this.login()
+			} else {
+				// set focus to the password field if it is blanck
+				window.setTimeout(() => {
+					const passwordElement: any = this.$refs.login_password;
+					if (passwordElement) passwordElement.focus();
+				}, 100);
 			}
 		}
 	}
@@ -195,6 +226,7 @@ export default class Login extends mixins(Global, Recaptcha) {
 			return;
 		}
 		this.logonError = '';
+		this.showSignUp = false;
 		this.showSpinner(this.$t('loader.LOADING_ACCOUNT').toString());
 		this.store.loginComplete = false;
 		let email = this.walletEmail;
@@ -203,8 +235,8 @@ export default class Login extends mixins(Global, Recaptcha) {
 		let recoveryTypeId = 1;
 		let token = null;
 		let fetch_key = email;
-
-		if (this.loginUser && this.loginUser.userID  && this.loginUser.key) {
+		
+		if (!this.passwordSignin && this.loginUser && this.loginUser.userID  && this.loginUser.key) {
 			fetch_key  = this.loginUser.key
 			email = this.loginUser.email || this.loginUser.key
 			password = this.loginUser.userID;
@@ -259,6 +291,17 @@ export default class Login extends mixins(Global, Recaptcha) {
 
 			if (error !== true && error !== false) {
 				if (error.success === false) {
+					if (error.error == 'USER_NOT_FOUND') {
+						if (Number(recoveryTypeId) === 3) {
+							error.error = 'USER_NOT_FOUND_GOOGLE'
+							this.showSignUp = true;
+						}
+						if (Number(recoveryTypeId) === 6) {
+							error.error = 'USER_NOT_FOUND_APPLE'
+							this.showSignUp = true;
+						}
+
+					}
 					this.loginErrorReturn(email, error.error);
 					this.logonError = getDictionaryValue(error.error);
 				} else {

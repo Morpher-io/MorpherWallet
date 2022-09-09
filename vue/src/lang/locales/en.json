@@ -16,6 +16,7 @@
         "AUTHENTICATOR": "Authenticator",
         "SUBMIT": "Submit",
         "CONFIRM": "Confirm",
+        "CURRENT_EMAIL": "Current Email",
         "NEW_EMAIL": "New Email",
         "PASSWORD": "Password",
         "UPDATE_EMAIL": "Update Email",
@@ -50,6 +51,7 @@
         "LOGIN": "Log In",
         "LOGIN_DESCRIPTION": "Unlock your crypto wallet.",
         "RECOVER_YOUR_WALLET_QUESTION": "Recover your wallet?",
+        "SIGN_UP_WALLET_QUESTION": "Sign up with this account?",
         "FORGOT_PASSWORD": "Forgot password?",
         "RECOVER_YOUR_WALLET": "Recover your wallet",
         "DO_NOT_HAVE_WALLET": "Don't have a wallet?",
@@ -61,7 +63,15 @@
         "UNLOCK_DESCRIPTION": "Unlock your crypto wallet.",
         "SWITCH_ACCOUNT": "Switch account",
         "CANNOT_DECRYPT_PASSWORD": "The Password you provided can't be used to de-crypt your wallet.",
-        "RESTORE_ACCOUNT": "Do you want to restore your Account?"
+        "RESTORE_ACCOUNT": "Do you want to restore your Account?",
+        "SIGN_UP_GOOGLE": "Sign up with Google",
+        "LOG_IN_GOOGLE": "Log in with Google",
+        "UNLOCK_GOOGLE": "Unlock with Google",
+        "UPDATE_GOOGLE": "Update with Google",
+        "SIGN_UP_APPLE": "Sign up with Apple",
+        "LOG_IN_APPLE": "Log in with Apple",
+        "UNLOCK_APPLE": "Unlock with Apple",
+        "UPDATE_APPLE": "Update with Apple"
     },
     "settings": {
         "SETTINGS_TITLE": "Settings",
@@ -139,7 +149,9 @@
         "PLEASE_ADD_2_STEP": "Please add 2-step verification to increase wallet security.",
         "2_STEP_AUTH": "2-Step Authenticator",
         "2_STEP_RECOMMENDATION_TITLE": "2-Step Recommendation",
-        "2_STEP_RECOMMENDATION_DESCRIPTION": "Complete KYC on Morpher to avoid losing wallet after losing 2FA device."
+        "2_STEP_RECOMMENDATION_DESCRIPTION": "Complete KYC on Morpher to avoid losing wallet after losing 2FA device.",
+        "2_STEP_EMAIL_ERROR_GOOGLE": "You cannot enable email 2fa because your account email is the same as your Google email.",
+        "2_STEP_EMAIL_ERROR_APPLE": "You cannot enable email 2fa because your account email is the same as your Apple email."
     },
     "password": {
         "CHANGE_PASSWORD_TITLE": "Change Password",
@@ -178,7 +190,8 @@
     },
     "confirm": {
         "CONFIRM_ACCESS_TITLE": "Confirm Access",
-        "CONFIRM_ACCESS_DESCRIPTION": "Please enter your password before making changes."
+        "CONFIRM_ACCESS_DESCRIPTION": "We sent you an email with code. Enter the verification code below to access your account settings.",
+        "CONFIRM_ACCESS_DESCRIPTION_AUTHENTICATOR": "Enter the authenticator 2fa code below to access your account settings." 
     },
     "images": {
         "RECOVER_WALLET": "Recover wallet image",
@@ -193,6 +206,8 @@
         "INTERNAL_SERVER_ERROR": "Internal server error",
         "BAD_REQUEST": "Bad request",
         "USER_NOT_FOUND": "No account found. Please check your credentials and try again.",
+        "USER_NOT_FOUND_GOOGLE": "No wallet found for this google account. Please use a different account or sign up with this account.",
+        "USER_NOT_FOUND_APPLE": "No wallet found for this apple account. Please use a different account or sign up with this account.",
         "RECOVERY_METHOD_ALREADY_SET": "Recovery Method already set!",
         "RECOVERY_METHOD_NOT_EXIST": "The Recovery Method does not exist.",
         "USER_ALREADY_EXISTS": "Wallet for this mail already exists.",

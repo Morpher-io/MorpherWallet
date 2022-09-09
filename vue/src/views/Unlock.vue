@@ -28,7 +28,13 @@
 			</div>
 		</div>
 
-		<div class="field">
+		<div v-if="recoveryTypeId == 3">
+			<LoginGoogle :unlock="true" @processMethod="processMethod"></LoginGoogle>
+		</div>
+		<div v-else-if="recoveryTypeId == 6">
+			<LoginApple :unlock="true" @processMethod="processMethod"></LoginApple>
+		</div>
+		<div  v-else class="field">
 			<label class="label">{{ $t('common.PASSWORD') }}</label>
 
 			<div class="control">
@@ -53,7 +59,7 @@
 			<p>⚠️ <span v-html="logonError"></span></p>
 		</div>
 
-		<button @click="login()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!walletPassword">
+		<button v-if="recoveryTypeId !== 3 && recoveryTypeId !== 6" @click="login()" class="button is-green big-button is-login transition-faster mt-5" :disabled="!walletPassword">
 			<span class="text">{{ $t('auth.LOGIN') }}</span>
 		</button>
 		<p class="forgot-password">
@@ -72,8 +78,12 @@ import { sha256 } from '../utils/cryptoFunctions';
 import jazzicon from '@metamask/jazzicon';
 import { getDictionaryValue } from '../utils/dictionary';
 import { Recaptcha } from '../mixins/recaptcha';
+import LoginGoogle from '../components/LoginGoogle.vue';
+import LoginApple from '../components/LoginApple.vue';
 
-@Component({})
+@Component({components: {
+		LoginApple, LoginGoogle
+	}})
 export default class Unlock extends mixins(Global, Recaptcha) {
 	// Component properties
 	walletPassword = '';
@@ -81,6 +91,8 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 	iconSeed = this.$store.getters.iconSeed;
 	showRecovery = false;
 	logonError = '';
+	recoveryTypeId = this.$store.getters.recoveryTypeId;
+	loginUser: any = {};
 
 	/**
 	 * Cmponent mounted lifestyle hook
@@ -91,6 +103,8 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 			const passwordEmelemt: any = this.$refs.unlock_password;
 			if (passwordEmelemt) passwordEmelemt.focus();
 		}, 100);
+
+		
 
 		const iconSeed = localStorage.getItem('iconSeed') || '';
 		this.generateImage(iconSeed);
@@ -104,10 +118,28 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 		}
 
 		if (this.$store.state.hashedPassword && this.$store.state.encryptedSeed.ciphertext !== undefined) {
-
 			this.loadAccount();
 		} else{
 			this.unlockUpdate();
+		}
+	}
+
+	processMethod(data: any): void {
+		this.logonError = '';
+
+		if (data.success) {
+			this.loginUser = data;
+
+			this.login();
+
+		} else {
+			if (data.error === 'popup_closed_by_user') {
+				this.logonError = getDictionaryValue('GOOGLE_COOKIES_BLOCKED');
+			} else if (data.error === 'google_script_blocked') {
+				this.logonError = getDictionaryValue('GOOGLE_SCRIPT_BLOCKED');
+			} else {
+				this.logonError = data.method + ': ' + getDictionaryValue(data.error);
+			}
 		}
 	}
 
@@ -148,12 +180,16 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 			return;
 		}
 		this.logonError = '';
-		const password = await sha256(this.walletPassword);
+		let password = await sha256(this.walletPassword);
+
+		if ((this.recoveryTypeId === 3 || this.recoveryTypeId === 6) && this.loginUser && this.loginUser.userID  && this.loginUser.key) {
+			password = this.loginUser.userID;
+		}
+
 		this.showSpinnerThenAutohide(this.$t('loader.RECOVERY_LOG_IN').toString());
 		const recaptchaToken = this.recaptchaToken;
 
 		if (this.$store.state.encryptedSeed && this.$store.state.encryptedSeed.ciphertext) {
-
 
 			// Call the fetchUser store action to process the wallet logon
 			this.unlockWithPassword({ password, recaptchaToken })
@@ -189,14 +225,26 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 		this.logonError = '';
 		this.showSpinner(this.$t('loader.LOADING_ACCOUNT').toString());
 		this.store.loginComplete = false;
-		const email = this.walletEmail;
-		const password = this.walletPassword;
+		let email = this.walletEmail;
+		let password = this.walletPassword;
 		const recaptchaToken = this.recaptchaToken;
+		let recoveryTypeId = 1;
+		let fetch_key;
+		let token = '';
+
+			
+		if ((this.recoveryTypeId === 3 || this.recoveryTypeId === 6) && this.loginUser && this.loginUser.userID  && this.loginUser.key) {
+			fetch_key  = this.loginUser.key
+			email = this.loginUser.email || this.loginUser.key
+			password = this.loginUser.userID;
+			recoveryTypeId = this.loginUser.recoveryTypeId;
+			token = this.loginUser.token;
+		}
 
 		
 
 		// Call the fetchUser store action to process the wallet logon
-		this.fetchUser({ email, password, recaptchaToken, token: '',recoveryTypeId: 1, fetch_key: email })
+		this.fetchUser({ email, password, recaptchaToken, token,recoveryTypeId: recoveryTypeId, fetch_key: fetch_key })
 			.then(() => {
 				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator || this.store.twoFaRequired.needConfirmation) {
 					this.hideSpinner();

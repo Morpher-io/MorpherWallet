@@ -65,7 +65,7 @@ export default class Change2FAEmail extends mixins(Authenticated) {
 	}
 
 	async confirmAuthenticator() {
-		const confirmCode = await verifyEmailCode(this.store.email, this.authenticatorCode);
+		const confirmCode = await verifyEmailCode(this.store.fetch_key || this.store.email, this.authenticatorCode);
 
 		if (confirmCode.success) {
 			this.logonError = '';

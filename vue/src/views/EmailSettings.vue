@@ -38,13 +38,15 @@ export default class EmailSettings extends mixins(Authenticated, Global) {
 	twoFaSent = false;
 	twoFa: any = null;
 	logonError = '';
+	recoveryTypeId = this.$store.getters.recoveryTypeId;
 
 	async submitChange() {
 		return this.changeEmail({ newEmail: this.newEmail, password: this.password, twoFa: this.twoFa });
 	}
 
 	async setNewData(data: any) {
-		if (!data.email || !data.password) return;
+		
+		if (!data.email || (!data.password && this.recoveryTypeId !== 3 && this.recoveryTypeId !== 6)) return;
 
 		this.newEmail = data.email;
 		this.password = data.password;
@@ -56,7 +58,7 @@ export default class EmailSettings extends mixins(Authenticated, Global) {
 			this.currentPage = 1;
 			this.twoFaSent = true;
 			this.twoFa = false;
-		} catch (error) {
+		} catch (error: any) {
 			if (error && error.toString() === 'TypeError: Failed to fetch') {
 				this.showNetworkError(true);
 			} else {
@@ -77,7 +79,7 @@ export default class EmailSettings extends mixins(Authenticated, Global) {
 			await this.submitChange();
 
 			this.currentPage = 2;
-		} catch (error) {
+		} catch (error: any) {
 			if (error && error.toString() === 'TypeError: Failed to fetch') {
 				this.showNetworkError(true);
 			} else {
@@ -103,6 +105,7 @@ export default class EmailSettings extends mixins(Authenticated, Global) {
 		this.twoFaSent = false;
 		this.twoFa = null;
 		this.logonError = '';
+		this.$router.push('/').catch(() => undefined);
 	}
 }
 </script>

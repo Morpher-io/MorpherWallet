@@ -47,6 +47,7 @@ import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
 import { Emit } from 'vue-property-decorator';
 import { v4 as uuid } from 'uuid'
+import jwt_decode from 'jwt-decode';
 
 const rawNonce = uuid();
 const state = uuid();
@@ -132,10 +133,20 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 	async onLogin(appleUser) {
 
 		this.showSpinner(this.$t('loader.SAVING_KEYSTORE_RECOVERY'));
-		const userID = appleUser.authorizedData.userId;
-		const key = await sha256(this.clientId + userID);
+		if (appleUser.authorization)
+		appleUser = appleUser.authorization;
 
-		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
+		const authorizationCode = appleUser.code || appleUser.authorizationCode;
+		const identityToken = appleUser.id_token || appleUser.identityToken;
+		const nonce = appleUser.nonce;
+
+		const decoded = jwt_decode(identityToken);
+
+		const userID = decoded.sub;
+		const email = decoded.email;
+		const key = this.clientId + userID
+
+		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId, token: JSON.stringify({ identityToken, authorizationCode, nonce }), email, currentRecoveryTypeId: this.store.recoveryTypeId })
 			.then(async () => {
 				if (this.$gtag && window.gtag)
 					window.gtag('event', 'add_recovery', {

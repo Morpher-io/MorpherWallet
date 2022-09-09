@@ -311,5 +311,8 @@ export class Authenticated extends Global {
 	public updateRecoveryMethods!: () => void;
 
 	@Action
+	public unlocked!: () => Promise<unknown>;
+
+	@Action
 	public updateUserPayload!: (params: TypeUpdateUserPayload) => void;
 }

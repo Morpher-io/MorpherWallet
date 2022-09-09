@@ -81,7 +81,7 @@
 					</div>
 				</div>
 			</div>
-			<div key="password" class="settings-link email-password is-flex is-align-items-center reset-cursor">
+			<div v-if="Number(store.recoveryTypeId) == 1"  key="password" class="settings-link email-password is-flex is-align-items-center reset-cursor">
 				<div class="data">
 					<p class="has-text-weight-bold">{{ $t('common.PASSWORD') }}</p>
 					<p>********</p>

@@ -52,6 +52,11 @@ export class Recovery extends Model {
     })
     created_at;
 
+    @Column({
+        type: DataType.STRING
+    })
+    email: string;
+
     @BelongsTo(() => Recovery_Type)
     recovery_type: Recovery_Type;
 

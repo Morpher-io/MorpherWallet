@@ -41,6 +41,12 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 	@Prop({ default: false })
 	signIn;
 
+	@Prop({ default: false })
+	unlock;
+
+	@Prop({ default: false })
+	update;	
+
 	@Emit('processMethod')
 	processMethod(data) {
 		return data;

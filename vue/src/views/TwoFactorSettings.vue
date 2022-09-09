@@ -12,9 +12,11 @@
 		<div v-if="currentPage === 0">
 			<div class="divider just-space" />
 			<Change2FA @setCurrentMethod="setCurrentMethod" />
+			<div v-if="ssoEmailError == 3" class="alert warning mt-3 is-size-7 has-text-left mb-5">⚠ {{ $t('2fa.2_STEP_EMAIL_ERROR_GOOGLE') }}</div>
+			<div v-if="ssoEmailError == 6" class="alert warning mt-3 is-size-7 has-text-left mb-5">⚠ {{ $t('2fa.2_STEP_EMAIL_ERROR_GOOGLE') }}</div>
 		</div>
 		<div v-if="currentPage === 1">
-			<ConfirmAccess @setPassword="setPassword" @pageBack="pageBack" />
+			<ConfirmAccess @accessConfirmed="accessConfirmed" @pageBack="pageBack" />
 		</div>
 		<div v-if="currentPage === 2">
 			<ChangeAuthenticator v-if="currentMethod === 'authenticator'" :qrCode="qrCode" @setCode="setCode" @pageBack="pageBack" />
@@ -46,6 +48,9 @@
 					<p class="has-text-left has-text-weight-bold mb-0">{{ $t('2fa.KYC_TITLE') }}</p>
 					<p class="has-text-left subtitle mt-0">{{ $t('2fa.KYC_DESCRIPTION') }}</p>
 				</div>
+
+				
+
 			</div>
 		</div>
 		<div class="error mt-3" v-if="updateError">
@@ -83,6 +88,7 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 	authenticatorConfirmed: any = false;
 	isEnabling = true;
 	updateError = '';
+	ssoEmailError = 0;
 	passwordTimeout: number | undefined = undefined;
 
 	async submitChange(type: 'email' | 'authenticator') {
@@ -140,7 +146,7 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 			}
 
 			this.hideSpinner();
-		} catch (error) {
+		} catch (error: any) {
 			this.hideSpinner();
 
 			if (error && error.toString() === 'TypeError: Failed to fetch') {
@@ -156,8 +162,10 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 	async generateQR() {
 		this.authenticatorConfirmed = false;
 		this.authenticatorCode = '';
+		const result = ((await this.generateQRCode()) as any)
 
-		this.qrCode = ((await this.generateQRCode()) as any).image;
+		console.log(result)
+		this.qrCode = result.image;
 		return false;
 	}
 
@@ -182,9 +190,26 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 	}
 
 	setCurrentMethod(method: any) {
+		
+		if (method.method == 'email' && method.isEnabling) {
+			if (this.store.recoveryTypeId == 3 || this.store.recoveryTypeId == 6) {
+				const find = this.store.recoveryMethods.find(recovery => recovery.id == this.store.recoveryTypeId)
+				if (find && find.email == this.store.email ) {
+					this.ssoEmailError = this.store.recoveryTypeId 
+					return;
+				}
+
+			}
+			
+		}
+
 		this.isEnabling = method['isEnabling'];
 		this.currentMethod = method['method'];
-		this.currentPage = 1;
+		if (this.$store.state.unlocked == true) {
+			this.accessConfirmed(true)
+		} else {
+			this.currentPage = 1;
+		}
 	}
 
 	@Watch('currentPage')
@@ -194,10 +219,11 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 		}
 	}
 
-	setPassword(password: string) {
-		if (!password) {
+	accessConfirmed(access: boolean) {
+		if (!access) {
 			return;
 		}
+
 
 		if (this.currentMethod === 'email') {
 			this.emailCode = '';

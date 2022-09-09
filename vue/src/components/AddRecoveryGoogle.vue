@@ -91,10 +91,11 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 
 	async onLogin(googleUser) {
 		this.showSpinner(this.$t('loader.SAVING_KEYSTORE_RECOVERY'));
-		const userID = googleUser.getBasicProfile().getId();
 		const key = await sha256(this.clientId + userID);
+		const userID = googleUser.getId();
+		const token = googleUser.Cc.id_token
 		
-		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
+		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId, token, email: googleUser.getBasicProfile().getEmail(), currentRecoveryTypeId: this.store.recoveryTypeId })
 			.then(async () => {
 				if (this.$gtag && window.gtag)
 					window.gtag('event', 'add_recovery', {

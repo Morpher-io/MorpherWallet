@@ -6,7 +6,10 @@
 				<span class="icon img">
 					<img src="@/assets/img/google_logo.svg" alt="Google Logo" />
 				</span>
-				<span>{{ signIn == true ? 'Sign up' : 'Login' }} with Google</span>
+				<span v-if="signIn">{{  $t('auth.SIGN_UP_GOOGLE') }} </span>
+				<span v-else-if="unlock">{{  $t('auth.UNLOCK_GOOGLE') }} </span>
+				<span v-else-if="update">{{  $t('auth.UPDATE_GOOGLE') }} </span>
+				<span v-else>{{  $t('auth.LOG_IN_GOOGLE') }} </span>
 			</GoogleLogin>
 		</div>
 
@@ -33,6 +36,12 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 
 	@Prop({ default: false })
 	signIn;
+
+	@Prop({ default: false })
+	unlock;
+
+	@Prop({ default: false })
+	update;	
 
 	@Emit('processMethod')
 	processMethod(data) {

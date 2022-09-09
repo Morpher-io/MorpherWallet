@@ -154,7 +154,8 @@ export default class Wallet extends mixins(Global, Authenticated) {
 				(await promise).onLogin(this.store.accounts[0], this.store.email);
 			}
 		}
-		if (this.store.recoveryMethods.length == 1) {
+		
+		if (!this.store.recoveryMethods.find(method => Number(method.id) !== 1)) {
 			this.noRecoveryMethods = true;
 		}
 		if (this.store.twoFaRequired.authenticator) {

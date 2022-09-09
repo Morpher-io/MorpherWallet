@@ -25,7 +25,7 @@
 				<div class="field">
 					<label class="label">{{  $t('common.EMAIL')  }}</label>
 					<div class="control">
-						<input type="email" class="input" name="walletEmail" data-cy="walletEmail"
+						<input ref="login_email"  @keydown="checkKeyPress" type="email" class="input" name="walletEmail" data-cy="walletEmail"
 							v-model="walletEmail" />
 					</div>
 				</div>
@@ -34,7 +34,7 @@
 					<label class="label">{{  $t('common.PASSWORD')  }}</label>
 
 					<div class="control">
-						<input type="password" class="input password-input" name="walletPassword"
+						<input ref="login_password"  @keydown="checkKeyPress" type="password" class="input password-input" name="walletPassword"
 							data-cy="walletPassword" v-model="walletPassword" />
 						<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8"
 							style="max-width: initial" />
@@ -78,7 +78,7 @@
 				<div class="field">
 					<label class="label">{{  $t('common.CONFIRM_PASSWORD')  }}</label>
 					<div class="control">
-						<input type="password" class="input" name="walletPasswordRepeat" data-cy="walletPasswordRepeat"
+						<input type="password" ref="login_password_repeat"  @keydown="checkKeyPress" class="input" name="walletPasswordRepeat" data-cy="walletPasswordRepeat"
 							v-model="walletPasswordRepeat" />
 					</div>
 				</div>
@@ -173,6 +173,35 @@ export default class Signup extends mixins(Global, Recaptcha) {
 		}
 	}
 
+	checkKeyPress(e: any) {
+		if (e.key == 'Enter') {
+			
+			if (this.walletEmail && this.walletPassword && this.walletPasswordRepeat) {
+				this.signupExecute(false)
+			} else {
+				// set focus to the password field if it is blanck
+				if (!this.walletEmail) {
+					window.setTimeout(() => {
+						const passwordElement: any = this.$refs.login_email;
+						if (passwordElement) passwordElement.focus();
+					}, 100);
+				} else if (!this.walletPassword ) {
+					window.setTimeout(() => {
+						const passwordElement: any = this.$refs.login_password;
+						if (passwordElement) passwordElement.focus();
+					}, 100);
+
+				} else if (!this.walletPasswordRepeat ) {
+					window.setTimeout(() => {
+						const passwordElement: any = this.$refs.login_password_repeat;
+						if (passwordElement) passwordElement.focus();
+					}, 100);
+					
+				}
+			}
+		}
+	}
+
 	// Methods
 	async signupExecute(e: any) {
 
@@ -192,7 +221,7 @@ export default class Signup extends mixins(Global, Recaptcha) {
 		let token = '';
 		let fetch_key = email;
 
-		if (this.loginUser && this.loginUser.userID && this.loginUser.key) {
+		if (!this.passwordSignin && this.loginUser && this.loginUser.userID && this.loginUser.key) {
 			fetch_key = this.loginUser.key
 			email = this.loginUser.email || this.loginUser.key
 			password = this.loginUser.userID;

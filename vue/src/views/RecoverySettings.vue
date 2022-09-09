@@ -1,6 +1,6 @@
 <template>
 	<div class="container">
-		<ConfirmAccess v-if="currentPage === 0" @pageBack="pageBack" @setPassword="setPassword" />
+		<ConfirmAccess v-if="currentPage === 0" @pageBack="pageBack" @accessConfirmed="accessConfirmed" />
 		<div v-if="currentPage === 1">
 			<div class="title-container has-text-left">
 				<button
@@ -130,6 +130,9 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 	};
 
 	async mounted() {
+		if (this.$store.state.unlocked == true) {
+			this.currentPage = 1;
+		}
 		const facebook = await this.hasRecovery(2);
 		const google = await this.hasRecovery(3);
 		const vkontakte = await this.hasRecovery(5);
@@ -145,6 +148,12 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 
 	pageBack() {
 		this.redirectUser();
+	}
+
+	async accessConfirmed(access: boolean) {
+		if (access) {
+			this.currentPage = 1;
+		}
 	}
 
 	async setPassword(password: string) {
