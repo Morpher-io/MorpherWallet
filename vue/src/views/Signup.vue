@@ -87,7 +87,7 @@
 					<p>⚠️ <span v-html="logonError"></span></p>
 				</div>
 
-				<button type="submit" data-cy="createNewWallet"
+				<button type="submit" @click="signupExecute" data-cy="createNewWallet"
 					class="button is-green big-button is-login transition-faster">
 					<span class="text">{{  $t('auth.CREATE_WALLET')  }}</span>
 				</button>
