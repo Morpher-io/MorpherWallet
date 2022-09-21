@@ -157,9 +157,8 @@ export default class Wallet extends mixins(Global, Authenticated) {
 	async mounted() {
 		if (this.isIframe() && !this.store.loginComplete) {
 			if (this.store.connection && this.store.connection !== null) {
-				const promise = this.store.connection.promise;
-
-				(await promise).onLogin(this.store.accounts[0], this.store.email);
+				const connection: any = await this.store.connection.promise;
+				connection.onLogin(this.store.accounts[0], this.store.email);
 			}
 		}
 		
@@ -218,8 +217,8 @@ export default class Wallet extends mixins(Global, Authenticated) {
 	async sendInApp() {
 		if (this.isIframe()) {
 			if (this.store.connection && this.store.connection !== null) {
-				const promise = this.store.connection.promise;
-				(await promise).openSendInApp();
+				const connection: any = await this.store.connection.promise;
+				connection.openSendInApp();
 			}
 		}
 	}

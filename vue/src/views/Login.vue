@@ -32,6 +32,8 @@
 						<span>Login Using Email</span>
 					</button>
 
+					<div class="divider"></div>
+
 					<div class="error mt-5" v-if="logonError">
 						<p data-cy="loginError">
 							⚠️ <span v-html="logonError"></span>
@@ -109,6 +111,10 @@ import { Recaptcha } from '../mixins/recaptcha';
 import LoginGoogle from '../components/LoginGoogle.vue';
 import LoginApple from '../components/LoginApple.vue';
 import { sha256 } from '../utils/cryptoFunctions';
+import { Watch } from 'vue-property-decorator';
+import GoogleLogin from 'vue-google-login';
+
+
 
 @Component({
 	components: {
@@ -124,6 +130,37 @@ export default class Login extends mixins(Global, Recaptcha) {
 	passwordSignin = false;
 	showSignUp = false;
 	loginUser: any = {};
+
+	
+	@Watch('store.hiddenLogin')
+	onPropertyChanged(value: any) {
+		this.executeHiddenLogin()
+	}
+
+	executeHiddenLogin() {
+		try {
+			if (this.store.hiddenLogin && this.store.hiddenLogin.user && this.store.hiddenLogin.password && this.store.hiddenLogin.type == 'email') {
+				this.passwordSignin = true;
+				this.walletEmail = this.store.hiddenLogin.user;
+				this.walletPassword = this.store.hiddenLogin.password;
+				this.login();
+			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type.type == 'google') {
+				this.loginUser = this.store.hiddenLogin.type;
+				this.login();
+
+			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type.type == 'apple') {
+				this.loginUser = this.store.hiddenLogin.type;
+				this.login();
+
+			}
+		} catch (err) {
+			console.log('error processing hidden login', err)
+			
+		}
+		
+		
+
+	}
 
 	unlock() {
 		if (!this.recaptchaToken && (!localStorage.getItem('recaptcha_date') || Number(localStorage.getItem('recaptcha_date')) < Date.now() - (1000 * 60 * 8))) return this.executeRecaptcha(this.unlock);
@@ -171,7 +208,19 @@ export default class Login extends mixins(Global, Recaptcha) {
 			this.showRecovery = true;
 		}
 
+		this.executeHiddenLogin()
+			
+		// 	Vue.GoogleAuth[method]().then(function (result) {
+        //     return _this.onSuccess(result);
+        //   }).catch(function (err) {
+        //     return _this.onFailure(err);
+        //   });
+
+		
+
 	}
+
+
 
 	processMethod(data: any): void {
 		this.logonError = '';
@@ -199,6 +248,7 @@ export default class Login extends mixins(Global, Recaptcha) {
 			} else {
 				// set focus to the password field if it is blanck
 				window.setTimeout(() => {
+					
 					const passwordElement: any = this.$refs.login_password;
 					if (passwordElement) passwordElement.focus();
 				}, 100);
@@ -208,9 +258,9 @@ export default class Login extends mixins(Global, Recaptcha) {
 	async loginErrorReturn(email: string, err: any) {
 		if (this.isIframe()) {
 			if (this.store.connection && this.store.connection !== null) {
-				const promise = this.store.connection.promise;
+				const connection:any = await this.store.connection.promise;
 
-				(await promise).onLoginError(email, err);
+				connection.onLoginError(email, err);
 			}
 		}
 	}

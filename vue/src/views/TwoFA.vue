@@ -102,14 +102,29 @@ export default class TwoFA extends mixins(Global, Recaptcha) {
 	showRecovery = false;
 	logonError = '';
 
-	mounted() {
+	async mounted() {
 		window.setTimeout(() => {
 			const email: any = this.$refs.email_code;
 			const auth: any = this.$refs.auth_code;
 			if (email) email.focus();
 			else if (auth) auth.focus();
 		}, 100);
+
+		if (this.isIframe()) {
+			if (this.store.connection && this.store.connection !== null) {
+				const connection:any = await this.store.connection.promise;
+
+				connection.on2FA();
+			}
+		}
+
+		this.executeHiddenLogin()
 		//
+	}
+
+	@Watch('store.hiddenLogin')
+	onPropertyChanged(value: any) {
+		this.executeHiddenLogin()
 	}
 
 	@Watch('authenticatorCode')
@@ -118,6 +133,26 @@ export default class TwoFA extends mixins(Global, Recaptcha) {
 			this.validateCode();
 		}
 	}
+
+	executeHiddenLogin() {
+		try {
+			
+			 if (this.store.hiddenLogin) {
+				console.log(this.store.hiddenLogin)
+
+				this.emailCode = this.store.hiddenLogin.twoFACode
+				this.validateCode();
+
+			 }
+			} catch (err) {
+			console.log('error processing hidden login', err)
+			
+		}
+		
+		
+
+	}			 
+
 	/**
 	 * Process email 2fa authentication
 	 */

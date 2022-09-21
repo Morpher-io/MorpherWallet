@@ -4,7 +4,7 @@ declare module '*.vue' {
 }
 
 declare module '@metamask/jazzicon';
-
+declare module 'vue-google-login';
 
 declare module '*.json' {
 	const value: any;

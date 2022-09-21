@@ -22,7 +22,7 @@ import { sha256 } from '../utils/cryptoFunctions';
 
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
-import { Emit, Prop } from 'vue-property-decorator';
+import { Emit, Prop, Watch } from 'vue-property-decorator';
 
 @Component({
 	components: {
@@ -48,9 +48,11 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 		return data;
 	}
 
+
 	async mounted() {
 		this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 	}
+
 
 	onError(error) {
 		let errorMessage = error.error || error.err || error.message || JSON.stringify(error)

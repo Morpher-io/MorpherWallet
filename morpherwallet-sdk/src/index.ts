@@ -48,8 +48,6 @@ export type MorpherWalletConfig = {
   locale?: string;
 } | null;
 
-let iframeLoadedFired = false;
-
 export default class MorpherWallet {
 
 	wsRPCEndpointUrl: string;
@@ -59,6 +57,7 @@ export default class MorpherWallet {
   _on2FAUpdateCallback: any;
   _onRecoveryUpdateCallback: any;
 	_onLoginCallback: any;
+  _on2FACallback: any;
   _onLoginErrorCallback: any;
 	_onLogoutCallback: any;
 	_onCloseCallback: any;
@@ -127,6 +126,11 @@ export default class MorpherWallet {
     this._onLoginCallback = callback;
   }
 
+  on2FA(callback: any) {
+    this._on2FACallback = callback;
+  }
+  
+
   on2FAUpdate(callback: any) {
     this._on2FAUpdateCallback = callback;
   }
@@ -178,6 +182,33 @@ export default class MorpherWallet {
 		}
 
 	}
+
+  async loginWalletHidden(type: string, user: string, password: string) {
+    this.hideWallet()
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.loginWalletHidden(type, user, password);
+  }
+
+  async loginWallet2fa(twoFACode: string) {
+    this.hideWallet()
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.loginWallet2fa(twoFACode);
+  }
+
+  async walletRecoveryHidden(type: string) {
+    this.hideWallet()
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.walletRecoveryHidden(type);
+
+  }
+
+  async signupWalletHidden(type: string, walletEmail: string, walletPassword: string, walletPasswordRepeat: string, loginUser: any) {
+  	
+
+    this.hideWallet()
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.signupWalletHidden(type, walletEmail, walletPassword, walletPasswordRepeat, loginUser);
+  }
 
 	async showWalletSettings() {
 		this.showWallet()
@@ -268,24 +299,23 @@ export default class MorpherWallet {
 }
 
   async iframeLoaded() {
-    return new Promise((resolve): void => {
-      if(iframeLoadedFired) {
-        resolve(true);
+    return new Promise((resolve) => {
+      const frame: any = document.getElementById('morpher_wallet_sdk_iframe')
+      if (frame && frame.contentWindow && !frame.contentDocument) {
+          return resolve(true);
       }
+      const int = setInterval(() => {
+          if (frame && frame.contentWindow && !frame.contentDocument) {
+              clearInterval(int);
+              return resolve(true);
+          }
 
-      morpherWalletIframe.onload = () => {
-        iframeLoadedFired = true;
-        resolve(true);
-      };
-    });
+      }, 100)
+  });
   }
 
   async _initWidget() {
 		morpherWalletIframe.src = WIDGET_URL;
-		
-		morpherWalletIframe.onload = () => {
-			iframeLoadedFired = true;
-		};
     
     await onWindowLoad();
     const style = document.createElement('style');
@@ -316,6 +346,7 @@ export default class MorpherWallet {
         setHeight: this._setHeight.bind(this),
         getWindowSize: this._getWindowSize.bind(this),
 				onLogin: this._onLogin.bind(this),
+        on2FA: this._on2FA.bind(this),
         on2FAUpdate: this._on2FAUpdate.bind(this),
         onRecoveryUpdate: this._onRecoveryUpdate.bind(this),
         onLoginError: this._onLoginError.bind(this),
@@ -472,6 +503,13 @@ export default class MorpherWallet {
       this._onLoginCallback(walletAddress, email);
     }
 	}
+
+  _on2FA() {
+    if (this._on2FACallback) {
+      this._on2FACallback();
+    }
+  }
+
 
   _on2FAUpdate(method: any, enabled: any) {
     if (this._on2FAUpdateCallback) {

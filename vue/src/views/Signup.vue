@@ -141,6 +141,12 @@ export default class Signup extends mixins(Global, Recaptcha) {
 		match: ''
 	};
 
+	mounted() {
+
+		this.executeHiddenLogin()
+
+	}
+
 	@Watch('walletPassword')
 	handlePasswordChange(newValue: string) {
 		this.passwordChecks = this.checkPassword(newValue, false, this.passwordChecks, this.walletPasswordRepeat);
@@ -149,6 +155,39 @@ export default class Signup extends mixins(Global, Recaptcha) {
 	@Watch('walletPasswordRepeat')
 	handlePasswordRepeatChange(newValue: string) {
 		this.passwordChecks = this.checkPassword(this.walletPassword, false, this.passwordChecks, newValue, true);
+	}
+
+	@Watch('store.hiddenLogin')
+	onPropertyChanged(value: any) {
+		this.executeHiddenLogin()
+	}
+
+	executeHiddenLogin() {
+		try {
+			
+			 if (this.store.hiddenLogin && this.store.hiddenLogin.walletEmail && this.store.hiddenLogin.walletPassword && this.store.hiddenLogin.type == 'email') {
+				this.passwordSignin = true;
+				this.walletEmail = this.store.hiddenLogin.walletEmail;
+				this.walletPassword = this.store.hiddenLogin.walletPassword;
+				console.log(this.store.hiddenLogin)
+				this.walletPasswordRepeat = this.store.hiddenLogin.walletPasswordRepeat;
+				this.signupExecute(false);
+			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type == 'google') {
+				this.loginUser = this.store.hiddenLogin.loginUser;
+				this.signupExecute(false);
+
+			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type == 'apple') {
+				this.loginUser = this.store.hiddenLogin.loginUser;
+				this.signupExecute(false);
+
+			}
+		} catch (err) {
+			console.log('error processing hidden login', err)
+			
+		}
+		
+		
+
 	}
 
 	processMethod(data: any): void {

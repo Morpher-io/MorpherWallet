@@ -7,7 +7,10 @@
 				<span class="icon img">
 					<img src="@/assets/img/apple_logo.svg" alt="Apple Logo" />
 				</span>
-				<span>{{ signIn == true ? 'Sign up' : 'Login' }} with Apple</span>
+				<span v-if="signIn">{{  $t('auth.SIGN_UP_APPLE') }} </span>
+				<span v-else-if="unlock">{{  $t('auth.UNLOCK_APPLE') }} </span>
+				<span v-else-if="update">{{  $t('auth.UPDATE_APPLE') }} </span>
+				<span v-else>{{  $t('auth.LOG_IN_APPLE') }} </span>
 			</button>
 
 
@@ -16,8 +19,6 @@
 </template>
 
 <script>
-
-import { sha256 } from '../utils/cryptoFunctions';
 
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';

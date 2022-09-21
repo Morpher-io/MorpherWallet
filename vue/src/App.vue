@@ -66,10 +66,10 @@ export default class App extends Vue {
 	async closeWallet() {
 		if (this.iFrameDisplay) {
 			if (this.connection && this.connection !== null) {
-				const promise = this.connection.promise;
+				const connection:any = await this.connection.promise;
 				this.$store.state.signResponse = 'cancel';
-				(await promise).hideWallet();
-				(await promise).onClose();
+				connection.hideWallet();
+				connection.onClose();
 
 				if (this.$store.getters.isLoggedIn) {
 					if (this.$router.currentRoute.path !== '/') this.$router.push('/').catch(() => undefined);

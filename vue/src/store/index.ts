@@ -100,6 +100,7 @@ export interface RootState {
 	ipCountry: string;
 	app_lang: string;
 	unlocked: boolean;
+	hiddenLogin: any;
 }
 
 /**
@@ -158,7 +159,8 @@ function initialState(): RootState {
 		loginRetryCount: 0,
 		ipCountry: '',
 		app_lang: '',
-		unlocked: false
+		unlocked: false,
+		hiddenLogin: undefined
 	} as RootState;
 }
 
@@ -170,6 +172,9 @@ const store: Store<RootState> = new Vuex.Store({
 
 	modules: {},
 	mutations: {
+		hiddenLogin(state: RootState, loginData: any) {
+			state.hiddenLogin = loginData;
+		},
 		authRequested(state: RootState) {
 			state.status = 'loading';
 		},
@@ -497,7 +502,7 @@ const store: Store<RootState> = new Vuex.Store({
 						dispatch('updateRecoveryMethods', { dbUpdate: true, recoveryTypeId: state.recoveryTypeId }).then(async () => {
 							try {
 								if (state.connection && state.connection !== null) {
-									const promise = state.connection.promise;
+									const connection:any = await state.connection.promise;
 
 									let type;
 									if (params.recoveryTypeId == 2) {
@@ -512,7 +517,7 @@ const store: Store<RootState> = new Vuex.Store({
 									}
 
 									if (type) {
-										(await promise).onRecoveryUpdate(type, true);
+										connection.onRecoveryUpdate(type, true);
 									}
 
 								}
@@ -933,10 +938,10 @@ const store: Store<RootState> = new Vuex.Store({
 						
 						try {
 							if (state.connection && state.connection !== null) {
-								const promise = state.connection.promise;
-				
-								(await promise).on2FAUpdate('email', params.email);
-								(await promise).on2FAUpdate('authenticator', params.authenticator);
+								const connection: any = await state.connection.promise;
+
+								connection.on2FAUpdate('email', params.email);
+								connection.on2FAUpdate('authenticator', params.authenticator);
 							}
 						} catch {
 							console.error('Error calling on2FAUpdate callback')
@@ -1004,7 +1009,7 @@ const store: Store<RootState> = new Vuex.Store({
 						dispatch('updateRecoveryMethods', { dbUpdate: true, recoveryTypeId: state.recoveryTypeId }).then(async () => {
 							try {
 								if (state.connection && state.connection !== null) {
-									const promise = state.connection.promise;
+									const connection:any =  await state.connection.promise;
 
 									let type;
 									if (params.recoveryTypeId == '2') {
@@ -1019,7 +1024,7 @@ const store: Store<RootState> = new Vuex.Store({
 									}
 
 									if (type) {
-										(await promise).onRecoveryUpdate(type, false);
+										connection.onRecoveryUpdate(type, false);
 									}
 
 								}
@@ -1294,6 +1299,30 @@ if (isIframe()) {
 				}
 
 				return false;
+			},
+			async loginWalletHidden(type: string, user: string, password: string)  {
+				console.log('loginWalletHidden')
+				if (store.getters.isLoggedIn) {
+					store.commit('logout')	
+				}
+				store.commit('hiddenLogin', {type, user, password})
+			},
+			async signupWalletHidden(type: string, walletEmail: string, walletPassword: string, walletPasswordRepeat: string, loginUser: any)  {
+				console.log( {type, walletEmail, walletPassword, walletPasswordRepeat, loginUser})
+				if (store.getters.isLoggedIn) {
+					store.commit('logout')	
+				}
+				router.push('/signup').catch(() => undefined);
+				store.commit('hiddenLogin', {type, walletEmail, walletPassword, walletPasswordRepeat, loginUser})
+			},
+
+			async walletRecoveryHidden(type: string)  {
+				store.commit('hiddenLogin', {type: 'recovery', recovery: type})
+
+			},
+			async loginWallet2fa(twoFACode: string) {
+				router.push('/2fa').catch(() => undefined);
+				store.commit('hiddenLogin', {type: '2fa', twoFACode: twoFACode})
 			},
 			async isLoggedIn() {
 				let counter = 0;
