@@ -11,6 +11,6 @@
     "firstPassword": "Test123!",
     "secondPassword": "Test1234!",
     "incorrectPassword": "Test12345!",
-    "backendUrl": "http://localhost:8080"
+    "backendUrl": "http://backend"
   }
 }
