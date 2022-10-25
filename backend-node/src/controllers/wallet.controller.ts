@@ -442,6 +442,10 @@ export async function getEncryptedSeed(req, res) {
         if (recovery_type_id == 3 && verifyTokens) {
             const token = req.body.access_token
             const CLIENT_ID = process.env.GOOGLE_APP_ID;
+            const GOOGLE_ANDROID_APP_ID = process.env.GOOGLE_ANDROID_APP_ID;
+            const GOOGLE_IOS_APP_ID = process.env.GOOGLE_IOS_APP_ID;
+            const GOOGLE_WEB_APP_ID = process.env.GOOGLE_WEB_APP_ID;
+
     
             const {OAuth2Client} = require('google-auth-library');
             const client = new OAuth2Client(CLIENT_ID);
@@ -449,7 +453,7 @@ export async function getEncryptedSeed(req, res) {
             try {
                 const ticket = await client.verifyIdToken({
                     idToken: token,
-                    audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
+                    audience: [CLIENT_ID, GOOGLE_ANDROID_APP_ID, GOOGLE_IOS_APP_ID, GOOGLE_WEB_APP_ID],  // Specify the CLIENT_ID of the app that accesses the backend
                     // Or, if multiple clients access the backend:
                     //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
                 });

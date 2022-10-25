@@ -79,6 +79,18 @@
                     "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_GOOGLE_APP_SECRET::"
                 },
                 {
+                    "name": "GOOGLE_ANDROID_APP_ID",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:GOOGLE_ANDROID_APP_ID::"
+                },
+                {
+                    "name": "GOOGLE_IOS_APP_ID",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:GOOGLE_IOS_APP_ID::"
+                },
+                {
+                    "name": "GOOGLE_WEB_APP_ID",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:GOOGLE_WEB_APP_ID::"
+                },
+                {
                     "name": "VK_APP_ID",
                     "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_VK_APP_ID::"
                 },
