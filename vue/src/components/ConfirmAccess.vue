@@ -11,7 +11,7 @@
 			<label v-else class="label">{{ $t('2fa.AUTH_CODE') }}</label>
 
 			<div class="control">
-				<input data-cy="2faEmailCode" type="number" inputmode="numeric" class="input" v-model="authenticatorCode" />
+				<input data-cy="2faEmailCode" type="number" inputmode="numeric" class="input" v-model="authenticatorCode" @keypress="handleKeyPress" />
 			</div>
 		</div>
 
@@ -92,7 +92,6 @@ export default class ConfirmAccess extends mixins(Authenticated) {
 		let confirmCode
 		if (this.store.twoFaRequired.authenticator) {
 			confirmCode = await verifyAuthenticatorCode(this.store.fetch_key || this.store.email, this.authenticatorCode);
-			console.log(confirmCode)
 		} else {
 			confirmCode = await verifyEmailCode(this.store.fetch_key || this.store.email, this.authenticatorCode);
 		}

@@ -11,15 +11,15 @@
 
 		<div v-if="currentPage === 0">
 			<div class="divider just-space" />
-			<Change2FA @setCurrentMethod="setCurrentMethod" />
-			<div v-if="ssoEmailError == 3" class="alert warning mt-3 is-size-7 has-text-left mb-5">⚠ {{ $t('2fa.2_STEP_EMAIL_ERROR_GOOGLE') }}</div>
-			<div v-if="ssoEmailError == 6" class="alert warning mt-3 is-size-7 has-text-left mb-5">⚠ {{ $t('2fa.2_STEP_EMAIL_ERROR_GOOGLE') }}</div>
+			
+			<Change2FA @setCurrentMethod="setCurrentMethod" :ssoEmailError="ssoEmailError" />
+			
 		</div>
 		<div v-if="currentPage === 1">
 			<ConfirmAccess @accessConfirmed="accessConfirmed" @pageBack="pageBack" />
 		</div>
 		<div v-if="currentPage === 2">
-			<ChangeAuthenticator v-if="currentMethod === 'authenticator'" :qrCode="qrCode" @setCode="setCode" @pageBack="pageBack" />
+			<ChangeAuthenticator v-if="currentMethod === 'authenticator' && secret" :qrCode="qrCode" :secret="secret" @setCode="setCode" @pageBack="pageBack" />
 			<Change2FAEmail v-if="currentMethod === 'email'" @setCode="setCode" @pageBack="pageBack" />
 		</div>
 		<div v-if="currentPage === 3">
@@ -88,6 +88,7 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 	authenticatorConfirmed: any = false;
 	isEnabling = true;
 	updateError = '';
+	secret = '';
 	ssoEmailError = 0;
 	passwordTimeout: number | undefined = undefined;
 
@@ -104,7 +105,7 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 					authenticator = this.authenticator;
 				}
 
-				await this.change2FAMethods({
+				let data = await this.change2FAMethods({
 					email,
 					authenticator,
 					email2faVerification: this.emailCode,
@@ -164,8 +165,8 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 		this.authenticatorCode = '';
 		const result = ((await this.generateQRCode()) as any)
 
-		console.log(result)
 		this.qrCode = result.image;
+		this.secret = result.secret;
 		return false;
 	}
 
@@ -173,6 +174,15 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 		this.email = this.store.twoFaRequired.email;
 		this.authenticator = this.store.twoFaRequired.authenticator;
 		this.authenticatorConfirmed = this.store.twoFaRequired.authenticatorConfirmed;
+
+		if (this.store.recoveryTypeId == 3 || this.store.recoveryTypeId == 6) {
+			const find = this.store.recoveryMethods.find(recovery => recovery.id == this.store.recoveryTypeId)
+			if (find && find.email == this.store.email ) {
+				this.ssoEmailError = this.store.recoveryTypeId 
+				return;
+			}
+
+		}
 	}
 
 	redirectUser() {
@@ -186,26 +196,15 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 			this.authenticatorCode = '';
 		} else {
 			if (this.currentPage > 0) this.currentPage -= 1;
+			if (this.currentPage == 1)  this.currentPage = 0;
 		}
 	}
 
 	setCurrentMethod(method: any) {
-		
-		if (method.method == 'email' && method.isEnabling) {
-			if (this.store.recoveryTypeId == 3 || this.store.recoveryTypeId == 6) {
-				const find = this.store.recoveryMethods.find(recovery => recovery.id == this.store.recoveryTypeId)
-				if (find && find.email == this.store.email ) {
-					this.ssoEmailError = this.store.recoveryTypeId 
-					return;
-				}
-
-			}
-			
-		}
 
 		this.isEnabling = method['isEnabling'];
 		this.currentMethod = method['method'];
-		if (this.$store.state.unlocked == true) {
+		if (this.$store.state.unlocked == true || method.method == 'email' && method.isEnabling == true) {
 			this.accessConfirmed(true)
 		} else {
 			this.currentPage = 1;

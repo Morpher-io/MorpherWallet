@@ -8,6 +8,11 @@ describe('Signup and Login', () => {
 	it('Signup and Login', () => {
 		cy.visit('/signup');
 
+		cy.get('[data-cy=emailSignUpButton]').click();
+		
+
+		cy.waitUntil(() => cy.get('[data-cy=walletEmail]'));
+
 		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
 		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
@@ -35,6 +40,12 @@ describe('Signup and Login', () => {
 	it('Login Existing User', () => {
 		cy.visit('/');
 
+		cy.get('[data-cy=emailLoginButton]').click();
+		
+
+		cy.waitUntil(() => cy.get('[data-cy=walletEmail]'));
+
+ 
 		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
 		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
@@ -49,6 +60,10 @@ describe('Signup and Login', () => {
 
 	it('Logout Existing User', () => {
 		cy.visit('/');
+
+		cy.get('[data-cy=emailLoginButton]').click();
+
+		cy.waitUntil(() => cy.get('[data-cy=walletEmail]'));
 
 		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 

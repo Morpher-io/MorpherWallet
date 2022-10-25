@@ -13,13 +13,13 @@
 						<div class="field">
 							<label class="label">{{ $t('common.NEW_EMAIL') }}</label>
 							<div class="control">
-								<input data-cy="newEmail" class="input" name="newEmail" v-model="newEmail" />
+								<input data-cy="newEmail" class="input" name="newEmail" ref="new_email" v-model="newEmail"  @keypress="handleKeyPress" />
 							</div>
 						</div>
 						<div class="field" v-if="store.recoveryTypeId == 1">
 							<label class="label">{{ $t('common.PASSWORD') }}</label>
 							<div class="control">
-								<input data-cy="confirmPassword" type="password" class="input" name="password" v-model="password" />
+								<input data-cy="confirmPassword" type="password" class="input" name="password"  ref="new_password" v-model="password"  @keypress="handleKeyPress" />
 							</div>
 						</div>
 					</div>
@@ -146,6 +146,29 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 		}
 
 		return { email: data.email, password: newPassword };
+	}
+
+	handleKeyPress(e: any) {
+		const key = e.which || e.charCode || e.keyCode || 0;
+
+		if (key === 13) {
+			if (this.newEmail && this.password) {
+				this.setNewData({
+					email: this.newEmail,
+					password: this.password
+					})
+			} else if (!this.newEmail) {
+				window.setTimeout(() => {
+						const element: any = this.$refs.new_email;
+						if (element) element.focus();
+					}, 100);				
+			} else if (!this.password) {
+				window.setTimeout(() => {
+						const element: any = this.$refs.new_password;
+						if (element) element.focus();
+					}, 100);
+			}
+		}
 	}
 }
 </script>

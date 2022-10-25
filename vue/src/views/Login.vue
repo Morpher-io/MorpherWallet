@@ -24,12 +24,12 @@
 					<button
 						class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
 						@click="logonError = ''; showSignUp = false; passwordSignin = true"
-						data-cy="vkontakteButton"
+						data-cy="emailLoginButton"
 					>
 						<span class="icon img">
 							<img src="@/assets/img/email_icon.svg" alt="Email Icon" />
 						</span>
-						<span>Login Using Email</span>
+						<span>{{$t('auth.LOGIN_EMAIL') }}</span>
 					</button>
 
 					<div class="divider"></div>
@@ -285,6 +285,9 @@ export default class Login extends mixins(Global, Recaptcha) {
 		let recoveryTypeId = 1;
 		let token = null;
 		let fetch_key = email;
+
+		sessionStorage.removeItem('signupUser')
+
 		
 		if (!this.passwordSignin && this.loginUser && this.loginUser.userID  && this.loginUser.key) {
 			fetch_key  = this.loginUser.key
@@ -345,10 +348,12 @@ export default class Login extends mixins(Global, Recaptcha) {
 						if (Number(recoveryTypeId) === 3) {
 							error.error = 'USER_NOT_FOUND_GOOGLE'
 							this.showSignUp = true;
+							sessionStorage.setItem('signupUser', JSON.stringify(this.loginUser))
 						}
 						if (Number(recoveryTypeId) === 6) {
 							error.error = 'USER_NOT_FOUND_APPLE'
 							this.showSignUp = true;
+							sessionStorage.setItem('signupUser', JSON.stringify(this.loginUser))
 						}
 
 					}

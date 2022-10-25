@@ -52,6 +52,7 @@
         "LOGIN_DESCRIPTION": "Unlock your crypto wallet.",
         "RECOVER_YOUR_WALLET_QUESTION": "Recover your wallet?",
         "SIGN_UP_WALLET_QUESTION": "Sign up with this account?",
+        "SIGN_UP_USING_EMAIL": "Sign up Using Email",
         "FORGOT_PASSWORD": "Forgot password?",
         "RECOVER_YOUR_WALLET": "Recover your wallet",
         "DO_NOT_HAVE_WALLET": "Don't have a wallet?",
@@ -71,7 +72,8 @@
         "SIGN_UP_APPLE": "Sign up with Apple",
         "LOG_IN_APPLE": "Log in with Apple",
         "UNLOCK_APPLE": "Unlock with Apple",
-        "UPDATE_APPLE": "Update with Apple"
+        "UPDATE_APPLE": "Update with Apple",
+        "LOGIN_EMAIL":"Login Using Email"
     },
     "settings": {
         "SETTINGS_TITLE": "Settings",
@@ -128,12 +130,13 @@
         "VERIFICATION_ENABLED": "Verification enabled",
         "VERIFICATION_LOSE": "If you lose your 2-step verification device, trusted account recovery will not work.",
         "EMAIL_CONFIRMATION_TITLE": "Email Confirmation",
-        "EMAIL_CONFIRMATION_DESCRIPTION": "We sent you an email with code. Enter the verification code below to confirm 2-step activation.",
+        "EMAIL_CONFIRMATION_DESCRIPTION": "We sent you an email with a code. Enter the verification code below to confirm 2-step activation.",
         "VERIFICATION_CODE": "Verification Code",
         "NEED_AUTHENTICATOR_HELP": "Need an authenticator? Get",
         "NEED_AUTHENTICATOR_OR": "or",
         "CHANGE_AUTH_TITLE": "2-Step Activation",
         "CHANGE_AUTH_DESCRIPTION": "Scan the QR code with an authenticator app. Enter the verification code below to confirm 2-step activation.",
+        "CHANGE_AUTH_SECRET": "or enter this code into your authenticator app",
         "ENTER_EMAIL_CODE": "Please enter the code we sent to your email.",
         "ENTER_AUTH_CODE": "Please enter the code from your authenticator app.",
         "ENTER_BOTH_CODES": "Please input both code we sent you over the email and two FA Authenticator code.",
@@ -191,7 +194,7 @@
     },
     "confirm": {
         "CONFIRM_ACCESS_TITLE": "Confirm Access",
-        "CONFIRM_ACCESS_DESCRIPTION": "We sent you an email with code. Enter the verification code below to access your account settings.",
+        "CONFIRM_ACCESS_DESCRIPTION": "We sent you an email with a code. Enter the verification code below to access your account settings.",
         "CONFIRM_ACCESS_DESCRIPTION_AUTHENTICATOR": "Enter the authenticator 2fa code below to access your account settings." 
     },
     "images": {

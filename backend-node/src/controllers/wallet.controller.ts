@@ -165,7 +165,6 @@ export async function getRecoveryMethods(req: Request, res: Response) {
         for (let i = 0; i < recovery.length; i++) {
             let return_data = recovery[i].recovery_type['dataValues'];
             return_data['email'] = recovery[i].email
-            console.log(return_data)
             
             recoveryTypes.push(return_data);
         }
@@ -183,6 +182,8 @@ export async function addRecoveryMethod(req: Request, res: Response) {
         const recoveryTypeId = req.body.recoveryTypeId;
         const currentRecoveryTypeId = req.body.currentRecoveryTypeId;
         const email = req.body.email ? req.body.email.toLowerCase().replace(/ /g, '') : '';
+        const verifyTokens = String(process.env.SEND_EMAILS || 'false') !== 'false';
+        
 
         const emailRecovery = await Recovery.findOne({ where: { key, recovery_type_id: currentRecoveryTypeId } });
 
@@ -192,7 +193,7 @@ export async function addRecoveryMethod(req: Request, res: Response) {
 
 
         // Verify the apple acess token for apple logins
-        if (recoveryTypeId == 6) {
+        if (recoveryTypeId == 6 && verifyTokens) {
             const crypto = require('crypto');
             let token = req.body.access_token;
     
@@ -219,7 +220,7 @@ export async function addRecoveryMethod(req: Request, res: Response) {
         }
     
         // Verify the google acess token for google logins
-        if (recoveryTypeId == 3) {
+        if (recoveryTypeId == 3 && verifyTokens) {
             const token = req.body.access_token
             const CLIENT_ID = process.env.GOOGLE_APP_ID;
     
@@ -403,13 +404,14 @@ export async function updateEmail(req: Request, res: Response) {
 export async function getEncryptedSeed(req, res) {
     try {
         const key = req.body.key;
-        const email = req.body.email.toLowerCase().replace(/ /g, '');
+        const email = (req.body.email || '').toLowerCase().replace(/ /g, '');
         const email2fa = req.body.email2fa;
         const authenticator2fa = req.body.authenticator2fa;
         const recovery_type_id = Number(req.body.recovery_type || 1);
+        const verifyTokens = String(process.env.SEND_EMAILS || 'false') !== 'false';
 
         // Verify the apple acess token for apple logins
-        if (recovery_type_id == 6) {
+        if (recovery_type_id == 6 && verifyTokens) {
             const crypto = require('crypto');
             let token = req.body.access_token;
     
@@ -437,7 +439,7 @@ export async function getEncryptedSeed(req, res) {
         }
     
         // Verify the google acess token for google logins
-        if (recovery_type_id == 3) {
+        if (recovery_type_id == 3 && verifyTokens) {
             const token = req.body.access_token
             const CLIENT_ID = process.env.GOOGLE_APP_ID;
     
@@ -471,6 +473,7 @@ export async function getEncryptedSeed(req, res) {
         const ip_country = await getIPCountryCode(ip_address)
 
         if (recovery) {
+            
             const user = await User.findOne({ where: { id: recovery.user_id } });
 
             
@@ -975,7 +978,7 @@ export async function change2FAMethods(req, res) {
                         message: `2FA Email Sent [${user.id}] [${user.email}]`
                     });
 
-                    return successResponse(res, 'sent 2fa code to email address');
+                    return successResponse(res, {data: '2FA_CODE_SENT'});
                 } else {
                     // 2FA tokens in query params
                     // Attempt to get user from database.
@@ -1064,7 +1067,8 @@ export async function generateAuthenticatorQR(req, res) {
                         message: `Authenticator Code generated [${user.id}] [${user.email}]`
                     });
                     return successResponse(res, {
-                        image: result
+                        image: result,
+                        secret: user.authenticator_secret 
                     });
                 } catch (e) {
                     return errorResponse(res, 'CANNOT_GENERATE_QR_CODE', 500);
@@ -1275,6 +1279,60 @@ export async function resetRecovery(req, res) {
     try {
         const recoveryTypeId = req.body.recoveryTypeId;
         const key = req.body.key;
+        // Verify the apple acess token for apple logins
+        if (recoveryTypeId == 6) {
+            const crypto = require('crypto');
+            let token = req.body.access_token;
+    
+            if (!token) {
+                return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                                
+            }
+            token = JSON.parse(token)
+            try {
+                const appleIdTokenClaims = await appleSigninAuth.verifyIdToken(token.identityToken, {
+                    /** sha256 hex hash of raw nonce */
+                    nonce: token.nonce ? crypto.createHash('sha256').update(token.nonce).digest('hex') : undefined,
+                });
+    
+                if (!appleIdTokenClaims || !appleIdTokenClaims.email || appleIdTokenClaims.email.toLowerCase().replace(/ /g, '') !== req.body.email.toLowerCase().replace(/ /g, '')) {
+                    return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                            
+                }
+    
+            } catch (err) {
+                if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);            
+            }
+    
+    
+            
+        }
+    
+        // Verify the google acess token for google logins
+        if (recoveryTypeId == 3) {
+            const token = req.body.access_token
+            const CLIENT_ID = process.env.GOOGLE_APP_ID;
+    
+            const {OAuth2Client} = require('google-auth-library');
+            const client = new OAuth2Client(CLIENT_ID);
+    
+            try {
+                const ticket = await client.verifyIdToken({
+                    idToken: token,
+                    audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
+                    // Or, if multiple clients access the backend:
+                    //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+                });
+                const payload = ticket.getPayload();
+                const userid = payload['sub'];
+                if (!userid) {
+                    return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                            
+                }
+    
+            } catch (err) {
+                if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);            
+            }
+    
+        }   
+
         const defaultRecovery = await Recovery.findOne({ where: { key } });
         if (defaultRecovery !== null && recoveryTypeId !== 1) {
             const recovery = await Recovery.findOne({ where: { user_id: defaultRecovery.user_id, recovery_type_id: recoveryTypeId } });

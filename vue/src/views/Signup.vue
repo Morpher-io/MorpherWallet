@@ -1,5 +1,6 @@
 <template>
 	<div>
+
 		<vue-recaptcha ref="recaptcha" size="invisible" :sitekey="recaptchaSiteKey" :load-recaptcha-script="true"
 			@verify="onCaptchaVerified" @error="onCaptchaError" @expired="onCaptchaExpired" @render="onCaptchaLoaded"
 			style="display: none" />
@@ -13,11 +14,11 @@
 				<LoginGoogle @processMethod="processMethod" :signIn="true"></LoginGoogle>
 
 				<button class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
-					@click="passwordSignin = true" data-cy="vkontakteButton">
+					@click="passwordSignin = true" data-cy="emailSignUpButton">
 					<span class="icon img">
 						<img src="@/assets/img/email_icon.svg" alt="Email Icon" />
 					</span>
-					<span>Sign up Using Email</span>
+					<span>{{$t('auth.SIGN_UP_USING_EMAIL')}}</span>
 				</button>
 			</div>
 			<!-- Signin with email/password -->
@@ -145,6 +146,19 @@ export default class Signup extends mixins(Global, Recaptcha) {
 
 		this.executeHiddenLogin()
 
+		let signupUser = sessionStorage.getItem('signupUser')
+		if (signupUser) {
+			sessionStorage.removeItem('signupUser')
+			signupUser = JSON.parse(signupUser)
+			if (signupUser) {
+				
+				this.loginUser = signupUser;
+
+				this.signupExecute(false);
+			}
+
+		}
+
 	}
 
 	@Watch('walletPassword')
@@ -169,7 +183,6 @@ export default class Signup extends mixins(Global, Recaptcha) {
 				this.passwordSignin = true;
 				this.walletEmail = this.store.hiddenLogin.walletEmail;
 				this.walletPassword = this.store.hiddenLogin.walletPassword;
-				console.log(this.store.hiddenLogin)
 				this.walletPasswordRepeat = this.store.hiddenLogin.walletPasswordRepeat;
 				this.signupExecute(false);
 			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type == 'google') {

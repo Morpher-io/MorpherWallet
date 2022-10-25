@@ -25,7 +25,8 @@ const bodyData = {
         iv: 'TljpH9fl8eUC/6M3',
         salt: 'zAdVIXo4K+QJvSbjeqFVug=='
     },
-    ethAddress: '0xCb4DB6D3554B3F6439847f3559c41501967192fE'
+    ethAddress: '0xCb4DB6D3554B3F6439847f3559c41501967192fE',
+    recovery_type: 1
 };
 
 const newBodyData = {
@@ -61,7 +62,8 @@ const badBodyEncryptedSeed = {
 const encryptedSeedData = {
     key: '5eb8f7d40f8b67dec627deeb9f18620c40014e1346994b567a27374001c337ad',
     email2fa: '',
-    authenticator2fa: ''
+    authenticator2fa: '',
+    email: 'test@morpher.com',
 };
 
 const facebookData = {
@@ -73,8 +75,38 @@ const facebookData = {
         iv: 'TljpH9fl8eUC/6M3',
         salt: 'zAdVIXo4K+QJvSbjeqFVug=='
     },
-    recoveryTypeId: 2
+    recoveryTypeId: 2,
+    currentRecoveryTypeId: 1
 };
+
+const googleData = {
+    email: 'morpher@gmail.com',
+    key: sha256(process.env.VUE_APP_GOOGLE_APP_ID + '123456'), // simulating google user id
+    encryptedSeed: {
+        ciphertext:
+            'yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==',
+        iv: 'TljpH9fl8eUC/6M3',
+        salt: 'zAdVIXo4K+QJvSbjeqFVug=='
+    },
+    recoveryTypeId: 3,
+    recovery_type: 3,
+    currentRecoveryTypeId: 1
+};
+
+const appleData = {
+    email: 'morpher@apple.com',
+    key: sha256(process.env.VUE_APP_APPLE_CLIENT_ID + '123456'), // simulating apple id
+    encryptedSeed: {
+        ciphertext:
+            'yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==',
+        iv: 'TljpH9fl8eUC/6M3',
+        salt: 'zAdVIXo4K+QJvSbjeqFVug=='
+    },
+    recoveryTypeId: 6,
+    currentRecoveryTypeId: 3
+};
+
+
 
 const facebookRecovery = {
     accessToken: 'longAccessToken',
@@ -138,6 +170,7 @@ describe('Wallet controller test cases', async () => {
     });
 
     it('returns encryptedSeed', async () => {
+
         await request(app)
             .post('/v1/saveEmailPassword')
             .send(bodyData)
@@ -245,6 +278,7 @@ describe('Wallet controller test cases', async () => {
             .post('/v1/auth/change2FAMethods')
             .send(data)
             .set('Accept', 'application/json')
+            .set('recoveryTypeId', 1)
             .set('Signature', JSON.stringify(signature))
             .set('key', bodyData.key);
 
@@ -328,8 +362,7 @@ describe('Wallet controller test cases', async () => {
         expect(walletResponse.body.error).toEqual('USER_NOT_FOUND');
     });
 
-    // The logic is the same for the other recovery methods,
-    // only the recovery id changes.
+    // facebook recovery
     it('create user with facebook recovery method', async () => {
         const account = Account.privateKeyToAccount(secureAccount.privateKey);
 
@@ -360,6 +393,88 @@ describe('Wallet controller test cases', async () => {
         expect(recovery).toHaveProperty('encrypted_seed');
         expect(response.status).toEqual(200);
         expect(response.body).toHaveProperty('recovery_id');
+    });
+
+    // google recovary and login login and apple recovery
+
+    it('google and apple recovery and login', async () => {
+        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+
+        await request(app)
+            .post('/v1/saveEmailPassword')
+            .send(bodyData)
+            .set('Accept', 'application/json');
+
+        // Simulate sending an email by changing only user payload.
+        const emailData = {
+            key: bodyData.key
+        };
+
+        await request(app)
+            .post('/v1/send2FAEmail')
+            .send(emailData)
+            .set('Accept', 'application/json');
+
+        // Get the email verification code from the payload.
+        let user:any = await User.findOne();
+        encryptedSeedData.email2fa = user.email_verification_code;
+
+        // Confirm user first
+        await request(app)
+            .post('/v1/verifyEmailConfirmationCode')
+            .send({
+                key: bodyData.key,
+                code: user.email_verification_code
+            })
+            .set('Accept', 'application/json');            
+
+        user = await User.findOne();
+
+        googleData['nonce'] = user.nonce;
+
+        const body = sortObject(googleData);
+
+        const signature = account.sign(JSON.stringify(body));
+
+        const response = await request(app)
+            .post('/v1/auth/addRecoveryMethod')
+            .send(body)
+            .set('Accept', 'application/json')
+            .set('Signature', JSON.stringify(signature))
+            .set('key', bodyData.key);
+
+        const recovery = await Recovery.findOne({ where: { recovery_type_id: googleData.recoveryTypeId } });
+
+        // login with google
+        const googleResponse = await request(app)
+        .post('/v1/getEncryptedSeed')
+        .send(googleData)
+        .set('Accept', 'application/json');
+
+        // add apple recovery
+        user = await User.findOne();
+
+        appleData['nonce'] = user.nonce;
+
+        const appleBody = sortObject(appleData);
+
+        const appleSignature = account.sign(JSON.stringify(appleBody));
+
+        const appleResponse = await request(app)
+            .post('/v1/auth/addRecoveryMethod')
+            .send(appleBody)
+            .set('Accept', 'application/json')
+            .set('Signature', JSON.stringify(appleSignature))
+            .set('key', appleData.key);
+
+        const recoveryData = await Recovery.findAll({  });
+
+        expect(recovery).toHaveProperty('encrypted_seed');
+        expect(response.status).toEqual(200);
+        expect(response.body).toHaveProperty('recovery_id');
+        expect(googleResponse.status).toEqual(200);
+        expect(appleResponse.status).toEqual(200);
+        expect(recoveryData.length).toEqual(3);
     });
 
     it('returns recovery methods', async () => {
@@ -452,6 +567,7 @@ describe('Wallet controller test cases', async () => {
             .post('/v1/auth/updateEmail')
             .send(newEmailData)
             .set('Accept', 'application/json')
+            .set('recoveryTypeId', 1)
             .set('Signature', JSON.stringify(signature))
             .set('key', bodyData.key);
 
@@ -510,6 +626,7 @@ describe('Wallet controller test cases', async () => {
             .post('/v1/auth/change2FAMethods')
             .send(data)
             .set('Accept', 'application/json')
+            .set('recoveryTypeId', 1)
             .set('Signature', JSON.stringify(signature))
             .set('key', bodyData.key);
 
@@ -605,6 +722,7 @@ describe('Wallet controller test cases', async () => {
             .post('/v1/auth/change2FAMethods')
             .send(email2FAData)
             .set('Accept', 'application/json')
+            .set('recoveryTypeId', 1)
             .set('Signature', JSON.stringify(signature))
             .set('key', bodyData.key);
 

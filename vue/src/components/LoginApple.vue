@@ -59,7 +59,7 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 			await window.AppleID.auth.init({
 				clientId: this.clientId,
 				scope: 'email',
-				redirectURI: 'https://wallet-dev.morpher.com',
+				redirectURI: location.protocol + '//' + location.hostname ,
 				state: state,
 				nonce: rawNonce,
 				usePopup: true

@@ -71,7 +71,6 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 
 	onError(error) {
 		let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
-		console.log('onError', errorMessage)
 		this.logSentryError('addGoogleRecovery', errorMessage, {
 			hasRecoveryMethod: this.hasRecoveryMethod,
 			clientId: this.clientId,
@@ -91,8 +90,8 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 
 	async onLogin(googleUser) {
 		this.showSpinner(this.$t('loader.SAVING_KEYSTORE_RECOVERY'));
-		const key = await sha256(this.clientId + userID);
 		const userID = googleUser.getId();
+		const key = await sha256(this.clientId + userID);
 		const token = googleUser.Cc.id_token
 		
 		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId, token, email: googleUser.getBasicProfile().getEmail(), currentRecoveryTypeId: this.store.recoveryTypeId })
@@ -133,9 +132,11 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 
 	async onDelete(googleUser) {
 		this.showSpinner(this.$t('loader.DELETING_KEYSTORE_RECOVERY'));
-		const userID = googleUser.getBasicProfile().getId();
 		const key = await sha256(this.clientId + userID);
-		this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId })
+		const userID = googleUser.getId();
+		const token = googleUser.Cc.id_token
+
+		this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId, token })
 			.then(async () => {
 				googleUser.disconnect();
 				this.showSpinnerThenAutohide(this.$t('loader.DELETED_KEYSTORE_SUCCESSFULLY'));

@@ -7,7 +7,7 @@
 				<p class="subtitle">{{ $t('recovery.RECOVERY_DESCRIPTION') }}</p>
 
 				<div class="error alert warning is-size-7" v-if="logonError">
-					<p data-cy="loginError">⚠️ <span v-html="logonError">&nbsp;</span></p>
+					<p data-cy="loginError">⚠️ <span v-html="logonError || '&nbsp;'"></span></p>
 					<a
 						v-if="showMore"
 						href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/"
@@ -16,7 +16,7 @@
 						><span>{{ $t('common.LEARN_MORE') }}</span></a
 					>
 				</div>
-
+				
 				<div class="field is-grouped">
 					<RecoverWalletGoogle @setPassword="setPassword"></RecoverWalletGoogle>
 				</div>
@@ -54,7 +54,7 @@
 					<div class="field">
 						<label class="label">{{ $t('common.EMAIL') }}</label>
 						<div class="control">
-							<input type="email" class="input" name="newEmail" v-model="newEmail" />
+							<input type="email" class="input" name="newEmail" v-model="newEmail" @keypress="handleKeyPress"  />
 						</div>
 					</div>
 
@@ -174,6 +174,14 @@ export default class Recovery extends mixins(Authenticated, Global, Recaptcha) {
 			} else {
 				this.logonError = getDictionaryValue(error.toString());
 			}
+		}
+	}
+
+	handleKeyPress(e: any) {
+		const key = e.which || e.charCode || e.keyCode || 0;
+
+		if (key === 13) {
+			this.checkEmail();
 		}
 	}
 

@@ -12,24 +12,24 @@
 			style="display: none"
 		/>
 		<img
-			v-if="(twoFaRequired.email || twoFaRequired.needConfirmation) && !twoFaRequired.authenticator"
+			v-if="(store.twoFaRequired.email || store.twoFaRequired.needConfirmation) && !store.twoFaRequired.authenticator"
 			src="@/assets/img/email_verification.svg"
 			alt="Email 2FA image"
 			class="mb-3"
 		/>
-		<img v-if="twoFaRequired.authenticator" src="@/assets/img/authenticator.svg" alt="Phone authenticator image" class="mb-3" />
+		<img v-if="store.twoFaRequired.authenticator" src="@/assets/img/authenticator.svg" alt="Phone authenticator image" class="mb-3" />
 		<h2 data-cy="verificationTitle" class="title">{{ $t('settings.2_STEP_VERIFICATION') }}</h2>
-		<p v-if="(twoFaRequired.email || twoFaRequired.needConfirmation) && !twoFaRequired.authenticator" class="subtitle">
+		<p v-if="(store.twoFaRequired.email || store.twoFaRequired.needConfirmation) && !store.twoFaRequired.authenticator" class="subtitle">
 			{{ $t('2fa.ENTER_EMAIL_CODE') }}
 		</p>
-		<p v-if="twoFaRequired.authenticator && !twoFaRequired.email && !twoFaRequired.needConfirmation" class="subtitle">
+		<p v-if="store.twoFaRequired.authenticator && !store.twoFaRequired.email && !store.twoFaRequired.needConfirmation" class="subtitle">
 			{{ $t('2fa.ENTER_AUTH_CODE') }}
 		</p>
-		<p v-if="twoFaRequired.email && twoFaRequired.authenticator" class="subtitle">
+		<p v-if="store.twoFaRequired.email && store.twoFaRequired.authenticator" class="subtitle">
 			{{ $t('2fa.ENTER_BOTH_CODES') }}
 		</p>
 		<form v-on:submit.prevent="validateCode" novalidate>
-			<div class="field" v-if="twoFaRequired.email || twoFaRequired.needConfirmation">
+			<div class="field" v-if="store.twoFaRequired.email || store.twoFaRequired.needConfirmation">
 				<label class="label">{{ $t('2fa.EMAIL_CODE') }}</label>
 				<div class="control">
 					<input
@@ -43,10 +43,11 @@
 						data-cy="emailCode"
 						v-model="emailCode"
 						ref="email_code"
+						@keypress="handleKeyPress" 
 					/>
 				</div>
 			</div>
-			<div class="field" v-if="twoFaRequired.authenticator">
+			<div class="field" v-if="store.twoFaRequired.authenticator">
 				<label class="label">{{ $t('2fa.AUTH_CODE') }}</label>
 				<div class="control">
 					<input
@@ -58,6 +59,7 @@
 						data-cy="authenticatorCode"
 						ref="auth_code"
 						v-model="authenticatorCode"
+						@keypress="handleKeyPress" 
 					/>
 				</div>
 			</div>
@@ -138,7 +140,6 @@ export default class TwoFA extends mixins(Global, Recaptcha) {
 		try {
 			
 			 if (this.store.hiddenLogin) {
-				console.log(this.store.hiddenLogin)
 
 				this.emailCode = this.store.hiddenLogin.twoFACode
 				this.validateCode();
@@ -192,6 +193,14 @@ export default class TwoFA extends mixins(Global, Recaptcha) {
 	logout() {
 		this.logoutWallet();
 		//this.router.push('/login').catch(() => undefined);;
+	}
+
+	handleKeyPress(e: any) {
+		const key = e.which || e.charCode || e.keyCode || 0;
+
+		if (key === 13) {
+			this.validateCode();
+		}
 	}
 }
 </script>

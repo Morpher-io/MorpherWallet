@@ -21,11 +21,11 @@
 			<div class="error mt-3 mb-3" v-if="logonError">
 				<p>⚠️ <span v-html="logonError"></span></p>
 			</div>
-
 			<div>
-				<AddRecoveryApple v-if="whatRecovery.apple" @processMethod="processMethod"></AddRecoveryApple>
+				
+				<AddRecoveryApple v-if="whatRecovery.apple && store.recoveryTypeId !==6" @processMethod="processMethod"></AddRecoveryApple>
 
-				<AddRecoveryGoogle v-if="whatRecovery.google" @processMethod="processMethod"></AddRecoveryGoogle>
+				<AddRecoveryGoogle v-if="whatRecovery.google && store.recoveryTypeId !==3" @processMethod="processMethod"></AddRecoveryGoogle>
 
 				<AddRecoveryFacebook v-if="whatRecovery.facebook" :walletEmail="store.email" @processMethod="processMethod"></AddRecoveryFacebook>
 
@@ -41,9 +41,9 @@
 					{{ $t('recovery.ADD_ANOTHER_ACCOUNT') }}
 				</p>
 
-				<AddRecoveryApple v-if="!whatRecovery.apple" @processMethod="processMethod"></AddRecoveryApple>
+				<AddRecoveryApple v-if="!whatRecovery.apple && store.recoveryTypeId !==6" @processMethod="processMethod"></AddRecoveryApple>
 
-				<AddRecoveryGoogle v-if="!whatRecovery.google" @processMethod="processMethod"></AddRecoveryGoogle>
+				<AddRecoveryGoogle v-if="!whatRecovery.google  && store.recoveryTypeId !==3" @processMethod="processMethod"></AddRecoveryGoogle>
 
 				<AddRecoveryFacebook v-if="!whatRecovery.facebook" :walletEmail="store.email" @processMethod="processMethod"></AddRecoveryFacebook>
 

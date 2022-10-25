@@ -8,7 +8,7 @@
 			<label class="label">{{ $t('2fa.VERIFICATION_CODE') }}</label>
 
 			<div class="control">
-				<input data-cy="2faEmailCode" type="number" inputmode="numeric" class="input" v-model="authenticatorCode" />
+				<input data-cy="2faEmailCode" type="number" inputmode="numeric" class="input" v-model="authenticatorCode"  @keypress="handleKeyPress" />
 			</div>
 		</div>
 
@@ -73,6 +73,14 @@ export default class Change2FAEmail extends mixins(Authenticated) {
 		} else {
 			this.logonError = getDictionaryValue(confirmCode.error);
 			return false;
+		}
+	}
+
+	handleKeyPress(e: any) {
+		const key = e.which || e.charCode || e.keyCode || 0;
+
+		if (key === 13) {
+			this.setCode();
 		}
 	}
 }

@@ -11,7 +11,7 @@
 			@render="onCaptchaLoaded"
 			style="display: none"
 		/>
-		<spinner v-model="showSpinner" v-bind:status="status"></spinner>
+		<spinner v-model="showSpinner" v-bind:status="store.status"></spinner>
 
 		<h2 class="title">👋 {{ $t('auth.UNLOCK_TITLE') }}</h2>
 		<p class="subtitle">{{ $t('auth.UNLOCK_DESCRIPTION') }}</p>
@@ -19,7 +19,7 @@
 		<div class="user-details settings-data">
 			<div class="details">
 				<div class="is-flex has-text-left">
-					<div ref="userImage" class="jazz-icon" />
+					<div ref="userImage" class="jazz-icon"></div>
 					<div class="ml-3">
 						<p>{{ walletEmail }}</p>
 						<div @click="logout()" class="login-router transition-faster reset-line-height">{{ $t('auth.SWITCH_ACCOUNT') }}</div>
@@ -98,6 +98,10 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 	 * Cmponent mounted lifestyle hook
 	 */
 	async mounted() {
+
+		if (!this.walletEmail) return this.$router.push('/login').catch(() => undefined);
+
+		
 		// set focus to the password field when the control opens
 		window.setTimeout(() => {
 			const passwordEmelemt: any = this.$refs.unlock_password;

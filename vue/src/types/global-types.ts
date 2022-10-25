@@ -92,6 +92,7 @@ export type TypeResetRecovery = {
 	__typename?: 'TypeResetRecovery';
 	key: string;
 	recoveryTypeId: string;
+	token: string;
 };
 
 export type TypeChangeEmail = {

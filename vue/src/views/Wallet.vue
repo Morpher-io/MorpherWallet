@@ -6,8 +6,8 @@
 					<div ref="userImage" class="jazz-icon" />
 					<div class="ml-3">
 						<p class="medium-text has-text-weight-medium">
-							<span class="important-font"> {{ formatEthAddress(accounts[0]) }} </span>
-							<span class="copy-icon" @click="copyETHAddress(accounts[0])"><i class="fas fa-copy" /></span>
+							<span class="important-font"> {{ formatEthAddress(store.accounts[0])  }}</span>
+							<span class="copy-icon" @click="copyETHAddress(store.accounts[0])"><i class="fas fa-copy" /></span>
 						</p>
 						<p data-cy="currentEmail">{{ store.email }}</p>
 					</div>
@@ -15,7 +15,7 @@
 				<div class="buttons horizontal-buttons mt-3">
 					<button
 						tag="button"
-						:class="{ 'cursor-not-allowed': !this.isIframe() }"
+						:class="{ 'cursor-not-allowed': !isIframe() }"
 						@click="sendInApp"
 						class="button is-light-purple is-small-button has-text-weight-bold transition-faster"
 					>
@@ -23,7 +23,7 @@
 							<i class="fas fa-paper-plane"></i>
 						</span>
 						<span data-cy="sendButton" class="text">{{ $t('common.SEND') }}</span>
-						<div class="tooltip" v-if="!this.isIframe()">
+						<div class="tooltip" v-if="!isIframe()">
 							{{ $t('common.SEND_DESCRIPTION') }}
 						</div>
 					</button>
