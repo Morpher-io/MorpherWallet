@@ -233,7 +233,7 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 		let password = this.walletPassword;
 		const recaptchaToken = this.recaptchaToken;
 		let recoveryTypeId = 1;
-		let fetch_key;
+		let fetch_key = email;
 		let token = '';
 
 			
