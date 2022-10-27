@@ -76,7 +76,7 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 	async onLogin(googleUser) {
 		const userID = googleUser.getId();
 		const key = this.clientId + userID;
-		const token = googleUser.Cc.id_token
+		const token = (googleUser.Cc || googleUser.Bc).id_token
 		this.processMethod({
 			success: true,
 			userID, key, token, recoveryTypeId: this.recoveryTypeId, email: googleUser.getBasicProfile().getEmail()

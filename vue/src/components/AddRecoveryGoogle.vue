@@ -92,7 +92,7 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 		this.showSpinner(this.$t('loader.SAVING_KEYSTORE_RECOVERY'));
 		const userID = googleUser.getId();
 		const key = await sha256(this.clientId + userID);
-		const token = googleUser.Cc.id_token
+		const token = (googleUser.Cc || googleUser.Bc).id_token
 		
 		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId, token, email: googleUser.getBasicProfile().getEmail(), currentRecoveryTypeId: this.store.recoveryTypeId })
 			.then(async () => {
@@ -134,7 +134,7 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 		this.showSpinner(this.$t('loader.DELETING_KEYSTORE_RECOVERY'));
 		const key = await sha256(this.clientId + userID);
 		const userID = googleUser.getId();
-		const token = googleUser.Cc.id_token
+		const token = (googleUser.Cc || googleUser.Bc).id_token
 
 		this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId, token })
 			.then(async () => {
