@@ -44,7 +44,8 @@
         "ENABLE_IN_SETTINGS": "Подключить в Настройках",
         "SUPPORT": "Служба поддержки",
         "LOGOUT": "Выход",
-        "SECURED_WALLET": "Защищено с помощью AES | SHA-256 | PBKDF2"
+        "SECURED_WALLET": "Защищено с помощью AES | SHA-256 | PBKDF2",
+        "PRIVACY_POLICY": "Политика конфиденциальности"
     },
     "auth": {
         "LOGIN": "Вход",
