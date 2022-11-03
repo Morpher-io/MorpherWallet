@@ -20,10 +20,13 @@
 				<router-view />
 			</transition>
 			<div class="footer is-text-small">
-				<span class="icon is-small">
-					<i class="fas fa-lock"></i>
-				</span>
-				<span>{{ $t('common.SECURED_WALLET') }}</span>
+				<div>
+					<span class="icon is-small">
+						<i class="fas fa-lock"></i>
+					</span>
+					<span>{{ $t('common.SECURED_WALLET') }}</span>
+				</div>
+				<a href="https://www.morpher.com/privacy" target="_blank">{{ $t('common.PRIVACY_POLICY') }}</a>
 			</div>
 		</section>
 		<Footer v-if="!iFrameDisplay" :NFTBackground="NFTBackground" />

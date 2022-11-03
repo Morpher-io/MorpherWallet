@@ -139,7 +139,9 @@
         "PLEASE_ADD_2_STEP": "Dodajte 2FA kako biste povećali sigurnost novčanika.",
         "2_STEP_AUTH": "2-Step Authenticator",
         "2_STEP_RECOMMENDATION_TITLE": "2-Step preporuka",
-        "2_STEP_RECOMMENDATION_DESCRIPTION": "Dovršite KYC na Morpher aplikaciji kako biste izbjegli gubitak novčanika nakon gubitka 2FA uređaja."
+        "2_STEP_RECOMMENDATION_DESCRIPTION": "Dovršite KYC na Morpher aplikaciji kako biste izbjegli gubitak novčanika nakon gubitka 2FA uređaja.",
+        "PRIVACY_POLICY": "Politika privatnosti"
+
     },
     "password": {
         "CHANGE_PASSWORD_TITLE": "Promjeni šifru",
