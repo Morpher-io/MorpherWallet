@@ -147,7 +147,7 @@ export async function addRecoveryMethod(req: Request, res: Response) {
             return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
         }
 
-        const emailKey = await getKeyEmail(recoveryTypeId, req.body.access_token, key, email, req.clientIp);
+        const emailKey = await getKeyEmail(recoveryTypeId, req.body.access_token, keyForSaving, email, req.clientIp);
 
         if (emailKey.success !== true) {
             return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
@@ -160,7 +160,7 @@ export async function addRecoveryMethod(req: Request, res: Response) {
 
         // use the SSO email and check the user key for apple and google
         email = emailKey.email;
-        if (key !== emailKey.key) {
+        if (keyForSaving !== emailKey.key) {
             Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
             return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
         }
