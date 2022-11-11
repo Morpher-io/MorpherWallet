@@ -10,6 +10,7 @@ import * as bodyParser from 'body-parser';
 import { sequelize } from './database/index';
 import { successResponse } from './helpers/functions/util';
 import { Logger } from './helpers/functions/winston';
+const requestIp = require('request-ip');
 
 // Import v1 routes instance for REST endpoint.
 const v1 = require('./routes/v1/')(express);
@@ -40,7 +41,7 @@ const webLimiter = rateLimit(limiter);
 
 // apply a rate limit to the web endpoints.
 app.use('/v1/', webLimiter);
-
+app.use(requestIp.mw())
 // CORS - Cross-Origin Resource Sharing.
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');

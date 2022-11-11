@@ -465,29 +465,32 @@ const store: Store<RootState> = new Vuex.Store({
 		fetchWalletFromRecovery({ state, commit }, params: TypeRecoveryParams) {
 			commit('updateUnlocking', true);
 			return new Promise((resolve, reject) => {
-				recoverSeedSocialRecovery(params.accessToken, state.email, params.recoveryTypeId)
-					.then((encryptedSeed) => {
-						commit('seedFound', { encryptedSeed, recoveryTypeId: params.recoveryTypeId });
-						getKeystoreFromEncryptedSeed(state.encryptedSeed, params.password)
-							.then((keystore: WalletBase) => {
-								state.loginRetryCount = 0;
-								const accounts = getAccountsFromKeystore(keystore);
-								//not setting any password here, this is simply for the password change mechanism
-								commit('keystoreUnlocked', { keystore, accounts, hashedPassword: '' });
-								commit('updateUnlocking', false);
-								resolve(true);
-							})
-							.catch((err) => {
-								state.loginRetryCount += 1;
-								if (state.loginRetryCount >= 3 && err.error !== 'RECAPTCHA_REQUIRED')  commit('authError', 'Cannot unlock the Keystore, wrong ID');
-								commit('updateUnlocking', false);
-								reject(false);
-							});
-					})
-					.catch(() => {
-						commit('updateUnlocking', false);
-						reject(false);
-					});
+				sha256(params.key)
+				.then((hashedKey) => {
+					recoverSeedSocialRecovery(hashedKey, params.accessToken, state.email, params.recoveryTypeId)
+						.then((encryptedSeed) => {
+							commit('seedFound', { encryptedSeed, recoveryTypeId: params.recoveryTypeId });
+							getKeystoreFromEncryptedSeed(state.encryptedSeed, params.password)
+								.then((keystore: WalletBase) => {
+									state.loginRetryCount = 0;
+									const accounts = getAccountsFromKeystore(keystore);
+									//not setting any password here, this is simply for the password change mechanism
+									commit('keystoreUnlocked', { keystore, accounts, hashedPassword: '' });
+									commit('updateUnlocking', false);
+									resolve(true);
+								})
+								.catch((err) => {
+									state.loginRetryCount += 1;
+									if (state.loginRetryCount >= 3 && err.error !== 'RECAPTCHA_REQUIRED')  commit('authError', 'Cannot unlock the Keystore, wrong ID');
+									commit('updateUnlocking', false);
+									reject(false);
+								});
+						})
+						.catch(() => {
+							commit('updateUnlocking', false);
+							reject(false);
+						});
+				});
 			});
 		},
 		addRecoveryMethod({ state, dispatch }, params: TypeAddRecoveryParams) {

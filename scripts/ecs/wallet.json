@@ -95,6 +95,14 @@
                     "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_VK_APP_ID::"
                 },
                 {
+                    "name": "VK_SECURE_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_VK_SECURE_KEY::"
+                },
+                {
+                    "name": "VK_SERVICE_TOKEN",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_VK_SERVICE_TOKEN::"
+                },  
+                {
                     "name": "EMAIL_NOTIFICATIONS_NAME",
                     "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_EMAIL_NOTIFICATIONS_NAME::"
                 },
@@ -109,6 +117,10 @@
                 {
                     "name": "COUNTRY_LIST",
                     "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:WALLET_COUNTRY_LIST::"
+                },
+                {
+                    "name": "APPLE_CLIENT_ID",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_dev-GRZlqk:APPLE_CLIENT_ID::"
                 }
             ],
             "logConfiguration": {

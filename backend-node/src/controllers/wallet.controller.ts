@@ -3,91 +3,49 @@ import { User, Userhistory, Recovery, Recovery_Type } from '../database/models';
 import { decrypt, encrypt, errorResponse, successResponse, sha256, randomFixedInteger, getIPCountryCode } from '../helpers/functions/util';
 const { to } = require('await-to-js');
 import { Request, Response } from 'express';
-
-import { VK } from 'vk-io';
-import { Facebook } from 'fb';
 import { sendEmail2FA, sendEmailChanged } from '../helpers/functions/email';
 import { authenticator } from 'otplib';
 const QRCode = require('qrcode');
-const options = {
-    app_id: process.env.FACEBOOK_APP_ID,
-    app_secret: process.env.FACEBOOK_APP_SECRET,
-    default_graph_version: 'v7.0'
-};
-const FB = new Facebook(options);
-const Google = require('googleapis').google;
-const OAuth2 = Google.auth.OAuth2;
-const oauth2Client = new OAuth2();
 const countryList = process.env.COUNTRY_LIST || '[]';
-
-
 import { Logger } from '../helpers/functions/winston';
-import appleSigninAuth from 'apple-signin-auth';
+import { getKeyEmail } from '../helpers/functions/sso';
 
 // Function to save new signups to the database.
 export async function saveEmailPassword(req: Request, res: Response) {
-    const recoveryTypeId = Number(req.body.recovery_type || 1);
-    
-    if (recoveryTypeId == 6) {
-        const crypto = require('crypto');
-        let token = req.body.access_token;
-
-        if (!token) {
-            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                                
-        }
-        token = JSON.parse(token)
-        try {
-            const appleIdTokenClaims = await appleSigninAuth.verifyIdToken(token.identityToken, {
-                /** sha256 hex hash of raw nonce */
-                nonce: token.nonce ? crypto.createHash('sha256').update(token.nonce).digest('hex') : undefined,
-            });
-
-            if (!appleIdTokenClaims || !appleIdTokenClaims.email || appleIdTokenClaims.email.toLowerCase().replace(/ /g, '') !== req.body.email.toLowerCase().replace(/ /g, '')) {
-                return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                            
-            }
-
-        } catch (err) {
-            if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);            
-        }
-
-
-        
-    }
-
-    if (recoveryTypeId == 3) {
-        const token = req.body.access_token
-        const CLIENT_ID = process.env.GOOGLE_APP_ID;
-
-        const {OAuth2Client} = require('google-auth-library');
-        const client = new OAuth2Client(CLIENT_ID);
-
-        try {
-            const ticket = await client.verifyIdToken({
-                idToken: token,
-                audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
-                // Or, if multiple clients access the backend:
-                //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
-            });
-            const payload = ticket.getPayload();
-            const userid = payload['sub'];
-            if (!userid) {
-                return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                            
-            }
-
-        } catch (err) {
-            if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);            
-        }
-
-    }
     
     // Get sequelize transactions to rollback changes in case of failure.
     const [err, transaction] = await to(getTransaction());
     if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
 
     try {
+        const recoveryTypeId = Number(req.body.recovery_type || 1);
+    
         // Get variables from request body.
-        const email = req.body.email.toLowerCase().replace(/ /g, '');
+        let email = req.body.email.toLowerCase().replace(/ /g, '');
         const key = req.body.key;
+
+        const emailKey = await getKeyEmail(recoveryTypeId, req.body.access_token, key, email, req.clientIp);
+        
+        if (emailKey.success !== true) {
+            await transaction.rollback();
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+        }
+
+        // can only register using google/apple/password
+        if (!emailKey.recovery_type || !['Password','Apple','Google'].includes(emailKey.recovery_type)) {
+            await transaction.rollback();
+            return errorResponse(res, 'INVALID_RECOVERY_TYPE', 500);
+        }
+
+        // use the SSO email and check the user key for apple and google
+        email = emailKey.email;
+        if (key !== emailKey.key) {
+            Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
+            await transaction.rollback();
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+        }
+        
+
         const encryptedSeed = req.body.encryptedSeed;
         const eth_address = req.body.ethAddress;
 
@@ -181,9 +139,7 @@ export async function addRecoveryMethod(req: Request, res: Response) {
         const keyForSaving = req.body.key;
         const recoveryTypeId = req.body.recoveryTypeId;
         const currentRecoveryTypeId = req.body.currentRecoveryTypeId;
-        const email = req.body.email ? req.body.email.toLowerCase().replace(/ /g, '') : '';
-        const verifyTokens = String(process.env.SEND_EMAILS || 'false') !== 'false';
-        
+        let email = req.body.email ? req.body.email.toLowerCase().replace(/ /g, '') : '';
 
         const emailRecovery = await Recovery.findOne({ where: { key, recovery_type_id: currentRecoveryTypeId } });
 
@@ -191,60 +147,24 @@ export async function addRecoveryMethod(req: Request, res: Response) {
             return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
         }
 
+        const emailKey = await getKeyEmail(recoveryTypeId, req.body.access_token, key, email, req.clientIp);
 
-        // Verify the apple acess token for apple logins
-        if (recoveryTypeId == 6 && verifyTokens) {
-            const crypto = require('crypto');
-            let token = req.body.access_token;
-    
-            if (!token) {
-                return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                                
-            }
-            token = JSON.parse(token)
-            try {
-                const appleIdTokenClaims = await appleSigninAuth.verifyIdToken(token.identityToken, {
-                    /** sha256 hex hash of raw nonce */
-                    nonce: token.nonce ? crypto.createHash('sha256').update(token.nonce).digest('hex') : undefined,
-                });
-    
-                if (!appleIdTokenClaims || !appleIdTokenClaims.email || appleIdTokenClaims.email.toLowerCase().replace(/ /g, '') !== req.body.email.toLowerCase().replace(/ /g, '')) {
-                    return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                            
-                }
-    
-            } catch (err) {
-                if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);            
-            }
-    
-    
-            
+        if (emailKey.success !== true) {
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
         }
-    
-        // Verify the google acess token for google logins
-        if (recoveryTypeId == 3 && verifyTokens) {
-            const token = req.body.access_token
-            const CLIENT_ID = process.env.GOOGLE_APP_ID;
-    
-            const {OAuth2Client} = require('google-auth-library');
-            const client = new OAuth2Client(CLIENT_ID);
-    
-            try {
-                const ticket = await client.verifyIdToken({
-                    idToken: token,
-                    audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
-                    // Or, if multiple clients access the backend:
-                    //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
-                });
-                const payload = ticket.getPayload();
-                const userid = payload['sub'];
-                if (!userid) {
-                    return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                            
-                }
-    
-            } catch (err) {
-                if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);            
-            }
-    
-        }        
+
+        // can only register using google/apple/password
+        if (!emailKey.recovery_type || !['Password', 'Apple', 'Google', 'Facebook', 'VKontakte'].includes(emailKey.recovery_type)) {
+            return errorResponse(res, 'INVALID_RECOVERY_TYPE', 500);
+        }
+
+        // use the SSO email and check the user key for apple and google
+        email = emailKey.email;
+        if (key !== emailKey.key) {
+            Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+        }
+        
 
         const recovery = await Recovery.findOne({ where: { user_id: emailRecovery.user_id, recovery_type_id: recoveryTypeId } });
         if (recovery == null) {
@@ -404,83 +324,39 @@ export async function updateEmail(req: Request, res: Response) {
 export async function getEncryptedSeed(req, res) {
     try {
         const key = req.body.key;
-        const email = (req.body.email || '').toLowerCase().replace(/ /g, '');
+        let email = (req.body.email || '').toLowerCase().replace(/ /g, '');
         const email2fa = req.body.email2fa;
         const authenticator2fa = req.body.authenticator2fa;
         const recovery_type_id = Number(req.body.recovery_type || 1);
-        const verifyTokens = String(process.env.SEND_EMAILS || 'false') !== 'false';
 
-        // Verify the apple acess token for apple logins
-        if (recovery_type_id == 6 && verifyTokens) {
-            const crypto = require('crypto');
-            let token = req.body.access_token;
-    
-            if (!token) {
-                return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                                
-            }
-            token = JSON.parse(token)
-            try {
-                const appleIdTokenClaims = await appleSigninAuth.verifyIdToken(token.identityToken, {
-                    /** sha256 hex hash of raw nonce */
-                    nonce: token.nonce ? crypto.createHash('sha256').update(token.nonce).digest('hex') : undefined,
-                });
-    
-                if (!appleIdTokenClaims || !appleIdTokenClaims.email || appleIdTokenClaims.email.toLowerCase().replace(/ /g, '') !== req.body.email.toLowerCase().replace(/ /g, '')) {
+        const emailKey = await getKeyEmail(recovery_type_id, req.body.access_token, key, email, req.clientIp);
 
-                    return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
-                }
-    
-            } catch (err) {
-                return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
-            }
-    
-    
-            
+        if (emailKey.success !== true) {
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
         }
-    
-        // Verify the google acess token for google logins
-        if (recovery_type_id == 3 && verifyTokens) {
-            const token = req.body.access_token
-            const CLIENT_ID = process.env.GOOGLE_APP_ID;
-            const GOOGLE_ANDROID_APP_ID = process.env.GOOGLE_ANDROID_APP_ID;
-            const GOOGLE_IOS_APP_ID = process.env.GOOGLE_IOS_APP_ID;
-            const GOOGLE_WEB_APP_ID = process.env.GOOGLE_WEB_APP_ID;
 
-    
-            const {OAuth2Client} = require('google-auth-library');
-            const client = new OAuth2Client(CLIENT_ID);
-    
-            try {
-                const ticket = await client.verifyIdToken({
-                    idToken: token,
-                    audience: [CLIENT_ID, GOOGLE_ANDROID_APP_ID, GOOGLE_IOS_APP_ID, GOOGLE_WEB_APP_ID],  // Specify the CLIENT_ID of the app that accesses the backend
-                    // Or, if multiple clients access the backend:
-                    //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
-                });
-                const payload = ticket.getPayload();
-                const userid = payload['sub'];
-                if (!userid) {
-                    return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                            
-                }
-    
-            } catch (err) {
-                if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);            
-            }
-    
+        // can only login using google/apple/password - recover from 'Facebook'/'VKontakte'
+        if (!emailKey.recovery_type || !['Password','Apple','Google','Facebook', 'VKontakte'].includes(emailKey.recovery_type)) {
+            return errorResponse(res, 'INVALID_RECOVERY_TYPE', 500);
+        }
+
+        // use the SSO email and check the user key for apple and google
+        email = emailKey.email;
+        
+        if (key !== emailKey.key) {
+            Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
         }
         
+       
         // Simply get Recovery instance that has this key and return it if its found.
         const recovery = await Recovery.findOne({ where: { key, recovery_type_id } });
 
-        const ip_address = req.ip;
-
-        const ip_country = await getIPCountryCode(ip_address)
+        const ip_country = await getIPCountryCode(req.clientIp)
 
         if (recovery) {
             
             const user = await User.findOne({ where: { id: recovery.user_id } });
-
-            
 
             if (user) {
                 if (!user.ip_country && ip_country) {
@@ -504,7 +380,7 @@ export async function getEncryptedSeed(req, res) {
 
                 }
 
-                user.ip_address = ip_address;
+                user.ip_address = req.clientIp;
 
                 if (ip_country && ip_country !== user.ip_country) {
                     if (!user.payload.authenticator && !user.payload.email) {
@@ -620,162 +496,15 @@ export async function getEncryptedSeed(req, res) {
     }
 }
 
-// Function to get encrypted seed from facebook recovery.
-async function getFacebookEncryptedSeed(req, res) {
-    try {
-        // Get access token and email from request body.
-        const accessToken = req.body.accessToken;
-        const signupEmail = req.body.signupEmail.toLowerCase().replace(/ /g, '');
-
-        // Set facebook access token and make the query for the current profile.
-        FB.setAccessToken(accessToken);
-        const result = await FB.api('/me?fields=name,email', 'get');
-
-        // Hash the facebook id with user id to get the database key.
-        const key = sha256(process.env.FACEBOOK_APP_ID + result.id);
-
-        // Attempt to get user from database with the given email address.
-        const user = await User.findOne({ where: { email: signupEmail }, raw: true });
-
-        if (user) {
-            // If user exists return the decrypted seed.
-            const recovery = await Recovery.findOne({ where: { key, recovery_type_id: 2, user_id: user.id } });
-            if (recovery) {
-                Logger.info({
-                    method: arguments.callee.name,
-                    type: 'Recover Encrypted Seed',
-                    user_id: user.id,
-                    recovery,
-                    headers: req.headers,
-                    body: req.body,
-                    message: `getFacebookEncryptedSeed: Recovered Encrypted seed from Facebook [${key.substr(0, 10)}...]`
-                });
-                return successResponse(res, { encryptedSeed: await decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
-            }
-        }
-        Logger.info({
-            method: arguments.callee.name, type: 'Failed Recover Encrypted Seed', headers: req.headers, body: req.body,
-            message: `getFacebookEncryptedSeed: Failed to recover seed from Facebook [${user.id}]`
-        });
-        // If user does not exist return an error.
-        return errorResponse(res, 'USER_NOT_FOUND', 404);
-    } catch (error) {
-        Logger.error({ source: 'getFacebookEncryptedSeed', data: req.body, message: error.message || error.toString() });
-        return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
-    }
-}
-
-// Function to get encrypted seed from google recovery.
-async function getGoogleEncryptedSeed(req, res) {
-    try {
-        // Get access token and email from request body.
-        const accessToken = req.body.accessToken;
-        const signupEmail = req.body.signupEmail.toLowerCase().replace(/ /g, '');
-
-        // Set google access token and make the query for the current profile.
-        oauth2Client.setCredentials({ access_token: accessToken });
-        const oauth2 = Google.oauth2({
-            auth: oauth2Client,
-            version: 'v2'
-        });
-        const result = await oauth2.userinfo.get();
-
-        // Hash the facebook id with user id to get the database key.
-        const key = await sha256(process.env.GOOGLE_APP_ID + result.data.id);
-
-        // If user exists return the decrypted seed.
-        // Attempt to get user from database with the given email address.
-        const user = await User.findOne({ where: { email: signupEmail } });
-
-        if (user != null) {
-            const recovery = await Recovery.findOne({ where: { user_id: user.id, key, recovery_type_id: 3 }, include: [User] });
-            if (recovery != null) {
-                /**
-                 * Big question: are we leaking user-data here? No: The access token has only limited validity and will be different next time
-                 */
-                Logger.info({
-                    method: arguments.callee.name,
-                    type: 'Recover Encrypted Seed',
-                    user_id: user.id,
-                    recovery,
-                    headers: req.headers,
-                    body: req.body,
-                    message: `getGoogleEncryptedSeed: Recovered Encrypted seed from Google [${user.id}]`
-                });
-                return successResponse(res, {
-                    encryptedSeed: await decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT),
-                    email: recovery.user.email
-                });
-            }
-        }
-
-        Logger.info({
-            method: arguments.callee.name, type: 'Failed Recover Encrypted Seed', headers: req.headers, body: req.body,
-            message: `getGoogleEncryptedSeed: Failed to recover seed [${key.substr(0, 10)}...]`
-        });
-        // If user does not exist return an error.
-        return errorResponse(res, 'USER_NOT_FOUND', 404);
-    } catch (error) {
-        Logger.error({ source: 'getGoogleEncryptedSeed', data: req.body, message: error.message || error.toString() });
-        return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
-    }
-}
-
-// Function to get encrypted seed from vkontakte recovery.
-async function getVKontakteEncryptedSeed(req, res) {
-    try {
-        // Get access token and email from request body.
-        const accessToken = req.body.accessToken;
-        const signupEmail = req.body.signupEmail.toLowerCase().replace(/ /g, '');
-
-        // Set vkontakte access token and make the query for the current profile.
-        const vk = new VK({
-            token: accessToken
-        });
-        const result = await vk.api.users.get([accessToken]);
-
-        // Hash the facebook id with user id to get the database key.
-        const key = await sha256((process.env.VK_APP_ID + result[0].id).toString());
-
-        // Attempt to get user from database with the given email address.
-        const user = await User.findOne({ where: { email: signupEmail } });
-
-        if (user != null) {
-            // If user exists return the decrypted seed.
-            const recovery = await Recovery.findOne({ where: { key, recovery_type_id: 5, user_id: user.id } });
-            if (recovery != null) {
-                Logger.info({
-                    method: arguments.callee.name,
-                    type: 'Recover Encrypted Seed',
-                    user_id: user.id,
-                    recovery,
-                    headers: req.headers,
-                    body: req.body,
-                    message: `getVKontakteEncryptedSeed: Recovered Encrypted seed from VKontakte [${user.id}]`
-                });
-                return successResponse(res, { encryptedSeed: await decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
-            }
-        }
-        Logger.info({
-            method: arguments.callee.name, type: 'Failed Recover Encrypted Seed', headers: req.headers, body: req.body,
-            message: `getVKontakteEncryptedSeed: Failed to recover seed from VKontakte [${key.substr(0, 10)}...]`
-        });
-        // If user does not exist return an error.
-        return errorResponse(res, 'USER_NOT_FOUND', 404);
-    } catch (error) {
-        Logger.error({ source: 'getVKontakteEncryptedSeed', data: req.body, message: error.message || error.toString() });
-        return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
-    }
-}
 
 export async function recoverSeedSocialRecovery(req: Request, res: Response) {
     switch (req.body.recoveryTypeId) {
         case 2:
-            return await getFacebookEncryptedSeed(req, res);
+            return await getEncryptedSeed(req, res);
         case 3:
-            return await getGoogleEncryptedSeed(req, res);
+            return await getEncryptedSeed(req, res);
         case 5:
-            return await getVKontakteEncryptedSeed(req, res);
+            return await getEncryptedSeed(req, res);
         default:
             return errorResponse(res, 'RECOVERY_METHOD_NOT_EXIST', 500);
     }
@@ -1283,59 +1012,24 @@ export async function resetRecovery(req, res) {
     try {
         const recoveryTypeId = req.body.recoveryTypeId;
         const key = req.body.key;
+        const email = req.body.email;
         // Verify the apple acess token for apple logins
-        if (recoveryTypeId == 6) {
-            const crypto = require('crypto');
-            let token = req.body.access_token;
-    
-            if (!token) {
-                return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                                
-            }
-            token = JSON.parse(token)
-            try {
-                const appleIdTokenClaims = await appleSigninAuth.verifyIdToken(token.identityToken, {
-                    /** sha256 hex hash of raw nonce */
-                    nonce: token.nonce ? crypto.createHash('sha256').update(token.nonce).digest('hex') : undefined,
-                });
-    
-                if (!appleIdTokenClaims || !appleIdTokenClaims.email || appleIdTokenClaims.email.toLowerCase().replace(/ /g, '') !== req.body.email.toLowerCase().replace(/ /g, '')) {
-                    return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                            
-                }
-    
-            } catch (err) {
-                if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);            
-            }
-    
-    
-            
+        const emailKey = await getKeyEmail(recoveryTypeId, req.body.access_token, key, email, req.clientIp);
+
+        if (emailKey.success !== true) {
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
         }
-    
-        // Verify the google acess token for google logins
-        if (recoveryTypeId == 3) {
-            const token = req.body.access_token
-            const CLIENT_ID = process.env.GOOGLE_APP_ID;
-    
-            const {OAuth2Client} = require('google-auth-library');
-            const client = new OAuth2Client(CLIENT_ID);
-    
-            try {
-                const ticket = await client.verifyIdToken({
-                    idToken: token,
-                    audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
-                    // Or, if multiple clients access the backend:
-                    //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
-                });
-                const payload = ticket.getPayload();
-                const userid = payload['sub'];
-                if (!userid) {
-                    return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);                            
-                }
-    
-            } catch (err) {
-                if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);            
-            }
-    
-        }   
+
+        // can only register using google/apple/password
+        if (!emailKey.recovery_type || !['Password', 'Apple', 'Google', 'Facebook', 'VKontakte'].includes(emailKey.recovery_type)) {
+            return errorResponse(res, 'INVALID_RECOVERY_TYPE', 500);
+        }
+
+        // use the SSO email and check the user key for apple and google
+        if (key !== emailKey.key) {
+            Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+        }        
 
         const defaultRecovery = await Recovery.findOne({ where: { key } });
         if (defaultRecovery !== null && recoveryTypeId !== 1) {

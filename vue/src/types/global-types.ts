@@ -170,6 +170,7 @@ export type TypeRequestParams = {
 };
 export type TypeRecoveryParams = {
 	__typename?: 'TypeRecoveryParams';
+	key: string;
 	accessToken: string;
 	password: string;
 	recoveryTypeId: number;

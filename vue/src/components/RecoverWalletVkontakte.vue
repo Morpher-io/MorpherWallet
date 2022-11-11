@@ -84,7 +84,9 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 						const userID = params.user_id;
 						const accessToken = params.access_token;
 
-						this.fetchWalletFromRecovery({ accessToken, password: userID, recoveryTypeId: this.recoveryTypeId })
+						const key = this.clientId + userID
+
+						this.fetchWalletFromRecovery({ key, accessToken, password: userID, recoveryTypeId: this.recoveryTypeId })
 							.then(() => {
 								this.hideSpinner();
 								this.setPassword({

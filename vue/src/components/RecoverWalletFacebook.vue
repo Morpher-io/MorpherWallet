@@ -61,7 +61,9 @@ export default class RecoverWalletFacebook extends mixins(Global) {
 			const userID = data.authResponse.userID;
 			const accessToken = data.authResponse.accessToken;
 
-			this.fetchWalletFromRecovery({ accessToken, password: userID, recoveryTypeId: this.recoveryTypeId })
+			const key = this.clientId + userID
+
+			this.fetchWalletFromRecovery({ key, accessToken, password: userID, recoveryTypeId: this.recoveryTypeId })
 				.then(() => {
 					this.facebook.FB.api('/me/permissions', 'DELETE', async () => {
 						this.facebook.scope.logout();

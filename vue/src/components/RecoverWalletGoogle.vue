@@ -61,7 +61,9 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 			const userID = googleUser.getId();
 			const accessToken = googleUser.getAuthResponse(true).access_token;
 
-			this.fetchWalletFromRecovery({ accessToken, password: userID, recoveryTypeId: this.recoveryTypeId })
+			const key = this.clientId + userID
+
+			this.fetchWalletFromRecovery({ key, accessToken, password: userID, recoveryTypeId: this.recoveryTypeId })
 				.then(() => {
 					googleUser.disconnect();
 					this.hideSpinner();
