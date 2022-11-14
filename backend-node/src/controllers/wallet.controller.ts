@@ -1013,11 +1013,13 @@ export async function verifyEmailConfirmationCode(req, res) {
 
 export async function resetRecovery(req, res) {
     try {
+        const loginKey = req.header('key');
         const recoveryTypeId = req.body.recoveryTypeId;
         const key = req.body.key;
         const email = req.body.email;
+
         // Verify the apple acess token for apple logins
-        const emailKey = await getKeyEmail(recoveryTypeId, req.body.access_token, key, email, vk_tokens[key]);
+        const emailKey = await getKeyEmail(recoveryTypeId, req.body.token, key, email, vk_tokens[loginKey]);
 
         if (emailKey.success !== true) {
             return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     

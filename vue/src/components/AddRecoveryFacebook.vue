@@ -101,12 +101,14 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 			});
 			return;
 		}
-		console.log('x Facebook Data', data)
+		
 		this.showSpinner(this.$t('loader.SAVING_KEYSTORE_RECOVERY'));
 		const userID = data.authResponse.userID;
 		const key = await sha256(this.clientId + userID);
 
-		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId, token: '', email: data.authResponse.email, currentRecoveryTypeId: this.store.recoveryTypeId })
+		const accessToken = data.authResponse.accessToken;
+
+		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId, token: accessToken, email: data.authResponse.email, currentRecoveryTypeId: this.store.recoveryTypeId })
 			.then(async () => {
 				if (this.$gtag && window.gtag)
 					window.gtag('event', 'add_recovery', {
