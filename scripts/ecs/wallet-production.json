@@ -87,6 +87,10 @@
                 {
                     "name": "VK_SERVICE_TOKEN",
                     "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:WALLET_VK_SERVICE_TOKEN::"
+                },
+                {
+                    "name": "VK_URL",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:WALLET_VK_URL::"
                 },                                
                 {
                     "name": "EMAIL_NOTIFICATIONS_NAME",

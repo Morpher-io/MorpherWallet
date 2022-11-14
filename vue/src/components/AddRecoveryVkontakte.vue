@@ -82,7 +82,7 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 	async doLogin() {
 		const redirectUri = this.callbackUrlForPopup;
 		const uriRegex = new RegExp(redirectUri);
-		const url = `http://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=${redirectUri}`;
+		const url = `http://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.120&response_type=code&scope=offline&redirect_uri=${redirectUri}`;
 		const win = this.vkPopup({
 			width: 620,
 			height: 370,
@@ -107,7 +107,8 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 					}, 100);
 
 					const userID = params.user_id;
-					const accessToken = params.access_token;
+					const accessToken = params.code;
+					console.log('params', params)
 					this.showSpinner(this.$t('loader.SAVING_KEYSTORE_RECOVERY'));
 
 					const key = await sha256(this.clientId + userID);
@@ -148,7 +149,7 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 	async doDelete() {
 		const redirectUri = this.callbackUrlForPopup;
 		const uriRegex = new RegExp(redirectUri);
-		const url = `http://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=${redirectUri}`;
+		const url = `http://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.120&response_type=code&scope=offline&redirect_uri=${redirectUri}`;
 		const win = this.vkPopup({
 			width: 620,
 			height: 370,
@@ -172,7 +173,7 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 					}, 100);
 
 					const userID = params.user_id;
-					const accessToken = params.access_token;
+					const accessToken = params.code;
 					this.showSpinner(this.$t('loader.DELETING_KEYSTORE_RECOVERY'));
 
 					const key = await sha256(this.clientId + userID);

@@ -149,8 +149,14 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
                     token: process.env.VK_SERVICE_TOKEN
                 });
 
+                const {OAuthClient}=require("vk-auth-library");
+
+                const client=OAuthClient(process.env.VK_APP_ID,process.env.VK_SECURE_KEY,process.env.VK_URL);
+
+                const access_token = await client.getAccessToken(token);                
+                
                 const secure_check:Params.SecureCheckTokenParams = {
-                    token: token,
+                    token: access_token.access_token,
                     ip: ip_address
                 }
 

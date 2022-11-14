@@ -54,7 +54,7 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 	doLogin() {
 		const redirectUri = this.callbackUrlForPopup;
 		const uriRegex = new RegExp(redirectUri);
-		const url = `http://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.120&response_type=token&scope=offline&redirect_uri=${redirectUri}`;
+		const url = `http://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.120&response_type=code&scope=offline&redirect_uri=${redirectUri}`;
 		const win = this.vkPopup({
 			width: 620,
 			height: 370,
@@ -82,7 +82,7 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 					this.showSpinner(this.$t('loader.RECOVERY_LOG_IN'));
 					try {
 						const userID = params.user_id;
-						const accessToken = params.access_token;
+						const accessToken = params.code;
 
 						const key = this.clientId + userID
 
