@@ -4,7 +4,6 @@ import { sha256 } from './util';
 import { Recovery_Type } from '../../database/models';
 
 import { OAuth2Client } from 'google-auth-library'
-import { VK, Params } from 'vk-io';
 import { Facebook } from 'fb';
 const options = {
     app_id: process.env.FACEBOOK_APP_ID,
@@ -14,7 +13,7 @@ const options = {
 const FB = new Facebook(options);
 
 // Verify the sso user/token and return the user email and fetch key
-export const getKeyEmail = async (recoveryTypeId: number, token: any, key: string, email: string, ip_address: string) => {
+export const getKeyEmail = async (recoveryTypeId: number, token: any, key: string, email: string, vk_token: any) => {
     try {
         const testBackend = String(process.env.SEND_EMAILS || 'true') === 'false';
 
@@ -144,32 +143,30 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
         if (recovery_type == 'VKontakte') {
             try {
 
+                if (!vk_token || token !== vk_token.token || !vk_token.vk_user_id) {
+                    return { success: false, error: 'Invalid sso token' }
+                }
+                
                 // Set vkontakte access token and make the query for the current profile.
-                const vk = new VK({
-                    token: process.env.VK_SERVICE_TOKEN
-                });
-
-                const {OAuthClient}=require("vk-auth-library");
-
-                const client=OAuthClient(process.env.VK_APP_ID,process.env.VK_SECURE_KEY,process.env.VK_URL);
-
-                const access_token = await client.getAccessToken(token);                
                 
-                const secure_check:Params.SecureCheckTokenParams = {
-                    token: access_token.access_token,
-                    ip: ip_address
+
+                const url_service = `https://api.vk.com/method/users.get?access_token=${process.env.VK_SERVICE_TOKEN}&v=5.131&user_ids=${vk_token.vk_user_id}`
+                const url_user = `https://api.vk.com/method/users.get?access_token=${token}&v=5.131`
+
+                const axios = require('axios')
+                                // get the vk user info
+                const response_service = await axios.get(url_service);
+                const response_user = await axios.get(url_user);
+
+                if (!response_user.data.response || !response_service.data.response || response_user.data.response.length !== 1 || response_service.data.response.length !== 1 || response_user.data.response[0].id !== response_service.data.response[0].id) {
+                    return { success: false, error: 'Invalid sso user' }
                 }
 
-                // check that the token is valid and generated against the correct vk app id.
-                const tokenResult = await vk.api.secure.checkToken(secure_check)   
-                
-                if (!tokenResult || !tokenResult.success || tokenResult.success !== 1) {
-                    Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token, recovery_type }, message: 'SSO Token invalid' });
-                    return { success: false, error: 'SSO Token invalid' }
-                }
+                const result = response_user.data.response
 
-                // get the vk user info
-                const result = await vk.api.users.get([token]);
+                if (result[0].id !== vk_token.vk_user_id) {
+                    return { success: false, error: 'Invalid sso user' }
+                }
 
                 if (!result || result.length < 1 || !result[0].id) {
                     Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token, recovery_type }, message: 'No sso user id returned' });
@@ -178,8 +175,6 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
                 
                 // Hash the VK id with user id to get the database key.
                 const key = await sha256((process.env.VK_APP_ID + result[0].id).toString());
-
-                Logger.info({ source: 'getKeyEmail', data: { result, tokenResult }, message: 'VK User Data' });
                 
                 return { success: true, recovery_type, key: key, email: result[0].email || email }
 
@@ -195,6 +190,7 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
         return { success: false, error: 'No sso user id returned' }
 
     } catch (err) {
+
         Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token }, message: err.message || err.toString() });
 
         return { success: false, error: err.message || err.toString() }

@@ -54,7 +54,7 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 	doLogin() {
 		const redirectUri = this.callbackUrlForPopup;
 		const uriRegex = new RegExp(redirectUri);
-		const url = `http://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.120&response_type=code&scope=offline&redirect_uri=${redirectUri}`;
+		const url = `https://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.131&response_type=code&scope=email&redirect_uri=${redirectUri}`;
 		const win = this.vkPopup({
 			width: 620,
 			height: 370,
@@ -66,23 +66,19 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 			try {
 				if (uriRegex.test(win.location)) {
 					if (this.watchTimer) clearInterval(this.watchTimer);
-
-					const hash = win.location.hash.substr(1);
-					const params = hash.split('&').reduce((result, item) => {
-						const parts = item.split('=');
-						result[parts[0]] = parts[1];
-						return result;
-					}, {});
-
 					setTimeout(() => {
 						win.close();
-						//document.location.reload();
-					}, 500);
+					}, 100);
+
+					const urlParams = new URLSearchParams(win.location.search);
+					const user_code = urlParams.get('code');
 
 					this.showSpinner(this.$t('loader.RECOVERY_LOG_IN'));
 					try {
-						const userID = params.user_id;
-						const accessToken = params.code;
+						const auth_token = await this.fetchVKAuthToken({code: user_code })
+									
+						const userID = auth_token.user_id;
+						const accessToken = auth_token.access_token;
 
 						const key = this.clientId + userID
 

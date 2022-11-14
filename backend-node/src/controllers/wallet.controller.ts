@@ -9,6 +9,7 @@ const QRCode = require('qrcode');
 const countryList = process.env.COUNTRY_LIST || '[]';
 import { Logger } from '../helpers/functions/winston';
 import { getKeyEmail } from '../helpers/functions/sso';
+const vk_tokens = {};
 
 // Function to save new signups to the database.
 export async function saveEmailPassword(req: Request, res: Response) {
@@ -24,7 +25,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
         let email = req.body.email.toLowerCase().replace(/ /g, '');
         const key = req.body.key;
 
-        const emailKey = await getKeyEmail(recoveryTypeId, req.body.access_token, key, email, req.clientIp);
+        const emailKey = await getKeyEmail(recoveryTypeId, req.body.access_token, key, email, vk_tokens[key]);
         
         if (emailKey.success !== true) {
             await transaction.rollback();
@@ -147,7 +148,7 @@ export async function addRecoveryMethod(req: Request, res: Response) {
             return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
         }
 
-        const emailKey = await getKeyEmail(recoveryTypeId, req.body.access_token, keyForSaving, email, req.clientIp);
+        const emailKey = await getKeyEmail(recoveryTypeId, req.body.access_token, keyForSaving, email, vk_tokens[key]);
 
         if (emailKey.success !== true) {
             return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
@@ -194,6 +195,8 @@ export async function addRecoveryMethod(req: Request, res: Response) {
 
         return errorResponse(res, 'RECOVERY_METHOD_ALREADY_SET');
     } catch (error) {
+        console.log('error', error)
+        return
         Logger.error({ source: 'addRecoveryMethod', data: req.body, message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
@@ -329,7 +332,7 @@ export async function getEncryptedSeed(req, res) {
         const authenticator2fa = req.body.authenticator2fa;
         const recovery_type_id = Number(req.body.recovery_type || 1);
 
-        const emailKey = await getKeyEmail(recovery_type_id, req.body.access_token, key, email, req.clientIp);
+        const emailKey = await getKeyEmail(recovery_type_id, req.body.access_token, key, email, vk_tokens[key]);
 
         if (emailKey.success !== true) {
             return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
@@ -1014,7 +1017,7 @@ export async function resetRecovery(req, res) {
         const key = req.body.key;
         const email = req.body.email;
         // Verify the apple acess token for apple logins
-        const emailKey = await getKeyEmail(recoveryTypeId, req.body.access_token, key, email, req.clientIp);
+        const emailKey = await getKeyEmail(recoveryTypeId, req.body.access_token, key, email, vk_tokens[key]);
 
         if (emailKey.success !== true) {
             return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
@@ -1170,4 +1173,46 @@ export async function updateUserPayload(req, res) {
     }
     //error out in any other case
     return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
+}
+
+// generate an auth key using the vk app id and vk secure key. this validates the user is originating from the correct url and is using the correct application code 
+export const fetchVKAuthToken = async (req, res) => {
+    try {
+
+        const token = req.body.code
+
+        const axios = require('axios')
+
+        const getAuthToken = `https://oauth.vk.com/access_token?client_id=${process.env.VK_APP_ID}&client_secret=${process.env.VK_SECURE_KEY}&redirect_uri=${process.env.VK_URL}&code=${token}`
+
+        const response = await axios.get(getAuthToken);
+
+        const auth_token = response.data;
+
+        const key = req.header('key');
+        const recovery_type_id = req.header('recoverytypeid');
+
+        const recovery = await Recovery.findOne({ where: { key, recovery_type_id: recovery_type_id } });
+
+
+        if (!recovery || ! recovery.user_id) {
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
+        }
+
+        vk_tokens[key] = {token: auth_token.access_token, date: Date.now(), user_id: recovery.user_id, vk_user_id: auth_token.user_id }
+
+        const keys = Object.keys(vk_tokens)
+        keys.forEach(k => {
+            if (vk_tokens[k].date < Date.now() - (1000 * 60 * 60)) {
+                delete vk_tokens[k]
+            }
+        })
+
+        return successResponse(res, auth_token);
+
+    } catch (error) {
+        console.log('error', error)
+        Logger.error({ source: 'fetchVKAuthToken', data: req.body, message: error.message || error.toString() });
+        return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
+    }
 }

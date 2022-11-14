@@ -302,6 +302,9 @@ export class Authenticated extends Global {
 	public addRecoveryMethod!: (params: TypeAddRecoveryParams) => Promise<unknown>;
 
 	@Action
+	public fetchVKAuthToken!: (params: any) => Promise<unknown>;	
+
+	@Action
 	public hasRecovery!: (id: number) => boolean;
 
 	@Action

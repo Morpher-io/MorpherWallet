@@ -120,6 +120,7 @@ module.exports = function (express) {
     router.post('/auth/getRecoveryMethods', WalletController.getRecoveryMethods);
     router.post('/auth/deleteAccount', WalletController.deleteAccount);
     router.post('/auth/updateUserPayload', WalletController.updateUserPayload);
+    router.post('/auth/fetchVKAuthToken', WalletController.fetchVKAuthToken);
 
     /**
      * Email Notifications

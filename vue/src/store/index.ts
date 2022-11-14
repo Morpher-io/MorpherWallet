@@ -542,6 +542,23 @@ const store: Store<RootState> = new Vuex.Store({
 				})
 			});
 		},
+		fetchVKAuthToken({ state, dispatch }, params: any) {
+			return new Promise(async (resolve, reject) => {
+				dispatch('sendSignedRequest', {
+					body: {
+						code: params.code
+						
+					},
+					method: 'POST',
+					url: getBackendEndpoint() + '/v1/auth/fetchVKAuthToken'
+				})
+				.then((response) => {
+					
+					resolve(response)
+				})
+				.catch(reject);
+			});
+		},
 		hasRecovery({ state }, id: number) {
 			return (
 				state.recoveryMethods

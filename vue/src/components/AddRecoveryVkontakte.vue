@@ -82,7 +82,7 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 	async doLogin() {
 		const redirectUri = this.callbackUrlForPopup;
 		const uriRegex = new RegExp(redirectUri);
-		const url = `http://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.120&response_type=code&scope=offline&redirect_uri=${redirectUri}`;
+		const url = `https://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.131&response_type=code&scope=email&redirect_uri=${redirectUri}`;
 		const win = this.vkPopup({
 			width: 620,
 			height: 370,
@@ -94,25 +94,27 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 			try {
 				if (uriRegex.test(win.location)) {
 					if (this.watchTimer) clearInterval(this.watchTimer);
-					const hash = win.location.hash.substr(1);
-					const params = hash.split('&').reduce((result, item) => {
-						const parts = item.split('=');
-						result[parts[0]] = parts[1];
-						return result;
-					}, {});
 
-					setTimeout(() => {
-						win.close();
-						//document.location.reload();
-					}, 100);
+					 setTimeout(() => {
+					 	win.close();
+					 	//document.location.reload();
+					 }, 100);
+					const urlParams = new URLSearchParams(win.location.search);
+					const user_code = urlParams.get('code');
 
-					const userID = params.user_id;
-					const accessToken = params.code;
-					console.log('params', params)
+
+
+					const auth_token = await this.fetchVKAuthToken({code: user_code })
+					
+				
+					const userID = auth_token.user_id;
+					const accessToken = auth_token.access_token;
+					
 					this.showSpinner(this.$t('loader.SAVING_KEYSTORE_RECOVERY'));
 
 					const key = await sha256(this.clientId + userID);
-					this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId, token: accessToken, email: params.email, currentRecoveryTypeId: this.store.recoveryTypeId })
+					
+					this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId, token: accessToken, email: '', currentRecoveryTypeId: this.store.recoveryTypeId })
 						.then(async () => {
 							if (this.$gtag && window.gtag)
 								window.gtag('event', 'add_recovery', {
@@ -149,7 +151,7 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 	async doDelete() {
 		const redirectUri = this.callbackUrlForPopup;
 		const uriRegex = new RegExp(redirectUri);
-		const url = `http://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.120&response_type=code&scope=offline&redirect_uri=${redirectUri}`;
+		const url = `https://oauth.vk.com/authorize?client_id=${process.env.VUE_APP_VK_APP_ID}&display=popup&v=5.131&response_type=code&scope=email&redirect_uri=${redirectUri}`;
 		const win = this.vkPopup({
 			width: 620,
 			height: 370,
@@ -161,19 +163,20 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 			try {
 				if (uriRegex.test(win.location)) {
 					if (this.watchTimer) clearInterval(this.watchTimer);
-					const hash = win.location.hash.substr(1);
-					const params = hash.split('&').reduce((result, item) => {
-						const parts = item.split('=');
-						result[parts[0]] = parts[1];
-						return result;
-					}, {});
 
 					setTimeout(() => {
 						win.close();
 					}, 100);
 
-					const userID = params.user_id;
-					const accessToken = params.code;
+					const urlParams = new URLSearchParams(win.location.search);
+					const user_code = urlParams.get('code');
+
+
+					const auth_token = await this.fetchVKAuthToken({code: user_code })
+									
+					const userID = auth_token.user_id;
+					const accessToken = auth_token.access_token;
+
 					this.showSpinner(this.$t('loader.DELETING_KEYSTORE_RECOVERY'));
 
 					const key = await sha256(this.clientId + userID);
