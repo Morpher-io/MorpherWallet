@@ -107,10 +107,11 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 					}, 100);
 
 					const userID = params.user_id;
+					const accessToken = params.access_token;
 					this.showSpinner(this.$t('loader.SAVING_KEYSTORE_RECOVERY'));
 
 					const key = await sha256(this.clientId + userID);
-					this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId, token: '', email: params.email, currentRecoveryTypeId: this.store.recoveryTypeId })
+					this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId, token: accessToken, email: params.email, currentRecoveryTypeId: this.store.recoveryTypeId })
 						.then(async () => {
 							if (this.$gtag && window.gtag)
 								window.gtag('event', 'add_recovery', {
@@ -171,10 +172,11 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 					}, 100);
 
 					const userID = params.user_id;
+					const accessToken = params.access_token;
 					this.showSpinner(this.$t('loader.DELETING_KEYSTORE_RECOVERY'));
 
 					const key = await sha256(this.clientId + userID);
-					this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId })
+					this.resetRecoveryMethod({ key, token: accessToken, recoveryTypeId: this.recoveryTypeId })
 						.then(async () => {
 							this.showSpinnerThenAutohide(this.$t('loader.DELETED_KEYSTORE_SUCCESSFULLY'));
 							this.hasRecoveryMethod = false;
