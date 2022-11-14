@@ -159,7 +159,9 @@ export default class AddRecoveryFacebook extends mixins(Global, Authenticated) {
 		this.showSpinner(this.$t('loader.DELETING_KEYSTORE_RECOVERY'));
 		const userID = data.authResponse.userID;
 		const key = await sha256(this.clientId + userID);
-		this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId })
+		const accessToken = data.authResponse.accessToken;
+
+		this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId, token: accessToken })
 			.then(async () => {
 				this.facebook.FB.api('/me/permissions', 'DELETE', () => {
 					this.facebook.scope.logout();
