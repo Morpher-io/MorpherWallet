@@ -66,8 +66,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
         const user = await User.findOne({ where: { email }, raw: true, transaction });
 
         if (user == null) {
-            // If it exists, set the userId and delete the associated recovery method.
-            // If it doesnt exist create a new one.
+            // Create a new user and associated recovery method
             let needConfirmation = true;
             let registerConfirmation = true;
             if (recoveryTypeId == 3 || recoveryTypeId == 6) {
@@ -111,9 +110,10 @@ export async function saveEmailPassword(req: Request, res: Response) {
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 
-    return errorResponse(res, 'USER_NOT_FOUND', 404);
+    return errorResponse(res, 'USER_ALREADY_EXISTS', 404);
 }
 
+// Returns the all the active recovery types for a user. used to check which recovery types can be de-activated and to warn the user if no recovery types are active
 export async function getRecoveryMethods(req: Request, res: Response) {
     try {
         const recovery_type_id = Number(req.body.recovery_type || 1);
@@ -154,11 +154,6 @@ export async function addRecoveryMethod(req: Request, res: Response) {
             return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
         }
 
-        // can only register using google/apple/password
-        if (!emailKey.recovery_type || !['Password', 'Apple', 'Google', 'Facebook', 'VKontakte'].includes(emailKey.recovery_type)) {
-            return errorResponse(res, 'INVALID_RECOVERY_TYPE', 500);
-        }
-
         // use the SSO email and check the user key for apple and google
         email = emailKey.email;
         if (keyForSaving !== emailKey.key) {
@@ -195,8 +190,6 @@ export async function addRecoveryMethod(req: Request, res: Response) {
 
         return errorResponse(res, 'RECOVERY_METHOD_ALREADY_SET');
     } catch (error) {
-        console.log('error', error)
-        return
         Logger.error({ source: 'addRecoveryMethod', data: req.body, message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
@@ -336,11 +329,6 @@ export async function getEncryptedSeed(req, res) {
 
         if (emailKey.success !== true) {
             return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
-        }
-
-        // can only login using google/apple/password - recover from 'Facebook'/'VKontakte'
-        if (!emailKey.recovery_type || !['Password','Apple','Google','Facebook', 'VKontakte'].includes(emailKey.recovery_type)) {
-            return errorResponse(res, 'INVALID_RECOVERY_TYPE', 500);
         }
 
         // use the SSO email and check the user key for apple and google
@@ -508,6 +496,8 @@ export async function recoverSeedSocialRecovery(req: Request, res: Response) {
             return await getEncryptedSeed(req, res);
         case 5:
             return await getEncryptedSeed(req, res);
+        case 6:
+            return await getEncryptedSeed(req, res);            
         default:
             return errorResponse(res, 'RECOVERY_METHOD_NOT_EXIST', 500);
     }
@@ -601,9 +591,6 @@ export async function getPayload(req, res) {
                 }
                 if (user['payload'].authenticator !== undefined) {
                     payload['authenticator'] = user.payload.authenticator;
-                }
-                if (user['payload'].emailVerificationCode !== undefined) {
-                    payload['emailVerificationCode'] = user.payload.emailVerificationCode;
                 }
                 if (user['payload'].authenticatorConfirmed !== undefined) {
                     payload['authenticatorConfirmed'] = user.payload.authenticatorConfirmed;
@@ -782,6 +769,10 @@ export async function generateAuthenticatorQR(req, res) {
         const recovery = await Recovery.findOne({ where: { key } });
         if (recovery != null) {
             const user = await User.findOne({ where: { id: recovery.user_id } });
+
+            if (user.authenticator_secret && user.payload.authenticator == true) {
+                return errorResponse(res, 'AUTHENTICATOR_ALREADY_ENABLED', 500);
+            }
             if (user != null) {
                 user.authenticator_secret = authenticator.generateSecret();
 
@@ -1025,10 +1016,6 @@ export async function resetRecovery(req, res) {
             return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
         }
 
-        // can only register using google/apple/password
-        if (!emailKey.recovery_type || !['Password', 'Apple', 'Google', 'Facebook', 'VKontakte'].includes(emailKey.recovery_type)) {
-            return errorResponse(res, 'INVALID_RECOVERY_TYPE', 500);
-        }
 
         // use the SSO email and check the user key for apple and google
         if (key !== emailKey.key) {

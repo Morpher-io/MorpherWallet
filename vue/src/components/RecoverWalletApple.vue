@@ -1,21 +1,11 @@
 <template>
 	<div class="control is-expanded" v-if="clientId">
-		<GoogleLogin
-			class="button is-grey big-button outlined-button is-thick transition-faster"
-			:params="{ client_id: clientId }"
-			:onSuccess="onLogin"
-			:onFailure="onError"
-		>
-			<span class="icon img">
-				<img src="@/assets/img/google_logo.svg" alt="Google Logo" />
-			</span>
-			<span>Google</span>
-		</GoogleLogin>
+		<LoginApple recover=true  @processMethod="onLogin"></LoginApple>
 	</div>
 </template>
 
 <script>
-import GoogleLogin from 'vue-google-login';
+import LoginApple from './LoginApple.vue';
 import ChangePassword from './ChangePassword.vue';
 
 import Component, { mixins } from 'vue-class-component';
@@ -24,14 +14,14 @@ import { Emit } from 'vue-property-decorator';
 
 @Component({
 	components: {
-		GoogleLogin,
+		LoginApple,
 		ChangePassword
 	}
 })
-export default class RecoverWalletGoogle extends mixins(Global) {
-	clientId = process.env.VUE_APP_GOOGLE_APP_ID;
+export default class RecoverWalletApple extends mixins(Global) {
 
-	recoveryTypeId = 3;
+	clientId = process.env.VUE_APP_APPLE_CLIENT_ID;
+	recoveryTypeId = 6;
 
 	@Emit('setPassword')
 	setPassword(data) {
@@ -39,11 +29,11 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 	}
 
 	onError(error) {
-		this.logSentryError('recoverWalletGoogle', error.toString(), { clientId: this.clientId });
-		let errorText = error.error || error.err || 'Google login Error';
+		this.logSentryError('recoverWalletApple', error.toString(), { clientId: 6 });
+		let errorText = error.error || error.err || 'Apple login Error';
 
 		if (String(errorText.toLowerCase()).includes('script not loaded correctly')) {
-			errorText = 'google_script_blocked';
+			errorText = 'apple_script_blocked';
 		}
 
 		this.setPassword({
@@ -52,17 +42,19 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 		});
 	}
 
-	onLogin(googleUser) {
+	onLogin(appleUser) {
 		this.showSpinner(this.$t('loader.RECOVERY_LOG_IN'));
 		try {
-			const userID = googleUser.getBasicProfile().getId();
-			const accessToken = googleUser.getAuthResponse(true).access_token;
+			const key = appleUser.key
+			const email = appleUser.email || appleUser.key
+			const userID = appleUser.userID;
+			const recoveryTypeId = appleUser.recoveryTypeId;
+			const recaptchaToken = this.recaptchaToken;
+			const accessToken = appleUser.token;
 
-			const key = this.clientId + userID
-			
-			this.fetchWalletFromRecovery({ key, accessToken, password: userID, recoveryTypeId: this.recoveryTypeId })
+
+			this.fetchWalletFromRecovery({ key, accessToken, password: userID, recoveryTypeId })
 				.then(() => {
-					googleUser.disconnect();
 					this.hideSpinner();
 					this.setPassword({
 						success: true,
@@ -70,8 +62,7 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 					});
 				})
 				.catch((error) => {
-					this.logSentryError('recoverWalletGoogle', error.toString(), { userID });
-					googleUser.disconnect();
+					this.logSentryError('recoverWalletApple', error.toString(), { userID });
 					this.showSpinnerThenAutohide(this.$t('loader.NO_RECOVERY_FOUND'));
 					this.setPassword({
 						success: false,
@@ -79,7 +70,7 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 					});
 				});
 		} catch (e) {
-			this.logSentryError('recoverWalletGoogle', e.toString(), { googleUser });
+			this.logSentryError('recoverWalletApple', e.toString(), { appleUser });
 			this.showSpinnerThenAutohide(this.$t('loader.NO_RECOVERY_FOUND'));
 			this.setPassword({
 				success: false,

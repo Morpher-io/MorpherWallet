@@ -48,6 +48,7 @@
         "SECURED_WALLET": "Secured with AES | SHA-256 | PBKDF2"
     },
     "auth": {
+        "APPLE": "Apple",
         "LOGIN": "Log In",
         "LOGIN_DESCRIPTION": "Unlock your crypto wallet.",
         "RECOVER_YOUR_WALLET_QUESTION": "Recover your wallet?",

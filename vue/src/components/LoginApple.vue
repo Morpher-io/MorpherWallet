@@ -10,6 +10,7 @@
 				<span v-if="signIn">{{  $t('auth.SIGN_UP_APPLE') }} </span>
 				<span v-else-if="unlock">{{  $t('auth.UNLOCK_APPLE') }} </span>
 				<span v-else-if="update">{{  $t('auth.UPDATE_APPLE') }} </span>
+				<span v-else-if="recover">{{  $t('auth.APPLE') }} </span>				
 				<span v-else>{{  $t('auth.LOG_IN_APPLE') }} </span>
 			</button>
 
@@ -47,6 +48,9 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 
 	@Prop({ default: false })
 	update;	
+
+	@Prop({ default: false })
+	recover;		
 
 	@Emit('processMethod')
 	processMethod(data) {
