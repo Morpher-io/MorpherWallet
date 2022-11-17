@@ -144,7 +144,7 @@ export default class AddRecoveryApple extends mixins(Global, Authenticated) {
 
 		const userID = decoded.sub;
 		const email = decoded.email;
-		const key = this.clientId + userID
+		const key = await sha256(this.clientId + userID)
 
 		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId, token: JSON.stringify({ identityToken, authorizationCode, nonce }), email, currentRecoveryTypeId: this.store.recoveryTypeId })
 			.then(async () => {
