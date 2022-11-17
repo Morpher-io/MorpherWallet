@@ -3,7 +3,7 @@
 		<h2 class="title">{{ $t('email.EMAIL_SETTINGS_TITLE') }}</h2>
 		<h4 class="subtitle">{{ $t('email.EMAIL_SETTINGS_DESCRIPTION') }}</h4>
 		<ChangeEmail v-if="currentPage === 0" @setNewData="setNewData" :error="logonError" />
-		<Change2FAEmail v-if="currentPage === 1" @setCode="setCode" @pageBack="pageBack" :error="logonError" />
+		<Change2FAEmail v-if="currentPage === 1" @setCode="setCode" @pageBack="pageBack" :error="logonError" :verifyCode="false" />
 		<div v-if="currentPage === 2">
 			<div>
 				<img src="@/assets/img/checkmark.svg" alt="Checkmark image" class="mb-3" />

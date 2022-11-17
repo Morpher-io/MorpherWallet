@@ -899,33 +899,13 @@ const store: Store<RootState> = new Vuex.Store({
 				try {
 					if (state.keystore !== undefined && state.keystore !== null) {
 						if (params.password == state.hashedPassword || state.recoveryTypeId == 3 || state.recoveryTypeId == 6) {
-							if (params.twoFa != undefined && params.twoFa > 0) {
-								//twoFA was sent
-								const resultEmail2fa = await verifyEmailCode(state.email, params.twoFa.toString());
-								if (resultEmail2fa.success) {
-									const body = {
-										oldEmail: state.email,
-										newEmail: params.newEmail,
-										email2faVerification: params.twoFa
-									};
-									dispatch('sendSignedRequest', {
-										body,
-										method: 'POST',
-										url: getBackendEndpoint() + '/v1/auth/updateEmail'
-									})
-										.then(() => {
-											commit('userFound', { email: params.newEmail, hashedPassword: state.hashedPassword, recoveryTypeId: state.recoveryTypeId, fetch_key: state.fetch_key });
-											resolve(true);
-										})
-										.catch(reject);
-								} else {
-									reject('Two FA Code is incorrect!');
-								}
-							} else {
+							
+
 								//twoFA wasn't sent yet, send it with the first request to the new email address
 								const body = {
 									oldEmail: state.email,
-									newEmail: params.newEmail
+									newEmail: params.newEmail,
+									email2faVerification: (params.twoFa || undefined)
 								};
 								dispatch('sendSignedRequest', {
 									body,
@@ -934,7 +914,6 @@ const store: Store<RootState> = new Vuex.Store({
 								})
 									.then(resolve)
 									.catch(reject);
-							}
 						} else {
 							reject('Password is not correct!');
 						}

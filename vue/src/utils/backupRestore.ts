@@ -154,7 +154,7 @@ const recoverSeedSocialRecovery = async (key: string, accessToken: string, signu
 				key,
 				access_token: accessToken,
 				signupEmail,
-				recoveryTypeId
+				recovery_type: recoveryTypeId
 			}),
 			mode: 'cors',
 			cache: 'default'

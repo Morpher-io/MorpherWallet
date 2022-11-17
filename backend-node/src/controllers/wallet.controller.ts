@@ -260,7 +260,7 @@ export async function updateEmail(req: Request, res: Response) {
                 } else {
                     // 2FA tokens in query params
                     // Attempt to get user from database.
-                    if (await verifyEmail2FA(user.id.toString(), email2faVerification, true)) {
+                    if (await verifyEmail2FA(user.id.toString(), email2faVerification, true, newEmail)) {
                         //2fa passed here
                         Userhistory.create({
                             user_id: user.id,
@@ -863,6 +863,8 @@ async function updateEmail2fa(user_id) {
     const verificationCode = randomFixedInteger(6);
     user.email_verification_code = verificationCode;
     user.email2fa_valid_until = new Date(Date.now() + (15 * 60 * 1000)); //15 minutes valid
+    user.payload.email2fa_retry_count = 0;
+
     await user.save();
     return user.email_verification_code;
 }
@@ -1108,13 +1110,43 @@ export async function deleteAccount(req, res) {
     }
 }
 
-async function verifyEmail2FA(user_id: string, code: string, isEmailChange: boolean = false): Promise<boolean> {
+async function verifyEmail2FA(user_id: string, code: string, isEmailChange: boolean = false, email_override: String = ''): Promise<boolean> {
     const user = await User.findOne({ where: { id: user_id } });
+    const sendEmails = process.env.SEND_EMAILS;
+
     if (user.payload.needConfirmation || isEmailChange) {
-        return user.email_verification_code === Number(code)
+        const verified = user.email_verification_code === Number(code)
+        if (!verified) {
+            user.payload.email2fa_retry_count = (user.payload.email2fa_retry_count || 0) + 1;
+            if (user.payload.email2fa_retry_count >=3) {
+                const verificationCode = await updateEmail2fa(user.id);
+                if (sendEmails === 'true') {
+                    if (!email_override) {
+                        email_override = user.email
+                    }
+                    await sendEmail2FA(verificationCode, email_override, user);
+                }
+            }
+        }
+        return verified
     }
 
-    return user.payload.email === false || (user.email_verification_code === Number(code));
+    const verified = user.payload.email === false || (user.email_verification_code === Number(code));
+
+    if (!verified) {
+        user.payload.email2fa_retry_count = (user.payload.email2fa_retry_count || 0) + 1;
+        if (user.payload.email2fa_retry_count >=3) {
+            const verificationCode = await updateEmail2fa(user.id);
+            if (sendEmails === 'true') {
+                if (!email_override) {
+                    email_override = user.email
+                }
+                await sendEmail2FA(verificationCode, email_override, user);
+            }
+        }
+    }
+
+    return verified
 
 }
 

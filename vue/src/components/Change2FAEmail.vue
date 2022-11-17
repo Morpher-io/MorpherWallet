@@ -45,6 +45,10 @@ export default class Change2FAEmail extends mixins(Authenticated) {
 	@Prop()
 	error!: string;
 
+	@Prop()
+	verifyCode!: boolean;
+	
+
 	@Watch('error')
 	handleErorrChange(newValue: string) {
 		if (newValue) this.logonError = newValue;
@@ -52,11 +56,15 @@ export default class Change2FAEmail extends mixins(Authenticated) {
 
 	@Emit('setCode')
 	async setCode() {
-		this.logonError = '';
+		if (this.verifyCode === false) {
+			return this.authenticatorCode;
+		} else {
+			this.logonError = '';
 
-		const isCodeValid = await this.confirmAuthenticator();
-		if (isCodeValid) return this.authenticatorCode;
-		else return null;
+			const isCodeValid = await this.confirmAuthenticator();
+			if (isCodeValid) return this.authenticatorCode;
+			else return null;
+		}
 	}
 
 	@Emit('pageBack')
@@ -65,14 +73,16 @@ export default class Change2FAEmail extends mixins(Authenticated) {
 	}
 
 	async confirmAuthenticator() {
-		const confirmCode = await verifyEmailCode(this.store.fetch_key || this.store.email, this.authenticatorCode);
+		if (this.verifyCode !== false) {
+			const confirmCode = await verifyEmailCode(this.store.fetch_key || this.store.email, this.authenticatorCode);
 
-		if (confirmCode.success) {
-			this.logonError = '';
-			return true;
-		} else {
-			this.logonError = getDictionaryValue(confirmCode.error);
-			return false;
+			if (confirmCode.success) {
+				this.logonError = '';
+				return true;
+			} else {
+				this.logonError = getDictionaryValue(confirmCode.error);
+				return false;
+			}
 		}
 	}
 
