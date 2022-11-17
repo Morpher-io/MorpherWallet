@@ -146,7 +146,7 @@ describe('Wallet controller test cases', async () => {
             .set('Accept', 'application/json');
 
         expect(walletResponse.status).toEqual(404);
-        expect(walletResponse.body.error).toEqual('USER_NOT_FOUND');
+        expect(walletResponse.body.error).toEqual('USER_ALREADY_EXISTS');
     });
 
     it('returns error if bad body key', async () => {
