@@ -489,7 +489,7 @@ export async function getEncryptedSeed(req, res) {
 
 
 export async function recoverSeedSocialRecovery(req: Request, res: Response) {
-    switch (req.body.recoveryTypeId) {
+    switch (req.body.recovery_type) {
         case 2:
             return await getEncryptedSeed(req, res);
         case 3:
