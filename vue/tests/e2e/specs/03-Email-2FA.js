@@ -186,7 +186,7 @@ describe('Email 2FA', () => {
 
 		cy.get('[data-cy=confirmButton]').click();
 
-		cy.waitUntil(() => cy.get('[data-cy=2faEmailError]').contains('Could not verify email code. Please try again.'));
+		cy.waitUntil(() => cy.get('[data-cy=2faEmailError]').contains('Incorrect Email 2FA code. Check your email and Try again.'));
 	});
 
 	it('Change Login Email', () => {
