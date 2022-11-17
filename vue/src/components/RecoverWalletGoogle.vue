@@ -21,6 +21,7 @@ import ChangePassword from './ChangePassword.vue';
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 import { Emit } from 'vue-property-decorator';
+import { sha256 } from '../utils/cryptoFunctions';
 
 @Component({
 	components: {
@@ -55,21 +56,24 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 		});
 	}
 
-	onLogin(googleUser) {
+	async onLogin(googleUser) {
 		this.showSpinner(this.$t('loader.RECOVERY_LOG_IN'));
 		try {
 			const userID = googleUser.getId();
-			const accessToken = googleUser.getAuthResponse(true).access_token;
+
+			const accessToken = (googleUser.Cc || googleUser.Bc).id_token
 
 			const key = this.clientId + userID
 
-			this.fetchWalletFromRecovery({ key, accessToken, password: userID, recoveryTypeId: this.recoveryTypeId })
+			const oldPassword = await sha256(userID)
+			
+			this.fetchWalletFromRecovery({ key, accessToken, password: oldPassword, recoveryTypeId: this.recoveryTypeId })
 				.then(() => {
 					googleUser.disconnect();
 					this.hideSpinner();
 					this.setPassword({
 						success: true,
-						oldPassword: userID
+						oldPassword: oldPassword
 					});
 				})
 				.catch((error) => {

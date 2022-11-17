@@ -28,6 +28,7 @@ import ChangePassword from './ChangePassword.vue';
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 import { Emit } from 'vue-property-decorator';
+import { sha256 } from '../utils/cryptoFunctions';
 
 @Component({
 	components: {
@@ -63,14 +64,16 @@ export default class RecoverWalletFacebook extends mixins(Global) {
 
 			const key = this.clientId + userID
 
-			this.fetchWalletFromRecovery({ key, accessToken, password: userID, recoveryTypeId: this.recoveryTypeId })
+			const oldPassword = await sha256(userID)
+
+			this.fetchWalletFromRecovery({ key, accessToken, password: oldPassword, recoveryTypeId: this.recoveryTypeId })
 				.then(() => {
 					this.facebook.FB.api('/me/permissions', 'DELETE', async () => {
 						this.facebook.scope.logout();
 						this.hideSpinner();
 						this.setPassword({
 							success: true,
-							oldPassword: userID
+							oldPassword: oldPassword
 						});
 					});
 				})

@@ -11,6 +11,7 @@ import ChangePassword from './ChangePassword.vue';
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 import { Emit } from 'vue-property-decorator';
+import { sha256 } from '../utils/cryptoFunctions';
 
 @Component({
 	components: {
@@ -42,7 +43,7 @@ export default class RecoverWalletApple extends mixins(Global) {
 		});
 	}
 
-	onLogin(appleUser) {
+	async onLogin(appleUser) {
 		this.showSpinner(this.$t('loader.RECOVERY_LOG_IN'));
 		try {
 			const key = appleUser.key
@@ -52,13 +53,15 @@ export default class RecoverWalletApple extends mixins(Global) {
 			const recaptchaToken = this.recaptchaToken;
 			const accessToken = appleUser.token;
 
+			const oldPassword = await sha256(userID)
 
-			this.fetchWalletFromRecovery({ key, accessToken, password: userID, recoveryTypeId })
+
+			this.fetchWalletFromRecovery({ key, accessToken, password: oldPassword, recoveryTypeId })
 				.then(() => {
 					this.hideSpinner();
 					this.setPassword({
 						success: true,
-						oldPassword: userID
+						oldPassword: oldPassword
 					});
 				})
 				.catch((error) => {
