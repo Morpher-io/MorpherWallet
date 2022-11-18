@@ -68,7 +68,7 @@ const encryptedSeedData = {
 
 const facebookData = {
     email: 'test@morpher.com',
-    key: sha256(process.env.FACEBOOK_APP_ID + '.' + '1212'), // simulating facebook id
+    key: sha256(process.env.FACEBOOK_APP_ID + '.' + '54674675'), // simulating facebook id
     encryptedSeed: {
         ciphertext:
             'yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==',
@@ -81,7 +81,7 @@ const facebookData = {
 
 const googleData = {
     email: 'morpher@gmail.com',
-    key: sha256(process.env.VUE_APP_GOOGLE_APP_ID + '123456'), // simulating google user id
+    key: sha256(process.env.VUE_APP_GOOGLE_APP_ID + '234655374'), // simulating google user id
     encryptedSeed: {
         ciphertext:
             'yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==',
@@ -95,7 +95,7 @@ const googleData = {
 
 const appleData = {
     email: 'morpher@apple.com',
-    key: sha256(process.env.VUE_APP_APPLE_CLIENT_ID + '123456'), // simulating apple id
+    key: sha256(process.env.VUE_APP_APPLE_CLIENT_ID + '832745629'), // simulating apple id
     encryptedSeed: {
         ciphertext:
             'yqm+4z2w6XcqTveYC7uXjadFHJsIaS+OQ/hC2Zu/e4Jas7ha6U0dxf4pVvISUxSEkyKuTENcDyBYNjnQ8HgPNZ/Wdesw3R/IkghBz8c5wi2EnRe6lRxCCEeIpLGgPQ==',
