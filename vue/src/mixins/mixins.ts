@@ -122,8 +122,8 @@ export class Global extends Vue {
 	public fetchWalletFromRecovery!: (params: TypeRecoveryParams) => Promise<unknown>;
 
 	@Action
-	public fetchVKAuthToken!: (params: any) => Promise<unknown>;		
-
+	public recoveryVKAuthToken!: (params: any) => Promise<unknown>;	
+		
 	// Map Store Properties
 	store: RootState = this.$store.state;
 
@@ -318,4 +318,7 @@ export class Authenticated extends Global {
 
 	@Action
 	public updateUserPayload!: (params: TypeUpdateUserPayload) => void;
+
+	@Action
+	public fetchVKAuthToken!: (params: any) => Promise<unknown>;			
 }

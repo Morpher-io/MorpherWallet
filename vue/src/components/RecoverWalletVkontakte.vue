@@ -76,7 +76,9 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 
 					this.showSpinner(this.$t('loader.RECOVERY_LOG_IN'));
 					try {
-						const auth_token = await this.fetchVKAuthToken({code: user_code })
+						const auth_token = await this.recoveryVKAuthToken({code: user_code })
+
+						console.log('auth_token', auth_token)
 									
 						const userID = auth_token.user_id;
 						const accessToken = auth_token.access_token;

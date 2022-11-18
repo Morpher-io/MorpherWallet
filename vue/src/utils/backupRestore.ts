@@ -142,6 +142,7 @@ const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEnc
 	return response;
 };
 
+
 const recoverSeedSocialRecovery = async (key: string, accessToken: string, signupEmail: string, recoveryTypeId: number) =>
 	new Promise((resolve, reject) => {
 		const options: RequestInit = {

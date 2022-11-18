@@ -1243,7 +1243,48 @@ export const fetchVKAuthToken = async (req, res) => {
         return successResponse(res, auth_token);
 
     } catch (error) {
-        console.log('error', error)
+        Logger.error({ source: 'fetchVKAuthToken', data: req.body, message: error.message || error.toString() });
+        return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
+    }
+}
+
+// generate a vk token for recovery
+export const recoveryVKAuthToken = async (req, res) => {
+    try {
+
+        const token = req.body.code
+
+        const axios = require('axios')
+
+        const getAuthToken = `https://oauth.vk.com/access_token?client_id=${process.env.VK_APP_ID}&client_secret=${process.env.VK_SECURE_KEY}&redirect_uri=${process.env.VK_URL}&code=${token}`
+
+        const response = await axios.get(getAuthToken);
+
+        const auth_token = response.data;
+
+        const key = await sha256(process.env.VK_APP_ID + auth_token.user_id )
+
+        const recovery_type_id = 5;
+
+        const recovery = await Recovery.findOne({ where: { key, recovery_type_id: recovery_type_id } });
+
+
+        if (!recovery || ! recovery.user_id) {
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
+        }
+
+        vk_tokens[key] = {token: auth_token.access_token, date: Date.now(), user_id: recovery.user_id, vk_user_id: auth_token.user_id }
+
+        const keys = Object.keys(vk_tokens)
+        keys.forEach(k => {
+            if (vk_tokens[k].date < Date.now() - (1000 * 60 * 60)) {
+                delete vk_tokens[k]
+            }
+        })
+
+        return successResponse(res, auth_token);
+
+    } catch (error) {
         Logger.error({ source: 'fetchVKAuthToken', data: req.body, message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }

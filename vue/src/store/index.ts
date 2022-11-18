@@ -559,6 +559,31 @@ const store: Store<RootState> = new Vuex.Store({
 				.catch(reject);
 			});
 		},
+		recoveryVKAuthToken({ state, dispatch }, params: any) {
+			return new Promise(async (resolve, reject) => {
+				const options: RequestInit = {
+					method: 'POST',
+					headers: {
+						Accept: 'application/json',
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						code: params.code
+					}),
+					mode: 'cors',
+					cache: 'default'
+				};
+
+				fetch(getBackendEndpoint() + '/v1/recoveryVKAuthToken', options).then(async (response) => {
+					if (!response.ok) {
+						reject((await response.json()).error);
+					}
+					resolve(await response.json());
+				}).catch(reject);
+
+			});
+		},
+	
 		hasRecovery({ state }, id: number) {
 			return (
 				state.recoveryMethods
