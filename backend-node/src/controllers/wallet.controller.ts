@@ -79,6 +79,12 @@ export async function saveEmailPassword(req: Request, res: Response) {
 
             userId = (await User.create({ email, payload, nonce, eth_address }, { transaction })).getDataValue('id');
 
+
+            const existingRecovery = await Recovery.findOne({where: {key: key}, transaction});
+            if (existingRecovery) {
+                return errorResponse(res, 'USER_ALREADY_EXISTS', 404);
+            }
+
             // Create a new recovery method.
             const recoveryId = (
                 await Recovery.create(
@@ -164,6 +170,11 @@ export async function addRecoveryMethod(req: Request, res: Response) {
 
         const recovery = await Recovery.findOne({ where: { user_id: emailRecovery.user_id, recovery_type_id: recoveryTypeId } });
         if (recovery == null) {
+            const existingRecovery = await Recovery.findOne({where: {key: keyForSaving}});
+            if (existingRecovery) {
+                return errorResponse(res, 'RECOVERY_ALREADY_EXISTS');
+            }
+
             const newRecoveryId = (
                 await Recovery.create({
                     recovery_type_id: recoveryTypeId,
