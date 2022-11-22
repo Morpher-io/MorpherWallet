@@ -88,6 +88,7 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
             const CLIENT_SECRET = process.env.GOOGLE_APP_SECRET;
             const GOOGLE_ANDROID_APP_ID = process.env.GOOGLE_ANDROID_APP_ID;
             const GOOGLE_IOS_APP_ID = process.env.GOOGLE_IOS_APP_ID;
+            const GOOGLE_WEB_APP_ID = process.env.GOOGLE_WEB_APP_ID;
 
             const client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET);
 
@@ -96,7 +97,7 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
                 // check that the token is valid and generated against the correct google client id (web/android or ios).
                 const ticket = await client.verifyIdToken({
                     idToken: token,
-                    audience: [CLIENT_ID, GOOGLE_ANDROID_APP_ID, GOOGLE_IOS_APP_ID]
+                    audience: [CLIENT_ID, GOOGLE_ANDROID_APP_ID, GOOGLE_IOS_APP_ID, GOOGLE_WEB_APP_ID]
                 });
                 const payload = ticket.getPayload();
                 const userid = payload['sub'];
@@ -109,7 +110,7 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
                 return { success: true, recovery_type, key: key, email: payload.email }
 
             } catch (err) {
-                Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token, recovery_type }, message: 'Error veryfting google token' + err.message || err.toString() });
+                Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token, recovery_type }, message: 'Error veryfting google token: ' + err.message || err.toString() });
 
                 return { success: false, error: err.message || err.toString() }
             }
