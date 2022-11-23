@@ -111,7 +111,11 @@
                 {
                     "name": "APPLE_CLIENT_ID",
                     "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:APPLE_CLIENT_ID::"
-                }
+                },
+                {
+                    "name": "APPLE_APP_CLIENT_ID",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:APPLE_APP_CLIENT_ID::"
+                }                
             ],
             "logConfiguration": {
                 "logDriver": "awslogs",

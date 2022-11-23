@@ -57,7 +57,7 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
 
                 // check that the token is valid and generated against the correct apple client id.
                 const appleIdTokenClaims = await appleSigninAuth.verifyIdToken(token.identityToken, {
-                    audience: process.env.APPLE_CLIENT_ID,
+                    audience: [process.env.APPLE_CLIENT_ID, process.env.APPLE_APP_CLIENT_ID],
                     /** sha256 hex hash of raw nonce */
                     nonce: token.nonce ? crypto.createHash('sha256').update(token.nonce).digest('hex') : undefined,
                     ignoreExpiration: false
