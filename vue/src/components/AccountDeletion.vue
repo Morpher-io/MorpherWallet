@@ -30,7 +30,7 @@
 		<div class="field">
 			<label class="label">{{ currentMethod === 0 ? $t('delete.SEED_PHRASE') : $t('delete.PRIVATE_KEY') }}</label>
 			<div class="control">
-				<input data-cy="privateKeyInput" type="password" name="input" class="input password-input" v-model="input" />
+				<input data-cy="privateKeyInput" type="password" name="input" class="input password-input" v-model="input" @keypress="handleKeyPress"  />
 			</div>
 		</div>
 		<p class="reset-line-height is-size-7 reset-mt">
@@ -96,6 +96,14 @@ export default class AccountDeletion extends mixins(Authenticated, Global) {
 		this.currentMethod = method;
 		this.input = '';
 		this.logonError = '';
+	}
+
+	handleKeyPress(e: any) {
+		const key = e.which || e.charCode || e.keyCode || 0;
+
+		if (key === 13) {
+			this.deleteAccount();
+		}
 	}
 }
 </script>

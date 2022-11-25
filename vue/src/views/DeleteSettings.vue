@@ -44,7 +44,7 @@
 				<p>{{ $t('delete.WHAT_FUNDS_DESCRIPTION') }}</p>
 			</div>
 		</div>
-		<ConfirmAccess v-if="currentPage === 1" @pageBack="pageBack" @setPassword="setPassword" :error="logonError" />
+		<ConfirmAccess v-if="currentPage === 1" @pageBack="pageBack" @accessConfirmed="accessConfirmed" :error="logonError" />
 		<AccountDeletion v-if="currentPage === 2" @pageBack="resetData" @deleteAccount="deleteAccount" :error="logonError" />
 	</div>
 </template>
@@ -72,17 +72,21 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 	}
 
 	setNewPage() {
-		this.currentPage = 1;
+		if (this.$store.state.unlocked == true) {
+			this.currentPage = 2;
+		} else {
+			this.currentPage = 1;
+		}
+		
 	}
 
 	pageBack() {
 		if (this.currentPage > 0) this.currentPage -= 1;
 	}
 
-	async setPassword(password: string) {
-		if (!password) return;
+	async accessConfirmed(access: string) {
+		if (!access) return;
 
-		this.password = password;
 		this.currentPage = 2;
 	}
 

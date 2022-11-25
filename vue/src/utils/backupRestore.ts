@@ -4,6 +4,7 @@ const { cryptoEncrypt, cryptoDecrypt, sha256 } = require('./cryptoFunctions');
 import { TypeEncryptedSeed, TypePayloadData, TypeCreatedKeystore, TypeNonceData } from '../types/global-types';
 import { WalletBase } from 'web3-core';
 import { i18n } from '../plugins/i18n';
+import { getSessionStore } from '../utils/sessionStore';
 
 const getBackendEndpoint = () => {
 	return process.env.VUE_APP_BACKEND_ENDPOINT || 'http://localhost:8080';
@@ -25,16 +26,16 @@ const getKeystoreFromEncryptedSeed = async (encryptedWalletObject: TypeEncrypted
 			});
 	});
 
-const getEncryptedSeedFromMail = async (email: string, email2fa: string, authenticator2fa: string, recaptchaToken: string) =>
+const getEncryptedSeedFromMail = async (fetch_key: string, email: string, email2fa: string, authenticator2fa: string, recaptchaToken: string, token: string, recoveryTypeId: number) =>
 	new Promise<TypeEncryptedSeed>((resolve, reject) => {
-		sha256(email.toLowerCase()).then((key: string) => {
+		sha256(fetch_key.toLowerCase()).then((key: string) => {
 			const options: RequestInit = {
 				method: 'POST',
 				headers: {
 					Accept: 'application/json',
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ key, email2fa, authenticator2fa, recaptcha: recaptchaToken }),
+				body: JSON.stringify({ key, email, email2fa, authenticator2fa, recaptcha: recaptchaToken, access_token: token, recovery_type: recoveryTypeId }),
 				mode: 'cors',
 				cache: 'default'
 			};
@@ -114,8 +115,9 @@ const validateInput = async (fieldName: string, inputFieldValue: string) => {
 	}
 };
 
-const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEncryptedSeed, ethAddress: string, recaptchaToken: string) => {
-	const key = await sha256(userEmail.toLowerCase());
+const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEncryptedSeed, ethAddress: string, recaptchaToken: string, recoveryTypeId: number, token: string, fetch_key: string) => {
+	
+	const key = await sha256(fetch_key.toLowerCase() || userEmail.toLowerCase());
 	const options: RequestInit = {
 		method: 'POST',
 		headers: {
@@ -127,7 +129,9 @@ const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEnc
 			encryptedSeed,
 			email: userEmail.toLowerCase(),
 			ethAddress,
-			recaptcha: recaptchaToken
+			recaptcha: recaptchaToken,
+			recovery_type: recoveryTypeId,
+			access_token: token
 		}),
 		mode: 'cors',
 		cache: 'default'
@@ -138,7 +142,8 @@ const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEnc
 	return response;
 };
 
-const recoverSeedSocialRecovery = async (accessToken: string, signupEmail: string, recoveryTypeId: number) =>
+
+const recoverSeedSocialRecovery = async (key: string, accessToken: string, signupEmail: string, recoveryTypeId: number) =>
 	new Promise((resolve, reject) => {
 		const options: RequestInit = {
 			method: 'POST',
@@ -147,9 +152,10 @@ const recoverSeedSocialRecovery = async (accessToken: string, signupEmail: strin
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
-				accessToken,
+				key,
+				access_token: accessToken,
 				signupEmail,
-				recoveryTypeId
+				recovery_type: recoveryTypeId
 			}),
 			mode: 'cors',
 			cache: 'default'
@@ -171,10 +177,13 @@ const recoverSeedSocialRecovery = async (accessToken: string, signupEmail: strin
 			});
 	});
 
-const getPayload = (email: string, recaptchaToken = '') =>
+const getPayload = (email: string, recaptchaToken = '', key = '') =>
 	new Promise<TypePayloadData>(async (resolve, reject) => {
 		try {
-			const key = await sha256(email.toLowerCase());
+			if (!key) {
+				key = await sha256(email.toLowerCase());
+			}
+
 			const options: RequestInit = {
 				method: 'POST',
 				headers: {
@@ -235,7 +244,11 @@ const getNonce = async (key: string, retry = 0) => {
 };
 
 const send2FAEmail = async (email: string) => {
-	const key = await sha256(email.toLowerCase());
+	let key = await getSessionStore('fetch_key')
+	if (!key) {
+			key = await sha256(email.toLowerCase());
+	}
+	
 	const options: RequestInit = {
 		method: 'POST',
 		headers: {
@@ -261,7 +274,10 @@ const send2FAEmail = async (email: string) => {
 };
 
 const verifyAuthenticatorCode = async (email: string, code: string) => {
-	const key = await sha256(email.toLowerCase());
+	let key = await getSessionStore('fetch_key')
+	if (!key) {
+			key = await sha256(email.toLowerCase());
+	}	
 	const options: RequestInit = {
 		method: 'POST',
 		headers: {
@@ -296,7 +312,11 @@ const verifyEmailCode = async (email: string, code: string) => {
 			error: 'CANNOT_VERIFY_EMAIL_CODE'
 		};
 	}
-	const key = await sha256(email.toLowerCase());
+	let key = await getSessionStore('fetch_key')
+	if (!key) {
+			key = await sha256(email.toLowerCase());
+	}	
+
 	const options: RequestInit = {
 		method: 'POST',
 		headers: {
@@ -329,7 +349,11 @@ const verifyEmailConfirmationCode = async (email: string, code: string) => {
 			error: 'CANNOT_VERIFY_EMAIL_CODE'
 		};
 	}
-	const key = await sha256(email.toLowerCase());
+	let key = await getSessionStore('fetch_key')
+	if (!key) {
+			key = await sha256(email.toLowerCase());
+	}	
+
 	const options: RequestInit = {
 		method: 'POST',
 		headers: {

@@ -20,6 +20,10 @@ const recoveryTypes = [
     {
         id: 5,
         name: 'VKontakte'
+    },
+    {
+        id: 6,
+        name: 'Apple'
     }
 ];
 

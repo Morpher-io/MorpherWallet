@@ -7,6 +7,8 @@
 			<figure class="image" v-if="qrCode">
 				<img v-bind:src="qrCode" :alt="$t('2fa.QR_CODE')" />
 			</figure>
+			<p style="margin-top: 10px">{{ $t('2fa.CHANGE_AUTH_SECRET') }}:</p>
+			<p>{{secret}}</p>
 		</div>
 		<p class="is-size-7 mt-2 transition-faster">
 			{{ $t('2fa.NEED_AUTHENTICATOR_HELP') }}
@@ -23,7 +25,7 @@
 			<label class="label">{{ $t('2fa.VERIFICATION_CODE') }}</label>
 
 			<div class="control">
-				<input data-cy="2faAuthenticatorCode" type="number" inputmode="numeric" class="input" v-model="authenticatorCode" />
+				<input data-cy="2faAuthenticatorCode" type="number" inputmode="numeric" class="input" v-model="authenticatorCode" @keypress="handleKeyPress" />
 			</div>
 		</div>
 
@@ -47,7 +49,7 @@
 
 <script lang="ts">
 import Component, { mixins } from 'vue-class-component';
-import { Emit, Prop } from 'vue-property-decorator';
+import { Emit, Prop, Watch } from 'vue-property-decorator';
 import { Authenticated } from '../mixins/mixins';
 import { verifyAuthenticatorCode } from '../utils/backupRestore';
 import { getDictionaryValue } from '../utils/dictionary';
@@ -59,6 +61,9 @@ export default class ChangeAuthenticator extends mixins(Authenticated) {
 
 	@Prop()
 	qrCode!: string;
+
+	@Prop()
+	secret!: string;	
 
 	@Emit('setCode')
 	async setCode() {
@@ -72,8 +77,15 @@ export default class ChangeAuthenticator extends mixins(Authenticated) {
 		return;
 	}
 
+	@Watch('authenticatorCode')
+	authenticatorCodeChanged() {
+		if (this.authenticatorCode.length === 6) {
+			this.setCode();
+		}
+	}
+
 	async confirmAuthenticator() {
-		const confirmCode = await verifyAuthenticatorCode(this.store.email, this.authenticatorCode);
+		const confirmCode = await verifyAuthenticatorCode(this.store.fetch_key || this.store.email, this.authenticatorCode);
 
 		if (confirmCode.success) {
 			this.logonError = '';
@@ -81,6 +93,15 @@ export default class ChangeAuthenticator extends mixins(Authenticated) {
 		} else {
 			this.logonError = getDictionaryValue(confirmCode.error);
 			return false;
+		}
+	}
+
+	
+	handleKeyPress(e: any) {
+		const key = e.which || e.charCode || e.keyCode || 0;
+
+		if (key === 13) {
+			this.setCode();
 		}
 	}
 }

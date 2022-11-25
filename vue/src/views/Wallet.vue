@@ -6,8 +6,8 @@
 					<div ref="userImage" class="jazz-icon" />
 					<div class="ml-3">
 						<p class="medium-text has-text-weight-medium">
-							<span class="important-font"> {{ formatEthAddress(accounts[0]) }} </span>
-							<span class="copy-icon" @click="copyETHAddress(accounts[0])"><i class="fas fa-copy" /></span>
+							<span class="important-font"> {{ formatEthAddress(store.accounts[0])  }}</span>
+							<span class="copy-icon" @click="copyETHAddress(store.accounts[0])"><i class="fas fa-copy" /></span>
 						</p>
 						<p data-cy="currentEmail">{{ store.email }}</p>
 					</div>
@@ -15,7 +15,7 @@
 				<div class="buttons horizontal-buttons mt-3">
 					<button
 						tag="button"
-						:class="{ 'cursor-not-allowed': !this.isIframe() }"
+						:class="{ 'cursor-not-allowed': !isIframe() }"
 						@click="sendInApp"
 						class="button is-light-purple is-small-button has-text-weight-bold transition-faster"
 					>
@@ -23,7 +23,7 @@
 							<i class="fas fa-paper-plane"></i>
 						</span>
 						<span data-cy="sendButton" class="text">{{ $t('common.SEND') }}</span>
-						<div class="tooltip" v-if="!this.isIframe()">
+						<div class="tooltip" v-if="!isIframe()">
 							{{ $t('common.SEND_DESCRIPTION') }}
 						</div>
 					</button>
@@ -62,6 +62,13 @@
 					<p class="mr-1">{{ $t('recovery.GOOGLE_RECOVERY') }}</p>
 					<span class="enabled">{{ $t('common.ENABLED') }}</span>
 				</div>
+				<div class="protection-enabled mt-1" v-if="whatRecovery.apple">
+					<span class="icon img mr-1">
+						<img src="@/assets/img/apple_logo.svg" alt="Apple Logo" />
+					</span>
+					<p class="mr-1">{{ $t('recovery.APPLE_RECOVERY') }}</p>
+					<span class="enabled">{{ $t('common.ENABLED') }}</span>
+				</div>				
 				<div class="protection-enabled mt-1" v-if="whatRecovery.facebook">
 					<span class="icon img mr-1">
 						<img src="@/assets/img/fb_logo.svg" alt="Facebook Logo" />
@@ -143,18 +150,19 @@ export default class Wallet extends mixins(Global, Authenticated) {
 	whatRecovery = {
 		facebook: false,
 		google: false,
-		vkontakte: false
+		vkontakte: false,
+		apple: false
 	};
 
 	async mounted() {
 		if (this.isIframe() && !this.store.loginComplete) {
 			if (this.store.connection && this.store.connection !== null) {
-				const promise = this.store.connection.promise;
-
-				(await promise).onLogin(this.store.accounts[0], this.store.email);
+				const connection: any = await this.store.connection.promise;
+				connection.onLogin(this.store.accounts[0], this.store.email);
 			}
 		}
-		if (this.store.recoveryMethods.length == 1) {
+		
+		if (!this.store.recoveryMethods.find(method => Number(method.id) !== 1)) {
 			this.noRecoveryMethods = true;
 		}
 		if (this.store.twoFaRequired.authenticator) {
@@ -170,11 +178,14 @@ export default class Wallet extends mixins(Global, Authenticated) {
 		const facebook = await this.hasRecovery(2);
 		const google = await this.hasRecovery(3);
 		const vkontakte = await this.hasRecovery(5);
+		const apple = await this.hasRecovery(6);
+		
 
 		this.whatRecovery = {
 			facebook,
 			google,
-			vkontakte
+			vkontakte,
+			apple
 		};
 
 		this.store.loginComplete = true;
@@ -206,8 +217,8 @@ export default class Wallet extends mixins(Global, Authenticated) {
 	async sendInApp() {
 		if (this.isIframe()) {
 			if (this.store.connection && this.store.connection !== null) {
-				const promise = this.store.connection.promise;
-				(await promise).openSendInApp();
+				const connection: any = await this.store.connection.promise;
+				connection.openSendInApp();
 			}
 		}
 	}

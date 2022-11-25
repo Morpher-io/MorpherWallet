@@ -9,6 +9,12 @@ describe('Passwords', () => {
 	it('Error on Login Incorrect Password', () => {
 		cy.visit('/');
 
+		cy.get('[data-cy=emailLoginButton]').click();
+		
+
+		cy.waitUntil(() => cy.get('[data-cy=walletEmail]'));
+
+
 		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
 		cy.get('[data-cy=walletPassword]').type('123456').should('have.value', '123456');
@@ -20,6 +26,12 @@ describe('Passwords', () => {
 
 	it('Error on Change Password Incorrect Password', () => {
 		cy.visit('/');
+
+		cy.get('[data-cy=emailLoginButton]').click();
+		
+
+		cy.waitUntil(() => cy.get('[data-cy=walletEmail]'));
+
 
 		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
@@ -48,6 +60,12 @@ describe('Passwords', () => {
 
 	it('Successfully Change Password', () => {
 		cy.visit('/');
+
+		cy.get('[data-cy=emailLoginButton]').click();
+		
+
+		cy.waitUntil(() => cy.get('[data-cy=walletEmail]'));
+
 
 		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
@@ -79,6 +97,12 @@ describe('Passwords', () => {
 	it('Login with New Password', () => {
 		cy.visit('/');
 
+		cy.get('[data-cy=emailLoginButton]').click();
+		
+
+		cy.waitUntil(() => cy.get('[data-cy=walletEmail]'));
+
+
 		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
 		cy.get('[data-cy=walletPassword]').type(newPassword).should('have.value', newPassword);
@@ -92,6 +116,12 @@ describe('Passwords', () => {
 
 	it('Successfully Change Password Back to Original', () => {
 		cy.visit('/');
+
+		cy.get('[data-cy=emailLoginButton]').click();
+		
+
+		cy.waitUntil(() => cy.get('[data-cy=walletEmail]'));
+
 
 		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 

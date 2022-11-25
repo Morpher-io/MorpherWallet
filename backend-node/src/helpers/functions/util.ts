@@ -53,7 +53,8 @@ async function seedDatabase() {
         { id: 2, name: 'Facebook' },
         { id: 3, name: 'Google' },
         { id: 4, name: 'Twitter' },
-        { id: 5, name: 'VKontakte' }
+        { id: 5, name: 'VKontakte' },
+        { id: 6, name: 'Apple' }
     ];
 
     await Recovery_Type.bulkCreate(recoveryTypes);

@@ -121,6 +121,9 @@ export class Global extends Vue {
 	@Action
 	public fetchWalletFromRecovery!: (params: TypeRecoveryParams) => Promise<unknown>;
 
+	@Action
+	public recoveryVKAuthToken!: (params: any) => Promise<unknown>;	
+		
 	// Map Store Properties
 	store: RootState = this.$store.state;
 
@@ -232,8 +235,7 @@ export class Global extends Vue {
 		);
 	}
 	filterError(error: string) {
-		const filters = ['popup_closed_by_user', 'Keystore not found', 'EMAIL_2FA_WRONG', 'Non-Error promise rejection captured with value: Timeout']
-		
+		const filters = ['popup_closed_by_user', 'Keystore not found', 'EMAIL_2FA_WRONG', 'Non-Error promise rejection captured with value: Timeout', 'user_trigger_new_signin_flow']
 		let allow = true;
 
 		filters.forEach(filter => {
@@ -312,5 +314,11 @@ export class Authenticated extends Global {
 	public updateRecoveryMethods!: () => void;
 
 	@Action
+	public unlocked!: () => Promise<unknown>;
+
+	@Action
 	public updateUserPayload!: (params: TypeUpdateUserPayload) => void;
+
+	@Action
+	public fetchVKAuthToken!: (params: any) => Promise<unknown>;			
 }
