@@ -20,6 +20,10 @@
 					</span>
 					<span>{{$t('auth.SIGN_UP_USING_EMAIL')}}</span>
 				</button>
+				
+				<div class="error" v-if="logonError">
+					<p>⚠️ <span v-html="logonError"></span></p>
+				</div>
 			</div>
 			<!-- Signin with email/password -->
 			<div v-else>
