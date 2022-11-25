@@ -44,7 +44,8 @@
         "ENABLE_IN_SETTINGS": "Enable in Settings",
         "SUPPORT": "Support",
         "LOGOUT": "Logout",
-        "SECURED_WALLET": "Secured with AES | SHA-256 | PBKDF2"
+        "SECURED_WALLET": "Secured with AES | SHA-256 | PBKDF2",
+        "PRIVACY_POLICY": "Privacy Policy"
     },
     "auth": {
         "LOGIN": "Log In",
