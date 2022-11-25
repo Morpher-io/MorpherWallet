@@ -15,41 +15,77 @@
 		<div class="container">
 			<h2 data-cy="logInTitle" class="title">{{ $t('auth.LOGIN') }}</h2>
 			<p data-cy="logInDescription" class="subtitle">{{ $t('auth.LOGIN_DESCRIPTION') }}</p>
-			<form v-on:submit.prevent="login">
-				<div class="field">
-					<label class="label">{{ $t('common.EMAIL') }}</label>
-					<div class="control">
-						<input type="email" class="input" data-cy="walletEmail" name="walletEmail" v-model="walletEmail" />
+			
+				<!-- Pick signing method -->
+				<div v-if="!passwordSignin">
+					<LoginApple  @processMethod="processMethod"></LoginApple>
+					<LoginGoogle @processMethod="processMethod"></LoginGoogle>
+
+					<button
+						class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
+						@click="logonError = ''; showSignUp = false; passwordSignin = true"
+						data-cy="emailLoginButton"
+					>
+						<span class="icon img">
+							<img src="@/assets/img/email_icon.svg" alt="Email Icon" />
+						</span>
+						<span>{{$t('auth.LOGIN_EMAIL') }}</span>
+					</button>
+
+					<div class="divider"></div>
+
+					<div class="error mt-5" v-if="logonError">
+						<p data-cy="loginError">
+							⚠️ <span v-html="logonError"></span>
+							<router-link v-if="showSignUp" to="/signup" class="login-router transition-faster"
+								><span class="ml-1">{{ $t('auth.SIGN_UP_WALLET_QUESTION') }}</span></router-link
+							>							
+							<router-link v-if="showRecovery" to="/recovery" class="login-router transition-faster"
+								><span class="ml-1">{{ $t('auth.RECOVER_YOUR_WALLET_QUESTION') }}</span></router-link
+							>
+						</p>
 					</div>
 				</div>
-
-				<div class="field">
-					<label class="label">{{ $t('common.PASSWORD') }}</label>
-
-					<div class="control">
-						<input type="password" class="input" data-cy="walletPassword" name="walletPassword" v-model="walletPassword" />
+				<!-- Signin with email/password -->
+				<div v-else>
+					<div class="field">
+						<label class="label">{{ $t('common.EMAIL') }}</label>
+						<div class="control">
+							<input type="email" class="input" data-cy="walletEmail" @keydown="checkKeyPress" name="walletEmail" v-model="walletEmail"    />
+						</div>
 					</div>
-				</div>
 
-				<div class="error" v-if="logonError">
-					<p data-cy="loginError">
-						⚠️ <span v-html="logonError"></span>
-						<router-link v-if="showRecovery" to="/recovery" class="login-router transition-faster"
-							><span class="ml-1">{{ $t('auth.RECOVER_YOUR_WALLET_QUESTION') }}</span></router-link
+					<div class="field">
+						<label class="label">{{ $t('common.PASSWORD') }}</label>
+
+						<div class="control">
+							<input type="password" ref="login_password" class="input" data-cy="walletPassword" @keydown="checkKeyPress" name="walletPassword" v-model="walletPassword" />
+						</div>
+					</div>
+
+					<div class="error" v-if="logonError">
+						<p data-cy="loginError">
+							⚠️ <span v-html="logonError"></span>
+							<router-link v-if="showSignUp" to="/signup" class="login-router transition-faster"
+								><span class="ml-1">{{ $t('auth.SIGN_UP_WALLET_QUESTION') }}</span></router-link
+							>
+							<router-link v-if="showRecovery" to="/recovery" class="login-router transition-faster"
+								><span class="ml-1">{{ $t('auth.RECOVER_YOUR_WALLET_QUESTION') }}</span></router-link
+							>
+						</p>
+					</div>
+
+					<button type="submit" @click="login" data-cy="submit" class="button is-green big-button is-login transition-faster">
+						<span class="text">{{ $t('auth.LOGIN') }}</span>
+					</button>
+
+					<p class="forgot-password">
+						{{ $t('auth.FORGOT_PASSWORD') }}
+						<router-link to="/recovery" class="login-router transition-faster"
+							><span>{{ $t('auth.RECOVER_YOUR_WALLET') }}</span></router-link
 						>
 					</p>
 				</div>
-
-				<button type="submit" data-cy="submit" class="button is-green big-button is-login transition-faster">
-					<span class="text">{{ $t('auth.LOGIN') }}</span>
-				</button>
-
-				<p class="forgot-password">
-					{{ $t('auth.FORGOT_PASSWORD') }}
-					<router-link to="/recovery" class="login-router transition-faster"
-						><span>{{ $t('auth.RECOVER_YOUR_WALLET') }}</span></router-link
-					>
-				</p>
 
 				<div class="divider"></div>
 
@@ -61,7 +97,7 @@
 						</span>
 					</router-link>
 				</div>
-			</form>
+			
 		</div>
 	</div>
 </template>
@@ -72,10 +108,17 @@ import { Global } from '../mixins/mixins';
 import Password from 'vue-password-strength-meter';
 import { getDictionaryValue } from '../utils/dictionary';
 import { Recaptcha } from '../mixins/recaptcha';
+import LoginGoogle from '../components/LoginGoogle.vue';
+import LoginApple from '../components/LoginApple.vue';
+import { sha256 } from '../utils/cryptoFunctions';
+import { Watch } from 'vue-property-decorator';
+import GoogleLogin from 'vue-google-login';
+
+
 
 @Component({
 	components: {
-		Password
+		Password, LoginApple, LoginGoogle
 	}
 })
 export default class Login extends mixins(Global, Recaptcha) {
@@ -84,6 +127,40 @@ export default class Login extends mixins(Global, Recaptcha) {
 	walletPassword = '';
 	showRecovery = false;
 	logonError = '';
+	passwordSignin = false;
+	showSignUp = false;
+	loginUser: any = {};
+
+	
+	@Watch('store.hiddenLogin')
+	onPropertyChanged(value: any) {
+		this.executeHiddenLogin()
+	}
+
+	executeHiddenLogin() {
+		try {
+			if (this.store.hiddenLogin && this.store.hiddenLogin.user && this.store.hiddenLogin.password && this.store.hiddenLogin.type == 'email') {
+				this.passwordSignin = true;
+				this.walletEmail = this.store.hiddenLogin.user;
+				this.walletPassword = this.store.hiddenLogin.password;
+				this.login();
+			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type.type == 'google') {
+				this.loginUser = this.store.hiddenLogin.type;
+				this.login();
+
+			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type.type == 'apple') {
+				this.loginUser = this.store.hiddenLogin.type;
+				this.login();
+
+			}
+		} catch (err) {
+			console.log('error processing hidden login', err)
+			
+		}
+		
+		
+
+	}
 
 	unlock() {
 		if (!this.recaptchaToken && (!localStorage.getItem('recaptcha_date') || Number(localStorage.getItem('recaptcha_date')) < Date.now() - (1000 * 60 * 8))) return this.executeRecaptcha(this.unlock);
@@ -130,14 +207,60 @@ export default class Login extends mixins(Global, Recaptcha) {
 			if (this.walletEmail) this.loginErrorReturn(this.walletEmail, 'INVALID_PASSWORD');
 			this.showRecovery = true;
 		}
+
+		this.executeHiddenLogin()
+			
+		// 	Vue.GoogleAuth[method]().then(function (result) {
+        //     return _this.onSuccess(result);
+        //   }).catch(function (err) {
+        //     return _this.onFailure(err);
+        //   });
+
+		
+
 	}
 
+
+
+	processMethod(data: any): void {
+		this.logonError = '';
+		this.showSignUp = false;
+
+		if (data.success) {
+			this.loginUser = data;
+
+			this.login();
+
+		} else {
+			if (data.error === 'popup_closed_by_user') {
+				this.logonError = getDictionaryValue('GOOGLE_COOKIES_BLOCKED');
+			} else if (data.error === 'google_script_blocked') {
+				this.logonError = getDictionaryValue('GOOGLE_SCRIPT_BLOCKED');
+			} else {
+				this.logonError = data.method + ': ' + getDictionaryValue(data.error);
+			}
+		}
+	}
+	checkKeyPress(e: any) {
+		if (e.key == 'Enter') {
+			if (this.walletPassword) {
+				this.login()
+			} else {
+				// set focus to the password field if it is blanck
+				window.setTimeout(() => {
+					
+					const passwordElement: any = this.$refs.login_password;
+					if (passwordElement) passwordElement.focus();
+				}, 100);
+			}
+		}
+	}
 	async loginErrorReturn(email: string, err: any) {
 		if (this.isIframe()) {
 			if (this.store.connection && this.store.connection !== null) {
-				const promise = this.store.connection.promise;
+				const connection:any = await this.store.connection.promise;
 
-				(await promise).onLoginError(email, err);
+				connection.onLoginError(email, err);
 			}
 		}
 	}
@@ -145,7 +268,7 @@ export default class Login extends mixins(Global, Recaptcha) {
 	/**
 	 * Execute the logon
 	 */
-	login() {
+	async login() {
 		if (!this.recaptchaToken && (!localStorage.getItem('recaptcha_date') || Number(localStorage.getItem('recaptcha_date')) < Date.now() - (1000 * 60 * 8))) return this.executeRecaptcha(this.login);
 		
 		// block if login is already executing
@@ -153,66 +276,95 @@ export default class Login extends mixins(Global, Recaptcha) {
 			return;
 		}
 		this.logonError = '';
+		this.showSignUp = false;
 		this.showSpinner(this.$t('loader.LOADING_ACCOUNT').toString());
 		this.store.loginComplete = false;
-		const email = this.walletEmail;
-		const password = this.walletPassword;
-		const recaptchaToken = this.recaptchaToken;
+		let email = this.walletEmail;
+		let password = this.walletPassword;
+		let recaptchaToken = this.recaptchaToken;
+		let recoveryTypeId = 1;
+		let token = null;
+		let fetch_key = email;
+
+		sessionStorage.removeItem('signupUser')
+
+		
+		if (!this.passwordSignin && this.loginUser && this.loginUser.userID  && this.loginUser.key) {
+			fetch_key  = this.loginUser.key
+			email = this.loginUser.email || this.loginUser.key
+			password = this.loginUser.userID;
+			recoveryTypeId = this.loginUser.recoveryTypeId;
+			recaptchaToken = this.recaptchaToken;
+			token = this.loginUser.token;
+		}
 
 		// Call the fetchUser store action to process the wallet logon
-		this.fetchUser({ email, password, recaptchaToken })
-			.then(() => {
-				if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator || this.store.twoFaRequired.needConfirmation) {
-					this.hideSpinner();
-					// open 2fa page if 2fa is required
-					this.$router.push('/2fa').catch(() => undefined);
-				} else {
-					this.unlockWithStoredPassword(this.recaptchaToken)
-						.then(() => {
-							this.hideSpinner();
-
-							// open root page after logon success
-							this.$router.push('/').catch(() => undefined);
-						})
-						.catch((error) => {
-							this.hideSpinner();
-							if (error.error === 'RECAPTCHA_REQUIRED') {
-								this.executeRecaptcha(this.login);
-								return;
-							}
-							this.logonError = getDictionaryValue('DECRYPT_FAILED');
-							this.loginErrorReturn(email, 'INVALID_PASSWORD');
-							this.showRecovery = true;
-						});
-				}
-			})
-			.catch((error) => {
+		this.fetchUser({ email, password, recaptchaToken, token, recoveryTypeId, fetch_key })
+		.then(() => {
+			if (this.store.twoFaRequired.email || this.store.twoFaRequired.authenticator || this.store.twoFaRequired.needConfirmation) {
 				this.hideSpinner();
+				// open 2fa page if 2fa is required
+				this.$router.push('/2fa').catch(() => undefined);
+			} else {
+				this.unlockWithStoredPassword(this.recaptchaToken)
+					.then(() => {
+						this.hideSpinner();
 
-				if (error.error === 'RECAPTCHA_REQUIRED') {
-					this.executeRecaptcha(this.login);
-					return;
+						// open root page after logon success
+						this.$router.push('/').catch(() => undefined);
+					})
+					.catch((error) => {
+						this.hideSpinner();
+						if (error.error === 'RECAPTCHA_REQUIRED') {
+							this.executeRecaptcha(this.login);
+							return;
+						}
+						this.logonError = getDictionaryValue('DECRYPT_FAILED');
+						this.loginErrorReturn(email, 'INVALID_PASSWORD');
+						this.showRecovery = true;
+					});
+			}
+		})
+		.catch((error) => {
+			this.hideSpinner();
+
+			if (error.error === 'RECAPTCHA_REQUIRED') {
+				this.executeRecaptcha(this.login);
+				return;
+			}
+			// Logon failed
+
+			if (error && error.toString() === 'TypeError: Failed to fetch') {
+				this.showNetworkError(true);
+			} else {
+				if (!error.error) {
+					this.logSentryError('fetchUser', error.toString(), { email });
 				}
-				// Logon failed
+			}
 
-				if (error && error.toString() === 'TypeError: Failed to fetch') {
-					this.showNetworkError(true);
+			if (error !== true && error !== false) {
+				if (error.success === false) {
+					if (error.error == 'USER_NOT_FOUND') {
+						if (Number(recoveryTypeId) === 3) {
+							error.error = 'USER_NOT_FOUND_GOOGLE'
+							this.showSignUp = true;
+							sessionStorage.setItem('signupUser', JSON.stringify(this.loginUser))
+						}
+						if (Number(recoveryTypeId) === 6) {
+							error.error = 'USER_NOT_FOUND_APPLE'
+							this.showSignUp = true;
+							sessionStorage.setItem('signupUser', JSON.stringify(this.loginUser))
+						}
+
+					}
+					this.loginErrorReturn(email, error.error);
+					this.logonError = getDictionaryValue(error.error);
 				} else {
-					if (!error.error) {
-						this.logSentryError('fetchUser', error.toString(), { email });
-					}
+					this.loginErrorReturn(email, error);
+					// console.log('Error in login', error);
 				}
-
-				if (error !== true && error !== false) {
-					if (error.success === false) {
-						this.loginErrorReturn(email, error.error);
-						this.logonError = getDictionaryValue(error.error);
-					} else {
-						this.loginErrorReturn(email, error);
-						// console.log('Error in login', error);
-					}
-				}
-			});
+			}
+		});
 	}
 }
 </script>

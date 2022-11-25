@@ -1,7 +1,7 @@
 // Setup market routes according to controller functions.
 
 import { User } from '../../database/models/User.model';
-import { errorResponse, successResponse } from '../../helpers/functions/util';
+import { errorResponse, successResponse, randomFixedInteger } from '../../helpers/functions/util';
 
 module.exports = function(router) {
     router.get('/clearDatabase', async (req, res) => {
@@ -16,7 +16,9 @@ module.exports = function(router) {
     });
 
     router.post('/getEmailCode', async (req, res) => {
-        const user = await User.findOne({ where: { email: req.body.email }, raw: true });
+        
+        const user = await User.findOne({ where: { email: req.body.email } });
+        
         if (user) return successResponse(res, { email_verification_code: user.email_verification_code });
         else return errorResponse(res, 'User not found');
     });

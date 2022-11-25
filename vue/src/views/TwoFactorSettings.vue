@@ -11,13 +11,15 @@
 
 		<div v-if="currentPage === 0">
 			<div class="divider just-space" />
-			<Change2FA @setCurrentMethod="setCurrentMethod" />
+			
+			<Change2FA @setCurrentMethod="setCurrentMethod" :ssoEmailError="ssoEmailError" />
+			
 		</div>
 		<div v-if="currentPage === 1">
-			<ConfirmAccess @setPassword="setPassword" @pageBack="pageBack" />
+			<ConfirmAccess @accessConfirmed="accessConfirmed" @pageBack="pageBack" />
 		</div>
 		<div v-if="currentPage === 2">
-			<ChangeAuthenticator v-if="currentMethod === 'authenticator'" :qrCode="qrCode" @setCode="setCode" @pageBack="pageBack" />
+			<ChangeAuthenticator v-if="currentMethod === 'authenticator' && secret" :qrCode="qrCode" :secret="secret" @setCode="setCode" @pageBack="pageBack" />
 			<Change2FAEmail v-if="currentMethod === 'email'" @setCode="setCode" @pageBack="pageBack" />
 		</div>
 		<div v-if="currentPage === 3">
@@ -46,6 +48,9 @@
 					<p class="has-text-left has-text-weight-bold mb-0">{{ $t('2fa.KYC_TITLE') }}</p>
 					<p class="has-text-left subtitle mt-0">{{ $t('2fa.KYC_DESCRIPTION') }}</p>
 				</div>
+
+				
+
 			</div>
 		</div>
 		<div class="error mt-3" v-if="updateError">
@@ -83,6 +88,8 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 	authenticatorConfirmed: any = false;
 	isEnabling = true;
 	updateError = '';
+	secret = '';
+	ssoEmailError = 0;
 	passwordTimeout: number | undefined = undefined;
 
 	async submitChange(type: 'email' | 'authenticator') {
@@ -98,7 +105,7 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 					authenticator = this.authenticator;
 				}
 
-				await this.change2FAMethods({
+				let data = await this.change2FAMethods({
 					email,
 					authenticator,
 					email2faVerification: this.emailCode,
@@ -140,7 +147,7 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 			}
 
 			this.hideSpinner();
-		} catch (error) {
+		} catch (error: any) {
 			this.hideSpinner();
 
 			if (error && error.toString() === 'TypeError: Failed to fetch') {
@@ -156,8 +163,10 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 	async generateQR() {
 		this.authenticatorConfirmed = false;
 		this.authenticatorCode = '';
+		const result = ((await this.generateQRCode()) as any)
 
-		this.qrCode = ((await this.generateQRCode()) as any).image;
+		this.qrCode = result.image;
+		this.secret = result.secret;
 		return false;
 	}
 
@@ -165,6 +174,15 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 		this.email = this.store.twoFaRequired.email;
 		this.authenticator = this.store.twoFaRequired.authenticator;
 		this.authenticatorConfirmed = this.store.twoFaRequired.authenticatorConfirmed;
+
+		if (this.store.recoveryTypeId == 3 || this.store.recoveryTypeId == 6) {
+			const find = this.store.recoveryMethods.find(recovery => recovery.id == this.store.recoveryTypeId)
+			if (find && find.email == this.store.email ) {
+				this.ssoEmailError = this.store.recoveryTypeId 
+				return;
+			}
+
+		}
 	}
 
 	redirectUser() {
@@ -178,13 +196,19 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 			this.authenticatorCode = '';
 		} else {
 			if (this.currentPage > 0) this.currentPage -= 1;
+			if (this.currentPage == 1)  this.currentPage = 0;
 		}
 	}
 
 	setCurrentMethod(method: any) {
+
 		this.isEnabling = method['isEnabling'];
 		this.currentMethod = method['method'];
-		this.currentPage = 1;
+		if (this.$store.state.unlocked == true || method.method == 'email' && method.isEnabling == true) {
+			this.accessConfirmed(true)
+		} else {
+			this.currentPage = 1;
+		}
 	}
 
 	@Watch('currentPage')
@@ -194,10 +218,11 @@ export default class TwoFactorSettings extends mixins(Authenticated, Global) {
 		}
 	}
 
-	setPassword(password: string) {
-		if (!password) {
+	accessConfirmed(access: boolean) {
+		if (!access) {
 			return;
 		}
+
 
 		if (this.currentMethod === 'email') {
 			this.emailCode = '';

@@ -1,6 +1,6 @@
 <template>
 	<div class="container">
-		<ConfirmAccess v-if="currentPage === 0" @pageBack="pageBack" @setPassword="setPassword" />
+		<ConfirmAccess v-if="currentPage === 0" @pageBack="pageBack" @accessConfirmed="accessConfirmed" />
 		<div v-if="currentPage === 1">
 			<div class="title-container has-text-left">
 				<button
@@ -21,9 +21,11 @@
 			<div class="error mt-3 mb-3" v-if="logonError">
 				<p>⚠️ <span v-html="logonError"></span></p>
 			</div>
-
 			<div>
-				<AddRecoveryGoogle v-if="whatRecovery.google" @processMethod="processMethod"></AddRecoveryGoogle>
+				
+				<AddRecoveryApple v-if="whatRecovery.apple && store.recoveryTypeId !==6" @processMethod="processMethod"></AddRecoveryApple>
+
+				<AddRecoveryGoogle v-if="whatRecovery.google && store.recoveryTypeId !==3" @processMethod="processMethod"></AddRecoveryGoogle>
 
 				<AddRecoveryFacebook v-if="whatRecovery.facebook" :walletEmail="store.email" @processMethod="processMethod"></AddRecoveryFacebook>
 
@@ -34,12 +36,14 @@
 				></AddRecoveryVkontakte>
 			</div>
 
-			<div v-if="!whatRecovery.google || !whatRecovery.facebook || !whatRecovery.vkontakte">
-				<p v-if="whatRecovery.google || whatRecovery.facebook || whatRecovery.vkontakte" class="another-text has-text-left mt-5">
+			<div v-if="!whatRecovery.google || !whatRecovery.facebook || !whatRecovery.vkontakte || !whatRecovery.apple">
+				<p v-if="whatRecovery.google || whatRecovery.facebook || whatRecovery.vkontakte || whatRecovery.apple" class="another-text has-text-left mt-5">
 					{{ $t('recovery.ADD_ANOTHER_ACCOUNT') }}
 				</p>
 
-				<AddRecoveryGoogle v-if="!whatRecovery.google" @processMethod="processMethod"></AddRecoveryGoogle>
+				<AddRecoveryApple v-if="!whatRecovery.apple && store.recoveryTypeId !==6" @processMethod="processMethod"></AddRecoveryApple>
+
+				<AddRecoveryGoogle v-if="!whatRecovery.google  && store.recoveryTypeId !==3" @processMethod="processMethod"></AddRecoveryGoogle>
 
 				<AddRecoveryFacebook v-if="!whatRecovery.facebook" :walletEmail="store.email" @processMethod="processMethod"></AddRecoveryFacebook>
 
@@ -91,6 +95,7 @@
 <script lang="ts">
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
+import AddRecoveryApple from '../components/AddRecoveryApple.vue';
 import AddRecoveryGoogle from '../components/AddRecoveryGoogle.vue';
 import AddRecoveryFacebook from '../components/AddRecoveryFacebook.vue';
 import AddRecoveryVkontakte from '../components/AddRecoveryVkontakte.vue';
@@ -102,7 +107,8 @@ import { getDictionaryValue } from '../utils/dictionary';
 		AddRecoveryGoogle,
 		AddRecoveryFacebook,
 		AddRecoveryVkontakte,
-		ConfirmAccess
+		ConfirmAccess,
+		AddRecoveryApple
 	}
 })
 export default class RecoverySettings extends mixins(Authenticated, Global) {
@@ -114,7 +120,8 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 	whatRecovery = {
 		facebook: false,
 		google: false,
-		vkontakte: false
+		vkontakte: false,
+		apple: false,
 	};
 	processing = {
 		facebook: false,
@@ -123,19 +130,30 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 	};
 
 	async mounted() {
+		if (this.$store.state.unlocked == true) {
+			this.currentPage = 1;
+		}
 		const facebook = await this.hasRecovery(2);
 		const google = await this.hasRecovery(3);
 		const vkontakte = await this.hasRecovery(5);
+		const apple = await this.hasRecovery(6);
 
 		this.whatRecovery = {
 			facebook,
 			google,
-			vkontakte
+			vkontakte,
+			apple
 		};
 	}
 
 	pageBack() {
 		this.redirectUser();
+	}
+
+	async accessConfirmed(access: boolean) {
+		if (access) {
+			this.currentPage = 1;
+		}
 	}
 
 	async setPassword(password: string) {
@@ -176,11 +194,13 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 		const facebook = await this.hasRecovery(2);
 		const google = await this.hasRecovery(3);
 		const vkontakte = await this.hasRecovery(5);
+		const apple = await this.hasRecovery(6);
 
 		this.whatRecovery = {
 			facebook,
 			google,
-			vkontakte
+			vkontakte,
+			apple
 		};
 	}
 }

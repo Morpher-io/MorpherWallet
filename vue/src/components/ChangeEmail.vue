@@ -5,15 +5,21 @@
 				<div class="card-content">
 					<div class="content">
 						<div class="field">
-							<label class="label">{{ $t('common.NEW_EMAIL') }}</label>
+							<label class="label">{{ $t('common.CURRENT_EMAIL') }}</label>
 							<div class="control">
-								<input data-cy="newEmail" class="input" name="newEmail" v-model="newEmail" />
+								{{ currentEmail }}
 							</div>
 						</div>
 						<div class="field">
+							<label class="label">{{ $t('common.NEW_EMAIL') }}</label>
+							<div class="control">
+								<input data-cy="newEmail" class="input" name="newEmail" ref="new_email" v-model="newEmail"  @keypress="handleKeyPress" />
+							</div>
+						</div>
+						<div class="field" v-if="store.recoveryTypeId == 1">
 							<label class="label">{{ $t('common.PASSWORD') }}</label>
 							<div class="control">
-								<input data-cy="confirmPassword" type="password" class="input" name="password" v-model="password" />
+								<input data-cy="confirmPassword" type="password" class="input" name="password"  ref="new_password" v-model="password"  @keypress="handleKeyPress" />
 							</div>
 						</div>
 					</div>
@@ -24,10 +30,16 @@
 				</div>
 
 				<div class="mt-5">
+					<!-- <div v-if="recoveryTypeId == 3">
+						<LoginGoogle :update="true" @processMethod="processMethod"></LoginGoogle>
+					</div>
+					<div v-else-if="recoveryTypeId == 6">
+						<LoginApple :update="true" @processMethod="processMethod"></LoginApple>
+					</div> -->
 					<button
 						class="button is-green big-button is-login transition-faster"
 						data-cy="updateEmailButton"
-						:disabled="!newEmail || !password"
+						:disabled="!newEmail || (!password && recoveryTypeId !== 3 && recoveryTypeId !== 6 )"
 						@click="
 							setNewData({
 								email: newEmail,
@@ -57,12 +69,21 @@ import { sha256 } from '../utils/cryptoFunctions';
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
 import { Emit, Prop, Watch } from 'vue-property-decorator';
+import LoginGoogle from '../components/LoginGoogle.vue';
+import LoginApple from '../components/LoginApple.vue';
+import { getDictionaryValue } from '../utils/dictionary';
 
-@Component({})
+@Component({components: {
+		LoginApple, LoginGoogle
+	}})
 export default class ChangeEmail extends mixins(Global, Authenticated) {
 	newEmail = '';
 	password = '';
 	logonError = '';
+	loginUser: any = {};
+
+	recoveryTypeId = this.$store.getters.recoveryTypeId;
+	currentEmail = this.$store.getters.walletEmail;
 
 	@Prop()
 	error!: string;
@@ -70,6 +91,28 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 	@Watch('error')
 	handleErorrChange(newValue: string) {
 		if (newValue) this.logonError = newValue;
+	}
+
+	processMethod(data: any): void {
+		this.logonError = '';
+
+		if (data.success) {
+			this.loginUser = data;
+
+			this.setNewData({
+								email: this.newEmail,
+								password: this.loginUser.userID
+							});
+
+		} else {
+			if (data.error === 'popup_closed_by_user') {
+				this.logonError = getDictionaryValue('GOOGLE_COOKIES_BLOCKED');
+			} else if (data.error === 'google_script_blocked') {
+				this.logonError = getDictionaryValue('GOOGLE_SCRIPT_BLOCKED');
+			} else {
+				this.logonError = data.method + ': ' + getDictionaryValue(data.error);
+			}
+		}
 	}
 
 	@Emit('setNewData')
@@ -87,11 +130,14 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 			return { email: null, password: null };
 		}
 
-		const newPassword = await sha256(data.password);
+		let newPassword = '';
+		if (this.recoveryTypeId !== 3 && this.recoveryTypeId !== 6) {
+			newPassword = await sha256(data.password);
 
-		if (this.store.hashedPassword !== newPassword) {
-			this.logonError = this.$t('errors.WRONG_PASSWORD').toString();
-			return { email: null, password: null };
+			if (this.store.hashedPassword !== newPassword) {
+				this.logonError = this.$t('errors.WRONG_PASSWORD').toString();
+				return { email: null, password: null };
+			}
 		}
 
 		if (this.store.email === this.newEmail) {
@@ -100,6 +146,29 @@ export default class ChangeEmail extends mixins(Global, Authenticated) {
 		}
 
 		return { email: data.email, password: newPassword };
+	}
+
+	handleKeyPress(e: any) {
+		const key = e.which || e.charCode || e.keyCode || 0;
+
+		if (key === 13) {
+			if (this.newEmail && this.password) {
+				this.setNewData({
+					email: this.newEmail,
+					password: this.password
+					})
+			} else if (!this.newEmail) {
+				window.setTimeout(() => {
+						const element: any = this.$refs.new_email;
+						if (element) element.focus();
+					}, 100);				
+			} else if (!this.password) {
+				window.setTimeout(() => {
+						const element: any = this.$refs.new_password;
+						if (element) element.focus();
+					}, 100);
+			}
+		}
 	}
 }
 </script>

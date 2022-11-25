@@ -44,7 +44,7 @@
 			</button>
 		</div>
 
-		<ConfirmAccess v-if="currentPage === 1" @pageBack="pageBack" @setPassword="setPassword" :error="logonError" />
+		<ConfirmAccess v-if="currentPage === 1" @pageBack="pageBack" @accessConfirmed="accessConfirmed" :error="logonError" />
 
 		<div v-if="currentPage === 2">
 			<h2 class="title">{{ $t('export.EXPORT_SEED') }}</h2>
@@ -141,23 +141,26 @@ export default class KeysSettings extends mixins(Global, Authenticated) {
 
 	setExport(page: string) {
 		this.page = page;
-		this.currentPage = 1;
+		if (this.$store.state.unlocked == true) {
+			this.accessConfirmed(true)
+		} else {
+			this.currentPage = 1;
+		}
+		
 	}
 
 	pageBack() {
 		if (this.currentPage > 0) this.currentPage -= 1;
 	}
 
-	async setPassword(password: string) {
-		if (!password) return;
-
-		this.password = password;
+	async accessConfirmed(access: boolean) {
+		if (!access) return;
 
 		if (this.page === 'seed') {
-			this.showPhrase(password);
+			this.showPhrase(this.password);
 			this.currentPage = 2;
 		} else if (this.page === 'key') {
-			this.showKey(password);
+			this.showKey(this.password);
 			this.currentPage = 3;
 		}
 	}
@@ -180,7 +183,6 @@ export default class KeysSettings extends mixins(Global, Authenticated) {
 	}
 
 	async exportPhrase(account: any) {
-		if (!this.password) return;
 		await this.exportKeystore({ account, password: this.password });
 	}
 }

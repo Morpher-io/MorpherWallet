@@ -41,6 +41,8 @@ INSERT INTO "public"."Recovery_Type" ("id", "name") VALUES ('3', 'Google');
 INSERT INTO "public"."Recovery_Type" ("id", "name") VALUES ('4', 'Twitter');
 
 INSERT INTO "public"."Recovery_Type" ("id", "name") VALUES ('5', 'VKontakte');
+
+INSERT INTO "public"."Recovery_Type" ("id", "name") VALUES ('6', 'Apple');
 --
 -- Name: Recovery_Type_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --

@@ -10,13 +10,13 @@
 					<div class="field" v-if="!hideOldPassword">
 						<label class="label">{{ $t('password.OLD_PASSWORD') }}</label>
 						<div class="control">
-							<input type="password" data-cy="oldPassword" name="oldPassword" class="input" v-model="oldPassword" />
+							<input type="password" data-cy="oldPassword" name="oldPassword" class="input" v-model="oldPassword" @keypress="handleKeyPress" ref="old_password" />
 						</div>
 					</div>
 					<div class="field">
 						<label class="label">{{ $t('common.NEW_PASSWORD') }}</label>
 						<div class="control">
-							<input type="password" name="newPassword" data-cy="newPassword" class="input password-input" v-model="walletPassword" />
+							<input type="password" name="newPassword" data-cy="newPassword" class="input password-input" v-model="walletPassword" @keypress="handleKeyPress" ref="new_password" />
 							<password v-model="walletPassword" :strength-meter-only="true" :secure-length="8" style="max-width: initial" />
 							<div class="password-help">
 								<p>{{ $t('password.REQUIREMENTS') }}</p>
@@ -68,7 +68,7 @@
 					<div class="field">
 						<label class="label">{{ $t('common.CONFIRM_PASSWORD') }}</label>
 						<div class="control">
-							<input type="password" class="input" name="newPasswordRepeat" data-cy="newPasswordRepeat" v-model="walletPasswordRepeat" />
+							<input type="password" class="input" name="newPasswordRepeat" data-cy="newPasswordRepeat" v-model="walletPasswordRepeat" @keypress="handleKeyPress"  ref="new_password_repeat" />
 						</div>
 					</div>
 
@@ -194,6 +194,31 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 
 				this.logonError = getDictionaryValue('');
 			});
+	}
+
+	handleKeyPress(e: any) {
+		const key = e.which || e.charCode || e.keyCode || 0;
+
+		if (key === 13) {
+			if (this.oldPassword && this.walletPassword && this.walletPasswordRepeat) {
+				this.changePasswordExecute()
+			} else if (!this.oldPassword) {
+				window.setTimeout(() => {
+						const element: any = this.$refs.old_password;
+						if (element) element.focus();
+					}, 100);				
+			} else if (!this.walletPassword) {
+				window.setTimeout(() => {
+						const element: any = this.$refs.new_password;
+						if (element) element.focus();
+					}, 100);
+			} else if (!this.walletPasswordRepeat) {
+				window.setTimeout(() => {
+						const element: any = this.$refs.new_password_repeat;
+						if (element) element.focus();
+					}, 100);
+			}
+		}
 	}
 
 	resetData() {

@@ -3,38 +3,51 @@ import { User, Userhistory, Recovery, Recovery_Type } from '../database/models';
 import { decrypt, encrypt, errorResponse, successResponse, sha256, randomFixedInteger, getIPCountryCode } from '../helpers/functions/util';
 const { to } = require('await-to-js');
 import { Request, Response } from 'express';
-
-import { VK } from 'vk-io';
-import { Facebook } from 'fb';
 import { sendEmail2FA, sendEmailChanged } from '../helpers/functions/email';
 import { authenticator } from 'otplib';
 const QRCode = require('qrcode');
-const options = {
-    app_id: process.env.FACEBOOK_APP_ID,
-    app_secret: process.env.FACEBOOK_APP_SECRET,
-    default_graph_version: 'v7.0'
-};
-const FB = new Facebook(options);
-const Google = require('googleapis').google;
-const OAuth2 = Google.auth.OAuth2;
-const oauth2Client = new OAuth2();
 const countryList = process.env.COUNTRY_LIST || '[]';
-
-
 import { Logger } from '../helpers/functions/winston';
+import { getKeyEmail } from '../helpers/functions/sso';
+const vk_tokens = {};
 
 // Function to save new signups to the database.
 export async function saveEmailPassword(req: Request, res: Response) {
+    
     // Get sequelize transactions to rollback changes in case of failure.
     const [err, transaction] = await to(getTransaction());
     if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
 
     try {
+        const recoveryTypeId = Number(req.body.recovery_type || 1);
+    
         // Get variables from request body.
-        const email = req.body.email.toLowerCase();
+        let email = req.body.email.toLowerCase().replace(/ /g, '');
         const key = req.body.key;
+
+        const emailKey = await getKeyEmail(recoveryTypeId, req.body.access_token, key, email, vk_tokens[key]);
+        
+        if (emailKey.success !== true) {
+            await transaction.rollback();
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+        }
+
+        // can only register using google/apple/password
+        if (!emailKey.recovery_type || !['Password','Apple','Google'].includes(emailKey.recovery_type)) {
+            await transaction.rollback();
+            return errorResponse(res, 'INVALID_RECOVERY_TYPE', 500);
+        }
+
+        // use the SSO email and check the user key for apple and google
+        email = emailKey.email;
+        if (key !== emailKey.key) {
+            Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
+            await transaction.rollback();
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+        }
+        
+
         const encryptedSeed = req.body.encryptedSeed;
-        const recoveryTypeId = req.body.recoveryTypeId || 1;
         const eth_address = req.body.ethAddress;
 
         if (
@@ -53,13 +66,24 @@ export async function saveEmailPassword(req: Request, res: Response) {
         const user = await User.findOne({ where: { email }, raw: true, transaction });
 
         if (user == null) {
-            // If it exists, set the userId and delete the associated recovery method.
-            // If it doesnt exist create a new one.
-            const payload = { email: false, authenticator: false, authenticatorConfirmed: false, needConfirmation: true, registerConfirmation: true };
+            // Create a new user and associated recovery method
+            let needConfirmation = true;
+            let registerConfirmation = true;
+            if (recoveryTypeId == 3 || recoveryTypeId == 6) {
+                needConfirmation = false;
+                registerConfirmation = false;
+            }
+            const payload = { email: false, authenticator: false, authenticatorConfirmed: false, needConfirmation, registerConfirmation };
 
             const nonce = 1;
 
             userId = (await User.create({ email, payload, nonce, eth_address }, { transaction })).getDataValue('id');
+
+
+            const existingRecovery = await Recovery.findOne({where: {key: key}, transaction});
+            if (existingRecovery) {
+                return errorResponse(res, 'USER_ALREADY_EXISTS', 404);
+            }
 
             // Create a new recovery method.
             const recoveryId = (
@@ -68,7 +92,8 @@ export async function saveEmailPassword(req: Request, res: Response) {
                         recovery_type_id: recoveryTypeId,
                         user_id: userId,
                         encrypted_seed: JSON.stringify(await encrypt(JSON.stringify(encryptedSeed), process.env.DB_BACKEND_SALT)),
-                        key
+                        key,
+                        email
                     },
                     { transaction }
                 )
@@ -91,17 +116,22 @@ export async function saveEmailPassword(req: Request, res: Response) {
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 
-    return errorResponse(res, 'USER_NOT_FOUND', 404);
+    return errorResponse(res, 'USER_ALREADY_EXISTS', 404);
 }
 
+// Returns the all the active recovery types for a user. used to check which recovery types can be de-activated and to warn the user if no recovery types are active
 export async function getRecoveryMethods(req: Request, res: Response) {
     try {
+        const recovery_type_id = Number(req.body.recovery_type || 1);
         const key = req.header('key');
-        const recoveryEmail = await Recovery.findOne({ where: { key, recovery_type_id: 1 } });
+        const recoveryEmail = await Recovery.findOne({ where: { key, recovery_type_id: recovery_type_id } });
         const recovery = await Recovery.findAll({ where: { user_id: recoveryEmail.user_id }, include: [Recovery_Type] });
         const recoveryTypes = [];
         for (let i = 0; i < recovery.length; i++) {
-            recoveryTypes.push(recovery[i].recovery_type);
+            let return_data = recovery[i].recovery_type['dataValues'];
+            return_data['email'] = recovery[i].email
+            
+            recoveryTypes.push(return_data);
         }
         return successResponse(res, recoveryTypes);
     } catch (error) {
@@ -115,17 +145,43 @@ export async function addRecoveryMethod(req: Request, res: Response) {
         const key = req.header('key');
         const keyForSaving = req.body.key;
         const recoveryTypeId = req.body.recoveryTypeId;
+        const currentRecoveryTypeId = req.body.currentRecoveryTypeId;
+        let email = req.body.email ? req.body.email.toLowerCase().replace(/ /g, '') : '';
 
-        const emailRecovery = await Recovery.findOne({ where: { key, recovery_type_id: 1 } });
+        const emailRecovery = await Recovery.findOne({ where: { key, recovery_type_id: currentRecoveryTypeId } });
+
+        if (!emailRecovery) {
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
+        }
+
+        const emailKey = await getKeyEmail(recoveryTypeId, req.body.access_token, keyForSaving, email, vk_tokens[key]);
+
+        if (emailKey.success !== true) {
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+        }
+
+        // use the SSO email and check the user key for apple and google
+        email = emailKey.email;
+        if (keyForSaving !== emailKey.key) {
+            Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+        }
+        
 
         const recovery = await Recovery.findOne({ where: { user_id: emailRecovery.user_id, recovery_type_id: recoveryTypeId } });
         if (recovery == null) {
+            const existingRecovery = await Recovery.findOne({where: {key: keyForSaving}});
+            if (existingRecovery) {
+                return errorResponse(res, 'RECOVERY_ALREADY_EXISTS');
+            }
+
             const newRecoveryId = (
                 await Recovery.create({
                     recovery_type_id: recoveryTypeId,
                     user_id: emailRecovery.user_id,
                     encrypted_seed: JSON.stringify(await encrypt(JSON.stringify(req.body.encryptedSeed), process.env.DB_BACKEND_SALT)),
-                    key: keyForSaving
+                    key: keyForSaving,
+                    email
                 })
             ).getDataValue('id');
 
@@ -192,10 +248,10 @@ export async function updateEmail(req: Request, res: Response) {
 
     try {
         // Get variables from request body.
-        const newEmail = req.body.newEmail.toLowerCase();
+        const newEmail = req.body.newEmail.toLowerCase().replace(/ /g, '');
         const email2faVerification = req.body.email2faVerification;
         const key = req.header('key');
-        const recoveryTypeId = 1;
+        const recoveryTypeId = req.header('recoveryTypeId');
         const sendEmails = process.env.SEND_EMAILS;
 
         const recovery = await Recovery.findOne({ where: { key, recovery_type_id: recoveryTypeId }, transaction });
@@ -215,7 +271,7 @@ export async function updateEmail(req: Request, res: Response) {
                 } else {
                     // 2FA tokens in query params
                     // Attempt to get user from database.
-                    if (await verifyEmail2FA(user.id.toString(), email2faVerification, true)) {
+                    if (await verifyEmail2FA(user.id.toString(), email2faVerification, true, newEmail)) {
                         //2fa passed here
                         Userhistory.create({
                             user_id: user.id,
@@ -244,8 +300,10 @@ export async function updateEmail(req: Request, res: Response) {
                         await user.save({ transaction });
 
                         //save the new recovery key for the recovery option email
-                        recovery.key = await sha256(newEmail);
-                        await recovery.save({ transaction });
+                        if (recovery.recovery_type_id == 1) {
+                            recovery.key = await sha256(newEmail);
+                            await recovery.save({ transaction });
+                        }
 
                         // Commit changes to database and return successfully.
                         await transaction.commit();
@@ -273,18 +331,33 @@ export async function updateEmail(req: Request, res: Response) {
 export async function getEncryptedSeed(req, res) {
     try {
         const key = req.body.key;
+        let email = (req.body.email || '').toLowerCase().replace(/ /g, '');
         const email2fa = req.body.email2fa;
         const authenticator2fa = req.body.authenticator2fa;
-        const recovery_type_id = 1;
+        const recovery_type_id = Number(req.body.recovery_type || 1);
 
+        const emailKey = await getKeyEmail(recovery_type_id, req.body.access_token, key, email, vk_tokens[key]);
+
+        if (emailKey.success !== true) {
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+        }
+
+        // use the SSO email and check the user key for apple and google
+        email = emailKey.email;
+        
+        if (key !== emailKey.key) {
+            Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+        }
+        
+       
         // Simply get Recovery instance that has this key and return it if its found.
-        const recovery = await Recovery.findOne({ where: { key, recovery_type_id }, raw: true });
+        const recovery = await Recovery.findOne({ where: { key, recovery_type_id } });
 
-        const ip_address = req.ip;
-
-        const ip_country = await getIPCountryCode(ip_address)
+        const ip_country = await getIPCountryCode(req.clientIp)
 
         if (recovery) {
+            
             const user = await User.findOne({ where: { id: recovery.user_id } });
 
             if (user) {
@@ -309,7 +382,7 @@ export async function getEncryptedSeed(req, res) {
 
                 }
 
-                user.ip_address = ip_address;
+                user.ip_address = req.clientIp;
 
                 if (ip_country && ip_country !== user.ip_country) {
                     if (!user.payload.authenticator && !user.payload.email) {
@@ -394,6 +467,11 @@ export async function getEncryptedSeed(req, res) {
             if (user.payload.email) {
                 updateEmail2fa(user.id);
             }
+
+            if (recovery_type_id !== 1 && email && recovery.email !== email) {
+                recovery.email = email;
+                await recovery.save();
+            }
             //only if the codes are correct we get the juicy seed.
 
             Logger.info({
@@ -405,8 +483,10 @@ export async function getEncryptedSeed(req, res) {
                 body: req.body,
                 message: `getEncryptedSeed: Fetched encrypted seed [${user.id}]`
             });
+            const encryptedSeed = await decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT);
+
             return successResponse(res, {
-                encryptedSeed: await decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT)
+                encryptedSeed
             });
         }
 
@@ -418,162 +498,17 @@ export async function getEncryptedSeed(req, res) {
     }
 }
 
-// Function to get encrypted seed from facebook recovery.
-async function getFacebookEncryptedSeed(req, res) {
-    try {
-        // Get access token and email from request body.
-        const accessToken = req.body.accessToken;
-        const signupEmail = req.body.signupEmail.toLowerCase();
-
-        // Set facebook access token and make the query for the current profile.
-        FB.setAccessToken(accessToken);
-        const result = await FB.api('/me?fields=name,email', 'get');
-
-        // Hash the facebook id with user id to get the database key.
-        const key = sha256(process.env.FACEBOOK_APP_ID + result.id);
-
-        // Attempt to get user from database with the given email address.
-        const user = await User.findOne({ where: { email: signupEmail }, raw: true });
-
-        if (user) {
-            // If user exists return the decrypted seed.
-            const recovery = await Recovery.findOne({ where: { key, recovery_type_id: 2, user_id: user.id } });
-            if (recovery) {
-                Logger.info({
-                    method: arguments.callee.name,
-                    type: 'Recover Encrypted Seed',
-                    user_id: user.id,
-                    recovery,
-                    headers: req.headers,
-                    body: req.body,
-                    message: `getFacebookEncryptedSeed: Recovered Encrypted seed from Facebook [${key.substr(0, 10)}...]`
-                });
-                return successResponse(res, { encryptedSeed: await decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
-            }
-        }
-        Logger.info({
-            method: arguments.callee.name, type: 'Failed Recover Encrypted Seed', headers: req.headers, body: req.body,
-            message: `getFacebookEncryptedSeed: Failed to recover seed from Facebook [${user.id}]`
-        });
-        // If user does not exist return an error.
-        return errorResponse(res, 'USER_NOT_FOUND', 404);
-    } catch (error) {
-        Logger.error({ source: 'getFacebookEncryptedSeed', data: req.body, message: error.message || error.toString() });
-        return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
-    }
-}
-
-// Function to get encrypted seed from google recovery.
-async function getGoogleEncryptedSeed(req, res) {
-    try {
-        // Get access token and email from request body.
-        const accessToken = req.body.accessToken;
-        const signupEmail = req.body.signupEmail.toLowerCase();
-
-        // Set google access token and make the query for the current profile.
-        oauth2Client.setCredentials({ access_token: accessToken });
-        const oauth2 = Google.oauth2({
-            auth: oauth2Client,
-            version: 'v2'
-        });
-        const result = await oauth2.userinfo.get();
-
-        // Hash the facebook id with user id to get the database key.
-        const key = await sha256(process.env.GOOGLE_APP_ID + result.data.id);
-
-        // If user exists return the decrypted seed.
-        // Attempt to get user from database with the given email address.
-        const user = await User.findOne({ where: { email: signupEmail } });
-
-        if (user != null) {
-            const recovery = await Recovery.findOne({ where: { user_id: user.id, key, recovery_type_id: 3 }, include: [User] });
-            if (recovery != null) {
-                /**
-                 * Big question: are we leaking user-data here? No: The access token has only limited validity and will be different next time
-                 */
-                Logger.info({
-                    method: arguments.callee.name,
-                    type: 'Recover Encrypted Seed',
-                    user_id: user.id,
-                    recovery,
-                    headers: req.headers,
-                    body: req.body,
-                    message: `getGoogleEncryptedSeed: Recovered Encrypted seed from Google [${user.id}]`
-                });
-                return successResponse(res, {
-                    encryptedSeed: await decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT),
-                    email: recovery.user.email
-                });
-            }
-        }
-
-        Logger.info({
-            method: arguments.callee.name, type: 'Failed Recover Encrypted Seed', headers: req.headers, body: req.body,
-            message: `getGoogleEncryptedSeed: Failed to recover seed [${key.substr(0, 10)}...]`
-        });
-        // If user does not exist return an error.
-        return errorResponse(res, 'USER_NOT_FOUND', 404);
-    } catch (error) {
-        Logger.error({ source: 'getGoogleEncryptedSeed', data: req.body, message: error.message || error.toString() });
-        return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
-    }
-}
-
-// Function to get encrypted seed from vkontakte recovery.
-async function getVKontakteEncryptedSeed(req, res) {
-    try {
-        // Get access token and email from request body.
-        const accessToken = req.body.accessToken;
-        const signupEmail = req.body.signupEmail.toLowerCase();
-
-        // Set vkontakte access token and make the query for the current profile.
-        const vk = new VK({
-            token: accessToken
-        });
-        const result = await vk.api.users.get([accessToken]);
-
-        // Hash the facebook id with user id to get the database key.
-        const key = await sha256((process.env.VK_APP_ID + result[0].id).toString());
-
-        // Attempt to get user from database with the given email address.
-        const user = await User.findOne({ where: { email: signupEmail } });
-
-        if (user != null) {
-            // If user exists return the decrypted seed.
-            const recovery = await Recovery.findOne({ where: { key, recovery_type_id: 5, user_id: user.id } });
-            if (recovery != null) {
-                Logger.info({
-                    method: arguments.callee.name,
-                    type: 'Recover Encrypted Seed',
-                    user_id: user.id,
-                    recovery,
-                    headers: req.headers,
-                    body: req.body,
-                    message: `getVKontakteEncryptedSeed: Recovered Encrypted seed from VKontakte [${user.id}]`
-                });
-                return successResponse(res, { encryptedSeed: await decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT) });
-            }
-        }
-        Logger.info({
-            method: arguments.callee.name, type: 'Failed Recover Encrypted Seed', headers: req.headers, body: req.body,
-            message: `getVKontakteEncryptedSeed: Failed to recover seed from VKontakte [${key.substr(0, 10)}...]`
-        });
-        // If user does not exist return an error.
-        return errorResponse(res, 'USER_NOT_FOUND', 404);
-    } catch (error) {
-        Logger.error({ source: 'getVKontakteEncryptedSeed', data: req.body, message: error.message || error.toString() });
-        return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
-    }
-}
 
 export async function recoverSeedSocialRecovery(req: Request, res: Response) {
-    switch (req.body.recoveryTypeId) {
+    switch (req.body.recovery_type) {
         case 2:
-            return await getFacebookEncryptedSeed(req, res);
+            return await getEncryptedSeed(req, res);
         case 3:
-            return await getGoogleEncryptedSeed(req, res);
+            return await getEncryptedSeed(req, res);
         case 5:
-            return await getVKontakteEncryptedSeed(req, res);
+            return await getEncryptedSeed(req, res);
+        case 6:
+            return await getEncryptedSeed(req, res);            
         default:
             return errorResponse(res, 'RECOVERY_METHOD_NOT_EXIST', 500);
     }
@@ -668,9 +603,6 @@ export async function getPayload(req, res) {
                 if (user['payload'].authenticator !== undefined) {
                     payload['authenticator'] = user.payload.authenticator;
                 }
-                if (user['payload'].emailVerificationCode !== undefined) {
-                    payload['emailVerificationCode'] = user.payload.emailVerificationCode;
-                }
                 if (user['payload'].authenticatorConfirmed !== undefined) {
                     payload['authenticatorConfirmed'] = user.payload.authenticatorConfirmed;
                 }
@@ -681,6 +613,9 @@ export async function getPayload(req, res) {
         }
 
         if (user) {
+            if (recovery.recovery_type_id !== 1) {
+                payload['user_email'] = user.email;
+            }
             Logger.info({ method: arguments.callee.name, type: 'Get Payload', user_id: user.id, user, headers: req.headers, body: req.body, message: `getPayload: Successful [${user.id}] [${user.email}]` });
             payload['ip_country'] = user.ip_country;
             return successResponse(res, payload);
@@ -746,6 +681,7 @@ export async function change2FAMethods(req, res) {
         const email2faVerification = req.body.email2faVerification;
         const authenticator2faVerification = req.body.authenticator2faVerification;
         const sendEmails = process.env.SEND_EMAILS;
+        const recoveryTypeId =  req.header('recoveryTypeId');
 
         // only allow one
         if (toggleAuthenticator) toggleEmail = false;
@@ -753,7 +689,7 @@ export async function change2FAMethods(req, res) {
 
         const key = req.header('key');
 
-        const recovery = await Recovery.findOne({ where: { key } });
+        const recovery = await Recovery.findOne({ where: { key, recovery_type_id: recoveryTypeId } });
         if (recovery != null) {
             const user = await User.findOne({ where: { id: recovery.user_id } });
 
@@ -776,7 +712,7 @@ export async function change2FAMethods(req, res) {
                         message: `2FA Email Sent [${user.id}] [${user.email}]`
                     });
 
-                    return successResponse(res, 'sent 2fa code to email address');
+                    return successResponse(res, {data: '2FA_CODE_SENT'});
                 } else {
                     // 2FA tokens in query params
                     // Attempt to get user from database.
@@ -844,6 +780,10 @@ export async function generateAuthenticatorQR(req, res) {
         const recovery = await Recovery.findOne({ where: { key } });
         if (recovery != null) {
             const user = await User.findOne({ where: { id: recovery.user_id } });
+
+            if (user.authenticator_secret && user.payload.authenticator == true) {
+                return errorResponse(res, 'AUTHENTICATOR_ALREADY_ENABLED', 500);
+            }
             if (user != null) {
                 user.authenticator_secret = authenticator.generateSecret();
 
@@ -865,7 +805,8 @@ export async function generateAuthenticatorQR(req, res) {
                         message: `Authenticator Code generated [${user.id}] [${user.email}]`
                     });
                     return successResponse(res, {
-                        image: result
+                        image: result,
+                        secret: user.authenticator_secret 
                     });
                 } catch (e) {
                     return errorResponse(res, 'CANNOT_GENERATE_QR_CODE', 500);
@@ -933,6 +874,8 @@ async function updateEmail2fa(user_id) {
     const verificationCode = randomFixedInteger(6);
     user.email_verification_code = verificationCode;
     user.email2fa_valid_until = new Date(Date.now() + (15 * 60 * 1000)); //15 minutes valid
+    user.payload.email2fa_retry_count = 0;
+
     await user.save();
     return user.email_verification_code;
 }
@@ -975,12 +918,13 @@ export async function verifyEmailCode(req, res) {
     try {
         const code = req.body.code;
         const key = req.body.key;
+
         const recovery = await Recovery.findOne({ where: { key } });
         if (recovery != null) {
             const user = await User.findOne({ where: { id: recovery.user_id } });
             if (user != null) {
                 if (await isEmail2FaStillValid(recovery.user_id)) {
-                    if (await verifyEmail2FA(recovery.user_id, code)) {
+                    if (await verifyEmail2FA(recovery.user_id, code, true)) {
                         Logger.info({
                             method: arguments.callee.name,
                             type: 'Email 2FA Code Verified',
@@ -1073,8 +1017,25 @@ export async function verifyEmailConfirmationCode(req, res) {
 
 export async function resetRecovery(req, res) {
     try {
+        const loginKey = req.header('key');
         const recoveryTypeId = req.body.recoveryTypeId;
         const key = req.body.key;
+        const email = req.body.email;
+
+        // Verify the apple acess token for apple logins
+        const emailKey = await getKeyEmail(recoveryTypeId, req.body.token, key, email, vk_tokens[loginKey]);
+
+        if (emailKey.success !== true) {
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+        }
+
+
+        // use the SSO email and check the user key for apple and google
+        if (key !== emailKey.key) {
+            Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+        }        
+
         const defaultRecovery = await Recovery.findOne({ where: { key } });
         if (defaultRecovery !== null && recoveryTypeId !== 1) {
             const recovery = await Recovery.findOne({ where: { user_id: defaultRecovery.user_id, recovery_type_id: recoveryTypeId } });
@@ -1121,7 +1082,7 @@ export async function resetRecovery(req, res) {
 
 export async function deleteAccount(req, res) {
     try {
-        const user = await User.findOne({ where: { email: req.body.email.toLowerCase() } });
+        const user = await User.findOne({ where: { email: req.body.email.toLowerCase().replace(/ /g, '') } });
         if (user !== null) {
             try {
                 await user.destroy();
@@ -1136,7 +1097,7 @@ export async function deleteAccount(req, res) {
                     type: 'User Account Deleted',
                     headers: req.headers,
                     body: req.body,
-                    message: `deleteAccount: User deleted [${req.body.email.toLowerCase()}] [${user.id}]`
+                    message: `deleteAccount: User deleted [${req.body.email.toLowerCase().replace(/ /g, '')}] [${user.id}]`
                 });
                 return successResponse(res, true);
             } catch (e) {
@@ -1149,7 +1110,7 @@ export async function deleteAccount(req, res) {
             type: 'Error: User Not Found',
             headers: req.headers,
             body: req.body,
-            message: `deleteAccount: User Not Found [${req.body.email.toLowerCase()}]`
+            message: `deleteAccount: User Not Found [${req.body.email.toLowerCase().replace(/ /g, '')}]`
         });
 
 
@@ -1160,13 +1121,43 @@ export async function deleteAccount(req, res) {
     }
 }
 
-async function verifyEmail2FA(user_id: string, code: string, isEmailChange: boolean = false): Promise<boolean> {
+async function verifyEmail2FA(user_id: string, code: string, isEmailChange: boolean = false, email_override: String = ''): Promise<boolean> {
     const user = await User.findOne({ where: { id: user_id } });
+    const sendEmails = process.env.SEND_EMAILS;
+
     if (user.payload.needConfirmation || isEmailChange) {
-        return user.email_verification_code === Number(code)
+        const verified = user.email_verification_code === Number(code)
+        if (!verified) {
+            user.payload.email2fa_retry_count = (user.payload.email2fa_retry_count || 0) + 1;
+            if (user.payload.email2fa_retry_count >=3) {
+                const verificationCode = await updateEmail2fa(user.id);
+                if (sendEmails === 'true') {
+                    if (!email_override) {
+                        email_override = user.email
+                    }
+                    await sendEmail2FA(verificationCode, email_override, user);
+                }
+            }
+        }
+        return verified
     }
 
-    return user.payload.email === false || (user.email_verification_code === Number(code));
+    const verified = user.payload.email === false || (user.email_verification_code === Number(code));
+
+    if (!verified) {
+        user.payload.email2fa_retry_count = (user.payload.email2fa_retry_count || 0) + 1;
+        if (user.payload.email2fa_retry_count >=3) {
+            const verificationCode = await updateEmail2fa(user.id);
+            if (sendEmails === 'true') {
+                if (!email_override) {
+                    email_override = user.email
+                }
+                await sendEmail2FA(verificationCode, email_override, user);
+            }
+        }
+    }
+
+    return verified
 
 }
 
@@ -1194,8 +1185,11 @@ export async function updateUserPayload(req, res) {
         if (payloadColumn !== 'app_lang') {
             return res.status(403).json({ error: "INVALID_REQUEST" });
         }
+
+        const recovery_type_id = Number(req.body.recovery_type || 1);
+        
         // Create a new recovery method.
-        const recovery = await Recovery.findOne({ where: { key, recovery_type_id: 1 } });
+        const recovery = await Recovery.findOne({ where: { key, recovery_type_id: recovery_type_id } });
         const user = await User.findOne({ where: { id: recovery.user_id } });
 
         if (user) {
@@ -1211,4 +1205,87 @@ export async function updateUserPayload(req, res) {
     }
     //error out in any other case
     return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
+}
+
+// generate an auth key using the vk app id and vk secure key. this validates the user is originating from the correct url and is using the correct application code 
+export const fetchVKAuthToken = async (req, res) => {
+    try {
+
+        const token = req.body.code
+
+        const axios = require('axios')
+
+        const getAuthToken = `https://oauth.vk.com/access_token?client_id=${process.env.VK_APP_ID}&client_secret=${process.env.VK_SECURE_KEY}&redirect_uri=${process.env.VK_URL}&code=${token}`
+
+        const response = await axios.get(getAuthToken);
+
+        const auth_token = response.data;
+
+        const key = req.header('key');
+        const recovery_type_id = req.header('recoverytypeid');
+
+        const recovery = await Recovery.findOne({ where: { key, recovery_type_id: recovery_type_id } });
+
+
+        if (!recovery || ! recovery.user_id) {
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
+        }
+
+        vk_tokens[key] = {token: auth_token.access_token, date: Date.now(), user_id: recovery.user_id, vk_user_id: auth_token.user_id }
+
+        const keys = Object.keys(vk_tokens)
+        keys.forEach(k => {
+            if (vk_tokens[k].date < Date.now() - (1000 * 60 * 60)) {
+                delete vk_tokens[k]
+            }
+        })
+
+        return successResponse(res, auth_token);
+
+    } catch (error) {
+        Logger.error({ source: 'fetchVKAuthToken', data: req.body, message: error.message || error.toString() });
+        return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
+    }
+}
+
+// generate a vk token for recovery
+export const recoveryVKAuthToken = async (req, res) => {
+    try {
+
+        const token = req.body.code
+
+        const axios = require('axios')
+
+        const getAuthToken = `https://oauth.vk.com/access_token?client_id=${process.env.VK_APP_ID}&client_secret=${process.env.VK_SECURE_KEY}&redirect_uri=${process.env.VK_URL}&code=${token}`
+
+        const response = await axios.get(getAuthToken);
+
+        const auth_token = response.data;
+
+        const key = await sha256(process.env.VK_APP_ID + auth_token.user_id )
+
+        const recovery_type_id = 5;
+
+        const recovery = await Recovery.findOne({ where: { key, recovery_type_id: recovery_type_id } });
+
+
+        if (!recovery || ! recovery.user_id) {
+            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
+        }
+
+        vk_tokens[key] = {token: auth_token.access_token, date: Date.now(), user_id: recovery.user_id, vk_user_id: auth_token.user_id }
+
+        const keys = Object.keys(vk_tokens)
+        keys.forEach(k => {
+            if (vk_tokens[k].date < Date.now() - (1000 * 60 * 60)) {
+                delete vk_tokens[k]
+            }
+        })
+
+        return successResponse(res, auth_token);
+
+    } catch (error) {
+        Logger.error({ source: 'fetchVKAuthToken', data: req.body, message: error.message || error.toString() });
+        return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
+    }
 }

@@ -9,6 +9,12 @@ describe('Email 2FA', () => {
 	it('Activate Email 2FA', () => {
 		cy.visit('/');
 
+		cy.get('[data-cy=emailLoginButton]').click();
+		
+
+		cy.waitUntil(() => cy.get('[data-cy=walletEmail]'));
+
+
 		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
 		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
@@ -27,11 +33,11 @@ describe('Email 2FA', () => {
 
 		cy.get('[data-cy=emailToggle]').click();
 
-		cy.get('[data-cy=confirmAccessTitle]').contains('Please enter your password before making changes.');
+		//cy.get('[data-cy=confirmAccessTitle]').contains('Please enter your password before making changes.');
 
-		cy.get('[data-cy=confirmAccessPassword]').type(password).should('have.value', password);
+		//cy.get('[data-cy=confirmAccessPassword]').type(password).should('have.value', password);
 
-		cy.get('[data-cy=confirmAccessButton]').click();
+		//cy.get('[data-cy=confirmAccessButton]').click();
 
 		cy.waitUntil(() => cy.get('[data-cy=emailConfirmationTitle]').contains('Email Confirmation'));
 
@@ -57,6 +63,12 @@ describe('Email 2FA', () => {
 
 	it('Login with Email 2FA Activated', () => {
 		cy.visit('/');
+
+		cy.get('[data-cy=emailLoginButton]').click();
+		
+
+		cy.waitUntil(() => cy.get('[data-cy=walletEmail]'));
+
 
 		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
@@ -85,6 +97,12 @@ describe('Email 2FA', () => {
 	it('Disable Email 2FA', () => {
 		cy.visit('/');
 
+		cy.get('[data-cy=emailLoginButton]').click();
+		
+
+		cy.waitUntil(() => cy.get('[data-cy=walletEmail]'));
+
+
 		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
 		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
@@ -112,21 +130,34 @@ describe('Email 2FA', () => {
 
 			cy.get('[data-cy=emailToggle]').click();
 
-			cy.get('[data-cy=confirmAccessTitle]').contains('Please enter your password before making changes.');
+			
 
-			cy.get('[data-cy=confirmAccessPassword]').type(password).should('have.value', password);
+			cy.get('[data-cy=confirmAccessTitle]').contains('We sent you an email with a code.');
 
-			cy.get('[data-cy=confirmAccessButton]').click();
+			cy.request('POST', `${backendUrl}/v1/test/getEmailCode`, { email }).then((response) => {
+				const code = response.body.email_verification_code;
+				cy.get('[data-cy=2faEmailCode]').type(code);
+				cy.get('[data-cy=confirmAccessButton]').click();
 
-			cy.waitUntil(() => cy.get('[data-cy=2faConfirmedTitle]').contains('2-Step Deactivated'));
-			cy.get('[data-cy=2faDisabledDescription]').contains('2-step verification has been removed from your account.');
+				cy.waitUntil(() => cy.get('[data-cy=2faConfirmedTitle]').contains('2-Step Deactivated'));
+				cy.get('[data-cy=2faDisabledDescription]').contains('2-step verification has been removed from your account.');
+	
+				cy.get('[data-cy=closeButton]').click();
+			});
 
-			cy.get('[data-cy=closeButton]').click();
+
+
 		});
 	});
 
 	it('Change Login Email Error', () => {
 		cy.visit('/');
+
+		cy.get('[data-cy=emailLoginButton]').click();
+		
+
+		cy.waitUntil(() => cy.get('[data-cy=walletEmail]'));
+
 
 		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
@@ -160,6 +191,12 @@ describe('Email 2FA', () => {
 
 	it('Change Login Email', () => {
 		cy.visit('/');
+
+		cy.get('[data-cy=emailLoginButton]').click();
+		
+
+		cy.waitUntil(() => cy.get('[data-cy=walletEmail]'));
+
 
 		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
@@ -200,6 +237,12 @@ describe('Email 2FA', () => {
 	it('Login new Email', () => {
 		cy.visit('/');
 
+		cy.get('[data-cy=emailLoginButton]').click();
+		
+
+		cy.waitUntil(() => cy.get('[data-cy=walletEmail]'));
+
+
 		cy.get('[data-cy=walletEmail]').type(secondEmail).should('have.value', secondEmail);
 
 		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
@@ -214,6 +257,12 @@ describe('Email 2FA', () => {
 
 	it('Change Login Email Back to Original', () => {
 		cy.visit('/');
+
+		cy.get('[data-cy=emailLoginButton]').click();
+		
+
+		cy.waitUntil(() => cy.get('[data-cy=walletEmail]'));
+
 
 		cy.get('[data-cy=walletEmail]').type(secondEmail).should('have.value', secondEmail);
 

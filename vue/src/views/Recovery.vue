@@ -7,7 +7,7 @@
 				<p class="subtitle">{{ $t('recovery.RECOVERY_DESCRIPTION') }}</p>
 
 				<div class="error alert warning is-size-7" v-if="logonError">
-					<p data-cy="loginError">⚠️ <span v-html="logonError">&nbsp;</span></p>
+					<p data-cy="loginError">⚠️ <span v-html="logonError || '&nbsp;'"></span></p>
 					<a
 						v-if="showMore"
 						href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/"
@@ -16,10 +16,13 @@
 						><span>{{ $t('common.LEARN_MORE') }}</span></a
 					>
 				</div>
-
+				
 				<div class="field is-grouped">
 					<RecoverWalletGoogle @setPassword="setPassword"></RecoverWalletGoogle>
 				</div>
+				<div class="field is-grouped">
+					<RecoverWalletApple @setPassword="setPassword"></RecoverWalletApple>
+				</div>				
 				<div class="field is-grouped">
 					<RecoverWalletFacebook @setPassword="setPassword"></RecoverWalletFacebook>
 				</div>
@@ -51,7 +54,7 @@
 					<div class="field">
 						<label class="label">{{ $t('common.EMAIL') }}</label>
 						<div class="control">
-							<input type="email" class="input" name="newEmail" v-model="newEmail" />
+							<input type="email" class="input" name="newEmail" v-model="newEmail" @keypress="handleKeyPress"  />
 						</div>
 					</div>
 
@@ -101,6 +104,7 @@
 import Component, { mixins } from 'vue-class-component';
 import RecoverWalletVkontakte from '../components/RecoverWalletVkontakte.vue';
 import RecoverWalletGoogle from '../components/RecoverWalletGoogle.vue';
+import RecoverWalletApple from '../components/RecoverWalletApple.vue';
 import RecoverWalletFacebook from '../components/RecoverWalletFacebook.vue';
 import ChangePassword from '../components/ChangePassword.vue';
 import { Authenticated, Global } from '../mixins/mixins';
@@ -113,6 +117,7 @@ import { getDictionaryValue } from '../utils/dictionary';
 		RecoverWalletVkontakte,
 		RecoverWalletFacebook,
 		RecoverWalletGoogle,
+		RecoverWalletApple,
 		ChangePassword
 	}
 })
@@ -169,6 +174,14 @@ export default class Recovery extends mixins(Authenticated, Global, Recaptcha) {
 			} else {
 				this.logonError = getDictionaryValue(error.toString());
 			}
+		}
+	}
+
+	handleKeyPress(e: any) {
+		const key = e.which || e.charCode || e.keyCode || 0;
+
+		if (key === 13) {
+			this.checkEmail();
 		}
 	}
 

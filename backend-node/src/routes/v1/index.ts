@@ -106,6 +106,8 @@ module.exports = function (express) {
     router.post('/verifyEmailConfirmationCode', limiterGetPayload, limiterUser, WalletController.verifyEmailConfirmationCode);
     router.post('/verifyAuthenticatorCode', limiterGetPayload, limiterUser, WalletController.verifyAuthenticatorCode);
     router.post('/validateInput', ValidationController.validateInput);
+    router.post('/recoveryVKAuthToken', WalletController.recoveryVKAuthToken);
+    
 
     /**
      * Secure routes checking signature matching eth_address
@@ -120,6 +122,7 @@ module.exports = function (express) {
     router.post('/auth/getRecoveryMethods', WalletController.getRecoveryMethods);
     router.post('/auth/deleteAccount', WalletController.deleteAccount);
     router.post('/auth/updateUserPayload', WalletController.updateUserPayload);
+    router.post('/auth/fetchVKAuthToken', WalletController.fetchVKAuthToken);
 
     /**
      * Email Notifications

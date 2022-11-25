@@ -5,7 +5,6 @@
 				class="button is-grey big-button outlined-button is-thick transition-faster"
 				:params="{ clientId }"
 				:onSuccess="onLogin"
-				:onCurrentUser="onLogin"
 				:onFailure="onError"
 				data-cy="googleButton"
 			>
@@ -21,7 +20,6 @@
 					class="button is-danger big-button is-thick transition-faster"
 					:params="{ clientId }"
 					:onSuccess="onDelete"
-					:onCurrentUser="onDelete"
 					:onFailure="onError"
 				>
 					<span class="icon img">
@@ -73,7 +71,6 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 
 	onError(error) {
 		let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
-		console.log('onError', errorMessage)
 		this.logSentryError('addGoogleRecovery', errorMessage, {
 			hasRecoveryMethod: this.hasRecoveryMethod,
 			clientId: this.clientId,
@@ -93,9 +90,11 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 
 	async onLogin(googleUser) {
 		this.showSpinner(this.$t('loader.SAVING_KEYSTORE_RECOVERY'));
-		const userID = googleUser.getBasicProfile().getId();
+		const userID = googleUser.getId();
 		const key = await sha256(this.clientId + userID);
-		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId })
+		const token = (googleUser.Cc || googleUser.Bc).id_token
+		
+		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId, token, email: googleUser.getBasicProfile().getEmail(), currentRecoveryTypeId: this.store.recoveryTypeId })
 			.then(async () => {
 				if (this.$gtag && window.gtag)
 					window.gtag('event', 'add_recovery', {
@@ -133,9 +132,11 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 
 	async onDelete(googleUser) {
 		this.showSpinner(this.$t('loader.DELETING_KEYSTORE_RECOVERY'));
-		const userID = googleUser.getBasicProfile().getId();
 		const key = await sha256(this.clientId + userID);
-		this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId })
+		const userID = googleUser.getId();
+		const token = (googleUser.Cc || googleUser.Bc).id_token
+
+		this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId, token })
 			.then(async () => {
 				googleUser.disconnect();
 				this.showSpinnerThenAutohide(this.$t('loader.DELETED_KEYSTORE_SUCCESSFULLY'));

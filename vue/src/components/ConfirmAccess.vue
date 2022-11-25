@@ -1,21 +1,17 @@
 <template>
 	<div>
-		<img src="@/assets/img/password.svg" :alt="$t('images.PASSWORD_IMAGE')" class="mb-3" />
 		<h2 class="title">{{ $t('confirm.CONFIRM_ACCESS_TITLE') }}</h2>
-		<p data-cy="confirmAccessTitle" class="subtitle">{{ $t('confirm.CONFIRM_ACCESS_DESCRIPTION') }}</p>
+		<img src="@/assets/img/password.svg" :alt="$t('images.PASSWORD_IMAGE')" class="mb-3" />
+
+		<p data-cy="confirmAccessTitle" v-if="!store.twoFaRequired.authenticator"  class="subtitle">{{ $t('confirm.CONFIRM_ACCESS_DESCRIPTION') }}</p>
+		<p data-cy="confirmAccessTitle" v-else  class="subtitle">{{ $t('confirm.CONFIRM_ACCESS_DESCRIPTION_AUTHENTICATOR') }}</p>
 
 		<div class="field">
-			<label class="label">{{ $t('common.PASSWORD') }}</label>
+			<label v-if="!store.twoFaRequired.authenticator" class="label">{{ $t('2fa.VERIFICATION_CODE') }}</label>
+			<label v-else class="label">{{ $t('2fa.AUTH_CODE') }}</label>
 
 			<div class="control">
-				<input
-					data-cy="confirmAccessPassword"
-					type="password"
-					class="input"
-					name="walletPassword"
-					v-model="walletPassword"
-					@keypress="handleKeyPress"
-				/>
+				<input data-cy="2faEmailCode" type="number" inputmode="numeric" class="input" v-model="authenticatorCode" @keypress="handleKeyPress" />
 			</div>
 		</div>
 
@@ -25,9 +21,9 @@
 
 		<button
 			data-cy="confirmAccessButton"
-			@click="setPassword()"
+			@click="accessConfirmed()"
 			class="button is-green big-button is-login transition-faster mt-5"
-			:disabled="!walletPassword"
+			:disabled="!authenticatorCode || authenticatorCode.length != 6"
 		>
 			<span class="text">{{ $t('common.CONTINUE') }}</span>
 		</button>
@@ -42,11 +38,17 @@ import Component, { mixins } from 'vue-class-component';
 import { Emit, Prop, Watch } from 'vue-property-decorator';
 import { Authenticated } from '../mixins/mixins';
 import { sha256 } from '../utils/cryptoFunctions';
+import { verifyEmailCode, send2FAEmail, verifyAuthenticatorCode } from '../utils/backupRestore';
+import { getDictionaryValue } from '../utils/dictionary';
 
 @Component({})
 export default class ConfirmAccess extends mixins(Authenticated) {
 	walletPassword = '';
 	logonError = '';
+	authenticatorCode = '';
+	initialized = false;
+	confirmed = false;
+	
 
 	@Prop()
 	error!: string;
@@ -56,16 +58,55 @@ export default class ConfirmAccess extends mixins(Authenticated) {
 		if (newValue) this.logonError = newValue;
 	}
 
-	@Emit('setPassword')
-	async setPassword() {
-		const newPassword = await sha256(this.walletPassword);
+	
+	async mounted() {
+		try {
+			send2FAEmail(this.$store.getters.walletEmail)
+										.then(() => {
+											this.initialized = true;
+										})
+										.catch((e) => {
+											this.initialized = false;
+										});
 
-		if (this.store.hashedPassword !== newPassword) {
-			this.logonError = this.$t('errors.WRONG_PASSWORD').toString();
-			return null;
+		} catch (err) {
+			console.log('init error', err)
 		}
 
-		return newPassword;
+	}
+
+	@Watch('authenticatorCode')
+	authenticatorCodeChanged() {
+		if (this.authenticatorCode.length === 6 && this.store.twoFaRequired.authenticator) {
+			this.accessConfirmed();
+		}
+	}
+
+	
+
+	@Emit('accessConfirmed')
+	async accessConfirmed() {
+		if (!this.authenticatorCode || this.authenticatorCode.length != 6) {
+			return false;
+		}
+		let confirmCode
+		if (this.store.twoFaRequired.authenticator) {
+			confirmCode = await verifyAuthenticatorCode(this.store.fetch_key || this.store.email, this.authenticatorCode);
+		} else {
+			confirmCode = await verifyEmailCode(this.store.fetch_key || this.store.email, this.authenticatorCode);
+		}
+		
+
+
+		if (confirmCode.success) {
+			this.unlocked()
+			this.logonError = '';
+			return true;
+		} else {
+			this.logonError = getDictionaryValue(confirmCode.error);
+			return false;
+		}
+
 	}
 
 	@Emit('pageBack')
@@ -77,7 +118,7 @@ export default class ConfirmAccess extends mixins(Authenticated) {
 		const key = e.which || e.charCode || e.keyCode || 0;
 
 		if (key === 13) {
-			this.setPassword();
+			this.accessConfirmed();
 		}
 	}
 }

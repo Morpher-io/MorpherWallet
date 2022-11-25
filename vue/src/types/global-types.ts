@@ -22,6 +22,7 @@ export type TypeSeedFoundData = {
 	email: string;
 	encryptedSeed: TypeEncryptedSeed;
 	hashedPassword: string;
+	recoveryTypeId: number;
 };
 
 export type TypeSeedCreatedData = {
@@ -29,6 +30,7 @@ export type TypeSeedCreatedData = {
 	email: string;
 	encryptedSeed: TypeEncryptedSeed;
 	hashedPassword: string;
+	recoveryTypeId: number;
 };
 
 export type TypeFetchUser = {
@@ -36,6 +38,9 @@ export type TypeFetchUser = {
 	email: string;
 	password: string;
 	recaptchaToken: string;
+	token: string;
+	recoveryTypeId: number
+	fetch_key: string;
 };
 
 export type TypeUnlock2fa = {
@@ -63,11 +68,13 @@ export type TypeUnlockWithPassword = {
 	__typename?: 'TypeUnlockWithPassword';
 	password: string;
 	recaptchaToken: string;
+	fetch_key?: string;
 };
 
 export type TypeUpdateRecovery = {
 	__typename?: 'TypeUpdateRecovery';
 	dbUpdate: boolean;
+	recoveryTypeId: string;
 };
 
 export type TypeChangePassword = {
@@ -85,6 +92,7 @@ export type TypeResetRecovery = {
 	__typename?: 'TypeResetRecovery';
 	key: string;
 	recoveryTypeId: string;
+	token: string;
 };
 
 export type TypeChangeEmail = {
@@ -98,6 +106,10 @@ export type TypeUserFoundData = {
 	__typename?: 'TypeUserFoundData';
 	email: string;
 	hashedPassword: string;
+	token: string
+	recoveryTypeId: number
+	fetch_key: string
+	loginEmail?: string;
 };
 
 
@@ -113,6 +125,7 @@ export type TypePayloadData = {
 	authenticatorConfirmed?: boolean;
 	needConfirmation?: boolean;
 	ip_country?: string;
+	user_email?: string;
 };
 
 export type Type2FAUpdateParams = {
@@ -157,6 +170,7 @@ export type TypeRequestParams = {
 };
 export type TypeRecoveryParams = {
 	__typename?: 'TypeRecoveryParams';
+	key: string;
 	accessToken: string;
 	password: string;
 	recoveryTypeId: number;
@@ -166,6 +180,9 @@ export type TypeAddRecoveryParams = {
 	key: string;
 	password: string;
 	recoveryTypeId: number;
+	email: string;
+	token: string;
+	currentRecoveryTypeId: number;
 };
 
 export type TypeUpdateUserPayload = {

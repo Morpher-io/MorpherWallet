@@ -1,9 +1,10 @@
 {
   "pluginsFile": "tests/e2e/plugins/index.js",
-  "experimentalNetworkStubbing": true,
   "retries": 1,
   "baseUrl": "http://localhost:3001",
   "video": false,
+  "defaultCommandTimeout": 10000,
+  "requestTimeout": 10000,  
   "env": {
     "firstEmail": "test@email.com",
     "secondEmail": "test2@email.com",
