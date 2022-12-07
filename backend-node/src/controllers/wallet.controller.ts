@@ -13,7 +13,7 @@ const vk_tokens = {};
 
 // Function to save new signups to the database.
 export async function saveEmailPassword(req: Request, res: Response) {
-    
+
     // Get sequelize transactions to rollback changes in case of failure.
     const [err, transaction] = await to(getTransaction());
     if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
@@ -29,7 +29,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
         
         if (emailKey.success !== true) {
             await transaction.rollback();
-            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+            return errorResponse(res, 'TOKEN_VALIDATION_ERROR', 500);     
         }
 
         // can only register using google/apple/password
@@ -43,7 +43,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
         if (key !== emailKey.key) {
             Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
             await transaction.rollback();
-            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+            return errorResponse(res, 'SSO_KEY_MISMATCH', 500);     
         }
         
 
@@ -157,14 +157,14 @@ export async function addRecoveryMethod(req: Request, res: Response) {
         const emailKey = await getKeyEmail(recoveryTypeId, req.body.access_token, keyForSaving, email, vk_tokens[key]);
 
         if (emailKey.success !== true) {
-            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+            return errorResponse(res, 'TOKEN_VALIDATION_ERROR', 500);     
         }
 
         // use the SSO email and check the user key for apple and google
         email = emailKey.email;
         if (keyForSaving !== emailKey.key) {
             Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
-            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+            return errorResponse(res, 'SSO_KEY_MISMATCH', 500);     
         }
         
 
@@ -347,7 +347,7 @@ export async function getEncryptedSeed(req, res) {
         
         if (key !== emailKey.key) {
             Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
-            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+            return errorResponse(res, 'SSO_KEY_MISMATCH', 500);     
         }
         
        
@@ -1026,14 +1026,14 @@ export async function resetRecovery(req, res) {
         const emailKey = await getKeyEmail(recoveryTypeId, req.body.token, key, email, vk_tokens[loginKey]);
 
         if (emailKey.success !== true) {
-            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+            return errorResponse(res, 'TOKEN_VALIDATION_ERROR', 500);     
         }
 
 
         // use the SSO email and check the user key for apple and google
         if (key !== emailKey.key) {
             Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
-            return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);     
+            return errorResponse(res, 'SSO_KEY_MISMATCH', 500);     
         }        
 
         const defaultRecovery = await Recovery.findOne({ where: { key } });
@@ -1190,14 +1190,16 @@ export async function updateUserPayload(req, res) {
         
         // Create a new recovery method.
         const recovery = await Recovery.findOne({ where: { key, recovery_type_id: recovery_type_id } });
-        const user = await User.findOne({ where: { id: recovery.user_id } });
+        if (recovery) {
+            const user = await User.findOne({ where: { id: recovery.user_id } });
 
-        if (user) {
-            user.payload[payloadColumn] = payloadValue;
-            user.changed('payload', true);
-            await user.save();
+            if (user) {
+                user.payload[payloadColumn] = payloadValue;
+                user.changed('payload', true);
+                await user.save();
 
-            return successResponse(res, true);
+                return successResponse(res, true);
+            }
         }
     } catch (error) {
         Logger.error({ source: 'updateUserPayload', data: req.body, message: error.message || error.toString() });
