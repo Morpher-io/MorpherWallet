@@ -326,7 +326,13 @@ export default class Login extends mixins(Global, Recaptcha) {
 			}
 		})
 		.catch((error) => {
+			
 			this.hideSpinner();
+
+			if (error.toString() == 'Too Many Requests') {
+				error = 'TOO_MANY_REQUESTS'
+			}
+
 
 			if (error.error === 'RECAPTCHA_REQUIRED') {
 				this.executeRecaptcha(this.login);
@@ -361,6 +367,12 @@ export default class Login extends mixins(Global, Recaptcha) {
 					this.logonError = getDictionaryValue(error.error);
 				} else {
 					this.loginErrorReturn(email, error);
+					if (error.toString().includes('_')) {
+						this.logonError = getDictionaryValue(error.toString())
+					} else {
+						this.logonError = error.toString();
+					}
+					
 					// console.log('Error in login', error);
 				}
 			}
