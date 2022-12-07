@@ -36,7 +36,7 @@ const limiterUser = rateLimit({
 let ipRequestPayload = {};
 
 /**
- * the idea is to allow maximum of 3 _different_ keys per 60 minutes
+ * the idea is to allow maximum of 15 _different_ keys per 60 minutes
  * 
  * that means: if the key was already requested and is just re-requested, the keyGenerator will return a random number (Date.now()), which wasn't rate-limited yet.
  * 
@@ -45,7 +45,7 @@ let ipRequestPayload = {};
  * 15 times the same ip with different keys will get then rate-limited.
  */
 const limiterGetPayload =  rateLimit({
-    windowMs: 24 * 60 * 60 * 1000,
+    windowMs: 1 * 60 * 60 * 1000,
     max: 15,
     onLimitReached: limitReached,
     keyGenerator(req, res) {

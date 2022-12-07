@@ -338,7 +338,7 @@ export default class Signup extends mixins(Global, Recaptcha) {
 				if (error && error.toString() === 'TypeError: Failed to fetch') {
 					this.showNetworkError(true);
 				} else {
-					this.logSentryError('createWallet', error.toString(), {});
+					this.logSentryError('createWallet',  error.error || error.message || error.toString(), {});
 				}
 
 				this.logonError = getDictionaryValue(error.toString());

@@ -58,7 +58,12 @@ const getEncryptedSeedFromMail = async (fetch_key: string, email: string, email2
 							if (responseBody.error && responseBody.error === 'RECAPTCHA_REQUIRED') {
 								reject(responseBody);
 							} else {
-								reject('seed not found');
+								if (responseBody.error.includes('_')) {
+									reject(responseBody.error.toString());
+								} else {
+									reject('seed not found');
+								}
+								
 							}
 						})
 						.catch((err) => {
@@ -116,30 +121,47 @@ const validateInput = async (fieldName: string, inputFieldValue: string) => {
 };
 
 const saveWalletEmailPassword = async (userEmail: string, encryptedSeed: TypeEncryptedSeed, ethAddress: string, recaptchaToken: string, recoveryTypeId: number, token: string, fetch_key: string) => {
-	
-	const key = await sha256(fetch_key.toLowerCase() || userEmail.toLowerCase());
-	const options: RequestInit = {
-		method: 'POST',
-		headers: {
-			Accept: 'application/json',
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
-			key,
-			encryptedSeed,
-			email: userEmail.toLowerCase(),
-			ethAddress,
-			recaptcha: recaptchaToken,
-			recovery_type: recoveryTypeId,
-			access_token: token
-		}),
-		mode: 'cors',
-		cache: 'default'
-	};
-	const result = await fetch(getBackendEndpoint() + '/v1/saveEmailPassword', options);
+	return new Promise<any>(async (resolve, reject) => {
+		try {
 
-	const response = await result.json();
-	return response;
+			const key = await sha256(fetch_key.toLowerCase() || userEmail.toLowerCase());
+			const options: RequestInit = {
+				method: 'POST',
+				headers: {
+					Accept: 'application/json',
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					key,
+					encryptedSeed,
+					email: userEmail.toLowerCase(),
+					ethAddress,
+					recaptcha: recaptchaToken,
+					recovery_type: recoveryTypeId,
+					access_token: token
+				}),
+				mode: 'cors',
+				cache: 'default'
+			};
+			const result = await fetch(getBackendEndpoint() + '/v1/saveEmailPassword', options);
+
+			if (result.status != 200) {
+				try {
+					const response = await result.json();
+					if (response.success == false) {
+						return reject(response.error);	
+					}
+				} catch (e) {
+					return reject(result.statusText);
+				}
+			}
+
+			const response = await result.json();
+			resolve (response);
+		} catch (err) {
+			reject(err)
+		}
+	});
 };
 
 
@@ -198,11 +220,21 @@ const getPayload = (email: string, recaptchaToken = '', key = '') =>
 				cache: 'default'
 			};
 			const result = await fetch(getBackendEndpoint() + '/v1/getPayload', options);
-			const response: TypePayloadData = await result.json();
+
+
 			if (result.status != 200) {
-				reject(response);
+				try {
+					const response = await result.json();
+					if (response.success == false) {
+						return reject(response.error);	
+					}
+				} catch (e) {
+					return reject(result.statusText);
+				}
 			}
 
+			const response: TypePayloadData = await result.json();
+	
 			resolve(response);
 		} catch (err) {
 			reject(err);
@@ -224,6 +256,17 @@ const getNonce = async (key: string, retry = 0) => {
 			cache: 'default'
 		};
 		const result = await fetch(getBackendEndpoint() + '/v1/getNonce', options);
+
+		if (result.status != 200) {
+			try {
+				const response = await result.json();
+				if (response.success == false) {
+					return reject(response.error);	
+				}
+			} catch (e) {
+				return reject(result.statusText);
+			}
+		}
 
 		const response = await result.json();
 

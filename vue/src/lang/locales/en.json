@@ -234,7 +234,11 @@
         "GOOGLE_COOKIES_BLOCKED": "Unable to log into Google. It looks like cookies are disabled wich may be blocking google access. Try turning off incognito mode.",
         "GOOGLE_SCRIPT_BLOCKED": "Unable to log into Google. The google login script has been blocked, possibly by an ad-blocker. Try turning off your ad-blocker and login again.",
         "RECOVERY_UNLOCK_ERROR": "Unable to unlock your wallet. This may be because you used a different account or never set up account recovery.",
-        "FALLBACK_MESSAGE": "Something went wrong. Please try again later."
+        "FALLBACK_MESSAGE": "Something went wrong. Please try again later.",
+        "TOO_MANY_REQUESTS": "Request blocked due to too many requests. Please try again later.",
+        "TOKEN_VALIDATION_ERROR": "SSO Token valication failed.",
+        "SSO_KEY_MISMATCH": "SSO user key mismatch.",
+        "INVALID_RECOVERY_TYPE": "Invalid recovery type."
     },
     "loader": {
         "ACCOUNT_DELETED_SUCCESSFULLY": "Account deleted successfully.",
