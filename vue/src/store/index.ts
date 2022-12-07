@@ -440,9 +440,9 @@ const store: Store<RootState> = new Vuex.Store({
 											commit('seedFound', { encryptedSeed, recoveryTypeId });
 											resolve(true);
 										})
-										.catch(() => {
+										.catch((e) => {
 											commit('updateUnlocking', false);
-											reject;
+											reject(e);
 										});
 								} else {
 									commit('updateUnlocking', false);
@@ -601,7 +601,7 @@ const store: Store<RootState> = new Vuex.Store({
 				sha256(params.password).then((hashedPassword) => {
 					getPayload(params.fetch_key || params.email, params.recaptchaToken)
 						.then(() => {
-							reject('USER_ALREADY_EXISTS');
+							return reject('USER_ALREADY_EXISTS');
 						})
 						.catch(async (error) => {
 							if (error.error && error.error === 'RECAPTCHA_REQUIRED') {
@@ -628,7 +628,7 @@ const store: Store<RootState> = new Vuex.Store({
 										});
 								})
 								.catch((e) => {
-									reject(e);
+									return reject(e);
 								});
 						});
 				});
@@ -1386,6 +1386,9 @@ if (isIframe()) {
 				else return { isLoggedIn: false };
 			},
 			hasSocialRecoveryMethods() {
+				if (store.state.recoveryTypeId && store.state.recoveryTypeId !== 1) {
+					return true;	
+				}				
 				if (!store.state.recoveryMethods.find(method => Number(method.id) !== 1)) {	
 					return false;
 				}

@@ -1,7 +1,7 @@
 <template>
 	<div class="field">
 		<div class="control is-expanded">
-			<GoogleLogin class="button is-grey big-button outlined-button is-thick transition-faster"
+			<GoogleLogin class="button is-grey big-button outlined-button is-thick transition-faster" v-if="clientId"
 				:params="{ clientId }" :onSuccess="onLogin" :onFailure="onError" data-cy="googleButton">
 				<span class="icon img">
 					<img src="@/assets/img/google_logo.svg" alt="Google Logo" />

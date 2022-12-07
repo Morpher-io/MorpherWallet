@@ -7,9 +7,21 @@ module.exports = async function(req, res, next) {
     const signature = JSON.parse(req.header('Signature'));
     const key = req.header('key');
 
+    if (!key) {
+        return errorResponse(res, 'AUTH_ERROR - No Key', 400);    
+    }
+
     if (signature !== null) {
         const recovery = await Recovery.findOne({ where: { key } });
+        if (!recovery) {
+            return errorResponse(res, 'AUTH_ERROR - No Recovery', 400);  
+        }
         const user = await User.findOne({ where: { id: recovery.user_id } });
+
+        if (!user) {
+            return errorResponse(res, 'AUTH_ERROR - No User', 400);  
+        }
+        
         if (req.body.nonce === user.nonce) {
             const signMessage = Buffer.from(JSON.stringify(sortObject(req.body)));
             const prefixedMsg = ethereumjs.hashPersonalMessage(signMessage);
