@@ -1386,6 +1386,9 @@ if (isIframe()) {
 				else return { isLoggedIn: false };
 			},
 			hasSocialRecoveryMethods() {
+				if (store.state.recoveryTypeId && store.state.recoveryTypeId !== 1) {
+					return true;	
+				}				
 				if (!store.state.recoveryMethods.find(method => Number(method.id) !== 1)) {	
 					return false;
 				}
