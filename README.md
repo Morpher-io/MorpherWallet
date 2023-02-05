@@ -29,7 +29,7 @@ The wallet users (probably) won't lose.
 
 The wallet has an SDK: a web3 object you can import into any JS app. But in its current form it was only designed to work really well with the Morpher trading app. We built this wallet to solve the problems our users were facing every day with other wallet providers ([see our post on crypto wallet pitfalls](https://www.morpher.com/blog/why-we-built-morpher-wallet)). Just like with our DApp, we want developers to have an invisible wallet that users don't need to notice or learn about.
 
-Want to us to build a plug-and-play hosted solution for all DApp developers? Fill out the form below:
+Want us to build a plug-and-play hosted solution for all DApp developers? Fill out the form below:
 
 - **[SDK Request Form](https://docs.google.com/forms/d/e/1FAIpQLSdh00G9PenekJDMQoc4Nu8bYOpDFPULs0f04yuRpriTqnhrmg/viewform?usp=sf_link)**
 
