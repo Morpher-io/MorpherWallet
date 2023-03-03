@@ -20,6 +20,7 @@
 				<div v-if="!passwordSignin">
 					<LoginApple  @processMethod="processMethod"></LoginApple>
 					<LoginGoogle @processMethod="processMethod"></LoginGoogle>
+					
 
 					<button
 						class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
@@ -108,7 +109,7 @@ import { Global } from '../mixins/mixins';
 import Password from 'vue-password-strength-meter';
 import { getDictionaryValue } from '../utils/dictionary';
 import { Recaptcha } from '../mixins/recaptcha';
-import LoginGoogle from '../components/LoginGoogle.vue';
+import LoginGoogle from '../components/LoginGoogleV2.vue';
 import LoginApple from '../components/LoginApple.vue';
 import { sha256 } from '../utils/cryptoFunctions';
 import { Watch } from 'vue-property-decorator';

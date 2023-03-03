@@ -1,10 +1,4 @@
-FROM public.ecr.aws/lts/ubuntu:latest
-
-RUN apt-get update
-RUN apt-get -y install curl gnupg
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
-
-RUN apt-get -y install nodejs
+FROM public.ecr.aws/docker/library/node:18-alpine
 
 #ARG DEBIAN_FRONTEND=noninteractive
 #ENV TZ=Europe/Vienna
@@ -17,9 +11,15 @@ WORKDIR /app
 # where available (npm@5+)
 COPY package*.json ./
 
-RUN npm install
+RUN apk add --no-cache --virtual .gyp \
+        python3 \
+        make \
+        g++ \
+    && npm install \
+    && apk del .gyp
 # If you are building your code for production
 # RUN npm ci --only=production
+
 
 # Bundle app source
 COPY . .

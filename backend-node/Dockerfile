@@ -1,4 +1,4 @@
-FROM public.ecr.aws/docker/library/node:16-alpine
+FROM public.ecr.aws/docker/library/node:18-alpine
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -8,7 +8,12 @@ WORKDIR /usr/src/app
 # where available (npm@5+)
 COPY package*.json ./
 
-RUN npm install
+RUN apk add --no-cache --virtual .gyp \
+        python3 \
+        make \
+        g++ \
+    && npm install \
+    && apk del .gyp
 # If you are building your code for production
 # RUN npm ci --only=production
 

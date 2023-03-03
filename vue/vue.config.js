@@ -22,6 +22,11 @@ module.exports = {
 				stream: require.resolve('stream-browserify'),
 				buffer: require.resolve('buffer')
 			}
+		},
+		devServer: {
+			// allowedHosts: "all",
+			// webSocketServer: false,
+			// liveReload: false,
 		}
 	}
 };

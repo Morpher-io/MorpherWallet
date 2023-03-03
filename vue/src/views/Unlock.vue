@@ -78,7 +78,7 @@ import { sha256 } from '../utils/cryptoFunctions';
 import jazzicon from '@metamask/jazzicon';
 import { getDictionaryValue } from '../utils/dictionary';
 import { Recaptcha } from '../mixins/recaptcha';
-import LoginGoogle from '../components/LoginGoogle.vue';
+import LoginGoogle from '../components/LoginGoogleV2.vue';
 import LoginApple from '../components/LoginApple.vue';
 
 @Component({components: {
