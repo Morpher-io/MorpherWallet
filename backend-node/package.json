@@ -23,7 +23,7 @@
   "license": "ISC",
   "private": true,
   "dependencies": {
-    "apple-signin-auth": "^1.7.4",
+    "apple-signin-auth": "^1.7.5",
     "await-to-js": "^3.0.0",
     "aws-sdk": "^2.1107.0",
     "axios": "^0.26.1",
@@ -51,7 +51,7 @@
     "qrcode": "^1.5.0",
     "reflect-metadata": "^0.1.13",
     "request-ip": "^3.3.0",
-    "sequelize": "^6.18.0",
+    "sequelize": "^6.29.0",
     "sequelize-typescript": "^2.1.3",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.3",

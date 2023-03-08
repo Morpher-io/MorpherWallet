@@ -1,31 +1,23 @@
 <template>
 	<div class="control is-expanded" v-if="clientId">
-		<GoogleLogin
-			class="button is-grey big-button outlined-button is-thick transition-faster"
-			:params="{ client_id: clientId }"
-			:onSuccess="onLogin"
-			:onFailure="onError"
-		>
-			<span class="icon img">
-				<img src="@/assets/img/google_logo.svg" alt="Google Logo" />
-			</span>
-			<span>Google</span>
-		</GoogleLogin>
+		<LoginGoogle @processMethod="processMethod" ></LoginGoogle>
 	</div>
 </template>
 
 <script>
-import GoogleLogin from 'vue-google-login';
+import LoginGoogle from '../components/LoginGoogleV2.vue';
+
 import ChangePassword from './ChangePassword.vue';
 
 import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 import { Emit } from 'vue-property-decorator';
 import { sha256 } from '../utils/cryptoFunctions';
+import { getDictionaryValue } from '../utils/dictionary';
 
 @Component({
 	components: {
-		GoogleLogin,
+		LoginGoogle,
 		ChangePassword
 	}
 })
@@ -33,6 +25,8 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 	clientId = process.env.VUE_APP_GOOGLE_APP_ID;
 
 	recoveryTypeId = 3;
+
+	logonError = '';
 
 	@Emit('setPassword')
 	setPassword(data) {
@@ -56,12 +50,28 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 		});
 	}
 
+	processMethod(data) {
+		this.logonError = '';
+
+		if (data.success) {
+			this.onLogin(data)
+		} else {
+			if (data.error === 'popup_closed_by_user') {
+				this.logonError = getDictionaryValue('GOOGLE_COOKIES_BLOCKED');
+			} else if (data.error === 'google_script_blocked') {
+				this.logonError = getDictionaryValue('GOOGLE_SCRIPT_BLOCKED');
+			} else {
+				this.logonError = data.method + ': ' + getDictionaryValue(data.error);
+			}
+		}
+	}
+
 	async onLogin(googleUser) {
 		this.showSpinner(this.$t('loader.RECOVERY_LOG_IN'));
 		try {
-			const userID = googleUser.getId();
+			const userID = googleUser.userId;
 
-			const accessToken = (googleUser.Cc || googleUser.Bc).id_token
+			const accessToken = googleUser.token;
 
 			const key = this.clientId + userID
 
@@ -69,7 +79,6 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 			
 			this.fetchWalletFromRecovery({ key, accessToken, password: oldPassword, recoveryTypeId: this.recoveryTypeId })
 				.then(() => {
-					googleUser.disconnect();
 					this.hideSpinner();
 					this.setPassword({
 						success: true,
@@ -81,7 +90,6 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 					console.log('onLogin error', errorMessage)
 
 					this.logSentryError('recoverWalletGoogle', errorMessage, { userID });
-					googleUser.disconnect();
 					this.showSpinnerThenAutohide(this.$t('loader.NO_RECOVERY_FOUND'));
 					this.setPassword({
 						success: false,

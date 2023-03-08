@@ -15,7 +15,7 @@ const FB = new Facebook(options);
 // Verify the sso user/token and return the user email and fetch key
 export const getKeyEmail = async (recoveryTypeId: number, token: any, key: string, email: string, vk_token: any) => {
     try {
-        const testBackend = false; //String(process.env.SEND_EMAILS || 'true') === 'false';
+        const testBackend = String(process.env.SEND_EMAILS || 'true') === 'false';
 
         // fail if not recovery type was found in the DB.
         const recovery_type_db = await Recovery_Type.findOne({ where: { id: recoveryTypeId } })
