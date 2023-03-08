@@ -1,8 +1,8 @@
-FROM public.ecr.aws/docker/library/node:18-alpine
+FROM public.ecr.aws/docker/library/node:18-buster
 
-#ARG DEBIAN_FRONTEND=noninteractive
-#ENV TZ=Europe/Vienna
-#RUN apt-get install -y tzdata
+# ARG DEBIAN_FRONTEND=noninteractive
+# ENV TZ=Europe/Vienna
+# RUN apt-get install -y tzdata
 # Create app directory
 WORKDIR /app
 
@@ -11,12 +11,7 @@ WORKDIR /app
 # where available (npm@5+)
 COPY package*.json ./
 
-RUN apk add --no-cache --virtual .gyp \
-        python3 \
-        make \
-        g++ \
-    && npm install \
-    && apk del .gyp
+RUN apt-get clean && apt-get update && apt-get -y install python3 make g++ && npm install
 # If you are building your code for production
 # RUN npm ci --only=production
 
