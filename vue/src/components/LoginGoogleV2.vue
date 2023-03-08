@@ -8,6 +8,7 @@
 			<span v-if="signIn">{{ $t('auth.SIGN_UP_GOOGLE') }} </span>
 			<span v-else-if="unlock">{{ $t('auth.UNLOCK_GOOGLE') }} </span>
 			<span v-else-if="update">{{ $t('auth.UPDATE_GOOGLE') }} </span>
+			<span v-else-if="recovery">{{ $t('auth.GOOGLE') }} </span>
 			<span v-else>{{ $t('auth.LOG_IN_GOOGLE') }} </span>
 		</button>
 
@@ -17,7 +18,6 @@
 </template>
 
 <script>
-import GoogleLogin from 'vue-google-login';
 import { sha256 } from '../utils/cryptoFunctions';
 
 import Component, { mixins } from 'vue-class-component';
@@ -28,7 +28,6 @@ import jwt_decode from 'jwt-decode';
 
 @Component({
 	components: {
-		GoogleLogin
 	}
 })
 export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
@@ -45,6 +44,9 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 
 	@Prop({ default: false })
 	update;
+
+	@Prop({ default: false })
+	recovery;
 
 	@Emit('processMethod')
 	processMethod(data) {

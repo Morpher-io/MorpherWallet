@@ -1,32 +1,11 @@
 <template>
 	<div class="field">
 		<div class="control is-expanded" v-if="!hasRecoveryMethod">
-			<GoogleLogin
-				class="button is-grey big-button outlined-button is-thick transition-faster"
-				:params="{ clientId }"
-				:onSuccess="onLogin"
-				:onFailure="onError"
-				data-cy="googleButton"
-			>
-				<span class="icon img">
-					<img src="@/assets/img/google_logo.svg" alt="Google Logo" />
-				</span>
-				<span>Google</span>
-			</GoogleLogin>
+			<LoginGoogle @processMethod="processMethod" :recovery="true"></LoginGoogle>
 		</div>
 		<div v-if="hasRecoveryMethod" class="has-text-centered">
 			<div class="control is-expanded" v-if="hasRecoveryMethod">
-				<GoogleLogin
-					class="button is-danger big-button is-thick transition-faster"
-					:params="{ clientId }"
-					:onSuccess="onDelete"
-					:onFailure="onError"
-				>
-					<span class="icon img">
-						<img src="@/assets/img/google_logo_white.svg" alt="Google Logo" />
-					</span>
-					<span>{{ $t('recovery.REVOKE_ACCESS') }}</span>
-				</GoogleLogin>
+				<LoginGoogle @processMethod="revokeAccess"></LoginGoogle>
 			</div>
 			<div class="recovery-active is-text-small">
 				<span class="icon">
@@ -43,27 +22,24 @@
 </template>
 
 <script>
-import GoogleLogin from 'vue-google-login';
-import { sha256 } from './../utils/cryptoFunctions';
+import LoginGoogle from '../components/LoginGoogleV2.vue';
+import { sha256 } from '../utils/cryptoFunctions';
 
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
 import { Emit } from 'vue-property-decorator';
+import { getDictionaryValue } from '../utils/dictionary';
 
 @Component({
 	components: {
-		GoogleLogin
+		LoginGoogle
 	}
 })
 export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 	hasRecoveryMethod = false;
 	clientId = process.env.VUE_APP_GOOGLE_APP_ID;
 	recoveryTypeId = 3;
-
-	@Emit('processMethod')
-	processMethod(data) {
-		return data;
-	}
+	logonError = '';
 
 	async mounted() {
 		this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
@@ -88,20 +64,54 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 		});
 	}
 
+	processMethod(data) {
+
+		this.logonError = '';
+
+		if (data.success) {
+			this.onLogin(data)
+		} else {
+			if (data.error === 'popup_closed_by_user') {
+				this.logonError = getDictionaryValue('GOOGLE_COOKIES_BLOCKED');
+			} else if (data.error === 'google_script_blocked') {
+				this.logonError = getDictionaryValue('GOOGLE_SCRIPT_BLOCKED');
+			} else {
+				this.logonError = data.method + ': ' + getDictionaryValue(data.error);
+			}
+		}
+	}
+
+	revokeAccess(data) {
+
+		this.logonError = '';
+
+		if (data.success) {
+			this.onDelete(data)
+		} else {
+			if (data.error === 'popup_closed_by_user') {
+				this.logonError = getDictionaryValue('GOOGLE_COOKIES_BLOCKED');
+			} else if (data.error === 'google_script_blocked') {
+				this.logonError = getDictionaryValue('GOOGLE_SCRIPT_BLOCKED');
+			} else {
+				this.logonError = data.method + ': ' + getDictionaryValue(data.error);
+			}
+		}
+	}
+
 	async onLogin(googleUser) {
+
 		this.showSpinner(this.$t('loader.SAVING_KEYSTORE_RECOVERY'));
-		const userID = googleUser.getId();
+		const userID = googleUser.userId;
 		const key = await sha256(this.clientId + userID);
-		const token = (googleUser.Cc || googleUser.Bc).id_token
+		const token = googleUser.token;
 		
-		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId, token, email: googleUser.getBasicProfile().getEmail(), currentRecoveryTypeId: this.store.recoveryTypeId })
+		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId, token, email: googleUser.email, currentRecoveryTypeId: this.store.recoveryTypeId })
 			.then(async () => {
 				if (this.$gtag && window.gtag)
 					window.gtag('event', 'add_recovery', {
 						method: 'google'
 					});
 
-				googleUser.disconnect();
 				this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_SUCCESSFULLY'));
 				this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
 				this.processMethod({
@@ -132,13 +142,12 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 
 	async onDelete(googleUser) {
 		this.showSpinner(this.$t('loader.DELETING_KEYSTORE_RECOVERY'));
+		const userID = googleUser.userId;
 		const key = await sha256(this.clientId + userID);
-		const userID = googleUser.getId();
-		const token = (googleUser.Cc || googleUser.Bc).id_token
+		const token = googleUser.token;
 
 		this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId, token })
 			.then(async () => {
-				googleUser.disconnect();
 				this.showSpinnerThenAutohide(this.$t('loader.DELETED_KEYSTORE_SUCCESSFULLY'));
 				this.hasRecoveryMethod = false;
 				this.processMethod({

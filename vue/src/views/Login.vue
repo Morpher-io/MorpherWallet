@@ -113,7 +113,6 @@ import LoginGoogle from '../components/LoginGoogleV2.vue';
 import LoginApple from '../components/LoginApple.vue';
 import { sha256 } from '../utils/cryptoFunctions';
 import { Watch } from 'vue-property-decorator';
-import GoogleLogin from 'vue-google-login';
 
 
 
