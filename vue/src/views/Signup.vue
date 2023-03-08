@@ -120,7 +120,7 @@ import { Global } from '../mixins/mixins';
 import { Recaptcha } from '../mixins/recaptcha';
 import { Watch } from 'vue-property-decorator';
 import { getDictionaryValue } from '../utils/dictionary';
-import LoginGoogle from '../components/LoginGoogle.vue';
+import LoginGoogle from '../components/LoginGoogleV2.vue';
 import LoginApple from '../components/LoginApple.vue';
 import { sha256 } from '../utils/cryptoFunctions';
 
