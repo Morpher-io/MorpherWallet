@@ -15,7 +15,7 @@ const FB = new Facebook(options);
 // Verify the sso user/token and return the user email and fetch key
 export const getKeyEmail = async (recoveryTypeId: number, token: any, key: string, email: string, vk_token: any) => {
     try {
-        const testBackend = String(process.env.SEND_EMAILS || 'true') === 'false';
+        const testBackend = false; //String(process.env.SEND_EMAILS || 'true') === 'false';
 
         // fail if not recovery type was found in the DB.
         const recovery_type_db = await Recovery_Type.findOne({ where: { id: recoveryTypeId } })
@@ -120,6 +120,13 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
                     const tokenInfo = await client.getTokenInfo(
                         token
                     );
+
+                    const audience = tokenInfo["aud"];
+
+                    if(![CLIENT_ID, GOOGLE_ANDROID_APP_ID, GOOGLE_IOS_APP_ID, GOOGLE_WEB_APP_ID].includes(audience)) {
+                        Logger.error({source: "getKeyEmail", data: {tokenInfo, CLIENT_ID}, message: "SSO Audience mismatch"});
+                        return {success: false, error: "SSO Audience mismatch"}
+                    }
                    
                     const userid = tokenInfo['sub'];
 
