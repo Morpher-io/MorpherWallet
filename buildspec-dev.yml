@@ -19,7 +19,7 @@ env:
 phases:
     install:
         runtime-versions:
-            nodejs: 14
+            nodejs: 16
         commands:
             - pip install --upgrade pip
             - pip install --upgrade awscli
