@@ -69,7 +69,7 @@ import { sha256 } from '../utils/cryptoFunctions';
 import Component, { mixins } from 'vue-class-component';
 import { Authenticated, Global } from '../mixins/mixins';
 import { Emit, Prop, Watch } from 'vue-property-decorator';
-import LoginGoogle from '../components/LoginGoogle.vue';
+import LoginGoogle from '../components/LoginGoogleV2.vue';
 import LoginApple from '../components/LoginApple.vue';
 import { getDictionaryValue } from '../utils/dictionary';
 

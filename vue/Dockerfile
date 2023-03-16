@@ -1,14 +1,8 @@
-FROM public.ecr.aws/lts/ubuntu:latest
+FROM public.ecr.aws/docker/library/node:18-buster
 
-RUN apt-get update
-RUN apt-get -y install curl gnupg
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
-
-RUN apt-get -y install nodejs
-
-#ARG DEBIAN_FRONTEND=noninteractive
-#ENV TZ=Europe/Vienna
-#RUN apt-get install -y tzdata
+# ARG DEBIAN_FRONTEND=noninteractive
+# ENV TZ=Europe/Vienna
+# RUN apt-get install -y tzdata
 # Create app directory
 WORKDIR /app
 
@@ -17,9 +11,10 @@ WORKDIR /app
 # where available (npm@5+)
 COPY package*.json ./
 
-RUN npm install
+RUN apt-get clean && apt-get update && apt-get -y install python3 make g++ && npm install
 # If you are building your code for production
 # RUN npm ci --only=production
+
 
 # Bundle app source
 COPY . .

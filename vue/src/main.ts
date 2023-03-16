@@ -8,7 +8,6 @@ import VueGtag from 'vue-gtag';
 import Cookie from 'js-cookie';
 import { checkErrorFilter } from './utils/sentry';
 import Buefy from 'buefy';
-import { LoaderPlugin } from 'vue-google-login';
 
 
 Vue.config.productionTip = false;

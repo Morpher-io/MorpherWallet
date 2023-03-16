@@ -2,3 +2,4 @@
 .idea
 
 .env.aws.backend
+.DS_Store
