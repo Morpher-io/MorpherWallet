@@ -158,7 +158,7 @@ export default class Wallet extends mixins(Global, Authenticated) {
 		if (this.isIframe() && !this.store.loginComplete) {
 			if (this.store.connection && this.store.connection !== null) {
 				const connection: any = await this.store.connection.promise;
-				connection.onLogin(this.store.accounts[0], this.store.email);
+				connection.onLogin(this.store.accounts[0], this.store.email, this.store.recoveryTypeId);
 			}
 		}
 		
