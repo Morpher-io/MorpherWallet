@@ -174,7 +174,7 @@ export default class MorpherWallet {
 			const widgetCommunication = (await this.widget).communication;
 			const result = await widgetCommunication.getAccounts();
       if (this._onLoginCallback) {
-        this._onLoginCallback(result[0], loggedInResult.walletEmail);
+        this._onLoginCallback(result[0], loggedInResult.walletEmail, loggedInResult.recovery_type);
     }      
 			return result
 		} else {
@@ -497,10 +497,10 @@ export default class MorpherWallet {
     return { width, height };
   }
 
-  _onLogin(walletAddress: any, email: any) {
+  _onLogin(walletAddress: any, email: any, recovery_type: any) {
 		this.hideWallet();
     if (this._onLoginCallback) {
-      this._onLoginCallback(walletAddress, email);
+      this._onLoginCallback(walletAddress, email, recovery_type);
     }
 	}
 

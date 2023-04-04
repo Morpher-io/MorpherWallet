@@ -1381,7 +1381,8 @@ if (isIframe()) {
 					return {
 						isLoggedIn: true,
 						walletEmail: store.state.email,
-						accounts: store.state.accounts
+						accounts: store.state.accounts,
+						recovery_type: store.state.recoveryTypeId,
 					};
 				else return { isLoggedIn: false };
 			},
