@@ -25,7 +25,7 @@
   "dependencies": {
     "apple-signin-auth": "^1.7.5",
     "await-to-js": "^3.0.0",
-    "aws-sdk": "^2.1107.0",
+    "aws-sdk": "^2.1354.0",
     "axios": "^0.26.1",
     "bad-words": "^3.0.4",
     "cors": "^2.8.5",
