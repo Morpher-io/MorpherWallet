@@ -6,7 +6,6 @@ import {
 	verifyAuthenticatorCode,
 	verifyEmailCode,
 	saveWalletEmailPassword,
-	send2FAEmail,
 	getPayload,
 	getKeystoreFromEncryptedSeed,
 	changePasswordEncryptedSeed,
@@ -423,17 +422,7 @@ const store: Store<RootState> = new Vuex.Store({
 								commit('userFound', { email: payload.user_email || email, loginEmail: email, hashedPassword, token: params.token, recoveryTypeId: params.recoveryTypeId, fetch_key });
 								commit('updatePayload', payload);
 
-								if (payload.email || payload.needConfirmation) {
-									send2FAEmail(email)
-										.then(() => {
-											commit('updateUnlocking', false);
-											resolve(true);
-										})
-										.catch((e) => {
-											commit('updateUnlocking', false);
-											reject(e);
-										});
-								} else if (!payload.email && !payload.authenticator && !payload.needConfirmation) {
+								if (!payload.email && !payload.authenticator && !payload.needConfirmation) {
 									getEncryptedSeedFromMail(fetch_key || email, email, '', '', recaptchaToken, token, recoveryTypeId)
 										.then((encryptedSeed) => {
 											commit('updateUnlocking', false);

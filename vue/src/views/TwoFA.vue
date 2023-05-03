@@ -95,6 +95,8 @@ import { Global } from '../mixins/mixins';
 import { Watch } from 'vue-property-decorator';
 import { getDictionaryValue } from '../utils/dictionary';
 import { Recaptcha } from '../mixins/recaptcha';
+import { mapState } from 'vuex';
+import { send2FAEmail } from '../utils/backupRestore';
 
 @Component
 export default class TwoFA extends mixins(Global, Recaptcha) {
@@ -103,8 +105,11 @@ export default class TwoFA extends mixins(Global, Recaptcha) {
 	authenticatorCode = '';
 	showRecovery = false;
 	logonError = '';
+	retry = 0;
 
 	async mounted() {
+		this.retry = 0;
+
 		window.setTimeout(() => {
 			const email: any = this.$refs.email_code;
 			const auth: any = this.$refs.auth_code;
@@ -120,10 +125,55 @@ export default class TwoFA extends mixins(Global, Recaptcha) {
 			}
 		}
 
-		this.executeHiddenLogin()
+		if (this.store.hiddenLogin) {
+			this.executeHiddenLogin()
+		} else {
+			if (this.store.twoFaRequired.email || this.store.twoFaRequired.needConfirmation) {
+				this.executeEmailSend()
+			} else {
+				if (!this.store.twoFaRequired.authenticator) {
+					this.$router.push('/login').catch(() => undefined);
+					return;
+				}
+			}
+		}
 		//
 	}
 
+	async executeEmailSend() {
+		const walletEmail = this.store.email;
+		if (!walletEmail) {
+			this.$router.push('/login').catch(() => undefined);
+			return;
+		}
+
+		try {
+			const result = await send2FAEmail(walletEmail)
+
+			if (!result || !result.sent == true) {
+				this.retry = this.retry +1;
+				if (this.retry < 4) {
+					setTimeout(this.executeEmailSend, 2000);
+				} else {
+					this.$router.push('/login').catch(() => undefined);
+					return;
+				}
+			} 
+
+		} catch (err) {
+			this.retry = this.retry +1;
+			if (this.retry < 4) {
+				setTimeout(this.executeEmailSend, 2000);
+			} else {
+				this.$router.push('/login').catch(() => undefined);
+				return;
+			}
+
+		}
+		
+		
+
+	}
 	@Watch('store.hiddenLogin')
 	onPropertyChanged(value: any) {
 		this.executeHiddenLogin()
