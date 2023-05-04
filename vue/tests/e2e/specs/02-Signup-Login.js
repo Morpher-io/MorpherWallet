@@ -8,6 +8,8 @@ describe('Signup and Login', () => {
 	it('Signup and Login', () => {
 		cy.visit('/signup');
 
+		cy.wait(1000);
+
 		cy.get('[data-cy=emailSignUpButton]').click();
 		
 
@@ -19,6 +21,8 @@ describe('Signup and Login', () => {
 
 		cy.get('[data-cy=walletPasswordRepeat]').type(password).should('have.value', password);
 
+		cy.wait(2000);
+
 		cy.get('[data-cy=createNewWallet]').click();
 
 		cy.waitUntil(() => cy.get('[data-cy=verificationTitle]').contains('2-Step Verification'));
@@ -27,6 +31,8 @@ describe('Signup and Login', () => {
 			const code = response.body.email_verification_code;
 
 			cy.get('[data-cy=emailCode]').type(code);
+
+			cy.wait(1000);
 
 			cy.get('[data-cy=unlock]').click();
 
@@ -40,6 +46,8 @@ describe('Signup and Login', () => {
 	it('Login Existing User', () => {
 		cy.visit('/');
 
+		cy.wait(1000);
+
 		cy.get('[data-cy=emailLoginButton]').click();
 		
 
@@ -49,6 +57,8 @@ describe('Signup and Login', () => {
 		cy.get('[data-cy=walletEmail]').type(email).should('have.value', email);
 
 		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
+
+		cy.wait(1000);
 
 		cy.get('[data-cy=submit]').click();
 
@@ -61,6 +71,8 @@ describe('Signup and Login', () => {
 	it('Logout Existing User', () => {
 		cy.visit('/');
 
+		cy.wait(1000);
+
 		cy.get('[data-cy=emailLoginButton]').click();
 
 		cy.waitUntil(() => cy.get('[data-cy=walletEmail]'));
@@ -69,11 +81,15 @@ describe('Signup and Login', () => {
 
 		cy.get('[data-cy=walletPassword]').type(password).should('have.value', password);
 
+		cy.wait(1000);
+
 		cy.get('[data-cy=submit]').click();
 
 		cy.waitUntil(() => cy.get('[data-cy=currentEmail]').contains(email));
 		cy.get('[data-cy=sendButton]').contains('Send');
 		cy.get('[data-cy=settingsButton]').contains('Settings');
+
+		cy.wait(1000);
 
 		cy.get('[data-cy=logoutButton]').click();
 
