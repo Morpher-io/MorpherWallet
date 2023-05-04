@@ -18,7 +18,7 @@
 			class="mb-3"
 		/>
 		<img v-if="store.twoFaRequired.authenticator" src="@/assets/img/authenticator.svg" alt="Phone authenticator image" class="mb-3" />
-		<h2 data-cy="verificationTitle" class="title">{{ $t('settings.2_STEP_VERIFICATION') }}</h2>
+		<h2 v-if="emailSent" data-cy="verificationTitle" class="title">{{ $t('settings.2_STEP_VERIFICATION') }}</h2>
 		<p v-if="(store.twoFaRequired.email || store.twoFaRequired.needConfirmation) && !store.twoFaRequired.authenticator" class="subtitle">
 			{{ $t('2fa.ENTER_EMAIL_CODE') }}
 		</p>
@@ -106,6 +106,7 @@ export default class TwoFA extends mixins(Global, Recaptcha) {
 	showRecovery = false;
 	logonError = '';
 	retry = 0;
+	emailSent = false;
 
 	async mounted() {
 		this.retry = 0;
@@ -134,6 +135,8 @@ export default class TwoFA extends mixins(Global, Recaptcha) {
 				if (!this.store.twoFaRequired.authenticator) {
 					this.$router.push('/login').catch(() => undefined);
 					return;
+				} else {
+					this.emailSent = true;
 				}
 			}
 		}
@@ -158,7 +161,9 @@ export default class TwoFA extends mixins(Global, Recaptcha) {
 					this.$router.push('/login').catch(() => undefined);
 					return;
 				}
-			} 
+			} else {
+				this.emailSent = true;
+			}
 
 		} catch (err) {
 			this.retry = this.retry +1;
