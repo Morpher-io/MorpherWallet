@@ -22,7 +22,7 @@ const limiter = rateLimit({
 
 const limiterUser = rateLimit({
     windowMs: 60 * 1000,
-    max: 10,
+    max: 30,
     onLimitReached: limitReached,
     keyGenerator(req, res) {
         if (req.body.key && req.body.key) {
@@ -35,6 +35,12 @@ const limiterUser = rateLimit({
 
 let ipRequestPayload = {};
 
+let excludeIP = [];
+
+if (process.env.RATE_LIMIT_IP_EXCLUDE) {
+    excludeIP = process.env.RATE_LIMIT_IP_EXCLUDE.split(',');
+}
+
 /**
  * the idea is to allow maximum of 15 _different_ keys per 60 minutes
  * 
@@ -46,9 +52,16 @@ let ipRequestPayload = {};
  */
 const limiterGetPayload =  rateLimit({
     windowMs: 1 * 60 * 60 * 1000,
-    max: 15,
+    max: 30,
     onLimitReached: limitReached,
     keyGenerator(req, res) {
+
+        /** 
+        * Dont rate limit specifically exclused ip addresses
+        */
+        if (excludeIP.includes(req.ip)) {
+            return Date.now();
+        }
 
         /**
          * if the requests are not existing yet, define them
@@ -66,9 +79,9 @@ const limiterGetPayload =  rateLimit({
         if (!ipRequestPayload[req.ip].keyRequests.includes(req.body.key)) {
 
             /**
-             * if there are not yet 15 addresses in there, add it so it won't rate limit
+             * if there are not yet 30 addresses in there, add it so it won't rate limit
              */
-            if (ipRequestPayload[req.ip].keyRequests.length <= 15) {
+            if (ipRequestPayload[req.ip].keyRequests.length <= 30) {
                 ipRequestPayload[req.ip].keyRequests.push(req.body.key);
             }
             return req.ip;
