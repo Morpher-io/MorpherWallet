@@ -361,6 +361,11 @@ export async function getEncryptedSeed(req, res) {
             const user = await User.findOne({ where: { id: recovery.user_id } });
 
             if (user) {
+                if (recovery.recovery_type_id !== 1 && user.payload.needConfirmation) {
+                    user.payload.needConfirmation = false;
+                    user.changed('payload', true);
+                }
+
                 if (!user.ip_country && ip_country) {
                     user.ip_country = ip_country;
                 }
@@ -402,7 +407,9 @@ export async function getEncryptedSeed(req, res) {
                         }
 
                         if(process.env.ENVIRONMENT !== 'development' && ignoreCountry == false){
-                            user.payload.needConfirmation = true;
+                            if (recovery.recovery_type_id !== 1) {
+                                user.payload.needConfirmation = true;
+                            }
                         }
 
                         user.changed('payload', true)
@@ -573,7 +580,9 @@ export async function getPayload(req, res) {
                     }
 
                     if(process.env.ENVIRONMENT !== 'development' && ignoreCountry == false){
-                        user.payload.needConfirmation = true;
+                        if (recovery.recovery_type_id !== 1) {
+                            user.payload.needConfirmation = true;
+                        }
                     }
                     
                     user.changed('payload', true)
@@ -618,6 +627,9 @@ export async function getPayload(req, res) {
             }
             Logger.info({ method: arguments.callee.name, type: 'Get Payload', user_id: user.id, user, headers: req.headers, body: req.body, message: `getPayload: Successful [${user.id}] [${user.email}]` });
             payload['ip_country'] = user.ip_country;
+            if (recovery.recovery_type_id !== 1 && payload['needConfirmation']) {
+                payload['needConfirmation'] = false;
+            }
             return successResponse(res, payload);
         } else {
             return errorResponse(res, 'METHODS_2FA_NOT_FOUND', 404);
