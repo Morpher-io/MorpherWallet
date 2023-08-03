@@ -290,7 +290,9 @@ const store: Store<RootState> = new Vuex.Store({
 			removeSessionStore('fetch_key');
 			removeSessionStore('encryptedSeed');
 			state.loginRetryCount = 0;
-			router.push('/login').catch(() => undefined);
+			if (router.currentRoute.name !== 'Signup') {
+				router.push('/login').catch(() => undefined);
+			}
 			Sentry.configureScope((scope) => {
 				scope.setUser({ id: '', email: '' });
 			});
