@@ -1,3 +1,6 @@
 [submodule "vue"]
 	path = vue
 	url = git@github.com:Morpher-io/morpher-wallet-frontend.git
+[submodule "morpher-wallet-backend"]
+	path = backend-node
+	url = git@github.com:Morpher-io/morpher-wallet-backend.git
