@@ -68,11 +68,11 @@ export default class Footer extends mixins(Global, Authenticated) {
 			name: 'English',
 			flag: '🇬🇧'
 		},
-		// {
-		// 	code: 'de',
-		// 	name: 'Deutsch',
-		//  flag: '🇩🇪'
-		// },
+		{
+			code: 'de',
+			name: 'Deutsch',
+		 	flag: '🇩🇪'
+		},
 		{
 			code: 'ru',
 			name: 'Русский',

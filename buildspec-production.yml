@@ -5,7 +5,7 @@ env:
         NODE_ENV: 'production'
         VUE_APP_BACKEND_ENDPOINT: 'https://wallet-api.morpher.com'
         VUE_APP_I18N_DEFAULT_LOCALE: 'en'
-        VUE_APP_I18N_SUPPORTED_LOCALE: '["en", "ru", "bs"]'
+        VUE_APP_I18N_SUPPORTED_LOCALE: '["en", "ru", "bs", "de"]'
         VUE_APP_GOOGLE_ANALYTICS_API_KEY: 'G-ZKPQS232M6'
         VUE_APP_RECAPTCHA: '6Ld8v7gcAAAAAEZzYPP4vdaz17EymX7zTXjPQspT'
     secrets-manager:

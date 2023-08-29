@@ -328,7 +328,10 @@ export default class Login extends mixins(Global, Recaptcha) {
 		.catch((error) => {
 			
 			this.hideSpinner();
-
+			if (error.toString().toLowerCase().includes('too many r')) {
+				error = 'TOO_MANY_REQUESTS'
+			}
+			
 			if (error.toString() == 'Too Many Requests') {
 				error = 'TOO_MANY_REQUESTS'
 			}

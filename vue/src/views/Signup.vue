@@ -329,6 +329,10 @@ export default class Signup extends mixins(Global, Recaptcha) {
 				}
 			})
 			.catch((error) => {
+				if (error.toString().toLowerCase().includes('too many r')) {
+					error = 'TOO_MANY_REQUESTS'
+				}				
+				
 				this.hideSpinner();
 				if (error.error === 'RECAPTCHA_REQUIRED') {
 					this.executeRecaptcha(this.signupExecute);
