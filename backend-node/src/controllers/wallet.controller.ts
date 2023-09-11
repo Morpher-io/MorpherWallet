@@ -531,7 +531,7 @@ export async function getPayload(req, res) {
         const recovery = await Recovery.findOne({ where: { key } });
         if (recovery == null) {
 
-            Logger.error({ source: 'getPayload', data: req.body, message: `getPayload: User not found. [${req.ip}] [${key.substr(0, 10)}...]`, remoteAddress: req.ip });
+            Logger.warn({ source: 'getPayload', data: req.body, message: `getPayload: User not found. [${req.ip}] [${key.substr(0, 10)}...]`, remoteAddress: req.ip });
             return errorResponse(res, 'USER_NOT_FOUND', 404);
         }
         const user = await User.findOne({ where: { id: recovery.user_id } });
