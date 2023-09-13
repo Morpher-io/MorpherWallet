@@ -9,6 +9,7 @@
 				:appId="clientId"
 				@sdk-init="handleSdkInit"
 				@login="onLogin"
+				version="v18.0"
 				v-model="facebook.model"
 				data-cy="facebookButton"
 				><span class="is-flex is-align-items-center" slot="login">
@@ -27,6 +28,7 @@
 				class="button is-danger big-button is-thick transition-faster facebook-button"
 				:appId="clientId"
 				@sdk-init="handleSdkInit"
+				version="v18.0"
 				@login="deleteRecovery"
 				v-model="facebook.model"
 				><span class="is-flex is-align-items-center" slot="login">
