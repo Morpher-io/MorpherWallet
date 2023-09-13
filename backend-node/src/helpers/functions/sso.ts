@@ -8,7 +8,7 @@ import { Facebook } from 'fb';
 const options = {
     app_id: process.env.FACEBOOK_APP_ID,
     app_secret: process.env.FACEBOOK_APP_SECRET,
-    default_graph_version: 'v7.0'
+    default_graph_version: 'v18.0'
 };
 const FB = new Facebook(options);
 
