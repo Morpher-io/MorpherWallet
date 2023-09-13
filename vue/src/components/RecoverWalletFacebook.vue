@@ -8,7 +8,7 @@
 			class="button is-grey big-button outlined-button is-thick transition-faster facebook-button"
 			:appId="clientId"
 			@sdk-init="handleSdkInit"
-			version="v18.0"
+			:version="'v18.0'"
 			@login="onLogin"
 			v-model="facebook.model"
 		>
