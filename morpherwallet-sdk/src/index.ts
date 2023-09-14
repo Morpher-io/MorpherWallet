@@ -504,9 +504,9 @@ export default class MorpherWallet {
     }
 	}
 
-  _on2FA() {
+  _on2FA(data: any) {
     if (this._on2FACallback) {
-      this._on2FACallback();
+      this._on2FACallback(data);
     }
   }
 

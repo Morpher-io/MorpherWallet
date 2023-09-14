@@ -128,7 +128,7 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 		}
 	}
 
-	processMethod(data: any): void {
+	async processMethod(data: any) {
 		this.logonError = '';
 
 		if (data.success) {
@@ -137,12 +137,21 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 			this.login();
 
 		} else {
+			let error = ''
 			if (data.error === 'popup_closed_by_user') {
+				error = 'GOOGLE_COOKIES_BLOCKED'
 				this.logonError = getDictionaryValue('GOOGLE_COOKIES_BLOCKED');
 			} else if (data.error === 'google_script_blocked') {
+				error = 'GOOGLE_SCRIPT_BLOCKED'
 				this.logonError = getDictionaryValue('GOOGLE_SCRIPT_BLOCKED');
 			} else {
+				error = data.error
 				this.logonError = data.method + ': ' + getDictionaryValue(data.error);
+			}
+
+			if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+				const connection: any = await this.store.connection.promise;
+				connection.onError(error);
 			}
 		}
 	}
@@ -201,7 +210,7 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 					// open root page after logon success
 					this.$router.push('/').catch(() => undefined);
 				})
-				.catch((error) => {
+				.catch(async (error) => {
 					this.hideSpinner();
 					if (error.error === 'RECAPTCHA_REQUIRED') {
 						this.executeRecaptcha(this.login);
@@ -216,6 +225,10 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 
 					// Logon failed
 					this.logonError = getDictionaryValue('DECRYPT_FAILED');
+					if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+						const connection: any = await this.store.connection.promise;
+						connection.onError('DECRYPT_FAILED');
+					}
 				});
 		} else {
 			this.loginEmail();
@@ -261,7 +274,7 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 							// open root page after logon success
 							this.$router.push('/').catch(() => undefined);
 						})
-						.catch((error) => {
+						.catch(async (error) => {
 							this.hideSpinner();
 							if (error.error === 'RECAPTCHA_REQUIRED') {
 								this.executeRecaptcha(this.loginEmail);
@@ -269,10 +282,14 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 							}
 							this.logonError = getDictionaryValue('DECRYPT_FAILED');
 							this.showRecovery = true;
+							if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+								const connection: any = await this.store.connection.promise;
+								connection.onError('DECRYPT_FAILED');
+							}
 						});
 				}
 			})
-			.catch((error) => {
+			.catch(async (error) => {
 				this.hideSpinner();
 
 				if (error.error === 'RECAPTCHA_REQUIRED') {
@@ -292,6 +309,10 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 				if (error !== true && error !== false) {
 					if (error.success === false) {
 						this.logonError = getDictionaryValue(error.error);
+						if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+							const connection: any = await this.store.connection.promise;
+							connection.onError(error.error);
+						}
 					} else {
 						// console.log('Error in login', error);
 					}

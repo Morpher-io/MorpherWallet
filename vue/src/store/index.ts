@@ -1204,7 +1204,8 @@ const store: Store<RootState> = new Vuex.Store({
 		walletEmail: (state) => state.email,
 		recoveryTypeId: (state) => state.recoveryTypeId,
 		
-		hasEncryptedKeystore: (state) => state.encryptedSeed.ciphertext !== undefined
+		hasEncryptedKeystore: (state) => state.encryptedSeed.ciphertext !== undefined,
+		hiddenLogin: (state) => state.hiddenLogin,
 	}
 });
 
@@ -1332,8 +1333,12 @@ if (isIframe()) {
 				return false;
 			},
 			async loginWalletHidden(type: string, user: string, password: string)  {
-				if (store.getters.isLoggedIn) {
-					store.commit('logout')	
+				localStorage.removeItem('lastEmail');
+				store.commit('logout')	
+			    if (router.currentRoute.path !== '/login') router.push('/login').catch(() => undefined);
+
+				if (store.getters.hiddenLogin) {
+					store.commit('hiddenLogin', {})
 				}
 				store.commit('hiddenLogin', {type, user, password})
 			},
@@ -1342,16 +1347,32 @@ if (isIframe()) {
 					store.commit('logout')	
 				}
 				router.push('/signup').catch(() => undefined);
+				if (store.getters.hiddenLogin) {
+					store.commit('hiddenLogin', {})
+				}
 				store.commit('hiddenLogin', {type, walletEmail, walletPassword, walletPasswordRepeat, loginUser})
 			},
 
 			async walletRecoveryHidden(type: string)  {
+				if (store.getters.hiddenLogin) {
+					store.commit('hiddenLogin', {})
+				}
 				store.commit('hiddenLogin', {type: 'recovery', recovery: type})
 
 			},
 			async loginWallet2fa(twoFACode: string) {
 				router.push('/2fa').catch(() => undefined);
+				if (store.getters.hiddenLogin) {
+					store.commit('hiddenLogin', {})
+				}
 				store.commit('hiddenLogin', {type: '2fa', twoFACode: twoFACode})
+			},
+			async loginWallet2faSend(twoFACode: string) {
+				router.push('/2fa').catch(() => undefined);
+				if (store.getters.hiddenLogin) {
+					store.commit('hiddenLogin', {})
+				}
+				store.commit('hiddenLogin', {type: '2fasend', twoFACode: twoFACode})
 			},
 			async isLoggedIn() {
 				let counter = 0;

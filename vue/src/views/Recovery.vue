@@ -140,6 +140,10 @@ export default class Recovery extends mixins(Authenticated, Global, Recaptcha) {
 
 		if (emailMessage) {
 			this.logonError = emailMessage;
+			if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+				const connection: any = await this.store.connection.promise;
+				connection.onError(emailMessage);
+			}	
 			return;
 		}
 
@@ -169,11 +173,19 @@ export default class Recovery extends mixins(Authenticated, Global, Recaptcha) {
 				}
 			}
 
+			let err = ''
 			if (error.error) {
 				this.logonError = getDictionaryValue(error.error);
+				err = error.error
 			} else {
 				this.logonError = getDictionaryValue(error.toString());
+				err = error.toString()
 			}
+
+			if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+				const connection: any = await this.store.connection.promise;
+				connection.onError(err);
+			}	
 		}
 	}
 
@@ -185,20 +197,29 @@ export default class Recovery extends mixins(Authenticated, Global, Recaptcha) {
 		}
 	}
 
-	setPassword(data: any) {
+	async setPassword(data: any) {
 		this.logonError = '';
 
 		if (data.success) {
 			this.oldPassword = data.oldPassword;
 			this.currentPage = 1;
 		} else {
+			let error = '';
 			if (data.error === 'popup_closed_by_user') {
+				error = 'GOOGLE_COOKIES_BLOCKED'
 				this.logonError = getDictionaryValue('GOOGLE_COOKIES_BLOCKED');
 			} else if (data.error === 'google_script_blocked') {
+				error = 'GOOGLE_SCRIPT_BLOCKED'
 				this.logonError = getDictionaryValue('GOOGLE_SCRIPT_BLOCKED');
 			} else {
+				error = 'RECOVERY_UNLOCK_ERROR'
 				this.logonError = getDictionaryValue('RECOVERY_UNLOCK_ERROR');
 			}
+
+			if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+				const connection: any = await this.store.connection.promise;
+				connection.onError(error);
+			}	
 			this.currentPage = 0;
 		}
 	}
