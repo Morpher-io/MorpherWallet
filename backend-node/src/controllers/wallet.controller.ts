@@ -163,7 +163,6 @@ export async function addRecoveryMethod(req: Request, res: Response) {
         // use the SSO email and check the user key for apple and google
         email = emailKey.email;
 
-        console.log(keyForSaving, emailKey.key)
         if (keyForSaving !== emailKey.key) {
             Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
             return errorResponse(res, 'SSO_KEY_MISMATCH', 500);     

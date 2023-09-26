@@ -1395,6 +1395,13 @@ if (isIframe()) {
 					// wait for the wallet to finish unlocking
 					await waitForUnlock();
 				}
+				let recoveryMethods = store.state.recoveryMethods;
+				if (!recoveryMethods || recoveryMethods.length == 0) {
+					if (localStorage.getItem('recoveryMethods')) {
+						recoveryMethods = JSON.parse(localStorage.getItem('recoveryMethods') || '');
+					}
+				}
+				
 				//return 'ok'
 				if (store.state.keystore)
 					return {
@@ -1402,6 +1409,8 @@ if (isIframe()) {
 						walletEmail: store.state.email,
 						accounts: store.state.accounts,
 						recovery_type: store.state.recoveryTypeId,
+						recoveryMethods: recoveryMethods,
+						twoFaRequired: store.state.twoFaRequired
 					};
 				else return { isLoggedIn: false };
 			},

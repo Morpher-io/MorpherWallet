@@ -198,6 +198,12 @@ export default class MorpherWallet {
     return widgetCommunication.loginWallet2fa(twoFACode);
   }
 
+  async loginWallet2faSend() {
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.loginWallet2faSend();
+
+  }
+
   async walletRecoveryHidden(type: string, data: any) {
     this.hideWallet()
     const widgetCommunication = (await this.widget).communication;
@@ -236,6 +242,12 @@ export default class MorpherWallet {
     const widgetCommunication = (await this.widget).communication;
     return widgetCommunication.showPage('email');
   } 
+
+  async showWalletPassword(password: string) {
+    this.showWallet();
+    const widgetCommunication = (await this.widget).communication;
+    return widgetCommunication.showPage('password', password);
+}
 
 	async showWalletRegister() {
 		this.showWallet()
@@ -278,7 +290,9 @@ export default class MorpherWallet {
 		const widget = await this.widget;
 
 		const widgetCommunication = (await this.widget).communication;
-    return widgetCommunication.isLoggedIn();
+    const loggedIn = widgetCommunication.isLoggedIn();
+    return loggedIn
+
   }
 
   async setLanguage(lang?: string) {
@@ -303,18 +317,25 @@ export default class MorpherWallet {
 
   async iframeLoaded() {
     return new Promise((resolve) => {
-      const frame: any = document.getElementById('morpher_wallet_sdk_iframe')
-      if (frame && frame.contentWindow && !frame.contentDocument) {
-          return resolve(true);
-      }
-      const int = setInterval(() => {
+      const frame:any = document.getElementById('morpher_wallet_sdk_iframe');
+      try {
           if (frame && frame.contentWindow && !frame.contentDocument) {
-              clearInterval(int);
               return resolve(true);
           }
-
-      }, 100)
-  });
+      } catch (err) {
+          
+      }
+      const int = setInterval(() => {
+          try {
+              if (frame && frame.contentWindow && !frame.contentDocument) {
+                  clearInterval(int);
+                  return resolve(true);
+              }
+          } catch (err) {
+              
+          }
+      }, 100);
+    });
   }
 
   async _initWidget() {
