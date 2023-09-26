@@ -56,6 +56,7 @@ export default class MorpherWallet {
 	provider: Web3ProviderEngine;
   _on2FAUpdateCallback: any;
   _onRecoveryUpdateCallback: any;
+  _onRecoveryCallback: any;
 	_onLoginCallback: any;
   _on2FACallback: any;
   _onLoginErrorCallback: any;
@@ -138,7 +139,9 @@ export default class MorpherWallet {
   onRecoveryUpdate(callback: any) {
     this._onRecoveryUpdateCallback = callback;
   }
-
+  onRecovery(callback: any) {
+    this._onRecoveryCallback = callback;
+  }
   onLoginError(callback: any) {
     this._onLoginErrorCallback = callback;
   }
@@ -195,10 +198,10 @@ export default class MorpherWallet {
     return widgetCommunication.loginWallet2fa(twoFACode);
   }
 
-  async walletRecoveryHidden(type: string) {
+  async walletRecoveryHidden(type: string, data: any) {
     this.hideWallet()
     const widgetCommunication = (await this.widget).communication;
-    return widgetCommunication.walletRecoveryHidden(type);
+    return widgetCommunication.walletRecoveryHidden(type, data);
 
   }
 
@@ -349,6 +352,7 @@ export default class MorpherWallet {
         on2FA: this._on2FA.bind(this),
         on2FAUpdate: this._on2FAUpdate.bind(this),
         onRecoveryUpdate: this._onRecoveryUpdate.bind(this),
+        onRecovery: this._onRecovery.bind(this),
         onLoginError: this._onLoginError.bind(this),
 				onClose: this._onClose.bind(this),
         onLogout: this._onLogout.bind(this),
@@ -520,6 +524,12 @@ export default class MorpherWallet {
   _onRecoveryUpdate(method: any, enabled: any) {
     if (this._onRecoveryUpdateCallback) {
       this._onRecoveryUpdateCallback(method, enabled);
+    }    
+  }
+
+  _onRecovery(type: any, data: any) {
+    if (this._onRecoveryCallback) {
+      this._onRecoveryCallback(type, data);
     }    
   }
 

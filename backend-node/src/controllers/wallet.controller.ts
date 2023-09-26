@@ -162,6 +162,8 @@ export async function addRecoveryMethod(req: Request, res: Response) {
 
         // use the SSO email and check the user key for apple and google
         email = emailKey.email;
+
+        console.log(keyForSaving, emailKey.key)
         if (keyForSaving !== emailKey.key) {
             Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
             return errorResponse(res, 'SSO_KEY_MISMATCH', 500);     
@@ -1265,14 +1267,19 @@ export const fetchVKAuthToken = async (req, res) => {
 // generate a vk token for recovery
 export const recoveryVKAuthToken = async (req, res) => {
     try {
-
+        console.log()
         const token = req.body.code
+        const type = req.body.type
 
         const axios = require('axios')
 
-        const getAuthToken = `https://oauth.vk.com/access_token?client_id=${process.env.VK_APP_ID}&client_secret=${process.env.VK_SECURE_KEY}&redirect_uri=${process.env.VK_URL}&code=${token}`
+        let getAuthToken = `https://oauth.vk.com/access_token?client_id=${process.env.VK_APP_ID}&client_secret=${process.env.VK_SECURE_KEY}&redirect_uri=${process.env.VK_URL}&code=${token}`
 
-        const response = await axios.get(getAuthToken);
+        if (type == 'app'){
+            getAuthToken = `https://oauth.vk.com/access_token?client_id=${process.env.VK_APP_ID}&client_secret=${process.env.VK_SECURE_KEY}&redirect_uri=${process.env.VK_URL_APP}&code=${token}`
+        }
+
+        let response = await axios.get(getAuthToken);
 
         const auth_token = response.data;
 
@@ -1299,7 +1306,7 @@ export const recoveryVKAuthToken = async (req, res) => {
         return successResponse(res, auth_token);
 
     } catch (error) {
-        Logger.error({ source: 'fetchVKAuthToken', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'recoveryVKAuthToken', data: req.body, message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 }

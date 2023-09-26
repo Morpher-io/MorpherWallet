@@ -111,6 +111,7 @@ import { Authenticated, Global } from '../mixins/mixins';
 import { Recaptcha } from '../mixins/recaptcha';
 import { getPayload, validateInput } from '../utils/backupRestore';
 import { getDictionaryValue } from '../utils/dictionary';
+import { Watch } from 'vue-property-decorator';
 
 @Component({
 	components: {
@@ -128,6 +129,32 @@ export default class Recovery extends mixins(Authenticated, Global, Recaptcha) {
 	oldPassword = '';
 	showMore = true;
 
+	@Watch('store.hiddenLogin')
+	onPropertyChanged(value: any) {
+		this.executeHiddenRecovery()
+	}
+
+	executeHiddenRecovery() {
+		if (this.store.hiddenLogin && this.store.hiddenLogin.type == 'recovery') {
+			let recoveryData = this.store.hiddenLogin.recovery
+			if (recoveryData.type == 'email' && recoveryData.data && recoveryData.data.email) {
+				let email = recoveryData.data.email
+				this.newEmail = email;
+				this.checkEmail()
+			}
+			
+		}
+
+
+	}
+
+	/**
+	 * Cmponent mounted lifestyle hook
+	 */
+	async mounted() {
+		this.executeHiddenRecovery();
+	}
+
 	async checkEmail() {
 		this.logonError = '';
 
@@ -138,12 +165,15 @@ export default class Recovery extends mixins(Authenticated, Global, Recaptcha) {
 
 		const emailMessage = await validateInput('email', this.newEmail);
 
+		
+
 		if (emailMessage) {
 			this.logonError = emailMessage;
 			if (this.isIframe() && this.store.connection && this.store.connection !== null) {
 				const connection: any = await this.store.connection.promise;
 				connection.onError(emailMessage);
 			}	
+			this.loginErrorReturn(this.newEmail, emailMessage)
 			return;
 		}
 
@@ -152,32 +182,46 @@ export default class Recovery extends mixins(Authenticated, Global, Recaptcha) {
 
 			if (result.success) {
 				this.setUsersEmail(this.newEmail);
+
+				if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+					const connection: any = await this.store.connection.promise;
+					connection.onRecovery('emailValidated', this.newEmail);
+				}
+				
 			} else {
 				if (result && result.toString() === 'TypeError: Failed to fetch') {
 					this.showNetworkError(true);
 				}
 
+				this.loginErrorReturn(this.newEmail, result.toString())
 				this.logonError = getDictionaryValue(result.toString());
 			}
 		} catch (error: any) {
+
+			
 			if (error.error === 'RECAPTCHA_REQUIRED') {
+				this.loginErrorReturn(this.newEmail, 'RECAPTCHA_REQUIRED')
 				this.executeRecaptcha(this.checkEmail);
 				return;
 			}
 
 			if (error && error.toString() === 'TypeError: Failed to fetch') {
+				this.loginErrorReturn(this.newEmail, error.toString())
 				this.showNetworkError(true);
 			} else {
 				if (!error.error) {
+					this.loginErrorReturn(this.newEmail, error.toString())
 					this.logSentryError('checkEmail', error.toString(), {});
 				}
 			}
 
 			let err = ''
 			if (error.error) {
+				this.loginErrorReturn(this.newEmail, error.error)
 				this.logonError = getDictionaryValue(error.error);
 				err = error.error
 			} else {
+				this.loginErrorReturn(this.newEmail, error.toString())
 				this.logonError = getDictionaryValue(error.toString());
 				err = error.toString()
 			}
@@ -201,6 +245,11 @@ export default class Recovery extends mixins(Authenticated, Global, Recaptcha) {
 		this.logonError = '';
 
 		if (data.success) {
+			if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+				const connection: any = await this.store.connection.promise;
+				connection.onRecovery('setPassword', this.newEmail);
+			}
+
 			this.oldPassword = data.oldPassword;
 			this.currentPage = 1;
 		} else {
@@ -221,6 +270,16 @@ export default class Recovery extends mixins(Authenticated, Global, Recaptcha) {
 				connection.onError(error);
 			}	
 			this.currentPage = 0;
+		}
+	}
+
+	async loginErrorReturn(email: string, err: any) {
+		if (this.isIframe()) {
+			if (this.store.connection && this.store.connection !== null) {
+				const connection:any = await this.store.connection.promise;
+
+				connection.onLoginError(email, err);
+			}
 		}
 	}
 }

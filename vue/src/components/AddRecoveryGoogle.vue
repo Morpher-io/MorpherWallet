@@ -99,13 +99,16 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 	}
 
 	async onLogin(googleUser) {
+		try {
 
-		this.showSpinner(this.$t('loader.SAVING_KEYSTORE_RECOVERY'));
-		const userID = googleUser.userId;
-		const key = await sha256(this.clientId + userID);
-		const token = googleUser.token;
-		
-		this.addRecoveryMethod({ key, password: userID, recoveryTypeId: this.recoveryTypeId, token, email: googleUser.email, currentRecoveryTypeId: this.store.recoveryTypeId })
+			const userID = googleUser.userID;
+			const key = googleUser.key;
+			const keyEnc = await sha256(key);
+			const token = googleUser.token;
+
+			console.log('key', key, keyEnc )
+
+			this.addRecoveryMethod({ key: keyEnc, password: userID, recoveryTypeId: this.recoveryTypeId, token, email: googleUser.email, currentRecoveryTypeId: this.store.recoveryTypeId })
 			.then(async () => {
 				if (this.$gtag && window.gtag)
 					window.gtag('event', 'add_recovery', {
@@ -114,12 +117,7 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 
 				this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_SUCCESSFULLY'));
 				this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId);
-				this.processMethod({
-					success: true,
-					method: 'Google',
-					enabled: true,
-					erorr: ''
-				});
+
 			})
 			.catch((error) => {
 				let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
@@ -138,24 +136,31 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 					erorr: ''
 				});
 			});
+
+
+		} catch (error) {
+			//Not sure what to do here - or if we want to do anything at all?!
+			this.onError(error);
+		}
 	}
 
 	async onDelete(googleUser) {
 		this.showSpinner(this.$t('loader.DELETING_KEYSTORE_RECOVERY'));
-		const userID = googleUser.userId;
-		const key = await sha256(this.clientId + userID);
+		const userID = googleUser.userID;
+		const key = googleUser.key;
+		const keyEnc = await sha256(key);
 		const token = googleUser.token;
 
-		this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId, token })
+		this.resetRecoveryMethod({ key: keyEnc, recoveryTypeId: this.recoveryTypeId, token })
 			.then(async () => {
 				this.showSpinnerThenAutohide(this.$t('loader.DELETED_KEYSTORE_SUCCESSFULLY'));
 				this.hasRecoveryMethod = false;
-				this.processMethod({
-					success: true,
-					method: 'Google',
-					enabled: false,
-					erorr: ''
-				});
+				// this.processMethod({
+				// 	success: true,
+				// 	method: 'Google',
+				// 	enabled: false,
+				// 	erorr: ''
+				// });
 			})
 			.catch((error) => {
 				let errorMessage = error.error || error.err || error.message || JSON.stringify(error)

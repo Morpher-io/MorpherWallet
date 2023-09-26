@@ -118,6 +118,7 @@ import { Authenticated, Global } from '../mixins/mixins';
 import { Prop, Watch } from 'vue-property-decorator';
 import { getDictionaryValue } from '../utils/dictionary';
 
+
 @Component({
 	components: {
 		Password
@@ -138,6 +139,11 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 		match: ''
 	};
 
+	@Watch('store.hiddenLogin')
+	onPropertyChanged(value: any) {
+		this.executeHiddenRecovery()
+	}
+
 	@Prop()
 	presetOldPassword!: string;
 
@@ -156,9 +162,26 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 			this.oldPassword = this.presetOldPassword;
 			this.hideOldPassword = true;
 		}
+		this.executeHiddenRecovery()
+	}
+
+	executeHiddenRecovery() {
+		if (this.store.hiddenLogin && this.store.hiddenLogin.type == 'recovery') {
+			let recoveryData = this.store.hiddenLogin.recovery
+			if (recoveryData.type == 'password' && recoveryData.data && recoveryData.data.password && recoveryData.data.passwordConfirm) {
+
+				this.walletPassword = recoveryData.data.password;
+				this.walletPasswordRepeat = recoveryData.data.passwordConfirm;
+				this.changePasswordExecute()
+			}
+			
+		}
+
+
 	}
 
 	async changePasswordExecute() {
+
 		this.logonError = '';
 
 		this.passwordChecks = this.checkPassword(this.walletPassword, true, this.passwordChecks, this.walletPasswordRepeat);
@@ -177,14 +200,19 @@ export default class ChangePassword extends mixins(Global, Authenticated) {
 		const newPasswordHashed = await sha256(this.walletPassword);
 
 		this.changePassword({ oldPassword: oldPasswordHashed, newPassword: newPasswordHashed })
-			.then(() => {
+			.then(async () => {
 				this.oldPassword = '';
 				this.walletPassword = '';
 				this.walletPasswordRepeat = '';
 				this.currentPage = 1;
 
 				if (this.presetOldPassword !== undefined) {
-					this.$router.push('/login').catch(() => undefined);
+					this.logoutWallet();
+				}
+
+				if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+					const connection: any = await this.store.connection.promise;
+					connection.onRecovery('passwordUpdated');
 				}
 			})
 			.catch((error) => {

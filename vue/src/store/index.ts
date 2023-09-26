@@ -559,7 +559,8 @@ const store: Store<RootState> = new Vuex.Store({
 						'Content-Type': 'application/json'
 					},
 					body: JSON.stringify({
-						code: params.code
+						code: params.code,
+						type: params.type
 					}),
 					mode: 'cors',
 					cache: 'default'
@@ -1353,11 +1354,17 @@ if (isIframe()) {
 				store.commit('hiddenLogin', {type, walletEmail, walletPassword, walletPasswordRepeat, loginUser})
 			},
 
-			async walletRecoveryHidden(type: string)  {
+			async walletRecoveryHidden(type: string, data: any)  {
+				if (type !== 'password') {
+					if (store.getters.isLoggedIn) {
+						store.commit('logout')	
+					}
+					router.push('/recovery').catch(() => undefined);
+				}
 				if (store.getters.hiddenLogin) {
 					store.commit('hiddenLogin', {})
 				}
-				store.commit('hiddenLogin', {type: 'recovery', recovery: type})
+				store.commit('hiddenLogin', {type: 'recovery', recovery: {type, data}})
 
 			},
 			async loginWallet2fa(twoFACode: string) {

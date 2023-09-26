@@ -14,6 +14,7 @@ import { Global } from '../mixins/mixins';
 import { Emit } from 'vue-property-decorator';
 import { sha256 } from '../utils/cryptoFunctions';
 import { getDictionaryValue } from '../utils/dictionary';
+import { Watch } from 'vue-property-decorator';
 
 @Component({
 	components: {
@@ -33,6 +34,11 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 		return data;
 	}
 
+	@Watch('store.hiddenLogin')
+	onPropertyChanged(value) {
+		this.executeHiddenRecovery()
+	}
+
 	onError(error) {
 		let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
 		console.log('onError', errorMessage)
@@ -48,6 +54,27 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 			success: false,
 			error: errorText
 		});
+	}
+
+	executeHiddenRecovery() {
+
+
+		if (this.store.hiddenLogin && this.store.hiddenLogin.type == 'recovery') {
+			let recoveryData = this.store.hiddenLogin.recovery
+			if (recoveryData.type == 'google') {
+				this.processMethod(recoveryData.data)
+			}
+		
+
+		}
+
+	}
+
+		/**
+	 * Cmponent mounted lifestyle hook
+	 */
+	 async mounted() {
+		this.executeHiddenRecovery();
 	}
 
 	processMethod(data) {
@@ -69,11 +96,11 @@ export default class RecoverWalletGoogle extends mixins(Global) {
 	async onLogin(googleUser) {
 		this.showSpinner(this.$t('loader.RECOVERY_LOG_IN'));
 		try {
-			const userID = googleUser.userId;
+			const userID = googleUser.userID;
 
 			const accessToken = googleUser.token;
 
-			const key = this.clientId + userID
+			const key = googleUser.key
 
 			const oldPassword = await sha256(userID)
 			

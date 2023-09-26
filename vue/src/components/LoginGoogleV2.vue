@@ -126,10 +126,13 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 		try {
 			request.open('GET', 'https://www.googleapis.com/oauth2/v1/userinfo');
 			request.setRequestHeader('Authorization', 'Bearer ' + googleUser.access_token);
-			request.addEventListener('load', () => {
+			request.addEventListener('load', async () => {
 				let googlePayload = JSON.parse(request.response);
 				const userID = googlePayload.id;
 				const key = this.clientId + userID;
+				const keyEnc = await sha256(key);
+				
+
 				const token = googleUser.access_token;
 				this.processMethod({
 					success: true,

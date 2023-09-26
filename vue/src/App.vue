@@ -75,7 +75,7 @@ export default class App extends Vue {
 				connection.onClose();
 
 				if (this.$store.getters.isLoggedIn) {
-					if (this.$router.currentRoute.path !== '/') this.$router.push('/').catch(() => undefined);
+					if (this.$router.currentRoute.path !== '/' && this.$router.currentRoute.path !== '/recovery') this.$router.push('/').catch(() => undefined);
 				} else {
 					if (this.$router.currentRoute.path !== '/login') this.$router.push('/login').catch(() => undefined);
 				}
