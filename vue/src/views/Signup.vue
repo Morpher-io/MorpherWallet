@@ -182,19 +182,18 @@ export default class Signup extends mixins(Global, Recaptcha) {
 
 	executeHiddenLogin() {
 		try {
-			
 			 if (this.store.hiddenLogin && this.store.hiddenLogin.walletEmail && this.store.hiddenLogin.walletPassword && this.store.hiddenLogin.type == 'email') {
 				this.passwordSignin = true;
 				this.walletEmail = this.store.hiddenLogin.walletEmail;
 				this.walletPassword = this.store.hiddenLogin.walletPassword;
 				this.walletPasswordRepeat = this.store.hiddenLogin.walletPasswordRepeat;
 				this.signupExecute(false);
-			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type == 'google') {
-				this.loginUser = this.store.hiddenLogin.loginUser;
+			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type.type == 'google') {
+				this.loginUser = this.store.hiddenLogin.type;
 				this.signupExecute(false);
 
-			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type == 'apple') {
-				this.loginUser = this.store.hiddenLogin.loginUser;
+			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type.type == 'apple') {
+				this.loginUser = this.store.hiddenLogin.type;
 				this.signupExecute(false);
 
 			}
