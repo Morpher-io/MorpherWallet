@@ -1199,7 +1199,7 @@ export async function updateUserPayload(req, res) {
             return res.status(403).json({ error: "INVALID_REQUEST" });
         }
 
-        const recovery_type_id = Number(req.body.recovery_type || 1);
+        const recovery_type_id = Number(req.body.recovery_type || req.header('recoveryTypeId') || 1);
         
         // Create a new recovery method.
         const recovery = await Recovery.findOne({ where: { key, recovery_type_id: recovery_type_id } });
@@ -1215,9 +1215,12 @@ export async function updateUserPayload(req, res) {
             }
         }
     } catch (error) {
+        console.log('    updateUserPayload', error)
         Logger.error({ source: 'updateUserPayload', data: req.body, message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
+
+    console.log('    updateUserPayload error 2')
     //error out in any other case
     return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
 }

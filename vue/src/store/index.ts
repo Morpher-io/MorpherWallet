@@ -199,6 +199,9 @@ const store: Store<RootState> = new Vuex.Store({
 				state.loading = false;
 			}, 2000);
 		},
+		appLangUpdated(state: RootState, app_lang: string) {
+			state.app_lang = app_lang;
+		},
 		seedFound(state: RootState, seedFoundData: TypeSeedFoundData) {
 			state.status = 'success';
 			state.encryptedSeed = seedFoundData.encryptedSeed;
@@ -854,23 +857,27 @@ const store: Store<RootState> = new Vuex.Store({
 				}
 			});
 		},
-		updateUserPayload({ dispatch, state }, params: TypeUpdateUserPayload) {
+		updateUserPayload({ commit, dispatch, state }, params: TypeUpdateUserPayload) {
 			return new Promise((resolve, reject) => {
-				setTimeout(() => {
-					// only update the app language if it has changed
-					if (params.column !== 'app_lang') {
-						return resolve(true);
-					}
+				// only update the app language if it has changed
+				if (params.column !== 'app_lang') {
+					return resolve(true);
+				}
 
-					if (!state.app_lang || state.app_lang == '') {
-						return resolve(true);
-					}
-					if (!state.email || !state.accounts || state.accounts.length < 1 || !state.accounts[0] || !params.value) {
-						return resolve(true);
-					}
-					if (params.value.toLowerCase() == state.app_lang.toLowerCase()) {
-						return resolve(true);
-					}
+				if (!state.app_lang || state.app_lang == '') {
+					return resolve(true);
+				}
+				if (!state.email || !state.accounts || state.accounts.length < 1 || !state.accounts[0] || !params.value) {
+					return resolve(true);
+				}
+				if (params.value.toLowerCase() == state.app_lang.toLowerCase()) {
+					return resolve(true);
+				}
+
+				commit('appLangUpdated', params.value);
+
+				setTimeout(() => {
+
 					dispatch('sendSignedRequest', {
 						body: { column: params.column, value: params.value },
 						method: 'POST',
