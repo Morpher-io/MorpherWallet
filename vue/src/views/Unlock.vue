@@ -195,19 +195,19 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 		this.logonError = '';
 		let password = await sha256(this.walletPassword);
 		let fetch_key;
+		
 
 		if ((this.recoveryTypeId === 3 || this.recoveryTypeId === 6) && this.loginUser && this.loginUser.userID  && this.loginUser.key) {
 			fetch_key = await sha256(this.loginUser.key);
-		 	window.sessionStorage.setItem('fetch_key', fetch_key);
 			 
-			password = this.loginUser.userID;
+			password = await sha256(this.loginUser.userID);
 		}
 
 		this.showSpinnerThenAutohide(this.$t('loader.RECOVERY_LOG_IN').toString());
 		const recaptchaToken = this.recaptchaToken;
 
 		if (this.$store.state.encryptedSeed && this.$store.state.encryptedSeed.ciphertext) {
-
+			console.log('unlockWithPassword', fetch_key)
 			// Call the fetchUser store action to process the wallet logon
 			this.unlockWithPassword({ password, recaptchaToken, fetch_key })
 				.then(() => {
@@ -253,8 +253,8 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 		let fetch_key = email;
 		let token = '';
 
-			
-		if ((this.recoveryTypeId === 3 || this.recoveryTypeId === 6) && this.loginUser && this.loginUser.userID  && this.loginUser.key) {
+		if (this.loginUser && (this.loginUser.recoveryTypeId === 3 || this.loginUser.recoveryTypeId === 6)) {
+			console.log('loginEmail', this.loginUser)
 			fetch_key  = this.loginUser.key
 			email = this.loginUser.email || this.loginUser.key
 			password = this.loginUser.userID;
