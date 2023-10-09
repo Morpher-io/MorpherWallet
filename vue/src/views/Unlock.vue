@@ -194,9 +194,12 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 		}
 		this.logonError = '';
 		let password = await sha256(this.walletPassword);
+		let fetch_key;
 
 		if ((this.recoveryTypeId === 3 || this.recoveryTypeId === 6) && this.loginUser && this.loginUser.userID  && this.loginUser.key) {
-		 	window.sessionStorage.setItem('fetch_key', await sha256(this.loginUser.key));
+			fetch_key = await sha256(this.loginUser.key);
+		 	window.sessionStorage.setItem('fetch_key', fetch_key);
+			 
 			password = this.loginUser.userID;
 		}
 
@@ -206,7 +209,7 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 		if (this.$store.state.encryptedSeed && this.$store.state.encryptedSeed.ciphertext) {
 
 			// Call the fetchUser store action to process the wallet logon
-			this.unlockWithPassword({ password, recaptchaToken })
+			this.unlockWithPassword({ password, recaptchaToken, fetch_key })
 				.then(() => {
 					// open root page after logon success
 					this.$router.push('/').catch(() => undefined);
