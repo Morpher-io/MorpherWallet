@@ -91,6 +91,10 @@
                 {
                     "name": "VK_URL",
                     "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:WALLET_VK_URL::"
+                },  
+                {
+                    "name": "VK_URL_APP",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:612970435624:secret:environment_production-EdRBtv:WALLET_VK_URL_APP::"
                 },                                
                 {
                     "name": "EMAIL_NOTIFICATIONS_NAME",

@@ -30,6 +30,7 @@ import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 import { Emit } from 'vue-property-decorator';
 import { sha256 } from '../utils/cryptoFunctions';
+import { Watch } from 'vue-property-decorator';
 
 @Component({
 	components: {
@@ -52,9 +53,35 @@ export default class RecoverWalletFacebook extends mixins(Global) {
 		return data;
 	}
 
+	@Watch('store.hiddenLogin')
+	onPropertyChanged(value) {
+		this.executeHiddenRecovery()
+	}
+
 	handleSdkInit({ FB, scope }) {
 		this.facebook.scope = scope;
 		this.facebook.FB = FB;
+	}
+
+	executeHiddenRecovery() {
+
+
+		if (this.store.hiddenLogin && this.store.hiddenLogin.type == 'recovery') {
+			let recoveryData = this.store.hiddenLogin.recovery
+			if (recoveryData.type == 'facebook') {
+				this.onLogin(recoveryData.data)
+			}
+
+
+		}
+
+	}
+
+	/**
+	* Cmponent mounted lifestyle hook
+	*/
+	async mounted() {
+		this.executeHiddenRecovery();
 	}
 
 	async onLogin(data) {

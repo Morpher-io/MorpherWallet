@@ -182,19 +182,18 @@ export default class Signup extends mixins(Global, Recaptcha) {
 
 	executeHiddenLogin() {
 		try {
-			
 			 if (this.store.hiddenLogin && this.store.hiddenLogin.walletEmail && this.store.hiddenLogin.walletPassword && this.store.hiddenLogin.type == 'email') {
 				this.passwordSignin = true;
 				this.walletEmail = this.store.hiddenLogin.walletEmail;
 				this.walletPassword = this.store.hiddenLogin.walletPassword;
 				this.walletPasswordRepeat = this.store.hiddenLogin.walletPasswordRepeat;
 				this.signupExecute(false);
-			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type == 'google') {
-				this.loginUser = this.store.hiddenLogin.loginUser;
+			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type.type == 'google') {
+				this.loginUser = this.store.hiddenLogin.type;
 				this.signupExecute(false);
 
-			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type == 'apple') {
-				this.loginUser = this.store.hiddenLogin.loginUser;
+			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type.type == 'apple') {
+				this.loginUser = this.store.hiddenLogin.type;
 				this.signupExecute(false);
 
 			}
@@ -207,7 +206,7 @@ export default class Signup extends mixins(Global, Recaptcha) {
 
 	}
 
-	processMethod(data: any): void {
+	async processMethod(data: any) {
 		this.logonError = '';
 
 
@@ -219,13 +218,22 @@ export default class Signup extends mixins(Global, Recaptcha) {
 			this.signupExecute(false);
 
 		} else {
+			let error
 			if (data.error === 'popup_closed_by_user') {
 				this.logonError = getDictionaryValue('GOOGLE_COOKIES_BLOCKED');
+				error = 'GOOGLE_COOKIES_BLOCKED'
 			} else if (data.error === 'google_script_blocked') {
 				this.logonError = getDictionaryValue('GOOGLE_SCRIPT_BLOCKED');
+				error = 'GOOGLE_SCRIPT_BLOCKED'
 			} else {
 				this.logonError = data.method + ': ' + getDictionaryValue(data.error);
+				error = data.error
 			}
+
+			if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+				const connection: any = await this.store.connection.promise;
+				connection.onError(error);
+			}				
 		}
 	}
 
@@ -300,6 +308,10 @@ export default class Signup extends mixins(Global, Recaptcha) {
 			if (emailMessage) {
 				this.hideSpinner();
 				this.logonError = emailMessage;
+				if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+					const connection: any = await this.store.connection.promise;
+					connection.onError(emailMessage);
+				}				
 				return;
 			}
 
@@ -310,6 +322,10 @@ export default class Signup extends mixins(Global, Recaptcha) {
 			if (passwordMessage) {
 				this.hideSpinner();
 				this.logonError = passwordMessage;
+				if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+					const connection: any = await this.store.connection.promise;
+					connection.onError(passwordMessage);
+				}				
 				return;
 			}
 		}
@@ -328,7 +344,7 @@ export default class Signup extends mixins(Global, Recaptcha) {
 					this.$router.push('/').catch(() => undefined);
 				}
 			})
-			.catch((error) => {
+			.catch(async (error) => {
 				if (error.toString().toLowerCase().includes('too many r')) {
 					error = 'TOO_MANY_REQUESTS'
 				}				
@@ -346,6 +362,10 @@ export default class Signup extends mixins(Global, Recaptcha) {
 				}
 
 				this.logonError = getDictionaryValue(error.toString());
+				if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+					const connection: any = await this.store.connection.promise;
+					connection.onError(error.toString());
+				}
 			});
 	}
 }

@@ -199,6 +199,9 @@ const store: Store<RootState> = new Vuex.Store({
 				state.loading = false;
 			}, 2000);
 		},
+		appLangUpdated(state: RootState, app_lang: string) {
+			state.app_lang = app_lang;
+		},
 		seedFound(state: RootState, seedFoundData: TypeSeedFoundData) {
 			state.status = 'success';
 			state.encryptedSeed = seedFoundData.encryptedSeed;
@@ -559,7 +562,8 @@ const store: Store<RootState> = new Vuex.Store({
 						'Content-Type': 'application/json'
 					},
 					body: JSON.stringify({
-						code: params.code
+						code: params.code,
+						type: params.type
 					}),
 					mode: 'cors',
 					cache: 'default'
@@ -853,23 +857,27 @@ const store: Store<RootState> = new Vuex.Store({
 				}
 			});
 		},
-		updateUserPayload({ dispatch, state }, params: TypeUpdateUserPayload) {
+		updateUserPayload({ commit, dispatch, state }, params: TypeUpdateUserPayload) {
 			return new Promise((resolve, reject) => {
-				setTimeout(() => {
-					// only update the app language if it has changed
-					if (params.column !== 'app_lang') {
-						return resolve(true);
-					}
+				// only update the app language if it has changed
+				if (params.column !== 'app_lang') {
+					return resolve(true);
+				}
 
-					if (!state.app_lang || state.app_lang == '') {
-						return resolve(true);
-					}
-					if (!state.email || !state.accounts || state.accounts.length < 1 || !state.accounts[0] || !params.value) {
-						return resolve(true);
-					}
-					if (params.value.toLowerCase() == state.app_lang.toLowerCase()) {
-						return resolve(true);
-					}
+				if (!state.app_lang || state.app_lang == '') {
+					return resolve(true);
+				}
+				if (!state.email || !state.accounts || state.accounts.length < 1 || !state.accounts[0] || !params.value) {
+					return resolve(true);
+				}
+				if (params.value.toLowerCase() == state.app_lang.toLowerCase()) {
+					return resolve(true);
+				}
+
+				commit('appLangUpdated', params.value);
+
+				setTimeout(() => {
+
 					dispatch('sendSignedRequest', {
 						body: { column: params.column, value: params.value },
 						method: 'POST',
@@ -1204,7 +1212,8 @@ const store: Store<RootState> = new Vuex.Store({
 		walletEmail: (state) => state.email,
 		recoveryTypeId: (state) => state.recoveryTypeId,
 		
-		hasEncryptedKeystore: (state) => state.encryptedSeed.ciphertext !== undefined
+		hasEncryptedKeystore: (state) => state.encryptedSeed.ciphertext !== undefined,
+		hiddenLogin: (state) => state.hiddenLogin,
 	}
 });
 
@@ -1332,8 +1341,12 @@ if (isIframe()) {
 				return false;
 			},
 			async loginWalletHidden(type: string, user: string, password: string)  {
-				if (store.getters.isLoggedIn) {
-					store.commit('logout')	
+				localStorage.removeItem('lastEmail');
+				store.commit('logout')	
+			    if (router.currentRoute.path !== '/login') router.push('/login').catch(() => undefined);
+
+				if (store.getters.hiddenLogin) {
+					store.commit('hiddenLogin', {})
 				}
 				store.commit('hiddenLogin', {type, user, password})
 			},
@@ -1342,16 +1355,38 @@ if (isIframe()) {
 					store.commit('logout')	
 				}
 				router.push('/signup').catch(() => undefined);
+				if (store.getters.hiddenLogin) {
+					store.commit('hiddenLogin', {})
+				}
 				store.commit('hiddenLogin', {type, walletEmail, walletPassword, walletPasswordRepeat, loginUser})
 			},
 
-			async walletRecoveryHidden(type: string)  {
-				store.commit('hiddenLogin', {type: 'recovery', recovery: type})
+			async walletRecoveryHidden(type: string, data: any)  {
+				if (type !== 'password') {
+					if (store.getters.isLoggedIn) {
+						store.commit('logout')	
+					}
+					router.push('/recovery').catch(() => undefined);
+				}
+				if (store.getters.hiddenLogin) {
+					store.commit('hiddenLogin', {})
+				}
+				store.commit('hiddenLogin', {type: 'recovery', recovery: {type, data}})
 
 			},
 			async loginWallet2fa(twoFACode: string) {
 				router.push('/2fa').catch(() => undefined);
+				if (store.getters.hiddenLogin) {
+					store.commit('hiddenLogin', {})
+				}
 				store.commit('hiddenLogin', {type: '2fa', twoFACode: twoFACode})
+			},
+			async loginWallet2faSend(twoFACode: string) {
+				router.push('/2fa').catch(() => undefined);
+				if (store.getters.hiddenLogin) {
+					store.commit('hiddenLogin', {})
+				}
+				store.commit('hiddenLogin', {type: '2fasend', twoFACode: twoFACode})
 			},
 			async isLoggedIn() {
 				let counter = 0;
@@ -1367,6 +1402,13 @@ if (isIframe()) {
 					// wait for the wallet to finish unlocking
 					await waitForUnlock();
 				}
+				let recoveryMethods = store.state.recoveryMethods;
+				if (!recoveryMethods || recoveryMethods.length == 0) {
+					if (localStorage.getItem('recoveryMethods')) {
+						recoveryMethods = JSON.parse(localStorage.getItem('recoveryMethods') || '');
+					}
+				}
+				
 				//return 'ok'
 				if (store.state.keystore)
 					return {
@@ -1374,6 +1416,8 @@ if (isIframe()) {
 						walletEmail: store.state.email,
 						accounts: store.state.accounts,
 						recovery_type: store.state.recoveryTypeId,
+						recoveryMethods: recoveryMethods,
+						twoFaRequired: store.state.twoFaRequired
 					};
 				else return { isLoggedIn: false };
 			},

@@ -167,7 +167,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 		this.$router.push('/settings').catch(() => undefined);
 	}
 
-	processMethod(data: any): void {
+	async processMethod(data: any) {
 		this.logonError = '';
 
 		if (data.success) {
@@ -175,6 +175,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 			this.isEnabled = data.enabled;
 			this.currentPage = 2;
 		} else {
+			let error = '';
 			if (data.error === 'popup_closed_by_user') {
 				this.logonError = getDictionaryValue('GOOGLE_COOKIES_BLOCKED');
 			} else if (data.error === 'google_script_blocked') {
@@ -182,6 +183,11 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 			} else {
 				this.logonError = data.method + ': ' + getDictionaryValue(data.error);
 			}
+
+			if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+				const connection: any = await this.store.connection.promise;
+				connection.onError(error);
+			}	
 		}
 	}
 

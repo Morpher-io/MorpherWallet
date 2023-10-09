@@ -185,7 +185,7 @@ export default class Login extends mixins(Global, Recaptcha) {
 	/**
 	 * Cmponent mounted lifestyle hook
 	 */
-	mounted() {
+	async mounted() {
 		if (this.store.email) {
 			this.walletEmail = this.store.email;
 		}
@@ -206,6 +206,10 @@ export default class Login extends mixins(Global, Recaptcha) {
 			this.logonError = getDictionaryValue('DECRYPT_FAILED');
 			if (this.walletEmail) this.loginErrorReturn(this.walletEmail, 'INVALID_PASSWORD');
 			this.showRecovery = true;
+			if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+				const connection: any = await this.store.connection.promise;
+				connection.onError('DECRYPT_FAILED');
+			}	
 		}
 
 		this.executeHiddenLogin()
@@ -222,7 +226,7 @@ export default class Login extends mixins(Global, Recaptcha) {
 
 
 
-	processMethod(data: any): void {
+	async processMethod(data: any) {
 		this.logonError = '';
 		this.showSignUp = false;
 
@@ -232,13 +236,22 @@ export default class Login extends mixins(Global, Recaptcha) {
 			this.login();
 
 		} else {
+			let error = '';
 			if (data.error === 'popup_closed_by_user') {
 				this.logonError = getDictionaryValue('GOOGLE_COOKIES_BLOCKED');
+				error = 'GOOGLE_COOKIES_BLOCKED';
 			} else if (data.error === 'google_script_blocked') {
 				this.logonError = getDictionaryValue('GOOGLE_SCRIPT_BLOCKED');
+				error = 'GOOGLE_SCRIPT_BLOCKED';
 			} else {
 				this.logonError = data.method + ': ' + getDictionaryValue(data.error);
+				error = data.error;
 			}
+
+			if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+				const connection: any = await this.store.connection.promise;
+				connection.onError(error);
+			}	
 		}
 	}
 	checkKeyPress(e: any) {
@@ -313,7 +326,7 @@ export default class Login extends mixins(Global, Recaptcha) {
 						// open root page after logon success
 						this.$router.push('/').catch(() => undefined);
 					})
-					.catch((error) => {
+					.catch(async (error) => {
 						this.hideSpinner();
 						if (error.error === 'RECAPTCHA_REQUIRED') {
 							this.executeRecaptcha(this.login);
@@ -322,10 +335,15 @@ export default class Login extends mixins(Global, Recaptcha) {
 						this.logonError = getDictionaryValue('DECRYPT_FAILED');
 						this.loginErrorReturn(email, 'INVALID_PASSWORD');
 						this.showRecovery = true;
+
+						if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+							const connection: any = await this.store.connection.promise;
+							connection.onError('DECRYPT_FAILED');
+						}	
 					});
 			}
 		})
-		.catch((error) => {
+		.catch(async (error) => {
 			
 			this.hideSpinner();
 			if (error.toString().toLowerCase().includes('too many r')) {
@@ -368,6 +386,11 @@ export default class Login extends mixins(Global, Recaptcha) {
 					}
 					this.loginErrorReturn(email, error.error);
 					this.logonError = getDictionaryValue(error.error);
+
+					if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+						const connection: any = await this.store.connection.promise;
+						connection.onError(error.error);
+					}	
 				} else {
 					this.loginErrorReturn(email, error);
 					if (error.toString().includes('_')) {
@@ -375,6 +398,11 @@ export default class Login extends mixins(Global, Recaptcha) {
 					} else {
 						this.logonError = error.toString();
 					}
+
+					if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+						const connection: any = await this.store.connection.promise;
+						connection.onError(error.toString());
+					}	
 					
 					// console.log('Error in login', error);
 				}

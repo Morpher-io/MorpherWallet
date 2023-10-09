@@ -122,11 +122,11 @@ export default class TwoFA extends mixins(Global, Recaptcha) {
 			if (this.store.connection && this.store.connection !== null) {
 				const connection:any = await this.store.connection.promise;
 
-				connection.on2FA();
+				connection.on2FA({email : (this.store.twoFaRequired.email || this.store.twoFaRequired.needConfirmation), authenticator: this.store.twoFaRequired.authenticator });
 			}
 		}
 
-		if (this.store.hiddenLogin) {
+		if (this.store.hiddenLogin && this.store.hiddenLogin.type == '2fa') {
 			this.executeHiddenLogin()
 		} else {
 			if (this.store.twoFaRequired.email || this.store.twoFaRequired.needConfirmation) {
@@ -181,7 +181,12 @@ export default class TwoFA extends mixins(Global, Recaptcha) {
 	}
 	@Watch('store.hiddenLogin')
 	onPropertyChanged(value: any) {
-		this.executeHiddenLogin()
+		if (this.store.hiddenLogin && this.store.hiddenLogin.type == '2fasend') {
+			this.executeEmailSend()
+		} else {
+			this.executeHiddenLogin()
+		}
+
 	}
 
 	@Watch('authenticatorCode')
@@ -196,7 +201,12 @@ export default class TwoFA extends mixins(Global, Recaptcha) {
 			
 			 if (this.store.hiddenLogin) {
 
-				this.emailCode = this.store.hiddenLogin.twoFACode
+				if (this.store.twoFaRequired.authenticator) {
+					this.authenticatorCode = this.store.hiddenLogin.twoFACode
+				} else {
+					this.emailCode = this.store.hiddenLogin.twoFACode
+				}
+				
 				this.validateCode();
 
 			 }
@@ -226,7 +236,7 @@ export default class TwoFA extends mixins(Global, Recaptcha) {
 				this.hideSpinner();
 				this.router.push(nextroute).catch(() => undefined);
 			})
-			.catch((error) => {
+			.catch(async (error) => {
 				this.hideSpinner();
 				if (error.error === 'RECAPTCHA_REQUIRED') {
 					this.executeRecaptcha(this.validateCode);
@@ -240,6 +250,12 @@ export default class TwoFA extends mixins(Global, Recaptcha) {
 				if (error.toString() === 'invalid password') {
 					this.store.status = 'invalid password';
 					this.router.push('/login').catch(() => undefined);
+				}
+				if (this.isIframe()) {
+					if (this.store.connection && this.store.connection !== null) {
+						const connection: any = await this.store.connection.promise;
+						connection.onError(error.toString());
+					}
 				}
 				this.logonError = getDictionaryValue(error.toString());
 			});

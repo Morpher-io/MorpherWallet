@@ -15,6 +15,7 @@ import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 import { Emit } from 'vue-property-decorator';
 import { sha256 } from '../utils/cryptoFunctions';
+import { Watch } from 'vue-property-decorator';
 
 @Component({
 	components: {
@@ -31,11 +32,84 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 		return data;
 	}
 
+	@Watch('store.hiddenLogin')
+	onPropertyChanged(value) {
+		this.executeHiddenRecovery()
+	}
+
 	unmounted() {
 		if (this.watchTimer) clearInterval(this.watchTimer);
 	}
 	destroyed() {
 		if (this.watchTimer) clearInterval(this.watchTimer);
+	}
+
+	
+	executeHiddenRecovery() {
+		if (this.store.hiddenLogin && this.store.hiddenLogin.type == 'recovery') {
+			let recoveryData = this.store.hiddenLogin.recovery
+			if (recoveryData.type == 'vk') {
+				this.onLogin(recoveryData.data)
+			}
+		}
+	}
+
+	async onLogin(data) {
+
+		console.log('onLogin', data)
+		const user_code = data.user_code;
+		this.showSpinner(this.$t('loader.RECOVERY_LOG_IN'));
+		try {
+			const auth_token = await this.recoveryVKAuthToken({code: user_code, type: 'app' })
+
+			const userID = auth_token.user_id;
+			const accessToken = auth_token.access_token;
+
+			const key = this.clientId + userID
+
+			const oldPassword = await sha256(userID)
+
+			this.fetchWalletFromRecovery({ key, accessToken, password: oldPassword, recoveryTypeId: this.recoveryTypeId })
+				.then(() => {
+					this.hideSpinner();
+					this.setPassword({
+						success: true,
+						oldPassword: oldPassword
+					});
+				})
+				.catch((error) => {
+					let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
+					console.log('fetchWalletFromRecovery error', errorMessage)
+
+					this.logSentryError('recoverWalletVK',errorMessage, {
+						accessToken,
+						password: userID,
+						recoveryTypeId: this.recoveryTypeId
+					});
+					this.showSpinnerThenAutohide(this.$t('loader.NO_RECOVERY_FOUND'));
+					this.setPassword({
+						success: false,
+						error: error
+					});
+				});
+		} catch (error) {
+			let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
+			console.log('error', errorMessage)
+
+			this.logSentryError('recoverWalletVK', errorMessage, {});
+			this.showSpinnerThenAutohide(this.$t('loader.NO_RECOVERY_FOUND'));
+			this.setPassword({
+				success: false,
+				error: errorMessage
+			});
+		}
+	}
+
+	/**
+	* Cmponent mounted lifestyle hook
+	*/
+	async mounted() {
+		this.executeHiddenRecovery();
 	}
 
 	callbackUrlForPopup = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '');
@@ -65,7 +139,9 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 		if (this.watchTimer) clearInterval(this.watchTimer);
 		this.watchTimer = setInterval(async () => {
 			try {
+
 				if (uriRegex.test(win.location)) {
+
 					if (this.watchTimer) clearInterval(this.watchTimer);
 					setTimeout(() => {
 						win.close();
@@ -76,10 +152,8 @@ export default class RecoveryWalletVkontakte extends mixins(Global) {
 
 					this.showSpinner(this.$t('loader.RECOVERY_LOG_IN'));
 					try {
-						const auth_token = await this.recoveryVKAuthToken({code: user_code })
+						const auth_token = await this.recoveryVKAuthToken({code: user_code, type: 'wallet' })
 
-						console.log('auth_token', auth_token)
-									
 						const userID = auth_token.user_id;
 						const accessToken = auth_token.access_token;
 
