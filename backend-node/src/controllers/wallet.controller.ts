@@ -1274,11 +1274,13 @@ export const recoveryVKAuthToken = async (req, res) => {
         const type = req.body.type
 
         const axios = require('axios')
-
-        let getAuthToken = `https://oauth.vk.com/access_token?client_id=${process.env.VK_APP_ID}&client_secret=${process.env.VK_SECURE_KEY}&redirect_uri=${process.env.VK_URL}&code=${token}`
+        let getAuthToken;
+        
 
         if (type == 'app'){
             getAuthToken = `https://oauth.vk.com/access_token?client_id=${process.env.VK_APP_ID}&client_secret=${process.env.VK_SECURE_KEY}&redirect_uri=${process.env.VK_URL_APP}&code=${token}`
+        } else {
+            getAuthToken = `https://oauth.vk.com/access_token?client_id=${process.env.VK_APP_ID}&client_secret=${process.env.VK_SECURE_KEY}&redirect_uri=${process.env.VK_URL}&code=${token}`
         }
 
         let response = await axios.get(getAuthToken);
