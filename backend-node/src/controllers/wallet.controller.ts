@@ -1215,12 +1215,10 @@ export async function updateUserPayload(req, res) {
             }
         }
     } catch (error) {
-        console.log('    updateUserPayload', error)
         Logger.error({ source: 'updateUserPayload', data: req.body, message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 
-    console.log('    updateUserPayload error 2')
     //error out in any other case
     return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
 }
@@ -1269,7 +1267,6 @@ export const fetchVKAuthToken = async (req, res) => {
 // generate a vk token for recovery
 export const recoveryVKAuthToken = async (req, res) => {
     try {
-        console.log()
         const token = req.body.code
         const type = req.body.type
 

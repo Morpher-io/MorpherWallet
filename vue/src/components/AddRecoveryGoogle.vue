@@ -106,8 +106,6 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 			const keyEnc = await sha256(key);
 			const token = googleUser.token;
 
-			console.log('key', key, keyEnc )
-
 			this.addRecoveryMethod({ key: keyEnc, password: userID, recoveryTypeId: this.recoveryTypeId, token, email: googleUser.email, currentRecoveryTypeId: this.store.recoveryTypeId })
 			.then(async () => {
 				if (this.$gtag && window.gtag)
@@ -121,7 +119,6 @@ export default class AddRecoveryGoogle extends mixins(Global, Authenticated) {
 			})
 			.catch((error) => {
 				let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
-				console.log('onLogin error', errorMessage)				
 				this.logSentryError('addGoogleRecovery', errorMessage, {
 					hasRecoveryMethod: this.hasRecoveryMethod,
 					clientId: this.clientId,
