@@ -207,7 +207,6 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 		const recaptchaToken = this.recaptchaToken;
 
 		if (this.$store.state.encryptedSeed && this.$store.state.encryptedSeed.ciphertext) {
-			console.log('unlockWithPassword', fetch_key)
 			// Call the fetchUser store action to process the wallet logon
 			this.unlockWithPassword({ password, recaptchaToken, fetch_key })
 				.then(() => {
@@ -254,7 +253,6 @@ export default class Unlock extends mixins(Global, Recaptcha) {
 		let token = '';
 
 		if (this.loginUser && (this.loginUser.recoveryTypeId === 3 || this.loginUser.recoveryTypeId === 6)) {
-			console.log('loginEmail', this.loginUser)
 			fetch_key  = this.loginUser.key
 			email = this.loginUser.email || this.loginUser.key
 			password = this.loginUser.userID;
