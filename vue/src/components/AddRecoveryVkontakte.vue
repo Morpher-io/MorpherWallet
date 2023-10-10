@@ -101,11 +101,8 @@ export default class AddRecoveryVkontakte extends mixins(Global, Authenticated) 
 					 }, 100);
 					const urlParams = new URLSearchParams(win.location.search);
 					const user_code = urlParams.get('code');
-
-
-
 					const auth_token = await this.fetchVKAuthToken({code: user_code })
-					
+
 				
 					const userID = auth_token.user_id;
 					const accessToken = auth_token.access_token;

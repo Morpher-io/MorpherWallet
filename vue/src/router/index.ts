@@ -138,6 +138,11 @@ const router = new VueRouter({
 
 router.beforeEach(async (to, from, next) => {
 	if (to.matched.some((record) => record.meta.requiresAuth)) {
+
+		if (to.query && to.query.code) {
+			next();
+			return;
+		}
 		if (store.getters.isLoggedIn) {
 			if (store.state.redirectPath) {
 				const path = store.state.redirectPath;

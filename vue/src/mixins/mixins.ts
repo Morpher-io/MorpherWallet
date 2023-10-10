@@ -166,6 +166,7 @@ export class Global extends Vue {
 			if (value === '2fa') this.$router.push('/settings/2FA').catch(() => undefined);
 			if (value === 'recovery') this.$router.push('/settings/recovery').catch(() => undefined);
 			if (value === 'email') this.$router.push('/settings/email').catch(() => undefined);
+			if (value === 'password') this.$router.push('/settings/password').catch(() => undefined);
 
 			this.clearPage();
 		}

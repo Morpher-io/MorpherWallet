@@ -12,6 +12,7 @@ import Component, { mixins } from 'vue-class-component';
 import { Global } from '../mixins/mixins';
 import { Emit } from 'vue-property-decorator';
 import { sha256 } from '../utils/cryptoFunctions';
+import { Watch } from 'vue-property-decorator';
 
 @Component({
 	components: {
@@ -27,6 +28,27 @@ export default class RecoverWalletApple extends mixins(Global) {
 	@Emit('setPassword')
 	setPassword(data) {
 		return data;
+	}
+
+	@Watch('store.hiddenLogin')
+	onPropertyChanged(value) {
+		this.executeHiddenRecovery()
+	}
+
+	executeHiddenRecovery() {
+		if (this.store.hiddenLogin && this.store.hiddenLogin.type == 'recovery') {
+			let recoveryData = this.store.hiddenLogin.recovery
+			if (recoveryData.type == 'apple') {
+				this.onLogin(recoveryData.data)
+			}
+		}
+	}
+
+	/**
+	* Cmponent mounted lifestyle hook
+	*/
+	async mounted() {
+		this.executeHiddenRecovery();
 	}
 
 	onError(error) {
