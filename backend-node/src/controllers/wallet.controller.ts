@@ -408,7 +408,7 @@ export async function getEncryptedSeed(req, res) {
                         }
 
                         if(process.env.ENVIRONMENT !== 'development' && ignoreCountry == false){
-                            if (recovery.recovery_type_id !== 1) {
+                            if (recovery.recovery_type_id !== 3 && recovery.recovery_type_id !== 6) {
                                 user.payload.needConfirmation = true;
                             }
                         }
@@ -423,6 +423,14 @@ export async function getEncryptedSeed(req, res) {
                 }
 
                 await user.save();
+            }
+
+            if (user.payload.needConfirmation) {
+                if (recovery.recovery_type_id == 3 || recovery.recovery_type_id == 6) {
+                    user.payload.needConfirmation = false;
+                    user.changed('payload', true)
+                    await user.save();
+                }
             }
 
             if (user.payload.needConfirmation) {
@@ -581,7 +589,7 @@ export async function getPayload(req, res) {
                     }
 
                     if(process.env.ENVIRONMENT !== 'development' && ignoreCountry == false){
-                        if (recovery.recovery_type_id !== 1) {
+                        if (recovery.recovery_type_id !== 3 && recovery.recovery_type_id !== 6) {
                             user.payload.needConfirmation = true;
                         }
                     }
