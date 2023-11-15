@@ -1224,8 +1224,8 @@ if (isIframe()) {
 	store.state.connection = connectToParent({
 		parentOrigin:
 			process.env.NODE_ENV === 'production'
-				? /^https:\/\/[w]{0,3}\.?morpher\.com\/trade\/?.*$/gm
-				: /^https:\/\/dev-test\.?morpher\.com\/?.*$/gm,
+				? /^https:\/\/[w]{0,3}\.?morpher\.com\/?.*$/
+				: /^https:\/\/dev-test\.?morpher\.com\/?.*$/,
 				
 		// Methods child is exposing to parent
 		methods: {
