@@ -46,7 +46,8 @@ const cryptoEncrypt = (password: string, seedPhrase: string): Promise<TypeEncryp
 			const saltStr = saltArray.map((byte) => String.fromCharCode(byte)).join('');
 			const saltBase64 = btoa(saltStr);
 
-			console.log('encrypt done', Date.now() - start)
+			if (process.env.NODE_ENV !== 'production')
+				console.log('encrypt done', Date.now() - start)
 
 			//const ivHex = Array.from(iv).map(b => ('00' + b.toString(16)).slice(-2)).join(''); // iv as hex string
 			resolve({ ciphertext: ctBase64, iv: ivBase64, salt: saltBase64 });
@@ -96,7 +97,8 @@ const cryptoDecrypt = (password: string, ciphertext: string, iv: string, salt: s
 
 			const dec = new TextDecoder();
 			const return_data = dec.decode(decrypted)
-			console.log('decrypt done', Date.now() - start)
+			if (process.env.NODE_ENV !== 'production')
+				console.log('decrypt done', Date.now() - start)
 			resolve(return_data);
 		} catch (e) {
 			reject(e);

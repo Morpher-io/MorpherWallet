@@ -269,7 +269,7 @@ export default class Signup extends mixins(Global, Recaptcha) {
 	// Methods
 	async signupExecute(e: any) {
 
-		if (!crypto || ! crypto.subtle) {
+		if (!crypto || !crypto.subtle) {
 			this.logonError = getDictionaryValue('CRYPTO_DESCYPT_ACCESS');
 			
 			if (this.isIframe() && this.store.connection && this.store.connection !== null) {

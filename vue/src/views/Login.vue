@@ -283,10 +283,9 @@ export default class Login extends mixins(Global, Recaptcha) {
 	 */
 	async login() {
 		let email = this.walletEmail;
-		if (!crypto || ! crypto.subtle) {
+		if (!crypto || !crypto.subtle) {
 			this.logonError = getDictionaryValue('CRYPTO_DESCYPT_ACCESS');
 			this.loginErrorReturn(email, 'CRYPTO_DESCYPT_ACCESS');
-			console.log('CRYPTO_DESCYPT_ACCESS')
 			return
 		}
 
