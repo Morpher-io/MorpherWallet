@@ -282,22 +282,29 @@ export default class Login extends mixins(Global, Recaptcha) {
 	 * Execute the logon
 	 */
 	async login() {
+		let email = this.walletEmail;
+		if (!crypto || !crypto.subtle) {
+			this.logonError = getDictionaryValue('CRYPTO_DESCYPT_ACCESS');
+			this.loginErrorReturn(email, 'CRYPTO_DESCYPT_ACCESS');
+			return
+		}
+
 		if (!this.recaptchaToken && (!localStorage.getItem('recaptcha_date') || Number(localStorage.getItem('recaptcha_date')) < Date.now() - (1000 * 60 * 8))) return this.executeRecaptcha(this.login);
-		
 		// block if login is already executing
 		if (this.store.loading) {
 			return;
 		}
+
 		this.logonError = '';
 		this.showSignUp = false;
 		this.showSpinner(this.$t('loader.LOADING_ACCOUNT').toString());
 		this.store.loginComplete = false;
-		let email = this.walletEmail;
 		let password = this.walletPassword;
 		let recaptchaToken = this.recaptchaToken;
 		let recoveryTypeId = 1;
 		let token = null;
 		let fetch_key = email;
+
 
 		sessionStorage.removeItem('signupUser')
 

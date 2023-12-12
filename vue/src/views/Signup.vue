@@ -269,6 +269,16 @@ export default class Signup extends mixins(Global, Recaptcha) {
 	// Methods
 	async signupExecute(e: any) {
 
+		if (!crypto || !crypto.subtle) {
+			this.logonError = getDictionaryValue('CRYPTO_DESCYPT_ACCESS');
+			
+			if (this.isIframe() && this.store.connection && this.store.connection !== null) {
+				const connection: any = await this.store.connection.promise;
+				connection.onError(this.logonError);
+			}	
+			return
+		}
+
 		if (!this.recaptchaToken && (!localStorage.getItem('recaptcha_date') || Number(localStorage.getItem('recaptcha_date')) < Date.now() - (1000 * 60 * 8))) return this.executeRecaptcha(this.signupExecute);
 
 		// block if signup is already executing

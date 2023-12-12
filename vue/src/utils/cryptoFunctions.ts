@@ -3,13 +3,14 @@ import { TypeEncryptedSeed } from '../types/global-types';
 const cryptoEncrypt = (password: string, seedPhrase: string): Promise<TypeEncryptedSeed> =>
 	new Promise(async (resolve, reject) => {
 		try {
+			const start = Date.now();
 			const enc = new TextEncoder();
-			const keyMaterial = await window.crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits', 'deriveKey']);
+			const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits', 'deriveKey']);
 
-			const salt = await window.crypto.getRandomValues(new Uint8Array(16));
-			const iv = await window.crypto.getRandomValues(new Uint8Array(12));
+			const salt = await crypto.getRandomValues(new Uint8Array(16));
+			const iv = await crypto.getRandomValues(new Uint8Array(12));
 
-			const key = await window.crypto.subtle.deriveKey(
+			const key = await crypto.subtle.deriveKey(
 				{
 					name: 'PBKDF2',
 					salt: salt,
@@ -24,7 +25,7 @@ const cryptoEncrypt = (password: string, seedPhrase: string): Promise<TypeEncryp
 
 			const encoded = enc.encode(seedPhrase);
 
-			const ciphertext = await window.crypto.subtle.encrypt(
+			const ciphertext = await crypto.subtle.encrypt(
 				{
 					name: 'AES-GCM',
 					iv: iv
@@ -45,6 +46,9 @@ const cryptoEncrypt = (password: string, seedPhrase: string): Promise<TypeEncryp
 			const saltStr = saltArray.map((byte) => String.fromCharCode(byte)).join('');
 			const saltBase64 = btoa(saltStr);
 
+			if (process.env.NODE_ENV !== 'production')
+				console.log('encrypt done', Date.now() - start)
+
 			//const ivHex = Array.from(iv).map(b => ('00' + b.toString(16)).slice(-2)).join(''); // iv as hex string
 			resolve({ ciphertext: ctBase64, iv: ivBase64, salt: saltBase64 });
 			//send to server
@@ -55,6 +59,7 @@ const cryptoEncrypt = (password: string, seedPhrase: string): Promise<TypeEncryp
 
 const cryptoDecrypt = (password: string, ciphertext: string, iv: string, salt: string) =>
 	new Promise<string>(async (resolve, reject) => {
+		const start = Date.now()
 		//https://gist.github.com/chrisveness/43bcda93af9f646d083fad678071b90a
 		const ctStr = atob(ciphertext); // decode base64 ciphertext
 		const ctUint8 = new Uint8Array((ctStr.match(/[\s\S]/g) || []).map((ch) => ch.charCodeAt(0))); // ciphertext as Uint8Array
@@ -63,11 +68,11 @@ const cryptoDecrypt = (password: string, ciphertext: string, iv: string, salt: s
 		const saltStr = atob(salt);
 		const saltUint8 = new Uint8Array((saltStr.match(/[\s\S]/g) || []).map((ch) => ch.charCodeAt(0)));
 		const enc = new TextEncoder();
-		const keyMaterial = await window.crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits', 'deriveKey']);
-		//let salt = window.crypto.getRandomValues(new Uint8Array(16));
-		//let iv = window.crypto.getRandomValues(new Uint8Array(12));
+		const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits', 'deriveKey']);
+		//let salt = crypto.getRandomValues(new Uint8Array(16));
+		//let iv = crypto.getRandomValues(new Uint8Array(12));
 
-		const key = await window.crypto.subtle.deriveKey(
+		const key = await crypto.subtle.deriveKey(
 			{
 				name: 'PBKDF2',
 				salt: saltUint8,
@@ -81,7 +86,7 @@ const cryptoDecrypt = (password: string, ciphertext: string, iv: string, salt: s
 		);
 
 		try {
-			const decrypted = await window.crypto.subtle.decrypt(
+			const decrypted = await crypto.subtle.decrypt(
 				{
 					name: 'AES-GCM',
 					iv: ivUint8
@@ -91,7 +96,10 @@ const cryptoDecrypt = (password: string, ciphertext: string, iv: string, salt: s
 			);
 
 			const dec = new TextDecoder();
-			resolve(dec.decode(decrypted));
+			const return_data = dec.decode(decrypted)
+			if (process.env.NODE_ENV !== 'production')
+				console.log('decrypt done', Date.now() - start)
+			resolve(return_data);
 		} catch (e) {
 			reject(e);
 		}

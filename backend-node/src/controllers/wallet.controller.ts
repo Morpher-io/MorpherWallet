@@ -372,7 +372,7 @@ export async function getEncryptedSeed(req, res) {
                 }
 
                 if (ip_country) {
-                    if (countryList.includes("'" + ip_country.toUpperCase() + "'")) {
+                    if (countryList.includes("'" + ip_country.toUpperCase() + "'") && recovery_type_id == 1) {
                         if (!user.payload.authenticator && !user.payload.email) {
                             await Userhistory.create({
                                 user_id: user.id,
@@ -447,8 +447,12 @@ export async function getEncryptedSeed(req, res) {
                 return errorResponse(res, 'ACCOUNT_NOT_CONFIRMED', 400);
             }
 
-            const email2FAVerified = await verifyEmail2FA(recovery.user_id, email2fa);
+            let email2FAVerified = await verifyEmail2FA(recovery.user_id, email2fa);
             const googleVerified = await verifyGoogle2FA(recovery.user_id, authenticator2fa);
+
+            if (recovery.recovery_type_id == 3 || recovery.recovery_type_id == 6) {
+                email2FAVerified = true;
+            }
 
             if (!email2FAVerified || !googleVerified) {
                 Logger.info({
@@ -464,7 +468,10 @@ export async function getEncryptedSeed(req, res) {
                 return errorResponse(res, 'SOME_2FA_WRONG', 400);
             }
 
-            const email2faStillValid = await isEmail2FaStillValid(recovery.user_id);
+            let email2faStillValid = await isEmail2FaStillValid(recovery.user_id);
+            if (recovery.recovery_type_id == 3 || recovery.recovery_type_id == 6) {
+                email2faStillValid = true;
+            }
             if (!email2faStillValid) {
                 Logger.info({
                     method: arguments.callee.name,
@@ -552,7 +559,7 @@ export async function getPayload(req, res) {
             }
 
             if (ip_country) {
-                if (countryList.includes("'" + ip_country.toUpperCase() + "'")) {
+                if (countryList.includes("'" + ip_country.toUpperCase() + "'") && recovery.recovery_type_id == 1) {
                     if (!user.payload.authenticator && !user.payload.email) {
                         user.payload.email = true;
                         await Userhistory.create({
@@ -633,12 +640,15 @@ export async function getPayload(req, res) {
         if (user) {
             if (recovery.recovery_type_id !== 1) {
                 payload['user_email'] = user.email;
+                payload['email'] = false;
             }
-            Logger.info({ method: arguments.callee.name, type: 'Get Payload', user_id: user.id, user, headers: req.headers, body: req.body, message: `getPayload: Successful [${user.id}] [${user.email}]` });
             payload['ip_country'] = user.ip_country;
             if (recovery.recovery_type_id !== 1 && payload['needConfirmation']) {
                 payload['needConfirmation'] = false;
             }
+
+            Logger.info({ method: arguments.callee.name, type: 'Get Payload', user_id: user.id, user, headers: req.headers, body: req.body, message: `getPayload: Successful [${user.id}] [${user.email}]` });
+
             return successResponse(res, payload);
         } else {
             return errorResponse(res, 'METHODS_2FA_NOT_FOUND', 404);
