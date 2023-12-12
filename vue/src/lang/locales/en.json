@@ -157,8 +157,8 @@
         "2_STEP_AUTH": "2-Step Authenticator",
         "2_STEP_RECOMMENDATION_TITLE": "2-Step Recommendation",
         "2_STEP_RECOMMENDATION_DESCRIPTION": "Complete KYC on Morpher to avoid losing wallet after losing 2FA device.",
-        "2_STEP_EMAIL_ERROR_GOOGLE": "You cannot enable email 2fa because your account email is the same as your Google email.",
-        "2_STEP_EMAIL_ERROR_APPLE": "You cannot enable email 2fa because your account email is the same as your Apple email."
+        "2_STEP_EMAIL_ERROR_GOOGLE": "You cannot enable email 2fa on Google signin.",
+        "2_STEP_EMAIL_ERROR_APPLE": "You cannot enable email 2fa on Apple signin."
     },
     "password": {
         "CHANGE_PASSWORD_TITLE": "Change Password",
@@ -232,6 +232,7 @@
         "CANNOT_FIND_RECOVERY": "Could not find recovery!",
         "AUTH_ERROR": "Auth Error - Aborting!",
         "DECRYPT_FAILED": "Password provided failed to decrypt your account.",
+        "CRYPTO_DESCYPT_ACCESS": "Cannot access crypto subtle",
         "GOOGLE_COOKIES_BLOCKED": "Unable to log into Google. It looks like cookies are disabled wich may be blocking google access. Try turning off incognito mode.",
         "GOOGLE_SCRIPT_BLOCKED": "Unable to log into Google. The google login script has been blocked, possibly by an ad-blocker. Try turning off your ad-blocker and login again.",
         "RECOVERY_UNLOCK_ERROR": "Unable to unlock your wallet. This may be because you used a different account or never set up account recovery.",

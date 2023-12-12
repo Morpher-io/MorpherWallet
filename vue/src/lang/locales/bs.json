@@ -210,7 +210,8 @@
         "GOOGLE_COOKIES_BLOCKED": "Nije moguće prijaviti se na Google. Izgleda da su kolačići onemogućeni što možda blokira pristup Googleu. Pokušajte isključiti anonimni način rada.",
         "GOOGLE_SCRIPT_BLOCKED": "Nije moguće prijaviti se na Google. Skripta za prijavu na Google je blokirana, vjerovatno blokiranjem oglasa. Pokušajte isključiti blokator oglasa i ponovo se prijavite.",
         "RECOVERY_UNLOCK_ERROR": "Nije moguće otključati vaš novčanik. To može biti zato što ste koristili drugi račun ili nikada niste postavili oporavak računa.",
-        "FALLBACK_MESSAGE": "Nešto nije u redu. Pokušajte ponovo kasnije."
+        "FALLBACK_MESSAGE": "Nešto nije u redu. Pokušajte ponovo kasnije.",
+        "CRYPTO_DESCYPT_ACCESS": "Canot access crypto subtle"
     },
     "loader": {
         "ACCOUNT_DELETED_SUCCESSFULLY": "Račun je uspješno izbrisan.",
