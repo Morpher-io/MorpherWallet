@@ -9,8 +9,8 @@
 							<span class="ml-2">{{ $t('common.EMAIL') }}</span>
 						</p>
 
-						<p v-if="Number(ssoEmailError) == 3">{{ $t('2fa.2_STEP_EMAIL_ERROR_GOOGLE') }}</p>
-						<p v-else-if="Number(ssoEmailError) == 6">{{ $t('2fa.2_STEP_EMAIL_ERROR_APPLE') }}</p>
+						<p v-if="!store.twoFaRequired.email && Number(ssoEmailError) == 3">{{ $t('2fa.2_STEP_EMAIL_ERROR_GOOGLE') }}</p>
+						<p v-else-if="!store.twoFaRequired.email && Number(ssoEmailError) == 6">{{ $t('2fa.2_STEP_EMAIL_ERROR_APPLE') }}</p>
 						<p v-else>{{ $t('2fa.2FA_EMAIL_DESCRIPTION') }}</p>
 					</div>
 					<div class="actions">
@@ -19,7 +19,7 @@
 								'button is-light-green is-small-button has-text-weight-bold transition-faster': true,
 								'is-light-danger': store.twoFaRequired.email
 							}"
-							:disabled="store.ipCountry == 'RU' || Number(ssoEmailError) == 3 || Number(ssoEmailError) == 6"
+							:disabled="store.ipCountry == 'RU' || ((Number(ssoEmailError) == 3 || Number(ssoEmailError) == 6) && store.twoFaRequired.email == false)"
 							data-cy="emailToggle"
 							@click="setCurrentMethod('email', !store.twoFaRequired.email)"
 						>
