@@ -61,7 +61,7 @@ export default class ConfirmAccess extends mixins(Authenticated) {
 	
 	async mounted() {
 		try {
-			send2FAEmail(this.$store.getters.walletEmail)
+			send2FAEmail(this.$store.getters.walletEmail, this.store.fetch_key)
 										.then(() => {
 											this.initialized = true;
 										})

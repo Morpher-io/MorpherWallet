@@ -286,10 +286,16 @@ const getNonce = async (key: string, retry = 0) => {
 	})
 };
 
-const send2FAEmail = async (email: string) => {
-	let key = await getSessionStore('fetch_key')
+const send2FAEmail = async (email: string, fetch_key: string) => {
+	let key 
+	if (fetch_key) {
+		key = await sha256(fetch_key); 
+	} else {
+		key = sessionStorage.getItem('fetch_key');
+	}
+
 	if (!key) {
-			key = await sha256(email.toLowerCase());
+		key = await sha256(email.toLowerCase());
 	}
 	
 	const options: RequestInit = {

@@ -151,7 +151,7 @@ export default class TwoFA extends mixins(Global, Recaptcha) {
 		}
 
 		try {
-			const result = await send2FAEmail(walletEmail)
+			const result = await send2FAEmail(walletEmail, this.store.fetch_key)
 
 			if (!result || !result.sent == true) {
 				this.retry = this.retry +1;
