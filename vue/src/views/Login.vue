@@ -145,10 +145,16 @@ export default class Login extends mixins(Global, Recaptcha) {
 				this.walletPassword = this.store.hiddenLogin.password;
 				this.login();
 			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type.type == 'google') {
+				this.passwordSignin = false;
+				this.walletEmail = '';
+				this.walletPassword = '';
 				this.loginUser = this.store.hiddenLogin.type;
 				this.login();
 
 			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type.type == 'apple') {
+				this.passwordSignin = false;
+				this.walletEmail = '';
+				this.walletPassword = '';
 				this.loginUser = this.store.hiddenLogin.type;
 				this.login();
 

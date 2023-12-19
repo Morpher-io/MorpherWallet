@@ -189,10 +189,19 @@ export default class Signup extends mixins(Global, Recaptcha) {
 				this.walletPasswordRepeat = this.store.hiddenLogin.walletPasswordRepeat;
 				this.signupExecute(false);
 			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type.type == 'google') {
+				this.passwordSignin = false;
+				this.walletEmail = '';
+				this.walletPassword = '';
+				this.walletPasswordRepeat = '';
+
 				this.loginUser = this.store.hiddenLogin.type;
 				this.signupExecute(false);
 
 			} else if (this.store.hiddenLogin && this.store.hiddenLogin.type && this.store.hiddenLogin.type.type == 'apple') {
+				this.passwordSignin = false;
+				this.walletEmail = '';
+				this.walletPassword = '';
+				this.walletPasswordRepeat = '';				
 				this.loginUser = this.store.hiddenLogin.type;
 				this.signupExecute(false);
 
