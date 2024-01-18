@@ -111,7 +111,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 				try {
 					await this.deleteWalletAccount({ password: this.password });
 					this.showSpinnerThenAutohide(this.$t('loader.ACCOUNT_DELETED_SUCCESSFULLY').toString());
-				} catch (error) {
+				} catch (error:any) {
 					this.logSentryError('deleteAccount', error.toString(), data);
 					if (error && error.toString() === 'TypeError: Failed to fetch') {
 						this.showNetworkError(true);
@@ -130,7 +130,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 				try {
 					await this.deleteWalletAccount({ password: this.password });
 					this.showSpinnerThenAutohide(this.$t('loader.ACCOUNT_DELETED_SUCCESSFULLY').toString());
-				} catch (error) {
+				} catch (error:any) {
 					this.logSentryError('deleteAccount', error.toString(), data);
 					if (error && error.toString() === 'TypeError: Failed to fetch') {
 						this.showNetworkError(true);
@@ -139,7 +139,7 @@ export default class RecoverySettings extends mixins(Authenticated, Global) {
 					this.logonError = getDictionaryValue(error.toString());
 				}
 			}
-		} catch (e) {
+		} catch (e:any) {
 			this.logSentryError('deleteAccount', e.toString(), data);
 			this.logonError = getDictionaryValue('');
 		}

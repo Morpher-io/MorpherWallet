@@ -20,7 +20,9 @@ module.exports = {
 				https: require.resolve('https-browserify'),
 				os: require.resolve('os-browserify/browser'),
 				stream: require.resolve('stream-browserify'),
-				buffer: require.resolve('buffer')
+				buffer: require.resolve('buffer'),
+				zlib: require.resolve('browserify-zlib')
+				
 			}
 		},
 		devServer: {

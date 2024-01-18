@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex, { Store } from 'vuex';
 import { cryptoDecrypt, sha256 } from '../utils/cryptoFunctions';
+import { privateKeyToAccount } from 'viem/accounts'
 import {
 	getEncryptedSeedFromMail,
 	verifyAuthenticatorCode,
@@ -18,6 +19,7 @@ import { downloadEncryptedKeystore, getAccountsFromKeystore, sortObject } from '
 import { getKeystore } from '../utils/keystore';
 import { getSessionStore, saveSessionStore, removeSessionStore } from '../utils/sessionStore';
 import * as Sentry from '@sentry/vue';
+import { hashTypedData } from 'viem'
 
 import {
 	Type2FARequired,
@@ -1321,9 +1323,23 @@ if (isIframe()) {
 									}
 								}, 500);
 							} else {
-								const signedData = store.state.keystore[0].sign(txObj.data); //
+								let signedData: any;
+								if (txObj?.messageStandard == 'signTypedMessage') {
+									const data = JSON.parse(txObj.data)
 
-								resolve(signedData.signature);
+									const account = privateKeyToAccount(store.state.keystore[0].privateKey as any)
+
+									account.signTypedData(data).then(result => {
+										resolve(result);
+									}).catch(e => {
+										reject(e);
+									})
+
+								} else {
+									signedData = store.state.keystore[0].sign(txObj.data); //
+									resolve(signedData.signature);
+								}
+
 							}
 						}
 					} catch (e) {
