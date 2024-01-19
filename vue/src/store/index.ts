@@ -1311,8 +1311,21 @@ if (isIframe()) {
 										if (store.state.signResponse === 'confirm') {
 											store.state.signResponse = null;
 											if (store.state.keystore !== null) {
-												const signedData = store.state.keystore[0].sign(txObj.data); //
-												resolve(signedData.signature);
+												if (txObj?.messageStandard == 'signTypedMessage') {
+													const data = JSON.parse(txObj.data)
+				
+													const account = privateKeyToAccount(store.state.keystore[0].privateKey as `0x${string}`)
+				
+													account.signTypedData(data).then(result => {
+														resolve(result);
+													}).catch(e => {
+														reject(e);
+													})
+				
+												} else {
+													const signedData = store.state.keystore[0].sign(txObj.data); //
+													resolve(signedData.signature);
+												}
 											} else {
 												resolve(null);
 											}
@@ -1323,11 +1336,10 @@ if (isIframe()) {
 									}
 								}, 500);
 							} else {
-								let signedData: any;
 								if (txObj?.messageStandard == 'signTypedMessage') {
 									const data = JSON.parse(txObj.data)
 
-									const account = privateKeyToAccount(store.state.keystore[0].privateKey as any)
+									const account = privateKeyToAccount(store.state.keystore[0].privateKey as `0x${string}`)
 
 									account.signTypedData(data).then(result => {
 										resolve(result);
@@ -1336,7 +1348,7 @@ if (isIframe()) {
 									})
 
 								} else {
-									signedData = store.state.keystore[0].sign(txObj.data); //
+									const signedData = store.state.keystore[0].sign(txObj.data); //
 									resolve(signedData.signature);
 								}
 
