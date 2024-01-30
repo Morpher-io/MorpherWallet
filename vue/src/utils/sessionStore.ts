@@ -19,10 +19,6 @@ const sessionStorageTransfer = function (event: any) {
 	
 	if (!event.newValue) return; // do nothing if no value to work with
 
-	if (event.key == 'recoveryMethods') {
-		store.dispatch('updateRecoveryMethods', { dbUpdate: false, recoveryTypeId: store.state.recoveryTypeId });
-	}
-
 	if (event.key == 'getWalletSessionStorage') {
 
 

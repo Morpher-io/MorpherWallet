@@ -472,7 +472,7 @@ export default class MorpherWallet {
           const params = Object.assign({}, msgParams, { messageStandard: 'signTypedMessage' });
           if (this.config?.show_message)
             this.showWallet();                  
-          const { error, result } = await widgetCommunication.signMessage(params, this.config);
+          const result = await widgetCommunication.signMessage(params, this.config);
 					if(cb) {
 						cb(null, result);
 					}
@@ -485,7 +485,7 @@ export default class MorpherWallet {
           const params = Object.assign({}, msgParams, { messageStandard: 'signTypedMessageV3' });
           if (this.config?.show_message)
             this.showWallet();                  
-          const { error, result } = await widgetCommunication.signMessage(params, this.config);
+          const result = await widgetCommunication.signMessage(params, this.config);
 					if(cb) {
 						cb(null, result);
 					}

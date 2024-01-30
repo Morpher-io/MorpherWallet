@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex, { Store } from 'vuex';
 import { cryptoDecrypt, sha256 } from '../utils/cryptoFunctions';
+import { privateKeyToAccount } from 'viem/accounts'
 import {
 	getEncryptedSeedFromMail,
 	verifyAuthenticatorCode,
@@ -18,6 +19,7 @@ import { downloadEncryptedKeystore, getAccountsFromKeystore, sortObject } from '
 import { getKeystore } from '../utils/keystore';
 import { getSessionStore, saveSessionStore, removeSessionStore } from '../utils/sessionStore';
 import * as Sentry from '@sentry/vue';
+import { hashTypedData } from 'viem'
 
 import {
 	Type2FARequired,
@@ -85,6 +87,7 @@ export interface RootState {
 	openPage: string;
 	loginComplete: boolean;
 	recoveryMethods: Array<any>;
+	recoveryLoaded: boolean;
 	seedExported: boolean;
 	keystoreExported: boolean;
 	seedPhrase: string;
@@ -145,6 +148,7 @@ function initialState(): RootState {
 		openPage: '',
 		loginComplete: false,
 		recoveryMethods: [],
+		recoveryLoaded: false,
 		seedExported: false,
 		keystoreExported: false,
 		seedPhrase: '',
@@ -211,8 +215,8 @@ const store: Store<RootState> = new Vuex.Store({
 			localStorage.setItem('login', 'true')
 		},
 		recoveryMethodsFound(state: RootState, recoveryMethodsData: Array<any>) {
-			localStorage.setItem('recoveryMethods', JSON.stringify(recoveryMethodsData));
 			state.recoveryMethods = recoveryMethodsData;
+			state.recoveryLoaded = true;
 		},
 		updateUnlocking(state: RootState, payload: boolean) {
 			state.unlocking = payload;
@@ -316,7 +320,6 @@ const store: Store<RootState> = new Vuex.Store({
 
 			localStorage.removeItem('email');
 			localStorage.removeItem('iconSeed');
-			localStorage.removeItem('recoveryMethods');
 			removeSessionStore('password');
 			removeSessionStore('fetch_key');
 			removeSessionStore('encryptedSeed');
@@ -817,7 +820,7 @@ const store: Store<RootState> = new Vuex.Store({
 							.then((payload) => {
 								commit('ipCountry', payload.ip_country);
 								commit('updatePayload', payload);
-								dispatch('updateRecoveryMethods', { dbUpdate: false, recoveryTypeId: state.recoveryTypeId }).then(() => {
+								dispatch('updateRecoveryMethods', { dbUpdate: true, recoveryTypeId: state.recoveryTypeId }).then(() => {
 									resolve(true);
 								});
 							})
@@ -839,11 +842,6 @@ const store: Store<RootState> = new Vuex.Store({
 		},
 		updateRecoveryMethods({ commit, dispatch }, params: TypeUpdateRecovery) {
 			return new Promise((resolve, reject) => {
-				if (localStorage.getItem('recoveryMethods') && params.dbUpdate !== true) {
-					const methods = JSON.parse(localStorage.getItem('recoveryMethods') || '');
-					commit('recoveryMethodsFound', methods);
-					resolve(true);
-				} else {
 					dispatch('sendSignedRequest', {
 						body: { recovery_type: params.recoveryTypeId},
 						method: 'POST',
@@ -854,7 +852,6 @@ const store: Store<RootState> = new Vuex.Store({
 							resolve(true);
 						})
 						.catch(reject);
-				}
 			});
 		},
 		updateUserPayload({ commit, dispatch, state }, params: TypeUpdateUserPayload) {
@@ -1309,8 +1306,21 @@ if (isIframe()) {
 										if (store.state.signResponse === 'confirm') {
 											store.state.signResponse = null;
 											if (store.state.keystore !== null) {
-												const signedData = store.state.keystore[0].sign(txObj.data); //
-												resolve(signedData.signature);
+												if (txObj?.messageStandard == 'signTypedMessage') {
+													const data = JSON.parse(txObj.data)
+				
+													const account = privateKeyToAccount(store.state.keystore[0].privateKey as `0x${string}`)
+				
+													account.signTypedData(data).then(result => {
+														resolve(result);
+													}).catch(e => {
+														reject(e);
+													})
+				
+												} else {
+													const signedData = store.state.keystore[0].sign(txObj.data); //
+													resolve(signedData.signature);
+												}
 											} else {
 												resolve(null);
 											}
@@ -1321,9 +1331,22 @@ if (isIframe()) {
 									}
 								}, 500);
 							} else {
-								const signedData = store.state.keystore[0].sign(txObj.data); //
+								if (txObj?.messageStandard == 'signTypedMessage') {
+									const data = JSON.parse(txObj.data)
 
-								resolve(signedData.signature);
+									const account = privateKeyToAccount(store.state.keystore[0].privateKey as `0x${string}`)
+
+									account.signTypedData(data).then(result => {
+										resolve(result);
+									}).catch(e => {
+										reject(e);
+									})
+
+								} else {
+									const signedData = store.state.keystore[0].sign(txObj.data); //
+									resolve(signedData.signature);
+								}
+
 							}
 						}
 					} catch (e) {
@@ -1402,13 +1425,8 @@ if (isIframe()) {
 					// wait for the wallet to finish unlocking
 					await waitForUnlock();
 				}
-				let recoveryMethods = store.state.recoveryMethods;
-				if (!recoveryMethods || recoveryMethods.length == 0) {
-					if (localStorage.getItem('recoveryMethods')) {
-						recoveryMethods = JSON.parse(localStorage.getItem('recoveryMethods') || '');
-					}
-				}
-				
+				const recoveryMethods = store.state.recoveryMethods;
+
 				//return 'ok'
 				if (store.state.keystore)
 					return {
@@ -1421,7 +1439,23 @@ if (isIframe()) {
 					};
 				else return { isLoggedIn: false };
 			},
-			hasSocialRecoveryMethods() {
+			async hasSocialRecoveryMethods() {
+				const waitForRecovery = () => {
+					return new Promise((resolve) => {
+						setTimeout(resolve, 200);
+					});
+				};
+				let counter = 0;
+				// wait for the store to finish unlocking if it is in progress
+				while (!store.state.recoveryLoaded && counter < 50) {
+					counter += 1;
+					// wait for the wallet to finish unlocking
+					await waitForRecovery();
+				}
+				if (!store.state.recoveryLoaded) {
+					return true;
+				}
+
 				if (store.state.recoveryTypeId && store.state.recoveryTypeId !== 1) {
 					return true;	
 				}				
