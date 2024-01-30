@@ -87,6 +87,7 @@ export interface RootState {
 	openPage: string;
 	loginComplete: boolean;
 	recoveryMethods: Array<any>;
+	recoveryLoaded: boolean;
 	seedExported: boolean;
 	keystoreExported: boolean;
 	seedPhrase: string;
@@ -147,6 +148,7 @@ function initialState(): RootState {
 		openPage: '',
 		loginComplete: false,
 		recoveryMethods: [],
+		recoveryLoaded: false,
 		seedExported: false,
 		keystoreExported: false,
 		seedPhrase: '',
@@ -213,8 +215,8 @@ const store: Store<RootState> = new Vuex.Store({
 			localStorage.setItem('login', 'true')
 		},
 		recoveryMethodsFound(state: RootState, recoveryMethodsData: Array<any>) {
-			localStorage.setItem('recoveryMethods', JSON.stringify(recoveryMethodsData));
 			state.recoveryMethods = recoveryMethodsData;
+			state.recoveryLoaded = true;
 		},
 		updateUnlocking(state: RootState, payload: boolean) {
 			state.unlocking = payload;
@@ -318,7 +320,6 @@ const store: Store<RootState> = new Vuex.Store({
 
 			localStorage.removeItem('email');
 			localStorage.removeItem('iconSeed');
-			localStorage.removeItem('recoveryMethods');
 			removeSessionStore('password');
 			removeSessionStore('fetch_key');
 			removeSessionStore('encryptedSeed');
@@ -819,7 +820,7 @@ const store: Store<RootState> = new Vuex.Store({
 							.then((payload) => {
 								commit('ipCountry', payload.ip_country);
 								commit('updatePayload', payload);
-								dispatch('updateRecoveryMethods', { dbUpdate: false, recoveryTypeId: state.recoveryTypeId }).then(() => {
+								dispatch('updateRecoveryMethods', { dbUpdate: true, recoveryTypeId: state.recoveryTypeId }).then(() => {
 									resolve(true);
 								});
 							})
@@ -841,11 +842,6 @@ const store: Store<RootState> = new Vuex.Store({
 		},
 		updateRecoveryMethods({ commit, dispatch }, params: TypeUpdateRecovery) {
 			return new Promise((resolve, reject) => {
-				if (localStorage.getItem('recoveryMethods') && params.dbUpdate !== true) {
-					const methods = JSON.parse(localStorage.getItem('recoveryMethods') || '');
-					commit('recoveryMethodsFound', methods);
-					resolve(true);
-				} else {
 					dispatch('sendSignedRequest', {
 						body: { recovery_type: params.recoveryTypeId},
 						method: 'POST',
@@ -856,7 +852,6 @@ const store: Store<RootState> = new Vuex.Store({
 							resolve(true);
 						})
 						.catch(reject);
-				}
 			});
 		},
 		updateUserPayload({ commit, dispatch, state }, params: TypeUpdateUserPayload) {
@@ -1430,13 +1425,8 @@ if (isIframe()) {
 					// wait for the wallet to finish unlocking
 					await waitForUnlock();
 				}
-				let recoveryMethods = store.state.recoveryMethods;
-				if (!recoveryMethods || recoveryMethods.length == 0) {
-					if (localStorage.getItem('recoveryMethods')) {
-						recoveryMethods = JSON.parse(localStorage.getItem('recoveryMethods') || '');
-					}
-				}
-				
+				const recoveryMethods = store.state.recoveryMethods;
+
 				//return 'ok'
 				if (store.state.keystore)
 					return {
@@ -1449,7 +1439,23 @@ if (isIframe()) {
 					};
 				else return { isLoggedIn: false };
 			},
-			hasSocialRecoveryMethods() {
+			async hasSocialRecoveryMethods() {
+				const waitForRecovery = () => {
+					return new Promise((resolve) => {
+						setTimeout(resolve, 200);
+					});
+				};
+				let counter = 0;
+				// wait for the store to finish unlocking if it is in progress
+				while (!store.state.recoveryLoaded && counter < 50) {
+					counter += 1;
+					// wait for the wallet to finish unlocking
+					await waitForRecovery();
+				}
+				if (!store.state.recoveryLoaded) {
+					return true;
+				}
+
 				if (store.state.recoveryTypeId && store.state.recoveryTypeId !== 1) {
 					return true;	
 				}				
