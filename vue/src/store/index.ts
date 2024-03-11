@@ -1364,24 +1364,49 @@ if (isIframe()) {
 				return false;
 			},
 			async loginWalletHidden(type: string, user: string, password: string)  {
-				localStorage.removeItem('lastEmail');
-				store.commit('logout')	
-			    if (router.currentRoute.path !== '/login') router.push('/login').catch(() => undefined);
+				if (store.getters.isLoggedIn) {
+					localStorage.removeItem('lastEmail');
+					store.commit('logout')	
 
-				if (store.getters.hiddenLogin) {
-					store.commit('hiddenLogin', {})
+					setTimeout(() => {
+						if (router.currentRoute.path !== '/login') router.push('/login').catch(() => undefined);
+	
+						if (store.getters.hiddenLogin) {
+							store.commit('hiddenLogin', {})
+						}
+						store.commit('hiddenLogin', {type, user, password})
+	
+					}, 3000);
+				} else {
+					localStorage.removeItem('lastEmail');
+					store.commit('logout')	
+					if (router.currentRoute.path !== '/login') router.push('/login').catch(() => undefined);
+	
+					if (store.getters.hiddenLogin) {
+						store.commit('hiddenLogin', {})
+					}
+					store.commit('hiddenLogin', {type, user, password})
+	
 				}
-				store.commit('hiddenLogin', {type, user, password})
 			},
 			async signupWalletHidden(type: string, walletEmail: string, walletPassword: string, walletPasswordRepeat: string, loginUser: any)  {
 				if (store.getters.isLoggedIn) {
 					store.commit('logout')	
+					setTimeout(() => {
+						router.push('/signup').catch(() => undefined);
+						if (store.getters.hiddenLogin) {
+							store.commit('hiddenLogin', {})
+						}
+						store.commit('hiddenLogin', {type, walletEmail, walletPassword, walletPasswordRepeat, loginUser})
+		
+					}, 3000);
+				} else {
+					router.push('/signup').catch(() => undefined);
+					if (store.getters.hiddenLogin) {
+						store.commit('hiddenLogin', {})
+					}
+					store.commit('hiddenLogin', {type, walletEmail, walletPassword, walletPasswordRepeat, loginUser})
 				}
-				router.push('/signup').catch(() => undefined);
-				if (store.getters.hiddenLogin) {
-					store.commit('hiddenLogin', {})
-				}
-				store.commit('hiddenLogin', {type, walletEmail, walletPassword, walletPasswordRepeat, loginUser})
 			},
 
 			async walletRecoveryHidden(type: string, data: any)  {
