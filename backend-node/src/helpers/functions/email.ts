@@ -19,9 +19,9 @@ export async function sendEmail2FA(payload, email, user) {
     }
 
     const SES = new AWS.SES({
-        accessKeyId: process.env.ACCESS_KEY_ID,
-        secretAccessKey: process.env.ACCESS_KEY_SECRET,
-        region: 'eu-west-1'
+        // accessKeyId: process.env.ACCESS_KEY_ID,
+        // secretAccessKey: process.env.ACCESS_KEY_SECRET,
+        region: 'eu-central-1'
     });
 
     const from_address = email_template.from_address;
@@ -87,7 +87,7 @@ export async function sendEmailChanged(payload, email, user) {
     const SES = new AWS.SES({
         accessKeyId: process.env.ACCESS_KEY_ID,
         secretAccessKey: process.env.ACCESS_KEY_SECRET,
-        region: 'eu-west-1'
+        region: 'eu-central-1'
     });
 
     
