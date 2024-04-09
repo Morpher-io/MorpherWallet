@@ -647,7 +647,7 @@ export async function getPayload(req, res) {
                 payload['needConfirmation'] = false;
             }
 
-            Logger.info({ method: arguments.callee.name, type: 'Get Payload', user_id: user.id, user, headers: req.headers, body: req.body, message: `getPayload: Successful [${user.id}] [${user.email}]` });
+            Logger.info({ method: arguments.callee.name, type: 'Get Payload', user_id: user.id, headers: req.headers, body: req.body, message: `getPayload: Successful [${user.id}] [${user.email}]` });
 
             return successResponse(res, payload);
         } else {
@@ -685,7 +685,7 @@ export async function getNonce(req, res) {
 
 
         if (user) {
-            Logger.info({ method: arguments.callee.name, type: 'Get Nonce', user_id: user.id, user, headers: req.headers, body: req.body, message: `getNonce: User found [${user.id}]` });
+            Logger.info({ method: arguments.callee.name, type: 'Get Nonce', user_id: user.id, headers: req.headers, body: req.body, message: `getNonce: User found [${user.id}]` });
             return successResponse(res, { nonce: user.nonce });
         } else {
             return errorResponse(res, 'NONCE_NOT_FOUND', 404);
@@ -737,7 +737,6 @@ export async function change2FAMethods(req, res) {
                         method: arguments.callee.name,
                         type: '2FA Email Sent',
                         user_id: user.id,
-                        user,
                         headers: req.headers,
                         body: req.body,
                         message: `2FA Email Sent [${user.id}] [${user.email}]`
@@ -760,7 +759,6 @@ export async function change2FAMethods(req, res) {
                         method: arguments.callee.name,
                         type: 'Error: Authenticator Code Wrong',
                         user_id: user.id,
-                        user,
                         headers: req.headers,
                         body: req.body,
                         message: `change2FAMethod: Authenticator Code Wrong [${user.id}] [${user.email}]`
@@ -790,7 +788,6 @@ export async function change2FAMethods(req, res) {
                 method: arguments.callee.name,
                 type: '2FA Methods Changed',
                 user_id: user.id,
-                user,
                 headers: req.headers,
                 body: req.body,
                 message: `change2FAMethod: 2FA Method Changed [${user.id}] [${user.email}]`
@@ -830,7 +827,6 @@ export async function generateAuthenticatorQR(req, res) {
                         method: arguments.callee.name,
                         type: 'Generated Authenticator QR Code',
                         user_id: user.id,
-                        user,
                         headers: req.headers,
                         body: req.body,
                         message: `Authenticator Code generated [${user.id}] [${user.email}]`
@@ -872,7 +868,6 @@ export async function verifyAuthenticatorCode(req, res) {
                         method: arguments.callee.name,
                         type: 'Verify Authenticator Code',
                         user_id: user.id,
-                        user,
                         headers: req.headers,
                         body: req.body,
                         message: `verifyAuthenticatorCode: Authenticator Code verified successfully [${user.id}] [${user.email}]`
@@ -883,7 +878,6 @@ export async function verifyAuthenticatorCode(req, res) {
                         method: arguments.callee.name,
                         type: 'Error: Authenticator Code Wrong',
                         user_id: user.id,
-                        user,
                         headers: req.headers,
                         body: req.body,
                         message: `verifyAuthenticatorCode: Authenticator Code wrong [${user.id}] [${user.email}]`
@@ -929,7 +923,6 @@ export async function send2FAEmail(req, res) {
                 method: arguments.callee.name,
                 type: '2FA Email Sent',
                 user_id: user.id,
-                user,
                 headers: req.headers,
                 body: req.body,
                 message: `send2FAEmail: 2FA Email Sent [${user.id}] [${user.email}]`
@@ -960,7 +953,6 @@ export async function verifyEmailCode(req, res) {
                             method: arguments.callee.name,
                             type: 'Email 2FA Code Verified',
                             user_id: user.id,
-                            user,
                             headers: req.headers,
                             body: req.body,
                             message: `verifyEmailCode: 2FA Email Verified Successfully [${user.id}] [${user.email}]`
@@ -971,7 +963,6 @@ export async function verifyEmailCode(req, res) {
                             method: arguments.callee.name,
                             type: 'Error: Email 2FA Code Wrong',
                             user_id: user.id,
-                            user,
                             headers: req.headers,
                             body: req.body,
                             message: `verifyEmailCode: 2FA Email Wrong [${user.id}] [${user.email}]`
@@ -983,7 +974,6 @@ export async function verifyEmailCode(req, res) {
                         method: arguments.callee.name,
                         type: 'Error: Email 2FA Code Expired',
                         user_id: user.id,
-                        user,
                         headers: req.headers,
                         body: req.body,
                         message: `verifyEmailCode: 2FA Email Code Exired [${user.id}] [${user.email}]`
@@ -1018,7 +1008,6 @@ export async function verifyEmailConfirmationCode(req, res) {
                         method: arguments.callee.name,
                         type: 'Email Confirmation Code Verified',
                         user_id: user.id,
-                        user,
                         headers: req.headers,
                         body: req.body,
                         message: `verifyEmailConfirmationCode: 2FA Email Confirmed Successfully [${user.id}] [${user.email}]`
@@ -1029,7 +1018,6 @@ export async function verifyEmailConfirmationCode(req, res) {
                         method: arguments.callee.name,
                         type: 'Error: Email Confirmation Code Wrong',
                         user_id: user.id,
-                        user,
                         headers: req.headers,
                         body: req.body,
                         message: `verifyEmailConfirmationCode: 2FA Email Wrong [${user.id}] [${user.email}]`
@@ -1074,7 +1062,7 @@ export async function resetRecovery(req, res) {
                 Logger.info({
                     method: arguments.callee.name,
                     type: 'Recovery Method Removed',
-                    recovery,
+                    recovery: {...recovery, encrypted_seed: '-'},
                     headers: req.headers,
                     body: req.body,
                     message: `resetRecovery: Recovery Method Removed [${defaultRecovery.user_id}] [${recoveryTypeId}]`
@@ -1088,7 +1076,7 @@ export async function resetRecovery(req, res) {
             Logger.error({
                 method: arguments.callee.name,
                 type: 'Error: Recovery Method Not found',
-                recovery,
+                recovery: {...recovery, encrypted_seed: '-'},
                 headers: req.headers,
                 body: req.body,
                 message: `resetRecovery: Recovery Method Not Found [${defaultRecovery.user_id}] [${recoveryTypeId}]`
