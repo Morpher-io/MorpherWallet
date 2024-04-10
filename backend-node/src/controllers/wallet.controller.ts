@@ -1,6 +1,6 @@
 import { getTransaction, Op } from '../database';
 import { User, Userhistory, Recovery, Recovery_Type } from '../database/models';
-import { decrypt, encrypt, errorResponse, successResponse, sha256, randomFixedInteger, getIPCountryCode } from '../helpers/functions/util';
+import { decrypt, encrypt, errorResponse, successResponse, sha256, randomFixedInteger, getIPCountryCode, formatLogData } from '../helpers/functions/util';
 const { to } = require('await-to-js');
 import { Request, Response } from 'express';
 import { sendEmail2FA, sendEmailChanged } from '../helpers/functions/email';
@@ -13,7 +13,6 @@ const vk_tokens = {};
 
 // Function to save new signups to the database.
 export async function saveEmailPassword(req: Request, res: Response) {
-
     // Get sequelize transactions to rollback changes in case of failure.
     const [err, transaction] = await to(getTransaction());
     if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
@@ -41,7 +40,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
         // use the SSO email and check the user key for apple and google
         email = emailKey.email;
         if (key !== emailKey.key) {
-            Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
+            Logger.error({ source: 'saveEmailPassword', data: formatLogData(req.body), message: 'User key SSO mismatch' });
             await transaction.rollback();
             return errorResponse(res, 'SSO_KEY_MISMATCH', 500);     
         }
@@ -101,7 +100,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
             // Commit changes to database and return successfully.
             await transaction.commit();
 
-            Logger.info({ method: arguments.callee.name, type: 'New Wallet', user_id: userId, headers: req.headers, body: req.body, message: `saveEmailPassword: New Wallet [${userId}] [${email}] [${eth_address}]` });
+            Logger.info({ method: arguments.callee.name, type: 'New Wallet', user_id: userId, headers: formatLogData(req.headers), body: formatLogData(req.body), message: `saveEmailPassword: New Wallet [${userId}] [${email}] [${eth_address}]` });
 
             return successResponse(res, {
                 recovery_id: recoveryId
@@ -112,7 +111,7 @@ export async function saveEmailPassword(req: Request, res: Response) {
     } catch (error) {
         // If an error happened anywhere along the way, rollback all the changes.
         await transaction.rollback();
-        Logger.error({ source: 'saveEmailPassword', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'saveEmailPassword', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 
@@ -135,7 +134,7 @@ export async function getRecoveryMethods(req: Request, res: Response) {
         }
         return successResponse(res, recoveryTypes);
     } catch (error) {
-        Logger.error({ source: 'getRecoveryMethods', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'getRecoveryMethods', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 }
@@ -164,7 +163,7 @@ export async function addRecoveryMethod(req: Request, res: Response) {
         email = emailKey.email;
 
         if (keyForSaving !== emailKey.key) {
-            Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
+            Logger.error({ source: 'saveEmailPassword', data: formatLogData(req.body), message: 'User key SSO mismatch' });
             return errorResponse(res, 'SSO_KEY_MISMATCH', 500);     
         }
         
@@ -191,8 +190,8 @@ export async function addRecoveryMethod(req: Request, res: Response) {
                 type: 'Added new Recovery Method',
                 user_id: emailRecovery.user_id,
                 recovery_id: newRecoveryId,
-                headers: req.headers,
-                body: req.body,
+                headers: formatLogData(req.headers),
+                body: formatLogData(req.body),
                 message: `addRecoveryMethod: User ${emailRecovery.user_id} added recovery method ${recoveryTypeId} [${emailRecovery.user_id}]`
             });
             return successResponse(res, {
@@ -202,7 +201,7 @@ export async function addRecoveryMethod(req: Request, res: Response) {
 
         return errorResponse(res, 'RECOVERY_METHOD_ALREADY_SET');
     } catch (error) {
-        Logger.error({ source: 'addRecoveryMethod', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'addRecoveryMethod', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 }
@@ -225,15 +224,15 @@ export async function updatePassword(req: Request, res: Response) {
                 method: arguments.callee.name,
                 type: 'Password Change',
                 user_id: recovery.user_id,
-                headers: req.headers,
-                body: req.body,
+                headers: formatLogData(req.headers),
+                body: formatLogData(req.body),
                 message: `updatePassword: User ${recovery.user_id} changed his password [${recovery.user_id}]`
             });
             return successResponse(res, 'updated');
         }
 
     } catch (error) {
-        Logger.error({ source: 'updatePassword', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'updatePassword', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
     //error out in any other case
@@ -291,8 +290,8 @@ export async function updateEmail(req: Request, res: Response) {
                             user_id: user.id,
                             old_value: user.email,
                             new_value: newEmail,
-                            headers: req.headers,
-                            body: req.body,
+                            headers: formatLogData(req.headers),
+                            body: formatLogData(req.body),
                             message: `updateEmail: User ${user.id} changed his email (${user.email} to ${newEmail}) [${user.id}]`
                         });
 
@@ -323,7 +322,7 @@ export async function updateEmail(req: Request, res: Response) {
         await transaction.rollback();
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     } catch (error) {
-        Logger.error({ source: 'updateEmail', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'updateEmail', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 }
@@ -347,7 +346,7 @@ export async function getEncryptedSeed(req, res) {
         email = emailKey.email;
         
         if (key !== emailKey.key) {
-            Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
+            Logger.error({ source: 'saveEmailPassword', data: formatLogData(req.body), message: 'User key SSO mismatch' });
             return errorResponse(res, 'SSO_KEY_MISMATCH', 500);     
         }
         
@@ -439,9 +438,8 @@ export async function getEncryptedSeed(req, res) {
                     type: 'Error: Account not confirmed',
                     error: '2fa wrong',
                     user_id: user.id,
-                    user,
-                    headers: req.headers,
-                    body: req.body,
+                    headers: formatLogData(req.headers),
+                    body: formatLogData(req.body),
                     message: `getEncryptedSeed: Account not confirmed [${user.id}]`
                 });
                 return errorResponse(res, 'ACCOUNT_NOT_CONFIRMED', 400);
@@ -460,9 +458,8 @@ export async function getEncryptedSeed(req, res) {
                     type: 'Error: Fetch Encrypted Seed Failed',
                     error: '2fa wrong',
                     user_id: user.id,
-                    user,
-                    headers: req.headers,
-                    body: req.body,
+                    headers: formatLogData(req.headers),
+                    body: formatLogData(req.body),
                     message: `getEncryptedSeed: 2FA Wrong [${user.id}]`
                 });
                 return errorResponse(res, 'SOME_2FA_WRONG', 400);
@@ -478,9 +475,8 @@ export async function getEncryptedSeed(req, res) {
                     type: 'Error: Fetch Encrypted Seed Failed',
                     error: '2fa expired',
                     user_id: user.id,
-                    user,
-                    headers: req.headers,
-                    body: req.body,
+                    headers: formatLogData(req.headers),
+                    body: formatLogData(req.body),
                     message: `getEncryptedSeed: 2FA expired [${user.id}]`
                 });
                 return errorResponse(res, 'EMAIL_2FA_EXPIRED', 400);
@@ -501,9 +497,8 @@ export async function getEncryptedSeed(req, res) {
                 method: arguments.callee.name,
                 type: 'Fetch Encrypted Seed',
                 user_id: user.id,
-                user,
-                headers: req.headers,
-                body: req.body,
+                headers: formatLogData(req.headers),
+                body: formatLogData(req.body),
                 message: `getEncryptedSeed: Fetched encrypted seed [${user.id}]`
             });
             const encryptedSeed = await decrypt(JSON.parse(recovery.encrypted_seed), process.env.DB_BACKEND_SALT);
@@ -516,7 +511,7 @@ export async function getEncryptedSeed(req, res) {
         // Otherwise return an error.
         return errorResponse(res, 'USER_NOT_FOUND', 404);
     } catch (error) {
-        Logger.error({ source: 'getEncryptedSeed', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'getEncryptedSeed', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 }
@@ -547,7 +542,7 @@ export async function getPayload(req, res) {
         const recovery = await Recovery.findOne({ where: { key } });
         if (recovery == null) {
 
-            Logger.warn({ source: 'getPayload', data: req.body, message: `getPayload: User not found. [${req.ip}] [${key.substr(0, 10)}...]`, remoteAddress: req.ip });
+            Logger.warn({ source: 'getPayload', data: formatLogData(req.body), message: `getPayload: User not found. [${req.ip}] [${key.substr(0, 10)}...]`, remoteAddress: req.ip });
             return errorResponse(res, 'USER_NOT_FOUND', 404);
         }
         const user = await User.findOne({ where: { id: recovery.user_id } });
@@ -647,14 +642,14 @@ export async function getPayload(req, res) {
                 payload['needConfirmation'] = false;
             }
 
-            Logger.info({ method: arguments.callee.name, type: 'Get Payload', user_id: user.id, headers: req.headers, body: req.body, message: `getPayload: Successful [${user.id}] [${user.email}]` });
+            Logger.info({ method: arguments.callee.name, type: 'Get Payload', user_id: user.id, headers: formatLogData(req.headers), body: formatLogData(req.body), message: `getPayload: Successful [${user.id}] [${user.email}]` });
 
             return successResponse(res, payload);
         } else {
             return errorResponse(res, 'METHODS_2FA_NOT_FOUND', 404);
         }
     } catch (error) {
-        Logger.error({ source: 'getPayload', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'getPayload', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 }
@@ -667,7 +662,7 @@ export async function getNonce(req, res) {
         const key = req.body.key;
         const recovery = await Recovery.findOne({ where: { key } });
         if (recovery == null) {
-            Logger.info({ method: arguments.callee.name, type: 'Error: User Not found', key, headers: req.headers, body: req.body, message: `getNonce: User not found [${key.substr(0, 10)}...]` });
+            Logger.info({ method: arguments.callee.name, type: 'Error: User Not found', key, headers: formatLogData(req.headers), body: formatLogData(req.body), message: `getNonce: User not found [${key.substr(0, 10)}...]` });
             return errorResponse(res, 'USER_NOT_FOUND', 404);
         }
 
@@ -685,7 +680,7 @@ export async function getNonce(req, res) {
 
 
         if (user) {
-            Logger.info({ method: arguments.callee.name, type: 'Get Nonce', user_id: user.id, headers: req.headers, body: req.body, message: `getNonce: User found [${user.id}]` });
+            Logger.info({ method: arguments.callee.name, type: 'Get Nonce', user_id: user.id, headers: formatLogData(req.headers), body: formatLogData(req.body), message: `getNonce: User found [${user.id}]` });
             return successResponse(res, { nonce: user.nonce });
         } else {
             return errorResponse(res, 'NONCE_NOT_FOUND', 404);
@@ -699,7 +694,7 @@ export async function getNonce(req, res) {
             }
         }
         
-        Logger.error({ source: 'getNonce', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'getNonce', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 }
@@ -737,8 +732,8 @@ export async function change2FAMethods(req, res) {
                         method: arguments.callee.name,
                         type: '2FA Email Sent',
                         user_id: user.id,
-                        headers: req.headers,
-                        body: req.body,
+                        headers: formatLogData(req.headers),
+                        body: formatLogData(req.body),
                         message: `2FA Email Sent [${user.id}] [${user.email}]`
                     });
 
@@ -759,8 +754,8 @@ export async function change2FAMethods(req, res) {
                         method: arguments.callee.name,
                         type: 'Error: Authenticator Code Wrong',
                         user_id: user.id,
-                        headers: req.headers,
-                        body: req.body,
+                        headers: formatLogData(req.headers),
+                        body: formatLogData(req.body),
                         message: `change2FAMethod: Authenticator Code Wrong [${user.id}] [${user.email}]`
                     });
                     return errorResponse(res, 'CANNOT_VERIFY_AUTHENTICATOR', 500);
@@ -788,8 +783,8 @@ export async function change2FAMethods(req, res) {
                 method: arguments.callee.name,
                 type: '2FA Methods Changed',
                 user_id: user.id,
-                headers: req.headers,
-                body: req.body,
+                headers: formatLogData(req.headers),
+                body: formatLogData(req.body),
                 message: `change2FAMethod: 2FA Method Changed [${user.id}] [${user.email}]`
             });
             return successResponse(res, { message: 'User payload updated successfully.' });
@@ -797,7 +792,7 @@ export async function change2FAMethods(req, res) {
         //in any other case, return error
         return errorResponse(res, 'USER_NOT_FOUND', 404);
     } catch (error) {
-        Logger.error({ source: 'change2FAMethods', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'change2FAMethods', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 }
@@ -827,8 +822,8 @@ export async function generateAuthenticatorQR(req, res) {
                         method: arguments.callee.name,
                         type: 'Generated Authenticator QR Code',
                         user_id: user.id,
-                        headers: req.headers,
-                        body: req.body,
+                        headers: formatLogData(req.headers),
+                        body: formatLogData(req.body),
                         message: `Authenticator Code generated [${user.id}] [${user.email}]`
                     });
                     return successResponse(res, {
@@ -843,7 +838,7 @@ export async function generateAuthenticatorQR(req, res) {
 
         return errorResponse(res, 'USER_NOT_FOUND', 404);
     } catch (error) {
-        Logger.error({ source: 'generateAuthenticatorQR', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'generateAuthenticatorQR', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 }
@@ -868,8 +863,8 @@ export async function verifyAuthenticatorCode(req, res) {
                         method: arguments.callee.name,
                         type: 'Verify Authenticator Code',
                         user_id: user.id,
-                        headers: req.headers,
-                        body: req.body,
+                        headers: formatLogData(req.headers),
+                        body: formatLogData(req.body),
                         message: `verifyAuthenticatorCode: Authenticator Code verified successfully [${user.id}] [${user.email}]`
                     });
                     return successResponse(res, true);
@@ -878,18 +873,18 @@ export async function verifyAuthenticatorCode(req, res) {
                         method: arguments.callee.name,
                         type: 'Error: Authenticator Code Wrong',
                         user_id: user.id,
-                        headers: req.headers,
-                        body: req.body,
+                        headers: formatLogData(req.headers),
+                        body: formatLogData(req.body),
                         message: `verifyAuthenticatorCode: Authenticator Code wrong [${user.id}] [${user.email}]`
                     });
                     return errorResponse(res, 'CANNOT_VERIFY_AUTHENTICATOR', 500);
                 }
             }
         }
-        Logger.info({ method: arguments.callee.name, type: 'Error: User Not found', headers: req.headers, body: req.body });
+        Logger.info({ method: arguments.callee.name, type: 'Error: User Not found', headers: formatLogData(req.headers), body: formatLogData(req.body) });
         return errorResponse(res, 'USER_NOT_FOUND', 404);
     } catch (error) {
-        Logger.error({ source: 'verifyAuthenticatorCode', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'verifyAuthenticatorCode', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 }
@@ -923,17 +918,17 @@ export async function send2FAEmail(req, res) {
                 method: arguments.callee.name,
                 type: '2FA Email Sent',
                 user_id: user.id,
-                headers: req.headers,
-                body: req.body,
+                headers: formatLogData(req.headers),
+                body: formatLogData(req.body),
                 message: `send2FAEmail: 2FA Email Sent [${user.id}] [${user.email}]`
             });
             return successResponse(res, { sent: true });
         } catch (e) {
-            Logger.error({ source: 'send2FAEmail', data: req.body, message: e.message || e.toString() });
+            Logger.error({ source: 'send2FAEmail', data: formatLogData(req.body), message: e.message || e.toString() });
             return errorResponse(res, 'PROBLEM_SENDING_EMAIL', 500);
         }
     } catch (error) {
-        Logger.error({ source: 'send2FAEmail', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'send2FAEmail', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 }
@@ -953,8 +948,8 @@ export async function verifyEmailCode(req, res) {
                             method: arguments.callee.name,
                             type: 'Email 2FA Code Verified',
                             user_id: user.id,
-                            headers: req.headers,
-                            body: req.body,
+                            headers: formatLogData(req.headers),
+                            body: formatLogData(req.body),
                             message: `verifyEmailCode: 2FA Email Verified Successfully [${user.id}] [${user.email}]`
                         });
                         return successResponse(res, true);
@@ -963,8 +958,8 @@ export async function verifyEmailCode(req, res) {
                             method: arguments.callee.name,
                             type: 'Error: Email 2FA Code Wrong',
                             user_id: user.id,
-                            headers: req.headers,
-                            body: req.body,
+                            headers: formatLogData(req.headers),
+                            body: formatLogData(req.body),
                             message: `verifyEmailCode: 2FA Email Wrong [${user.id}] [${user.email}]`
                         });
                         return errorResponse(res, 'CANNOT_VERIFY_EMAIL_CODE', 400);
@@ -974,8 +969,8 @@ export async function verifyEmailCode(req, res) {
                         method: arguments.callee.name,
                         type: 'Error: Email 2FA Code Expired',
                         user_id: user.id,
-                        headers: req.headers,
-                        body: req.body,
+                        headers: formatLogData(req.headers),
+                        body: formatLogData(req.body),
                         message: `verifyEmailCode: 2FA Email Code Exired [${user.id}] [${user.email}]`
                     });
                     return errorResponse(res, 'EMAIL_2FA_EXPIRED', 400);
@@ -985,7 +980,7 @@ export async function verifyEmailCode(req, res) {
 
         return errorResponse(res, 'USER_NOT_FOUND', 404);
     } catch (error) {
-        Logger.error({ source: 'verifyEmailCode', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'verifyEmailCode', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 }
@@ -1008,8 +1003,8 @@ export async function verifyEmailConfirmationCode(req, res) {
                         method: arguments.callee.name,
                         type: 'Email Confirmation Code Verified',
                         user_id: user.id,
-                        headers: req.headers,
-                        body: req.body,
+                        headers: formatLogData(req.headers),
+                        body: formatLogData(req.body),
                         message: `verifyEmailConfirmationCode: 2FA Email Confirmed Successfully [${user.id}] [${user.email}]`
                     });
                     return successResponse(res, true);
@@ -1018,8 +1013,8 @@ export async function verifyEmailConfirmationCode(req, res) {
                         method: arguments.callee.name,
                         type: 'Error: Email Confirmation Code Wrong',
                         user_id: user.id,
-                        headers: req.headers,
-                        body: req.body,
+                        headers: formatLogData(req.headers),
+                        body: formatLogData(req.body),
                         message: `verifyEmailConfirmationCode: 2FA Email Wrong [${user.id}] [${user.email}]`
                     });
                     return errorResponse(res, 'CANNOT_VERIFY_EMAIL_CODE', 400);
@@ -1029,7 +1024,7 @@ export async function verifyEmailConfirmationCode(req, res) {
 
         return errorResponse(res, 'USER_NOT_FOUND', 404);
     } catch (error) {
-        Logger.error({ source: 'verifyEmailConfirmationCode', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'verifyEmailConfirmationCode', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 }
@@ -1051,7 +1046,7 @@ export async function resetRecovery(req, res) {
 
         // use the SSO email and check the user key for apple and google
         if (key !== emailKey.key) {
-            Logger.error({ source: 'saveEmailPassword', data: req.body, message: 'User key SSO mismatch' });
+            Logger.error({ source: 'saveEmailPassword', data: formatLogData(req.body), message: 'User key SSO mismatch' });
             return errorResponse(res, 'SSO_KEY_MISMATCH', 500);     
         }        
 
@@ -1063,8 +1058,8 @@ export async function resetRecovery(req, res) {
                     method: arguments.callee.name,
                     type: 'Recovery Method Removed',
                     recovery: {...recovery, encrypted_seed: '-'},
-                    headers: req.headers,
-                    body: req.body,
+                    headers: formatLogData(req.headers),
+                    body: formatLogData(req.body),
                     message: `resetRecovery: Recovery Method Removed [${defaultRecovery.user_id}] [${recoveryTypeId}]`
                 });
                 await recovery.destroy();
@@ -1077,8 +1072,8 @@ export async function resetRecovery(req, res) {
                 method: arguments.callee.name,
                 type: 'Error: Recovery Method Not found',
                 recovery: {...recovery, encrypted_seed: '-'},
-                headers: req.headers,
-                body: req.body,
+                headers: formatLogData(req.headers),
+                body: formatLogData(req.body),
                 message: `resetRecovery: Recovery Method Not Found [${defaultRecovery.user_id}] [${recoveryTypeId}]`
             });
             return errorResponse(res, 'CANNOT_FIND_RECOVERY', 404);
@@ -1088,20 +1083,20 @@ export async function resetRecovery(req, res) {
             method: arguments.callee.name,
             type: 'Error: User Not Found',
             key,
-            headers: req.headers,
-            body: req.body,
+            headers: formatLogData(req.headers),
+            body: formatLogData(req.body),
             message: `resetRecovery: User Not Found [${key.substr(0, 10)}...] [${recoveryTypeId}]`
         });
         return errorResponse(res, 'USER_NOT_FOUND', 404);
     } catch (error) {
-        Logger.error({ source: 'verifyEmailConfirmationCode', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'verifyEmailConfirmationCode', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 }
 
 export async function deleteAccount(req, res) {
     try {
-        const user = await User.findOne({ where: { email: req.body.email.toLowerCase().replace(/ /g, '') } });
+        const user = await User.findOne({ where: { email: formatLogData(req.body).email.toLowerCase().replace(/ /g, '') } });
         if (user !== null) {
             try {
                 await user.destroy();
@@ -1114,8 +1109,8 @@ export async function deleteAccount(req, res) {
                 Logger.info({
                     method: arguments.callee.name,
                     type: 'User Account Deleted',
-                    headers: req.headers,
-                    body: req.body,
+                    headers: formatLogData(req.headers),
+                    body: formatLogData(req.body),
                     message: `deleteAccount: User deleted [${req.body.email.toLowerCase().replace(/ /g, '')}] [${user.id}]`
                 });
                 return successResponse(res, true);
@@ -1127,15 +1122,15 @@ export async function deleteAccount(req, res) {
         Logger.error({
             method: arguments.callee.name,
             type: 'Error: User Not Found',
-            headers: req.headers,
-            body: req.body,
+            headers: formatLogData(req.headers),
+            body: formatLogData(req.body),
             message: `deleteAccount: User Not Found [${req.body.email.toLowerCase().replace(/ /g, '')}]`
         });
 
 
         return errorResponse(res, 'USER_NOT_FOUND', 404);
     } catch (error) {
-        Logger.error({ source: 'deleteAccount', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'deleteAccount', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 }
@@ -1221,7 +1216,7 @@ export async function updateUserPayload(req, res) {
             }
         }
     } catch (error) {
-        Logger.error({ source: 'updateUserPayload', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'updateUserPayload', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 
@@ -1265,7 +1260,7 @@ export const fetchVKAuthToken = async (req, res) => {
         return successResponse(res, auth_token);
 
     } catch (error) {
-        Logger.error({ source: 'fetchVKAuthToken', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'fetchVKAuthToken', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 }
@@ -1313,7 +1308,7 @@ export const recoveryVKAuthToken = async (req, res) => {
         return successResponse(res, auth_token);
 
     } catch (error) {
-        Logger.error({ source: 'recoveryVKAuthToken', data: req.body, message: error.message || error.toString() });
+        Logger.error({ source: 'recoveryVKAuthToken', data: formatLogData(req.body), message: error.message || error.toString() });
         return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
     }
 }
