@@ -135,6 +135,32 @@ function sortObject(object: any) {
     return newObject;
 }
 
+const formatLogData = (data: any) => {
+    let removeKeys = ['encryptedSeed', 
+                'encrypted_seed', 
+                'access_token', 
+                'token', 
+                'authenticator2fa', 
+                'code',
+                'signature'];
+
+    if (!data) {
+        return data
+    }
+    if (typeof data !== 'object') {
+        return data;
+    }
+    let formatted = JSON.parse(JSON.stringify(data))
+    removeKeys.forEach(key => {
+        if (formatted[key]) {
+            formatted[key] = '-'
+        }
+    })
+
+    return formatted
+
+}
+
 /**
  * validate a recaptcha token passed by the web site
  */
@@ -226,5 +252,6 @@ export {
     decrypt,
     sha256,
     randomFixedInteger,
-    sortObject
+    sortObject,
+    formatLogData
 };
