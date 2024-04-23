@@ -29,7 +29,6 @@ export async function sendEmail2FA(payload, email, user) {
         email_template = await Email_Template.findOne({ where: { template_name: email_name, lang: 'en' }})
     }
 
-
     const from_address = email_template.from_address;
     let html = email_template.template_html;
     let text = email_template.template_text;
@@ -98,8 +97,6 @@ export async function sendEmailChanged(payload, email, user) {
     if(!email_template){
         email_template = await Email_Template.findOne({ where: { template_name: 'Email Changed', lang: 'en' }})
     }
-
-
     
     const from_address = email_template.from_address;
     let html = email_template.template_html;
