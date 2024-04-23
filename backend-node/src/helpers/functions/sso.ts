@@ -42,14 +42,14 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
 
             // fail of no oath token was passed
             if (!token) {
-                Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token, recovery_type }, message: 'No sso token supplied' });
+                Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, recovery_type }, message: 'No sso token supplied' });
 
                 return { success: false, error: 'No sso token supplied' }
             }
             token = JSON.parse(token)
 
             if (!token.identityToken) {
-                Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token, recovery_type }, message: 'Invalid sso token' });
+                Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, recovery_type }, message: 'Invalid sso token' });
 
                 return { success: false, error: 'Invalid sso token' }
             }
@@ -65,7 +65,7 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
                 });
 
                 if (!appleIdTokenClaims.sub) {
-                    Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token, recovery_type }, message: 'No sso user id returned' });
+                    Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, recovery_type }, message: 'No sso user id returned' });
                     return { success: false, error: 'No sso user id returned' }
                 }
 
@@ -73,7 +73,7 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
                 return { success: true, recovery_type, key: key, email: appleIdTokenClaims.email }
 
             } catch (err) {
-                Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token, recovery_type }, message: 'Error veryfting apple token' + err.message || err.toString() });
+                Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, recovery_type }, message: 'Error veryfting apple token' + err.message || err.toString() });
 
                 return { success: false, error: err.message || err.toString() }
             }
@@ -105,11 +105,11 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
                     const userid = tokenInfo['sub'];
 
                     if (!userid) {
-                        Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token, recovery_type }, message: 'No sso user id returned' });
+                        Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, recovery_type }, message: 'No sso user id returned' });
                         return { success: false, error: 'No sso user id returned' }
                     }
                     if (tokenInfo.exp < (Date.now() / 1000)) {
-                        Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token, recovery_type }, message: 'Token Expired' });
+                        Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, recovery_type }, message: 'Token Expired' });
                         return { success: false, error: 'Token Expired' }
                     }
 
@@ -131,11 +131,11 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
                     const userid = tokenInfo['sub'];
 
                     if (!userid) {
-                        Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token, recovery_type }, message: 'No sso user id returned' });
+                        Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, recovery_type }, message: 'No sso user id returned' });
                         return { success: false, error: 'No sso user id returned' }
                     }
                     if (tokenInfo.expiry_date < Date.now()) {
-                        Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token, recovery_type }, message: 'Token Expired' });
+                        Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, recovery_type }, message: 'Token Expired' });
                         return { success: false, error: 'Token Expired' }
                     }
 
@@ -144,7 +144,7 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
                 }
 
             } catch (err) {
-                Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token, recovery_type }, message: 'Error veryfting google token: ' + err.message || err.toString() });
+                Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, recovery_type }, message: 'Error veryfting google token: ' + err.message || err.toString() });
 
                 return { success: false, error: err.message || err.toString() }
             }
@@ -159,7 +159,7 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
 
 
                 if (!result.id) {
-                    Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token, recovery_type }, message: 'No sso user id returned' });
+                    Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, recovery_type }, message: 'No sso user id returned' });
                     return { success: false, error: 'No sso user id returned' }
                 }
 
@@ -169,7 +169,7 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
 
                 return { success: true, recovery_type, key: return_key, email: result.email }
             } catch (err) {
-                Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token, recovery_type }, message: 'Error veryfting facebook token' + err.message || err.toString() });
+                Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, recovery_type }, message: 'Error veryfting facebook token' + err.message || err.toString() });
 
                 return { success: false, error: err.message || err.toString() }
             }
@@ -205,7 +205,7 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
                 }
 
                 if (!result || result.length < 1 || !result[0].id) {
-                    Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token, recovery_type }, message: 'No sso user id returned' });
+                    Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, recovery_type }, message: 'No sso user id returned' });
                     return { success: false, error: 'No sso user id returned' }
                 }
 
@@ -215,19 +215,19 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
                 return { success: true, recovery_type, key: key, email: result[0].email || email }
 
             } catch (err) {
-                Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token, recovery_type }, message: 'Error veryfting VK token' + err.message || err.toString() });
+                Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, recovery_type }, message: 'Error veryfting VK token' + err.message || err.toString() });
 
                 return { success: false, error: err.message || err.toString() }
             }
         }
 
-        Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token, recovery_type }, message: 'Invalid recovery type' });
+        Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, recovery_type }, message: 'Invalid recovery type' });
 
         return { success: false, error: 'No sso user id returned' }
 
     } catch (err) {
 
-        Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId, token }, message: err.message || err.toString() });
+        Logger.error({ source: 'getKeyEmail', data: { recoveryTypeId }, message: err.message || err.toString() });
 
         return { success: false, error: err.message || err.toString() }
     }
