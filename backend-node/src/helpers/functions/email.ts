@@ -1,7 +1,18 @@
-const AWS = require('aws-sdk');
+import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
 import { Logger } from './winston';
 import { Email_Template, Email_Log, User } from '../../database/models';
+
+const SES = new SESClient({
+    region: 'eu-west-1',
+    apiVersion: '2010-12-01',
+
+});
+
+const SES_NOTIFICATIONS = new SESClient({
+    region: 'eu-central-1',
+    apiVersion: '2010-12-01'
+});
 
 export async function sendEmail2FA(payload, email, user) {
     const lang = user.payload.app_lang || 'en';
@@ -17,12 +28,6 @@ export async function sendEmail2FA(payload, email, user) {
     if(!email_template){
         email_template = await Email_Template.findOne({ where: { template_name: email_name, lang: 'en' }})
     }
-
-    const SES = new AWS.SES({
-        accessKeyId: process.env.ACCESS_KEY_ID,
-        secretAccessKey: process.env.ACCESS_KEY_SECRET,
-        region: 'eu-west-1'
-    });
 
     const from_address = email_template.from_address;
     let html = email_template.template_html;
@@ -50,18 +55,27 @@ export async function sendEmail2FA(payload, email, user) {
                 Data: subject
             }
         },
-        Source: from_address
+        Source: from_address,
+        ConfigurationSetName: process.env.EMAIL_NOTIFICATIONS_NAME ? process.env.EMAIL_NOTIFICATIONS_NAME : undefined
     };
 
-    if (process.env.EMAIL_NOTIFICATIONS_NAME) params['ConfigurationSetName'] = process.env.EMAIL_NOTIFICATIONS_NAME
 
-    const info = await SES.sendEmail(params).promise();
+    let emailSendCommand = new SendEmailCommand(params)
+
+    let response
+
+    if (from_address.includes('@notifications.morpher.com')) {
+        response = await SES_NOTIFICATIONS.send(emailSendCommand);
+    } else {
+        response = await SES.send(emailSendCommand);
+    }
+
 
     try {
 
         const log:any = {
         
-            id: info.MessageId,
+            id: response.MessageId,
             aws_sent_status: 'success',
             email,
             email_template_id: email_template.id
@@ -83,13 +97,6 @@ export async function sendEmailChanged(payload, email, user) {
     if(!email_template){
         email_template = await Email_Template.findOne({ where: { template_name: 'Email Changed', lang: 'en' }})
     }
-
-    const SES = new AWS.SES({
-        accessKeyId: process.env.ACCESS_KEY_ID,
-        secretAccessKey: process.env.ACCESS_KEY_SECRET,
-        region: 'eu-west-1'
-    });
-
     
     const from_address = email_template.from_address;
     let html = email_template.template_html;
@@ -117,18 +124,24 @@ export async function sendEmailChanged(payload, email, user) {
                 Data: subject
             }
         },
-        Source: from_address
+        Source: from_address,
+        ConfigurationSetName: process.env.EMAIL_NOTIFICATIONS_NAME ? process.env.EMAIL_NOTIFICATIONS_NAME : undefined
+
     };
 
-    if (process.env.EMAIL_NOTIFICATIONS_NAME) params['ConfigurationSetName'] = process.env.EMAIL_NOTIFICATIONS_NAME
+    let emailSendCommand = new SendEmailCommand(params)
 
-    const info = await SES.sendEmail(params).promise();
+    let response
+
+    if (from_address.includes('@notifications.morpher.com')) {
+        response = await SES_NOTIFICATIONS.send(emailSendCommand);
+    } else {
+        response = await SES.send(emailSendCommand);
+    }
 
     try {
-
         const log:any = {
-        
-            id: info.MessageId,
+            id: response.MessageId,
             aws_sent_status: 'success',
             email,
             email_template_id: email_template.id
