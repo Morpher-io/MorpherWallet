@@ -354,7 +354,6 @@ export async function getEncryptedSeed(req, res) {
         // Simply get Recovery instance that has this key and return it if its found.
         const recovery = await Recovery.findOne({ where: { key, recovery_type_id } });
 
-        const ip_country = await getIPCountryCode(req.clientIp)
 
         if (recovery) {
             
@@ -364,6 +363,11 @@ export async function getEncryptedSeed(req, res) {
                 if (recovery.recovery_type_id !== 1 && user.payload.needConfirmation) {
                     user.payload.needConfirmation = false;
                     user.changed('payload', true);
+                }
+
+                let ip_country = user.ip_country
+                if (req.clientIp && user.ip_address !== req.clientIp) {
+                    ip_country = await getIPCountryCode(req.clientIp)
                 }
 
                 if (!user.ip_country && ip_country) {
