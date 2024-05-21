@@ -536,8 +536,6 @@ export async function recoverSeedSocialRecovery(req: Request, res: Response) {
 export async function getPayload(req, res) {
     try {
         const ip_address = req.ip;
-        const ip_country = await getIPCountryCode(ip_address)
-
         const key = req.body.key;
         const recovery = await Recovery.findOne({ where: { key } });
         if (recovery == null) {
@@ -546,6 +544,11 @@ export async function getPayload(req, res) {
             return errorResponse(res, 'USER_NOT_FOUND', 404);
         }
         const user = await User.findOne({ where: { id: recovery.user_id } });
+
+        let ip_country = user.ip_country
+        if (user.ip_address !== ip_address) {
+            ip_country = await getIPCountryCode(ip_address)
+        }
 
         const payload = {};
         if (user) {

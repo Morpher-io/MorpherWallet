@@ -1,7 +1,14 @@
 import { AutoIncrement, Column, DataType, ForeignKey, Model, PrimaryKey, Table, Unique } from 'sequelize-typescript';
 import { User } from './User.model';
 
-@Table({ timestamps: true })
+@Table({ timestamps: true,
+    indexes: [
+        {
+            unique: false,
+            fields: ['user_id']
+        },
+    ]
+ })
 export class Userhistory extends Model {
     @PrimaryKey
     @AutoIncrement

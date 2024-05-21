@@ -3,7 +3,27 @@ import { Recovery_Type } from './Recovery_Type.model';
 import { User } from './User.model';
 import * as moment from 'moment';
 
-@Table({ timestamps: false })
+@Table({ timestamps: false,
+    indexes: [
+        {
+            unique: true,
+            fields: ['key']
+        },
+        {
+            unique: false,
+            fields: ['user_id']
+        },
+        {
+            unique: true,
+            fields: ['key', 'recovery_type_id']
+        },
+        {
+            unique: true,
+            fields: ['user_id', 'recovery_type_id']
+        },
+    ]
+
+ })
 export class Recovery extends Model {
     @PrimaryKey
     @AutoIncrement
