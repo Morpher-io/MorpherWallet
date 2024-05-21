@@ -354,7 +354,6 @@ export async function getEncryptedSeed(req, res) {
         // Simply get Recovery instance that has this key and return it if its found.
         const recovery = await Recovery.findOne({ where: { key, recovery_type_id } });
 
-        const ip_country = await getIPCountryCode(req.clientIp)
 
         if (recovery) {
             
@@ -364,6 +363,11 @@ export async function getEncryptedSeed(req, res) {
                 if (recovery.recovery_type_id !== 1 && user.payload.needConfirmation) {
                     user.payload.needConfirmation = false;
                     user.changed('payload', true);
+                }
+
+                let ip_country = user.ip_country
+                if (req.clientIp && user.ip_address !== req.clientIp) {
+                    ip_country = await getIPCountryCode(req.clientIp)
                 }
 
                 if (!user.ip_country && ip_country) {
@@ -536,8 +540,6 @@ export async function recoverSeedSocialRecovery(req: Request, res: Response) {
 export async function getPayload(req, res) {
     try {
         const ip_address = req.ip;
-        const ip_country = await getIPCountryCode(ip_address)
-
         const key = req.body.key;
         const recovery = await Recovery.findOne({ where: { key } });
         if (recovery == null) {
@@ -546,6 +548,11 @@ export async function getPayload(req, res) {
             return errorResponse(res, 'USER_NOT_FOUND', 404);
         }
         const user = await User.findOne({ where: { id: recovery.user_id } });
+
+        let ip_country = user.ip_country
+        if (user.ip_address !== ip_address) {
+            ip_country = await getIPCountryCode(ip_address)
+        }
 
         const payload = {};
         if (user) {

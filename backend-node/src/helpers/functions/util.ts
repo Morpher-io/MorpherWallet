@@ -195,7 +195,12 @@ const formatLogData = (data: any) => {
     }
 };
 
+let ip_cache = {}
+
 export const getIPCountryCode = async ip_address => {
+    if (ip_cache[ip_address]) {
+        return ip_cache[ip_address]
+    }
     const axios = require('axios')
 
     let country_code = null;
@@ -237,6 +242,7 @@ export const getIPCountryCode = async ip_address => {
         }
     }
 
+    ip_cache[ip_address] = country_code
     return country_code;
 };
 

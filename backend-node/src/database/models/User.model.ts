@@ -2,14 +2,20 @@ import { AutoIncrement, Column, DataType, HasMany, Model, PrimaryKey, Table, Uni
 import { Recovery } from './Recovery.model';
 import { Userhistory } from './Userhistory.model';
 
-@Table({ timestamps: true })
+@Table({ timestamps: true,
+    indexes: [
+        {
+            unique: true,
+            fields: ['email']
+        },
+    ]
+ })
 export class User extends Model {
     @PrimaryKey
     @AutoIncrement
     @Column
     id: number;
 
-    @Unique
     @Column({
         type: DataType.TEXT
     })
