@@ -1,28 +1,63 @@
 # morpherwallet
 
+Morpher wallet frontend - 
+Project Libraries: 
+    Vue 3 in Vite
+    pinia store
+    Viem
+    buefy / bulma
+    vue-gtag - for handlin google gtag integration
+    vue-i18n - for multi language support
+    vue3-jazzicon - jazzicon generation
+    
+
+## Customize configuration
+
+See [Vite Configuration Reference](https://vitejs.dev/config/).
+
 ## Project setup
-```
+```sh
 npm install
 ```
 
-### Compiles and hot-reloads for development
-```
+### Compile and Hot-Reload for Development
+
+```sh
 npm run serve
 ```
 
-### Compiles and minifies for production
-```
+
+### Type-Check, Compile and Minify for Production
+
+```sh
 npm run build
 ```
 
-### Run your end-to-end tests
 
-`npm run tests` or `npm run tests-headless` 
+### Run Unit Tests with [Vitest](https://vitest.dev/)
 
-### Lints and fixes files
+```sh
+npm run test:unit
 ```
+
+### Run End-to-End Tests with [Cypress](https://www.cypress.io/)
+
+```sh
+npm run test:e2e:dev
+```
+
+This runs the end-to-end tests against the Vite development server.
+It is much faster than the production build.
+
+But it's still recommended to test the production build with `test:e2e` before deploying (e.g. in CI environments):
+
+```sh
+npm run build
+npm run test:e2e
+```
+
+### Lint with [ESLint](https://eslint.org/)
+
+```sh
 npm run lint
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
