@@ -10,6 +10,7 @@ const countryList = process.env.COUNTRY_LIST || '[]';
 import { Logger } from '../helpers/functions/winston';
 import { getKeyEmail } from '../helpers/functions/sso';
 const vk_tokens = {};
+import axios from 'axios';
 
 // Function to save new signups to the database.
 export async function saveEmailPassword(req: Request, res: Response) {
@@ -1237,7 +1238,8 @@ export const fetchVKAuthToken = async (req, res) => {
 
         const token = req.body.code
 
-        const axios = require('axios')
+        
+
 
         const getAuthToken = `https://oauth.vk.com/access_token?client_id=${process.env.VK_APP_ID}&client_secret=${process.env.VK_SECURE_KEY}&redirect_uri=${process.env.VK_URL}&code=${token}`
 
@@ -1278,7 +1280,6 @@ export const recoveryVKAuthToken = async (req, res) => {
         const token = req.body.code
         const type = req.body.type
 
-        const axios = require('axios')
         let getAuthToken;
         
 

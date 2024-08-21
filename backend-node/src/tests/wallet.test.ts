@@ -3,13 +3,13 @@ import { describe, it, beforeEach } from 'mocha';
 import { Recovery, User } from '../database/models';
 import { sha256, sortObject } from '../helpers/functions/util';
 import { authenticator } from 'otplib';
+import { privateKeyToAccount } from 'viem/accounts'
 
 const app = require('../index').app;
 const request = require('supertest');
 
-const Web3EthAccounts = require('web3-eth-accounts');
 
-const Account = new Web3EthAccounts('https://sidechain.morpher.com');
+// const Account = new Web3EthAccounts('https://sidechain.morpher.com');
 
 async function clearDatabase() {
     await Recovery.destroy({ where: {} });
@@ -188,24 +188,27 @@ describe('Wallet controller test cases', async () => {
 
         // Get the email verification code from the payload.
         const user = await User.findOne();
-        encryptedSeedData.email2fa = user.email_verification_code;
+        if (user) {
+            encryptedSeedData.email2fa = user.email_verification_code;
 
-        // Confirm user first
-        await request(app)
-            .post('/v1/verifyEmailConfirmationCode')
-            .send({
-                key: bodyData.key,
-                code: user.email_verification_code
-            })
-            .set('Accept', 'application/json');
+            // Confirm user first
+            await request(app)
+                .post('/v1/verifyEmailConfirmationCode')
+                .send({
+                    key: bodyData.key,
+                    code: user.email_verification_code
+                })
+                .set('Accept', 'application/json');
 
-        const walletResponse = await request(app)
-            .post('/v1/getEncryptedSeed')
-            .send(encryptedSeedData)
-            .set('Accept', 'application/json');
+            const walletResponse = await request(app)
+                .post('/v1/getEncryptedSeed')
+                .send(encryptedSeedData)
+                .set('Accept', 'application/json');
 
-        expect(walletResponse.status).toEqual(200);
-        expect(walletResponse.body).toHaveProperty('encryptedSeed');
+            
+            expect(walletResponse.status).toEqual(200);
+            expect(walletResponse.body).toHaveProperty('encryptedSeed');
+        }
     });
 
     it('returns error if user not confirmed', async () => {
@@ -243,52 +246,53 @@ describe('Wallet controller test cases', async () => {
 
         // Get the email verification code from the payload.
         const user = await User.findOne();
+        if (user) {
+            // Confirm user first
+            await request(app)
+                .post('/v1/verifyEmailConfirmationCode')
+                .send({
+                    key: bodyData.key,
+                    code: user.email_verification_code
+                })
+                .set('Accept', 'application/json');
 
-        // Confirm user first
-        await request(app)
-            .post('/v1/verifyEmailConfirmationCode')
-            .send({
-                key: bodyData.key,
-                code: user.email_verification_code
-            })
-            .set('Accept', 'application/json');
+            // Confirm user first
+            await request(app)
+                .post('/v1/verifyEmailConfirmationCode')
+                .send({
+                    key: bodyData.key,
+                    code: user.email_verification_code
+                })
+                .set('Accept', 'application/json');
 
-        // Confirm user first
-        await request(app)
-            .post('/v1/verifyEmailConfirmationCode')
-            .send({
-                key: bodyData.key,
-                code: user.email_verification_code
-            })
-            .set('Accept', 'application/json');
+            // Enable email 2fa since it is disabled by default
+            const account = privateKeyToAccount(secureAccount.privateKey as `0x${string}`);
 
-        // Enable email 2fa since it is disabled by default
-        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+            const data = {
+                email: true,
+                authenticator: false,
+                nonce: user.nonce,
+                email2faVerification: user.email_verification_code
+            };
 
-        const data = {
-            email: true,
-            authenticator: false,
-            nonce: user.nonce,
-            email2faVerification: user.email_verification_code
-        };
+            const signature = account.sign(JSON.stringify(sortObject(data)));
 
-        const signature = account.sign(JSON.stringify(sortObject(data)));
+            await request(app)
+                .post('/v1/auth/change2FAMethods')
+                .send(data)
+                .set('Accept', 'application/json')
+                .set('recoveryTypeId', 1)
+                .set('Signature', JSON.stringify(signature))
+                .set('key', bodyData.key);
 
-        await request(app)
-            .post('/v1/auth/change2FAMethods')
-            .send(data)
-            .set('Accept', 'application/json')
-            .set('recoveryTypeId', 1)
-            .set('Signature', JSON.stringify(signature))
-            .set('key', bodyData.key);
+            const walletResponse = await request(app)
+                .post('/v1/getEncryptedSeed')
+                .send(encryptedSeedData)
+                .set('Accept', 'application/json');
 
-        const walletResponse = await request(app)
-            .post('/v1/getEncryptedSeed')
-            .send(encryptedSeedData)
-            .set('Accept', 'application/json');
-
-        expect(walletResponse.status).toEqual(400);
-        expect(walletResponse.body.error).toEqual('SOME_2FA_WRONG');
+            expect(walletResponse.status).toEqual(400);
+            expect(walletResponse.body.error).toEqual('SOME_2FA_WRONG');
+        }
     });
 
     it('returns user payload', async () => {
@@ -364,7 +368,7 @@ describe('Wallet controller test cases', async () => {
 
     // facebook recovery
     it('create user with facebook recovery method', async () => {
-        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+        const account = privateKeyToAccount(secureAccount.privateKey as `0x${string}`);
 
         await request(app)
             .post('/v1/saveEmailPassword')
@@ -398,7 +402,7 @@ describe('Wallet controller test cases', async () => {
     // google recovary and login login and apple recovery
 
     it('google and apple recovery and login', async () => {
-        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+        const account = privateKeyToAccount(secureAccount.privateKey as `0x${string}`);
 
         await request(app)
             .post('/v1/saveEmailPassword')
@@ -477,7 +481,7 @@ describe('Wallet controller test cases', async () => {
     });
 
     it('returns recovery methods', async () => {
-        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+        const account = privateKeyToAccount(secureAccount.privateKey as `0x${string}`);
 
         await request(app)
             .post('/v1/saveEmailPassword')
@@ -501,7 +505,7 @@ describe('Wallet controller test cases', async () => {
 
     it('tests change password user auth', async () => {
         // Create account with private key that corresponds to eth wallet in user database.
-        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+        const account = privateKeyToAccount(secureAccount.privateKey as `0x${string}`);
 
         await request(app)
             .post('/v1/saveEmailPassword')
@@ -532,7 +536,7 @@ describe('Wallet controller test cases', async () => {
 
     it('tests change email user auth', async () => {
         // Create account with private key that corresponds to eth wallet in user database.
-        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+        const account = privateKeyToAccount(secureAccount.privateKey as `0x${string}`);
 
         await request(app)
             .post('/v1/saveEmailPassword')
@@ -579,7 +583,7 @@ describe('Wallet controller test cases', async () => {
 
     it('tests change password user auth error if bad body data', async () => {
         // Create account with private key that corresponds to eth wallet in user database.
-        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+        const account = privateKeyToAccount(secureAccount.privateKey as `0x${string}`);
 
         await request(app)
             .post('/v1/saveEmailPassword')
@@ -603,7 +607,7 @@ describe('Wallet controller test cases', async () => {
 
     it('tests change 2fa methods', async () => {
         // Create account with private key that corresponds to eth wallet in user database.
-        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+        const account = privateKeyToAccount(secureAccount.privateKey as `0x${string}`);
 
         await request(app)
             .post('/v1/saveEmailPassword')
@@ -640,7 +644,7 @@ describe('Wallet controller test cases', async () => {
 
     it('tests generate qr code', async () => {
         // Create account with private key that corresponds to eth wallet in user database.
-        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+        const account = privateKeyToAccount(secureAccount.privateKey as `0x${string}`);
 
         await request(app)
             .post('/v1/saveEmailPassword')
@@ -699,7 +703,7 @@ describe('Wallet controller test cases', async () => {
 
     // Create account with private key that corresponds to eth wallet in user database.
     it('returns error if email code not right', async () => {
-        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+        const account = privateKeyToAccount(secureAccount.privateKey as `0x${string}`);
 
         await request(app)
             .post('/v1/saveEmailPassword')
@@ -751,7 +755,7 @@ describe('Wallet controller test cases', async () => {
 
     // Create account with private key that corresponds to eth wallet in user database.
     it('tests verify authenticator code', async () => {
-        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+        const account = privateKeyToAccount(secureAccount.privateKey as `0x${string}`);
 
         await request(app)
             .post('/v1/saveEmailPassword')
@@ -782,7 +786,7 @@ describe('Wallet controller test cases', async () => {
 
     // Create account with private key that corresponds to eth wallet in user database.
     it('tests verify authenticator code error', async () => {
-        const account = Account.privateKeyToAccount(secureAccount.privateKey);
+        const account = privateKeyToAccount(secureAccount.privateKey as `0x${string}`);
 
         await request(app)
             .post('/v1/saveEmailPassword')

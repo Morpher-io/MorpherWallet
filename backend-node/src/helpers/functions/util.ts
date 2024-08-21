@@ -1,4 +1,5 @@
 import { Recovery_Type } from '../../database/models/Recovery_Type.model';
+import axios from 'axios';
 
 const crypto = require('crypto');
 
@@ -170,7 +171,6 @@ const formatLogData = (data: any) => {
         if (process.env.RECAPTCHA_SECRET == 'DISABLED') {
             return true;
         }
-        const axios = require('axios')
 
         const response = await  axios.post(
                 'https://www.google.com/recaptcha/api/siteverify?secret=' +
@@ -201,7 +201,6 @@ export const getIPCountryCode = async ip_address => {
     if (ip_cache[ip_address]) {
         return ip_cache[ip_address]
     }
-    const axios = require('axios')
 
     let country_code = null;
     if (!ip_address || ip_address === '127.0.0.1' || ip_address === '::ffff:127.0.0.1') {
