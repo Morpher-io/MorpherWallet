@@ -2,15 +2,23 @@
   <div>
     <div v-if="currentPage === 0">
       <div v-if="store.email" class="container">
-        <img src="@/assets/img/recover_wallet.svg" :alt="$t('images.RECOVER_WALLET')" class="mb-3" />
+        <img
+          src="@/assets/img/recover_wallet.svg"
+          :alt="$t('images.RECOVER_WALLET')"
+          class="mb-3"
+        />
         <h2 class="title">{{ $t('recovery.RECOVERY_TITLE') }}</h2>
         <p class="subtitle">{{ $t('recovery.RECOVERY_DESCRIPTION') }}</p>
 
         <div class="error alert warning is-size-7" v-if="logonError">
           <p data-cy="loginError">⚠️ <span v-html="logonError || '&nbsp;'"></span></p>
-          <a v-if="showMore"
+          <a
+            v-if="showMore"
             href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/"
-            target="__blank" class="login-router transition-faster"><span>{{ $t('common.LEARN_MORE') }}</span></a>
+            target="__blank"
+            class="login-router transition-faster"
+            ><span>{{ $t('common.LEARN_MORE') }}</span></a
+          >
         </div>
 
         <div class="field is-grouped">
@@ -34,19 +42,33 @@
 
         <p class="is-size-7 mt-5 transition-faster">
           {{ $t('recovery.RECOVERY_NEED_HELP') }}&nbsp;
-          <a href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/"
-            target="__blank" class="login-router">{{ $t('common.LEARN_MORE') }}</a>
+          <a
+            href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/"
+            target="__blank"
+            class="login-router"
+            >{{ $t('common.LEARN_MORE') }}</a
+          >
         </p>
       </div>
       <div v-else class="container">
-        <img src="@/assets/img/recover_wallet.svg" :alt="$t('images.RECOVER_WALLET')" class="mb-3" />
+        <img
+          src="@/assets/img/recover_wallet.svg"
+          :alt="$t('images.RECOVER_WALLET')"
+          class="mb-3"
+        />
         <h2 class="title">{{ $t('recovery.RECOVERY_TITLE') }}</h2>
         <p class="subtitle">{{ $t('recovery.ENTER_EMAIL') }}</p>
         <form v-on:submit.prevent="checkEmail" novalidate>
           <div class="field">
             <label class="label">{{ $t('common.EMAIL') }}</label>
             <div class="control">
-              <input type="email" class="input" name="newEmail" v-model="newEmail" @keypress="handleKeyPress" />
+              <input
+                type="email"
+                class="input"
+                name="newEmail"
+                v-model="newEmail"
+                @keypress="handleKeyPress"
+              />
             </div>
           </div>
 
@@ -54,7 +76,11 @@
             <p data-cy="loginError">⚠️ <span v-html="logonError"></span></p>
           </div>
 
-          <button data-cy="confirmButton" type="submit" class="button is-green big-button is-login transition-faster">
+          <button
+            data-cy="confirmButton"
+            type="submit"
+            class="button is-green big-button is-login transition-faster"
+          >
             <span class="text">{{ $t('common.CONTINUE') }}</span>
           </button>
           <router-link to="/login">
@@ -65,13 +91,25 @@
         </form>
         <p class="is-size-7 mt-5 transition-faster">
           {{ $t('recovery.RECOVERY_NEED_HELP') }}&nbsp;
-          <a href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/"
-            target="__blank" class="login-router">{{ $t('common.LEARN_MORE') }}</a>
+          <a
+            href="https://support.morpher.com/en/article/recovering-your-wallet-forgot-password-snvhxu/"
+            target="__blank"
+            class="login-router"
+            >{{ $t('common.LEARN_MORE') }}</a
+          >
         </p>
 
-        <vue-recaptcha ref="recaptcha" size="invisible" :sitekey="recaptchaSiteKey" :load-recaptcha-script="true"
-          @verify="onCaptchaVerified" @error="onCaptchaError" @expired="onCaptchaExpired" @render="onCaptchaLoaded"
-          style="display: none" />
+        <vue-recaptcha
+          ref="recaptcha"
+          size="invisible"
+          :sitekey="recaptchaSiteKey"
+          :load-recaptcha-script="true"
+          @verify="onCaptchaVerified"
+          @error="onCaptchaError"
+          @expired="onCaptchaExpired"
+          @render="onCaptchaLoaded"
+          style="display: none"
+        />
       </div>
     </div>
     <div class="container">

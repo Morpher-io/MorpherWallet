@@ -1,8 +1,16 @@
 <template>
   <div>
-    <vue-recaptcha ref="recaptcha" size="invisible" :sitekey="recaptchaSiteKey" :load-recaptcha-script="true"
-      @verify="onCaptchaVerified" @error="onCaptchaError" @expired="onCaptchaExpired" @render="onCaptchaLoaded"
-      style="display: none" />
+    <vue-recaptcha
+      ref="recaptcha"
+      size="invisible"
+      :sitekey="recaptchaSiteKey"
+      :load-recaptcha-script="true"
+      @verify="onCaptchaVerified"
+      @error="onCaptchaError"
+      @expired="onCaptchaExpired"
+      @render="onCaptchaLoaded"
+      style="display: none"
+    />
 
     <div class="container">
       <h2 data-cy="logInTitle" class="title">{{ $t('auth.LOGIN') }}</h2>
@@ -13,11 +21,15 @@
         <LoginApple @processMethod="processMethod"></LoginApple>
         <LoginGoogle @processMethod="processMethod"></LoginGoogle>
 
-        <button class="button is-grey big-button outlined-button is-thick facebook-button transition-faster" @click="
-          logonError = '';
-        showSignUp = false;
-        passwordSignin = true;
-        " data-cy="emailLoginButton">
+        <button
+          class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
+          @click="
+            logonError = '';
+            showSignUp = false;
+            passwordSignin = true;
+          "
+          data-cy="emailLoginButton"
+        >
           <span class="icon img">
             <img src="@/assets/img/email_icon.svg" alt="Email Icon" />
           </span>
@@ -29,10 +41,12 @@
         <div class="error mt-5" v-if="logonError">
           <p data-cy="loginError">
             ⚠️ <span v-html="logonError"></span>
-            <router-link v-if="showSignUp" to="/signup" class="login-router transition-faster"><span class="ml-1">{{
-              $t('auth.SIGN_UP_WALLET_QUESTION') }}</span></router-link>
-            <router-link v-if="showRecovery" to="/recovery" class="login-router transition-faster"><span class="ml-1">{{
-              $t('auth.RECOVER_YOUR_WALLET_QUESTION') }}</span></router-link>
+            <router-link v-if="showSignUp" to="/signup" class="login-router transition-faster"
+              ><span class="ml-1">{{ $t('auth.SIGN_UP_WALLET_QUESTION') }}</span></router-link
+            >
+            <router-link v-if="showRecovery" to="/recovery" class="login-router transition-faster"
+              ><span class="ml-1">{{ $t('auth.RECOVER_YOUR_WALLET_QUESTION') }}</span></router-link
+            >
           </p>
         </div>
       </div>
@@ -41,8 +55,14 @@
         <div class="field">
           <label class="label">{{ $t('common.EMAIL') }}</label>
           <div class="control">
-            <input type="email" class="input" data-cy="walletEmail" @keydown="checkKeyPress" name="walletEmail"
-              v-model="walletEmail" />
+            <input
+              type="email"
+              class="input"
+              data-cy="walletEmail"
+              @keydown="checkKeyPress"
+              name="walletEmail"
+              v-model="walletEmail"
+            />
           </div>
         </div>
 
@@ -50,30 +70,44 @@
           <label class="label">{{ $t('common.PASSWORD') }}</label>
 
           <div class="control">
-            <input type="password" ref="login_password" class="input" data-cy="walletPassword" @keydown="checkKeyPress"
-              name="walletPassword" v-model="walletPassword" />
+            <input
+              type="password"
+              ref="login_password"
+              class="input"
+              data-cy="walletPassword"
+              @keydown="checkKeyPress"
+              name="walletPassword"
+              v-model="walletPassword"
+            />
           </div>
         </div>
 
         <div class="error" v-if="logonError">
           <p data-cy="loginError">
             ⚠️ <span v-html="logonError"></span>
-            <router-link v-if="showSignUp" to="/signup" class="login-router transition-faster"><span class="ml-1">{{
-              $t('auth.SIGN_UP_WALLET_QUESTION') }}</span></router-link>
-            <router-link v-if="showRecovery" to="/recovery" class="login-router transition-faster"><span class="ml-1">{{
-              $t('auth.RECOVER_YOUR_WALLET_QUESTION') }}</span></router-link>
+            <router-link v-if="showSignUp" to="/signup" class="login-router transition-faster"
+              ><span class="ml-1">{{ $t('auth.SIGN_UP_WALLET_QUESTION') }}</span></router-link
+            >
+            <router-link v-if="showRecovery" to="/recovery" class="login-router transition-faster"
+              ><span class="ml-1">{{ $t('auth.RECOVER_YOUR_WALLET_QUESTION') }}</span></router-link
+            >
           </p>
         </div>
 
-        <button type="submit" @click="login" data-cy="submit"
-          class="button is-green big-button is-login transition-faster">
+        <button
+          type="submit"
+          @click="login"
+          data-cy="submit"
+          class="button is-green big-button is-login transition-faster"
+        >
           <span class="text">{{ $t('auth.LOGIN') }}</span>
         </button>
 
         <p class="forgot-password">
           {{ $t('auth.FORGOT_PASSWORD') }}
-          <router-link to="/recovery" class="login-router transition-faster"><span>{{ $t('auth.RECOVER_YOUR_WALLET')
-              }}</span></router-link>
+          <router-link to="/recovery" class="login-router transition-faster"
+            ><span>{{ $t('auth.RECOVER_YOUR_WALLET') }}</span></router-link
+          >
         </p>
       </div>
 

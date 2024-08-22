@@ -1,8 +1,11 @@
 <template>
   <div class="container">
     <div v-if="currentPage === 0" class="title-container has-text-left">
-      <button @click="redirectUser" tag="button"
-        class="button is-grey big-button outlined-button is-thick transition-faster is-icon-only">
+      <button
+        @click="redirectUser"
+        tag="button"
+        class="button is-grey big-button outlined-button is-thick transition-faster is-icon-only"
+      >
         <span class="icon is-small">
           <i class="fas fa-chevron-left"></i>
         </span>
@@ -19,8 +22,13 @@
       <ConfirmAccess @accessConfirmed="accessConfirmed" @pageBack="pageBack" />
     </div>
     <div v-if="currentPage === 2">
-      <ChangeAuthenticator v-if="currentMethod === 'authenticator' && secret" :qrCode="qrCode" :secret="secret"
-        @setCode="setCode" @pageBack="pageBack" />
+      <ChangeAuthenticator
+        v-if="currentMethod === 'authenticator' && secret"
+        :qrCode="qrCode"
+        :secret="secret"
+        @setCode="setCode"
+        @pageBack="pageBack"
+      />
       <Change2FAEmail v-if="currentMethod === 'email'" @setCode="setCode" @pageBack="pageBack" />
     </div>
     <div v-if="currentPage === 3">
@@ -44,7 +52,11 @@
           ⚠ {{ $t('2fa.2_STEP_REMOVED_WARNING') }}
         </div>
 
-        <button @click="resetData" tag="button" class="button outlined-button big-button transition-faster">
+        <button
+          @click="resetData"
+          tag="button"
+          class="button outlined-button big-button transition-faster"
+        >
           <span data-cy="closeButton" class="text">{{ $t('common.CLOSE') }}</span>
         </button>
 
@@ -207,10 +219,7 @@ export default defineComponent({
     setCurrentMethod(method: any) {
       this.isEnabling = method['isEnabling']
       this.currentMethod = method['method']
-      if (
-        this.store.unlocked == true ||
-        (method.method == 'email' && method.isEnabling == true)
-      ) {
+      if (this.store.unlocked == true || (method.method == 'email' && method.isEnabling == true)) {
         this.accessConfirmed(true)
       } else {
         this.currentPage = 1

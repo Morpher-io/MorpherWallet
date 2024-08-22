@@ -8,8 +8,14 @@
       <label class="label">{{ $t('2fa.VERIFICATION_CODE') }}</label>
 
       <div class="control">
-        <input data-cy="2faEmailCode" type="number" inputmode="numeric" class="input" v-model="authenticatorCode"
-          @keypress="handleKeyPress" />
+        <input
+          data-cy="2faEmailCode"
+          type="number"
+          inputmode="numeric"
+          class="input"
+          v-model="authenticatorCode"
+          @keypress="handleKeyPress"
+        />
       </div>
     </div>
 
@@ -17,11 +23,18 @@
       <p>⚠️ <span data-cy="2faEmailError" v-html="logonError"></span></p>
     </div>
 
-    <button data-cy="confirmButton" @click="setCode()"
-      class="button is-green big-button is-login transition-faster mt-5" :disabled="!authenticatorCode">
+    <button
+      data-cy="confirmButton"
+      @click="setCode()"
+      class="button is-green big-button is-login transition-faster mt-5"
+      :disabled="!authenticatorCode"
+    >
       <span class="text">{{ $t('common.SUBMIT') }}</span>
     </button>
-    <button v-on:click="pageBack()" class="button is-ghost is-blue big-button medium-text transition-faster">
+    <button
+      v-on:click="pageBack()"
+      class="button is-ghost is-blue big-button medium-text transition-faster"
+    >
       <span class="text">{{ $t('common.CANCEL') }}</span>
     </button>
   </div>

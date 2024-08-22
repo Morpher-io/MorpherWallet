@@ -3,20 +3,25 @@
     <div class="user-details settings-data">
       <div class="details">
         <div class="is-flex has-text-left">
-
           <jazzicon :address="store.accounts[0]" class="jazz-icon" :diameter="32" />
 
           <div class="ml-3">
             <p class="medium-text has-text-weight-medium">
               <span class="important-font"> {{ formatEthAddress(store.accounts[0]) }}</span>
-              <span class="copy-icon" @click="copyETHAddress(store.accounts[0])"><i class="fas fa-copy" /></span>
+              <span class="copy-icon" @click="copyETHAddress(store.accounts[0])"
+                ><i class="fas fa-copy"
+              /></span>
             </p>
             <p data-cy="currentEmail">{{ store.email }}</p>
           </div>
         </div>
         <div class="buttons horizontal-buttons mt-3">
-          <button tag="button" :class="{ 'cursor-not-allowed': !isIframe() }" @click="sendInApp"
-            class="button is-light-purple is-small-button has-text-weight-bold transition-faster">
+          <button
+            tag="button"
+            :class="{ 'cursor-not-allowed': !isIframe() }"
+            @click="sendInApp"
+            class="button is-light-purple is-small-button has-text-weight-bold transition-faster"
+          >
             <span class="icon is-small">
               <i class="fas fa-paper-plane"></i>
             </span>
@@ -25,8 +30,10 @@
               {{ $t('common.SEND_DESCRIPTION') }}
             </div>
           </button>
-          <button @click="$router.push('/settings').catch()"
-            class="button is-light-blue is-small-button has-text-weight-bold transition-faster">
+          <button
+            @click="$router.push('/settings').catch()"
+            class="button is-light-blue is-small-button has-text-weight-bold transition-faster"
+          >
             <span class="icon is-small">
               <i class="fas fa-cog"></i>
             </span>
@@ -36,7 +43,9 @@
       </div>
     </div>
 
-    <p class="mt-5 has-text-weight-medium is-size-6 is-flex is-align-items-center important-font has-text-left">
+    <p
+      class="mt-5 has-text-weight-medium is-size-6 is-flex is-align-items-center important-font has-text-left"
+    >
       <i class="fas fa-life-ring is-size-6 mr-1"></i>
       {{ noRecoveryMethods ? $t('common.RECOVERY_MISSING') : $t('common.RECOVERY') }}
     </p>
@@ -45,7 +54,9 @@
       <div v-if="noRecoveryMethods" class="details has-text-left">
         <p v-html="$t('recovery.ACCOUNT_AT_RISK')"></p>
         <router-link to="/settings/recovery">
-          <button class="button is-light-green is-small-button has-text-weight-bold transition-faster mt-3">
+          <button
+            class="button is-light-green is-small-button has-text-weight-bold transition-faster mt-3"
+          >
             <span class="text smaller-font">{{ $t('recovery.ADD_ACCOUNT_RECOVERY') }}</span>
           </button>
         </router-link>
@@ -82,7 +93,9 @@
       </div>
     </div>
 
-    <p class="mt-4 has-text-weight-medium is-size-6 is-flex is-align-items-center important-font has-text-left">
+    <p
+      class="mt-4 has-text-weight-medium is-size-6 is-flex is-align-items-center important-font has-text-left"
+    >
       <i class="fas fa-shield-alt is-size-6 mr-1"></i> {{ $t('common.SECURITY') }}
     </p>
 
@@ -92,7 +105,7 @@
           {{ $t('2fa.PLEASE_ADD_2_STEP') }}
           <router-link to="/settings/2fa" class="login-router transition-faster">{{
             $t('common.ENABLE_IN_SETTINGS')
-            }}</router-link>
+          }}</router-link>
         </p>
       </div>
       <div v-else class="details has-text-left">
@@ -119,8 +132,12 @@
     <div class="links is-flex is-align-items-center is-justify-content-center">
       <div class="link is-flex has-text-weight-medium is-align-items-center">
         <i class="fas fa-question-circle mr-1 is-size-6"></i>
-        <a href="https://support.morpher.com/en/category/morpher-wallet-idvnts/" target="__blank"
-          class="login-router transition-faster">{{ $t('common.SUPPORT') }}</a>
+        <a
+          href="https://support.morpher.com/en/category/morpher-wallet-idvnts/"
+          target="__blank"
+          class="login-router transition-faster"
+          >{{ $t('common.SUPPORT') }}</a
+        >
       </div>
       <div class="divider vertical"></div>
       <div class="link is-flex has-text-weight-medium is-align-items-center">
@@ -195,7 +212,6 @@ export default defineComponent({
     this.store.loginComplete = true
   },
   methods: {
-
     async sendInApp() {
       if (this.isIframe()) {
         if (this.store.connection && this.store.connection !== null) {

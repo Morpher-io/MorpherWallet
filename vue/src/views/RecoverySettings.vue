@@ -1,10 +1,17 @@
 <template>
   <div class="container">
-    <ConfirmAccess v-if="currentPage === 0" @pageBack="pageBack" @accessConfirmed="accessConfirmed" />
+    <ConfirmAccess
+      v-if="currentPage === 0"
+      @pageBack="pageBack"
+      @accessConfirmed="accessConfirmed"
+    />
     <div v-if="currentPage === 1">
       <div class="title-container has-text-left">
-        <button @click="redirectUser" tag="button"
-          class="button is-grey big-button outlined-button is-thick transition-faster is-icon-only">
+        <button
+          @click="redirectUser"
+          tag="button"
+          class="button is-grey big-button outlined-button is-thick transition-faster is-icon-only"
+        >
           <span class="icon is-small">
             <i class="fas fa-chevron-left"></i>
           </span>
@@ -19,44 +26,77 @@
         <p>⚠️ <span v-html="logonError"></span></p>
       </div>
       <div>
-        <AddRecoveryApple v-if="whatRecovery.apple && store.recoveryTypeId !== 6" @processMethod="processMethod">
+        <AddRecoveryApple
+          v-if="whatRecovery.apple && store.recoveryTypeId !== 6"
+          @processMethod="processMethod"
+        >
         </AddRecoveryApple>
 
-        <AddRecoveryGoogle v-if="whatRecovery.google && store.recoveryTypeId !== 3" @processMethod="processMethod">
+        <AddRecoveryGoogle
+          v-if="whatRecovery.google && store.recoveryTypeId !== 3"
+          @processMethod="processMethod"
+        >
         </AddRecoveryGoogle>
 
-        <AddRecoveryFacebook v-if="whatRecovery.facebook" :walletEmail="store.email" @processMethod="processMethod">
+        <AddRecoveryFacebook
+          v-if="whatRecovery.facebook"
+          :walletEmail="store.email"
+          @processMethod="processMethod"
+        >
         </AddRecoveryFacebook>
 
-        <AddRecoveryVkontakte v-if="whatRecovery.vkontakte" :walletEmail="store.email" @processMethod="processMethod">
+        <AddRecoveryVkontakte
+          v-if="whatRecovery.vkontakte"
+          :walletEmail="store.email"
+          @processMethod="processMethod"
+        >
         </AddRecoveryVkontakte>
       </div>
 
-      <div v-if="
-        !whatRecovery.google ||
-        !whatRecovery.facebook ||
-        !whatRecovery.vkontakte ||
-        !whatRecovery.apple
-      ">
-        <p v-if="
-          whatRecovery.google ||
-          whatRecovery.facebook ||
-          whatRecovery.vkontakte ||
-          whatRecovery.apple
-        " class="another-text has-text-left mt-5">
+      <div
+        v-if="
+          !whatRecovery.google ||
+          !whatRecovery.facebook ||
+          !whatRecovery.vkontakte ||
+          !whatRecovery.apple
+        "
+      >
+        <p
+          v-if="
+            whatRecovery.google ||
+            whatRecovery.facebook ||
+            whatRecovery.vkontakte ||
+            whatRecovery.apple
+          "
+          class="another-text has-text-left mt-5"
+        >
           {{ $t('recovery.ADD_ANOTHER_ACCOUNT') }}
         </p>
 
-        <AddRecoveryApple v-if="!whatRecovery.apple && store.recoveryTypeId !== 6" @processMethod="processMethod">
+        <AddRecoveryApple
+          v-if="!whatRecovery.apple && store.recoveryTypeId !== 6"
+          @processMethod="processMethod"
+        >
         </AddRecoveryApple>
 
-        <AddRecoveryGoogle v-if="!whatRecovery.google && store.recoveryTypeId !== 3" @processMethod="processMethod">
+        <AddRecoveryGoogle
+          v-if="!whatRecovery.google && store.recoveryTypeId !== 3"
+          @processMethod="processMethod"
+        >
         </AddRecoveryGoogle>
 
-        <AddRecoveryFacebook v-if="!whatRecovery.facebook" :walletEmail="store.email" @processMethod="processMethod">
+        <AddRecoveryFacebook
+          v-if="!whatRecovery.facebook"
+          :walletEmail="store.email"
+          @processMethod="processMethod"
+        >
         </AddRecoveryFacebook>
 
-        <AddRecoveryVkontakte v-if="!whatRecovery.vkontakte" :walletEmail="store.email" @processMethod="processMethod">
+        <AddRecoveryVkontakte
+          v-if="!whatRecovery.vkontakte"
+          :walletEmail="store.email"
+          @processMethod="processMethod"
+        >
         </AddRecoveryVkontakte>
       </div>
 
@@ -92,7 +132,11 @@
           }}
         </p>
 
-        <button @click="resetData" tag="button" class="button outlined-button big-button transition-faster">
+        <button
+          @click="resetData"
+          tag="button"
+          class="button outlined-button big-button transition-faster"
+        >
           <span class="text">{{ $t('common.CLOSE') }}</span>
         </button>
       </div>

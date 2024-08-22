@@ -6,8 +6,10 @@
         <p class="status-text">
           {{ $t('errors.NETWORK_ERROR_DESCRIPTION') }}
         </p>
-        <button class="button is-light-green is-small-button has-text-weight-bold transition-faster mt-3"
-          @click="() => hide()">
+        <button
+          class="button is-light-green is-small-button has-text-weight-bold transition-faster mt-3"
+          @click="() => hide()"
+        >
           <span class="text">{{ $t('common.OKAY') }}</span>
         </button>
       </div>
@@ -77,8 +79,7 @@ export default defineComponent({
 .fade-enter,
 .fade-leave-to
 
-/* .fade-leave-active below version 2.1.8 */
-  {
+/* .fade-leave-active below version 2.1.8 */ {
   opacity: 0;
 }
 </style>

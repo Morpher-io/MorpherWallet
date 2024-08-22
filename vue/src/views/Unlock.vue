@@ -1,8 +1,16 @@
 <template>
   <div class="container">
-    <vue-recaptcha ref="recaptcha" size="invisible" :sitekey="recaptchaSiteKey" :load-recaptcha-script="true"
-      @verify="onCaptchaVerified" @error="onCaptchaError" @expired="onCaptchaExpired" @render="onCaptchaLoaded"
-      style="display: none" />
+    <vue-recaptcha
+      ref="recaptcha"
+      size="invisible"
+      :sitekey="recaptchaSiteKey"
+      :load-recaptcha-script="true"
+      @verify="onCaptchaVerified"
+      @error="onCaptchaError"
+      @expired="onCaptchaExpired"
+      @render="onCaptchaLoaded"
+      style="display: none"
+    />
     <spinner v-model="showSpinner" v-bind:status="store.status"></spinner>
 
     <h2 class="title">👋 {{ $t('auth.UNLOCK_TITLE') }}</h2>
@@ -33,8 +41,14 @@
       <label class="label">{{ $t('common.PASSWORD') }}</label>
 
       <div class="control">
-        <input type="password" ref="unlock_password" class="input" name="walletPassword" v-model="walletPassword"
-          @keypress="handleKeyPress" />
+        <input
+          type="password"
+          ref="unlock_password"
+          class="input"
+          name="walletPassword"
+          v-model="walletPassword"
+          @keypress="handleKeyPress"
+        />
         <div v-if="showRecovery">
           <p class="help is-danger">
             {{ $t('auth.CANNOT_DECRYPT_PASSWORD') }}
@@ -48,14 +62,19 @@
       <p>⚠️ <span v-html="logonError"></span></p>
     </div>
 
-    <button v-if="recoveryTypeId !== 3 && recoveryTypeId !== 6" @click="login()"
-      class="button is-green big-button is-login transition-faster mt-5" :disabled="!walletPassword">
+    <button
+      v-if="recoveryTypeId !== 3 && recoveryTypeId !== 6"
+      @click="login()"
+      class="button is-green big-button is-login transition-faster mt-5"
+      :disabled="!walletPassword"
+    >
       <span class="text">{{ $t('auth.LOGIN') }}</span>
     </button>
     <p class="forgot-password">
       {{ $t('auth.FORGOT_PASSWORD') }}
-      <router-link to="/recovery" class="login-router transition-faster"><span>{{ $t('auth.RECOVER_YOUR_WALLET')
-          }}</span></router-link>
+      <router-link to="/recovery" class="login-router transition-faster"
+        ><span>{{ $t('auth.RECOVER_YOUR_WALLET') }}</span></router-link
+      >
     </p>
   </div>
 </template>
@@ -71,7 +90,6 @@ import { mapState } from 'pinia'
 import { useWalletStore } from '@/stores/wallet'
 import { getDictionaryValue } from '@/utils/dictionary'
 import { sha256 } from './../utils/cryptoFunctions'
-
 
 export default defineComponent({
   components: {
@@ -96,13 +114,13 @@ export default defineComponent({
       iconSeed: (state) => state.iconSeed,
       recoveryTypeId: (state) => state.recoveryTypeId,
       encryptedSeed: (state) => state.encryptedSeed,
-      hashedPassword: (state) => state.hashedPassword,
+      hashedPassword: (state) => state.hashedPassword
     })
   },
   async mounted() {
     if (!this.walletEmail) {
-      this.$router.push('/login').catch(() => undefined);
-      return;
+      this.$router.push('/login').catch(() => undefined)
+      return
     }
 
     // set focus to the password field when the control opens
@@ -110,7 +128,6 @@ export default defineComponent({
       const passwordEmelemt: any = this.$refs.unlock_password
       if (passwordEmelemt) passwordEmelemt.focus()
     }, 100)
-
 
     if (!this.encryptedSeed || !this.encryptedSeed.ciphertext) {
       await this.loadEncryptedSeed()
@@ -120,10 +137,7 @@ export default defineComponent({
       await this.loadPassword()
     }
 
-    if (
-      this.hashedPassword &&
-      this.encryptedSeed.ciphertext !== undefined
-    ) {
+    if (this.hashedPassword && this.encryptedSeed.ciphertext !== undefined) {
       this.loadAccount()
     } else {
       this.unlockUpdate()

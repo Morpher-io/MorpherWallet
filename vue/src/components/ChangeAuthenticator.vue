@@ -14,16 +14,26 @@
       {{ $t('2fa.NEED_AUTHENTICATOR_HELP') }}
       <a href="https://authy.com/download/" target="_blank" class="login-router">Authy</a>
       {{ $t('2fa.NEED_AUTHENTICATOR_OR') }}
-      <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US"
-        target="_blank" class="login-router">Google Authenticator</a>.
+      <a
+        href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US"
+        target="_blank"
+        class="login-router"
+        >Google Authenticator</a
+      >.
     </p>
 
     <div class="field">
       <label class="label">{{ $t('2fa.VERIFICATION_CODE') }}</label>
 
       <div class="control">
-        <input data-cy="2faAuthenticatorCode" type="number" inputmode="numeric" class="input"
-          v-model="authenticatorCode" @keypress="handleKeyPress" />
+        <input
+          data-cy="2faAuthenticatorCode"
+          type="number"
+          inputmode="numeric"
+          class="input"
+          v-model="authenticatorCode"
+          @keypress="handleKeyPress"
+        />
       </div>
     </div>
 
@@ -31,11 +41,18 @@
       <p>⚠️ <span data-cy="2faAuthenticatorError" v-html="logonError"></span></p>
     </div>
 
-    <button data-cy="confirm2faButton" @click="setCode()"
-      class="button is-green big-button is-login transition-faster mt-5" :disabled="!authenticatorCode">
+    <button
+      data-cy="confirm2faButton"
+      @click="setCode()"
+      class="button is-green big-button is-login transition-faster mt-5"
+      :disabled="!authenticatorCode"
+    >
       <span class="text">{{ $t('common.CONFIRM') }}</span>
     </button>
-    <button v-on:click="pageBack()" class="button is-ghost is-blue big-button medium-text transition-faster">
+    <button
+      v-on:click="pageBack()"
+      class="button is-ghost is-blue big-button medium-text transition-faster"
+    >
       <span class="text">{{ $t('common.BACK') }}</span>
     </button>
   </div>

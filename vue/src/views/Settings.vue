@@ -1,8 +1,11 @@
 <template>
   <div class="container">
     <div class="title-container has-text-left">
-      <button @click="redirectUser" tag="button"
-        class="button is-grey big-button outlined-button is-thick transition-faster is-icon-only">
+      <button
+        @click="redirectUser"
+        tag="button"
+        class="button is-grey big-button outlined-button is-thick transition-faster is-icon-only"
+      >
         <span class="icon is-small">
           <i class="fas fa-chevron-left"></i>
         </span>
@@ -14,8 +17,12 @@
     <div class="divider just-space" />
 
     <div v-if="!isEmailPasswordPage" class="settings-data">
-      <div data-cy="emailPasswordButton" key="email_passowrd" class="settings-link is-flex is-align-items-center"
-        @click="changeActive('email_password')">
+      <div
+        data-cy="emailPasswordButton"
+        key="email_passowrd"
+        class="settings-link is-flex is-align-items-center"
+        @click="changeActive('email_password')"
+      >
         <i class="fas fa-user-circle" />
         <span class="text">
           {{ $t('settings.EMAIL_AND_PASSWORD') }}
@@ -25,8 +32,12 @@
         </span>
       </div>
 
-      <div data-cy="recoverySettings" key="recovery" class="settings-link is-flex is-align-items-center"
-        @click="changeActive('recovery')">
+      <div
+        data-cy="recoverySettings"
+        key="recovery"
+        class="settings-link is-flex is-align-items-center"
+        @click="changeActive('recovery')"
+      >
         <i class="fas fa-life-ring" />
         <span class="text">
           {{ $t('settings.TRUSTED_ACCOUNT') }}
@@ -36,8 +47,12 @@
         </span>
       </div>
 
-      <div data-cy="verificationSettings" key="2FA" class="settings-link is-flex is-align-items-center"
-        @click="changeActive('2FA')">
+      <div
+        data-cy="verificationSettings"
+        key="2FA"
+        class="settings-link is-flex is-align-items-center"
+        @click="changeActive('2FA')"
+      >
         <i class="fas fa-check-double" />
         <span class="text">
           {{ $t('settings.2_STEP_VERIFICATION') }}
@@ -47,8 +62,12 @@
         </span>
       </div>
 
-      <div key="keys" class="settings-link is-flex is-align-items-center" data-cy="exportWalletButton"
-        @click="changeActive('keys')">
+      <div
+        key="keys"
+        class="settings-link is-flex is-align-items-center"
+        data-cy="exportWalletButton"
+        @click="changeActive('keys')"
+      >
         <i class="fas fa-file-download" />
         <span class="text">
           {{ $t('settings.EXPORT_WALLET') }}
@@ -58,8 +77,12 @@
         </span>
       </div>
 
-      <div data-cy="deleteAccountSettings" key="delete" class="settings-link is-flex is-align-items-center"
-        @click="changeActive('delete')">
+      <div
+        data-cy="deleteAccountSettings"
+        key="delete"
+        class="settings-link is-flex is-align-items-center"
+        @click="changeActive('delete')"
+      >
         <i class="fas fa-ban" />
         <span class="text">
           {{ $t('settings.DELETE_ACCOUNT') }}
@@ -71,25 +94,39 @@
     </div>
 
     <div v-else class="settings-data">
-      <div key="email" class="settings-link email-password is-flex is-align-items-center reset-cursor">
+      <div
+        key="email"
+        class="settings-link email-password is-flex is-align-items-center reset-cursor"
+      >
         <div class="data">
           <p class="has-text-weight-bold">{{ $t('common.EMAIL') }}</p>
           <p>{{ store.email }}</p>
         </div>
         <div class="link">
-          <div class="login-router transition-faster" data-cy="emailChangeButton" @click="changeActive('email')">
+          <div
+            class="login-router transition-faster"
+            data-cy="emailChangeButton"
+            @click="changeActive('email')"
+          >
             <i class="fas fa-pen-square" />
           </div>
         </div>
       </div>
-      <div v-if="Number(store.recoveryTypeId) == 1" key="password"
-        class="settings-link email-password is-flex is-align-items-center reset-cursor">
+      <div
+        v-if="Number(store.recoveryTypeId) == 1"
+        key="password"
+        class="settings-link email-password is-flex is-align-items-center reset-cursor"
+      >
         <div class="data">
           <p class="has-text-weight-bold">{{ $t('common.PASSWORD') }}</p>
           <p>********</p>
         </div>
         <div class="link">
-          <div class="login-router transition-faster" data-cy="passwordChangeButton" @click="changeActive('password')">
+          <div
+            class="login-router transition-faster"
+            data-cy="passwordChangeButton"
+            @click="changeActive('password')"
+          >
             <i class="fas fa-pen-square" />
           </div>
         </div>

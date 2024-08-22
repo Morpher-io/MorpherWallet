@@ -1,8 +1,16 @@
 <template>
   <div>
-    <vue-recaptcha ref="recaptcha" size="invisible" :sitekey="recaptchaSiteKey" :load-recaptcha-script="true"
-      @verify="onCaptchaVerified" @error="onCaptchaError" @expired="onCaptchaExpired" @render="onCaptchaLoaded"
-      style="display: none" />
+    <vue-recaptcha
+      ref="recaptcha"
+      size="invisible"
+      :sitekey="recaptchaSiteKey"
+      :load-recaptcha-script="true"
+      @verify="onCaptchaVerified"
+      @error="onCaptchaError"
+      @expired="onCaptchaExpired"
+      @render="onCaptchaLoaded"
+      style="display: none"
+    />
     <div class="container">
       <h2 data-cy="signUpTitle" class="title">{{ $t('auth.SIGNUP') }}</h2>
       <p data-cy="signUpDescription" class="subtitle">{{ $t('auth.SIGNUP_DESCRIPTION') }}</p>
@@ -12,8 +20,11 @@
         <LoginApple @processMethod="processMethod" :signIn="true"></LoginApple>
         <LoginGoogle @processMethod="processMethod" :signIn="true"></LoginGoogle>
 
-        <button class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
-          @click="passwordSignin = true" data-cy="emailSignUpButton">
+        <button
+          class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
+          @click="passwordSignin = true"
+          data-cy="emailSignUpButton"
+        >
           <span class="icon img">
             <img src="@/assets/img/email_icon.svg" alt="Email Icon" />
           </span>
@@ -29,8 +40,15 @@
         <div class="field">
           <label class="label">{{ $t('common.EMAIL') }}</label>
           <div class="control">
-            <input ref="login_email" @keydown="checkKeyPress" type="email" class="input" name="walletEmail"
-              data-cy="walletEmail" v-model="walletEmail" />
+            <input
+              ref="login_email"
+              @keydown="checkKeyPress"
+              type="email"
+              class="input"
+              name="walletEmail"
+              data-cy="walletEmail"
+              v-model="walletEmail"
+            />
           </div>
         </div>
 
@@ -38,41 +56,62 @@
           <label class="label">{{ $t('common.PASSWORD') }}</label>
 
           <div class="control">
-            <input ref="login_password" @keydown="checkKeyPress" type="password" class="input password-input"
-              name="walletPassword" data-cy="walletPassword" v-model="walletPassword" />
-            <password v-model="walletPassword" :strength-meter-only="true" :secure-length="8"
-              style="max-width: initial" />
+            <input
+              ref="login_password"
+              @keydown="checkKeyPress"
+              type="password"
+              class="input password-input"
+              name="walletPassword"
+              data-cy="walletPassword"
+              v-model="walletPassword"
+            />
+            <password
+              v-model="walletPassword"
+              :strength-meter-only="true"
+              :secure-length="8"
+              style="max-width: initial"
+            />
             <div class="password-help">
               <p>{{ $t('password.REQUIREMENTS') }}</p>
               <ul class="items">
-                <li :class="{
-                  done: passwordChecks.min === 'pass',
-                  fail: passwordChecks.min === 'fail'
-                }">
+                <li
+                  :class="{
+                    done: passwordChecks.min === 'pass',
+                    fail: passwordChecks.min === 'fail'
+                  }"
+                >
                   {{ $t('password.MIN_CHARACTERS') }}
                 </li>
-                <li :class="{
-                  done: passwordChecks.lowercase === 'pass',
-                  fail: passwordChecks.lowercase === 'fail'
-                }">
+                <li
+                  :class="{
+                    done: passwordChecks.lowercase === 'pass',
+                    fail: passwordChecks.lowercase === 'fail'
+                  }"
+                >
                   {{ $t('password.LOWERCASE_LETTER') }}
                 </li>
-                <li :class="{
-                  done: passwordChecks.uppercase === 'pass',
-                  fail: passwordChecks.uppercase === 'fail'
-                }">
+                <li
+                  :class="{
+                    done: passwordChecks.uppercase === 'pass',
+                    fail: passwordChecks.uppercase === 'fail'
+                  }"
+                >
                   {{ $t('password.UPPERCASE_LETTER') }}
                 </li>
-                <li :class="{
-                  done: passwordChecks.number === 'pass',
-                  fail: passwordChecks.number === 'fail'
-                }">
+                <li
+                  :class="{
+                    done: passwordChecks.number === 'pass',
+                    fail: passwordChecks.number === 'fail'
+                  }"
+                >
                   {{ $t('password.NUMBER') }}
                 </li>
-                <li :class="{
-                  done: passwordChecks.match === 'pass',
-                  fail: passwordChecks.match === 'fail'
-                }">
+                <li
+                  :class="{
+                    done: passwordChecks.match === 'pass',
+                    fail: passwordChecks.match === 'fail'
+                  }"
+                >
                   {{ $t('password.PASSWORD_MATCH') }}
                 </li>
               </ul>
@@ -82,8 +121,15 @@
         <div class="field">
           <label class="label">{{ $t('common.CONFIRM_PASSWORD') }}</label>
           <div class="control">
-            <input type="password" ref="login_password_repeat" @keydown="checkKeyPress" class="input"
-              name="walletPasswordRepeat" data-cy="walletPasswordRepeat" v-model="walletPasswordRepeat" />
+            <input
+              type="password"
+              ref="login_password_repeat"
+              @keydown="checkKeyPress"
+              class="input"
+              name="walletPasswordRepeat"
+              data-cy="walletPasswordRepeat"
+              v-model="walletPasswordRepeat"
+            />
           </div>
         </div>
 
@@ -91,8 +137,12 @@
           <p>⚠️ <span v-html="logonError"></span></p>
         </div>
 
-        <button type="submit" @click="signupExecute" data-cy="createNewWallet"
-          class="button is-green big-button is-login transition-faster">
+        <button
+          type="submit"
+          @click="signupExecute"
+          data-cy="createNewWallet"
+          class="button is-green big-button is-login transition-faster"
+        >
           <span class="text">{{ $t('auth.CREATE_WALLET') }}</span>
         </button>
       </div>

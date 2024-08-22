@@ -164,6 +164,9 @@ export const useWalletStore = defineStore('wallet', {
     hiddenLogin(loginData: any) {
       this.hiddenLogin = loginData
     },
+    setConnection(conn: Connection<CallSender>) {
+      this.connection = conn
+    },
     authRequested() {
       this.status = 'loading'
     },

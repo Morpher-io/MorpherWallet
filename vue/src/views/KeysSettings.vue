@@ -2,8 +2,12 @@
   <div class="container">
     <div v-if="currentPage === 0">
       <div class="title-container has-text-left">
-        <button data-cy="backArrowButton" @click="redirectUser" tag="button"
-          class="button is-grey big-button outlined-button is-thick transition-faster is-icon-only">
+        <button
+          data-cy="backArrowButton"
+          @click="redirectUser"
+          tag="button"
+          class="button is-grey big-button outlined-button is-thick transition-faster is-icon-only"
+        >
           <span class="icon is-small">
             <i class="fas fa-chevron-left"></i>
           </span>
@@ -13,26 +17,42 @@
 
       <p class="has-text-left mt-2 transition-faster">
         <span v-html="$t('export.EXPORT_WALLET_DESCRIPTION')"></span>
-        <a href="https://support.morpher.com/en/article/export-morpher-wallet-d6wr6g/" target="__blank"
-          class="login-router">{{ $t('common.LEARN_MORE') }}</a>
+        <a
+          href="https://support.morpher.com/en/article/export-morpher-wallet-d6wr6g/"
+          target="__blank"
+          class="login-router"
+          >{{ $t('common.LEARN_MORE') }}</a
+        >
       </p>
 
-      <button class="mt-3 button is-blue big-button is-login transition-faster" data-cy="exportSeedPhraseButton"
-        type="submit" @click="setExport('seed')">
+      <button
+        class="mt-3 button is-blue big-button is-login transition-faster"
+        data-cy="exportSeedPhraseButton"
+        type="submit"
+        @click="setExport('seed')"
+      >
         <span class="text">{{ $t('export.EXPORT_SEED') }}</span>
       </button>
 
       <div class="divider just-space" />
 
       <p class="mt-4 has-text-left">{{ $t('export.ADDITIONAL_OPTIONS') }}</p>
-      <button data-cy="exportPrivateKeyButton" @click="setExport('key')" tag="button"
-        class="button outlined-button is-thick big-button transition-faster mt-2">
+      <button
+        data-cy="exportPrivateKeyButton"
+        @click="setExport('key')"
+        tag="button"
+        class="button outlined-button is-thick big-button transition-faster mt-2"
+      >
         <span class="text">{{ $t('export.EXPORT_KEY') }}</span>
       </button>
     </div>
 
-    <ConfirmAccess v-if="currentPage === 1" @pageBack="pageBack" @accessConfirmed="accessConfirmed"
-      :error="logonError" />
+    <ConfirmAccess
+      v-if="currentPage === 1"
+      @pageBack="pageBack"
+      @accessConfirmed="accessConfirmed"
+      :error="logonError"
+    />
 
     <div v-if="currentPage === 2">
       <h2 class="title">{{ $t('export.EXPORT_SEED') }}</h2>
@@ -47,14 +67,20 @@
       <div class="links is-flex is-align-items-center is-justify-content-center mt-2">
         <div class="link is-flex has-text-weight-medium is-align-items-center">
           <i class="fas fa-copy mr-1"></i>
-          <div @click="copyToClipboard(store.seedPhrase)" class="login-router is-size-7 transition-faster">
+          <div
+            @click="copyToClipboard(store.seedPhrase)"
+            class="login-router is-size-7 transition-faster"
+          >
             {{ $t('common.COPY_TO_CLIPBOARD') }}
           </div>
         </div>
       </div>
 
-      <button @click="resetData()" tag="button"
-        class="button outlined-button is-thick big-button transition-faster mt-4">
+      <button
+        @click="resetData()"
+        tag="button"
+        class="button outlined-button is-thick big-button transition-faster mt-4"
+      >
         <span class="text">{{ $t('common.CLOSE') }}</span>
       </button>
     </div>
@@ -72,7 +98,10 @@
       <div class="links is-flex is-align-items-center is-justify-content-center mt-2">
         <div class="link is-flex has-text-weight-medium is-align-items-center">
           <i class="fas fa-copy mr-1"></i>
-          <div @click="copyToClipboard(store.privateKey)" class="login-router is-size-7 transition-faster">
+          <div
+            @click="copyToClipboard(store.privateKey)"
+            class="login-router is-size-7 transition-faster"
+          >
             {{ $t('common.COPY_TO_CLIPBOARD') }}
           </div>
         </div>
@@ -82,8 +111,11 @@
         ⚠ {{ $t('export.KEY_PASSWORD_PROTECTED') }}
       </div>
 
-      <button data-cy="privateKeyJsonButton" class="button is-blue big-button is-login transition-faster mt-4"
-        @click="exportPhrase(store.accounts[0])">
+      <button
+        data-cy="privateKeyJsonButton"
+        class="button is-blue big-button is-login transition-faster mt-4"
+        @click="exportPhrase(store.accounts[0])"
+      >
         <span class="text">{{
           $t('common.DOWNLOAD_TYPE', {
             type: 'JSON'
@@ -91,8 +123,12 @@
         }}</span>
       </button>
 
-      <button data-cy="exportBackButton" @click="resetData()" tag="button"
-        class="button outlined-button is-thick big-button transition-faster mt-4">
+      <button
+        data-cy="exportBackButton"
+        @click="resetData()"
+        tag="button"
+        class="button outlined-button is-thick big-button transition-faster mt-4"
+      >
         <span class="text">{{ $t('common.CLOSE') }}</span>
       </button>
     </div>

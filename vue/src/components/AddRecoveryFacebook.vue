@@ -2,9 +2,10 @@
   <div class="field">
     <div class="control is-expanded" v-if="!hasRecoveryMethod">
       <HFaceBookLogin v-slot="fbLogin" :app-id="clientId" :version="'v18.0'" @onSuccess="onLogin">
-        <button @click="fbLogin.initFBLogin"
-          class="button is-grey big-button outlined-button is-thick transition-faster facebook-button">
-
+        <button
+          @click="fbLogin.initFBLogin"
+          class="button is-grey big-button outlined-button is-thick transition-faster facebook-button"
+        >
           <span class="is-flex is-align-items-center" slot="login">
             <span class="icon img">
               <img src="@/assets/img/fb_logo.svg" alt="Facebook Logo" />
@@ -15,10 +16,16 @@
       </HFaceBookLogin>
     </div>
     <div class="control is-expanded has-text-centered" v-if="hasRecoveryMethod">
-      <HFaceBookLogin v-slot="fbLogin" :app-id="clientId" :version="'v18.0'" @onSuccess="deleteRecovery">
-        <button @click="fbLogin.initFBLogin"
-          class="button is-grey big-button outlined-button is-thick transition-faster facebook-button">
-
+      <HFaceBookLogin
+        v-slot="fbLogin"
+        :app-id="clientId"
+        :version="'v18.0'"
+        @onSuccess="deleteRecovery"
+      >
+        <button
+          @click="fbLogin.initFBLogin"
+          class="button is-grey big-button outlined-button is-thick transition-faster facebook-button"
+        >
           <span class="is-flex is-align-items-center" slot="login">
             <span class="icon img">
               <img src="@/assets/img/fb_logo.svg" alt="Facebook Logo" />
@@ -104,7 +111,6 @@ export default defineComponent({
               method: 'fb'
             })
 
-
           this.showSpinnerThenAutohide(this.$t('loader.SAVED_KEYSTORE_SUCCESSFULLY'))
           this.hasRecoveryMethod = await this.hasRecovery(this.recoveryTypeId)
           this.processing = false
@@ -114,7 +120,6 @@ export default defineComponent({
             enabled: true,
             erorr: ''
           })
-
         })
         .catch((error: any) => {
           let errorMessage = error.error || error.err || error.message || JSON.stringify(error)
@@ -152,9 +157,12 @@ export default defineComponent({
       const key = await sha256(this.clientId + userID)
       const accessToken = data.authResponse.accessToken
 
-      this.resetRecoveryMethod({ key, recoveryTypeId: this.recoveryTypeId.toString(), token: accessToken })
+      this.resetRecoveryMethod({
+        key,
+        recoveryTypeId: this.recoveryTypeId.toString(),
+        token: accessToken
+      })
         .then(async () => {
-
           this.showSpinnerThenAutohide(this.$t('loader.DELETED_KEYSTORE_SUCCESSFULLY'))
           this.hasRecoveryMethod = false
           this.processing = false
@@ -164,7 +172,6 @@ export default defineComponent({
             enabled: false,
             erorr: ''
           })
-
         })
         .catch((error) => {
           let errorMessage = error.error || error.err || error.message || JSON.stringify(error)

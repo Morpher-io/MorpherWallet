@@ -1,7 +1,11 @@
 <template>
   <div class="field">
-    <button class="button is-grey big-button outlined-button is-thick transition-faster" v-if="clientId"
-      @click="googleTokenLogin" data-cy="googleButton">
+    <button
+      class="button is-grey big-button outlined-button is-thick transition-faster"
+      v-if="clientId"
+      @click="googleTokenLogin"
+      data-cy="googleButton"
+    >
       <span class="icon img">
         <img src="@/assets/img/google_logo.svg" alt="Google Logo" />
       </span>
@@ -43,7 +47,7 @@ export default defineComponent({
       return data
     },
     googleTokenLogin() {
-      ; (window as any).google.accounts.oauth2
+      ;(window as any).google.accounts.oauth2
         .initTokenClient({
           client_id: import.meta.env.VITE_GOOGLE_APP_ID,
           scope: 'email profile',

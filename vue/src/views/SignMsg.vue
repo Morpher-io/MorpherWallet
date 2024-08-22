@@ -19,7 +19,10 @@
         <span class="text">{{ $t('common.SIGN') }}</span>
       </button>
 
-      <button @click="cancel()" class="button is-ghost is-blue big-button medium-text transition-faster">
+      <button
+        @click="cancel()"
+        class="button is-ghost is-blue big-button medium-text transition-faster"
+      >
         <span class="text">{{ $t('common.CANCEL') }}</span>
       </button>
     </div>

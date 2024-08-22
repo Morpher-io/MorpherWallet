@@ -7,26 +7,37 @@
     </div>
     <!-- Language -->
     <div class="language-selector has-line-height-1" v-click-outside="closeDropdown">
-      <div :class="{
-        dropdown: true,
-        active: dropdownOpen
-      }">
-        <button @click="dropdownOpen = !dropdownOpen"
-          class="button lang-button is-size-14 dark-btn has-text-weight-normal" :class="{
+      <div
+        :class="{
+          dropdown: true,
+          active: dropdownOpen
+        }"
+      >
+        <button
+          @click="dropdownOpen = !dropdownOpen"
+          class="button lang-button is-size-14 dark-btn has-text-weight-normal"
+          :class="{
             active: dropdownOpen
-          }">
+          }"
+        >
           <img :src="getLanguageParameter($i18n.locale, 'flag')" />
           <span class="has-text-weight-medium lang-name">{{
             getLanguageParameter($i18n.locale, 'name')
           }}</span>
-          <i :class="{
-            'fas fa-chevron-up arrow': true
-          }"></i>
+          <i
+            :class="{
+              'fas fa-chevron-up arrow': true
+            }"
+          ></i>
         </button>
 
         <div class="dropdown-items">
-          <div v-for="language in languages" :key="language.code" @click="() => setLanguage(language.code)"
-            class="lang-item has-text-grey-faded">
+          <div
+            v-for="language in languages"
+            :key="language.code"
+            @click="() => setLanguage(language.code)"
+            class="lang-item has-text-grey-faded"
+          >
             <img :src="language.flag" />
             <span>{{ language.name }}</span>
           </div>
@@ -203,7 +214,7 @@ footer {
           justify-content: flex-start;
           align-items: center;
 
-          +.lang-item {
+          + .lang-item {
             border-top: 1px solid #eae9ed;
           }
         }
@@ -228,7 +239,7 @@ footer {
       border-radius: 6px;
       box-shadow: 0px 2px 4px 0px rgb(51 51 51 / 10%);
 
-      >img {
+      > img {
         margin-right: 5px;
         width: 18px;
         height: 18px;
@@ -260,7 +271,7 @@ footer {
         text-decoration: none;
       }
 
-      >img {
+      > img {
         margin-right: 5px;
         width: 18px;
         height: 18px;

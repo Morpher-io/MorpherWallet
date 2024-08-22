@@ -12,48 +12,76 @@
           <div class="field" v-if="!hideOldPassword">
             <label class="label">{{ $t('password.OLD_PASSWORD') }}</label>
             <div class="control">
-              <input type="password" data-cy="oldPassword" name="oldPassword" class="input" v-model="oldPassword"
-                @keypress="handleKeyPress" ref="old_password" />
+              <input
+                type="password"
+                data-cy="oldPassword"
+                name="oldPassword"
+                class="input"
+                v-model="oldPassword"
+                @keypress="handleKeyPress"
+                ref="old_password"
+              />
             </div>
           </div>
           <div class="field">
             <label class="label">{{ $t('common.NEW_PASSWORD') }}</label>
             <div class="control">
-              <input type="password" name="newPassword" data-cy="newPassword" class="input password-input"
-                v-model="walletPassword" @keypress="handleKeyPress" ref="new_password" />
-              <password v-model="walletPassword" :strength-meter-only="true" :secure-length="8"
-                style="max-width: initial" />
+              <input
+                type="password"
+                name="newPassword"
+                data-cy="newPassword"
+                class="input password-input"
+                v-model="walletPassword"
+                @keypress="handleKeyPress"
+                ref="new_password"
+              />
+              <password
+                v-model="walletPassword"
+                :strength-meter-only="true"
+                :secure-length="8"
+                style="max-width: initial"
+              />
               <div class="password-help">
                 <p>{{ $t('password.REQUIREMENTS') }}</p>
                 <ul class="items">
-                  <li :class="{
-                    done: passwordChecks.min === 'pass',
-                    fail: passwordChecks.min === 'fail'
-                  }">
+                  <li
+                    :class="{
+                      done: passwordChecks.min === 'pass',
+                      fail: passwordChecks.min === 'fail'
+                    }"
+                  >
                     {{ $t('password.MIN_CHARACTERS') }}
                   </li>
-                  <li :class="{
-                    done: passwordChecks.lowercase === 'pass',
-                    fail: passwordChecks.lowercase === 'fail'
-                  }">
+                  <li
+                    :class="{
+                      done: passwordChecks.lowercase === 'pass',
+                      fail: passwordChecks.lowercase === 'fail'
+                    }"
+                  >
                     {{ $t('password.LOWERCASE_LETTER') }}
                   </li>
-                  <li :class="{
-                    done: passwordChecks.uppercase === 'pass',
-                    fail: passwordChecks.uppercase === 'fail'
-                  }">
+                  <li
+                    :class="{
+                      done: passwordChecks.uppercase === 'pass',
+                      fail: passwordChecks.uppercase === 'fail'
+                    }"
+                  >
                     {{ $t('password.UPPERCASE_LETTER') }}
                   </li>
-                  <li :class="{
-                    done: passwordChecks.number === 'pass',
-                    fail: passwordChecks.number === 'fail'
-                  }">
+                  <li
+                    :class="{
+                      done: passwordChecks.number === 'pass',
+                      fail: passwordChecks.number === 'fail'
+                    }"
+                  >
                     {{ $t('password.NUMBER') }}
                   </li>
-                  <li :class="{
-                    done: passwordChecks.match === 'pass',
-                    fail: passwordChecks.match === 'fail'
-                  }">
+                  <li
+                    :class="{
+                      done: passwordChecks.match === 'pass',
+                      fail: passwordChecks.match === 'fail'
+                    }"
+                  >
                     {{ $t('password.PASSWORD_MATCH') }}
                   </li>
                 </ul>
@@ -63,8 +91,15 @@
           <div class="field">
             <label class="label">{{ $t('common.CONFIRM_PASSWORD') }}</label>
             <div class="control">
-              <input type="password" class="input" name="newPasswordRepeat" data-cy="newPasswordRepeat"
-                v-model="walletPasswordRepeat" @keypress="handleKeyPress" ref="new_password_repeat" />
+              <input
+                type="password"
+                class="input"
+                name="newPasswordRepeat"
+                data-cy="newPasswordRepeat"
+                v-model="walletPasswordRepeat"
+                @keypress="handleKeyPress"
+                ref="new_password_repeat"
+              />
             </div>
           </div>
 
@@ -72,17 +107,25 @@
             <p>⚠️ <span data-cy="incorrectPassword" v-html="logonError"></span></p>
           </div>
 
-          <button class="button is-green big-button is-login transition-faster mt-5" type="submit"
-            data-cy="passwordSubmit">
+          <button
+            class="button is-green big-button is-login transition-faster mt-5"
+            type="submit"
+            data-cy="passwordSubmit"
+          >
             <span class="text">{{ $t('common.UPDATE_PASSWORD') }}</span>
           </button>
 
           <div class="mt-2">
-            <button v-on:click="
-              $router
-                .push(hideOldPassword ? '/login' : '/settings?email_password=true')
-                .catch(() => undefined)
-              " tag="button" type="button" class="button is-ghost is-blue big-button medium-text transition-faster">
+            <button
+              v-on:click="
+                $router
+                  .push(hideOldPassword ? '/login' : '/settings?email_password=true')
+                  .catch(() => undefined)
+              "
+              tag="button"
+              type="button"
+              class="button is-ghost is-blue big-button medium-text transition-faster"
+            >
               <span class="text">{{ $t('common.CANCEL') }}</span>
             </button>
           </div>
@@ -100,7 +143,11 @@
           {{ $t('password.PASSWORD_UPDATED_DESCRIPTION') }}
         </p>
 
-        <button @click="resetData" tag="button" class="button outlined-button big-button transition-faster">
+        <button
+          @click="resetData"
+          tag="button"
+          class="button outlined-button big-button transition-faster"
+        >
           <span class="text">{{ $t('common.CLOSE') }}</span>
         </button>
       </div>

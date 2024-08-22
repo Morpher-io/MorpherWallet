@@ -17,8 +17,14 @@
       <label v-else class="label">{{ $t('2fa.AUTH_CODE') }}</label>
 
       <div class="control">
-        <input data-cy="2faEmailCode" type="number" inputmode="numeric" class="input" v-model="authenticatorCode"
-          @keypress="handleKeyPress" />
+        <input
+          data-cy="2faEmailCode"
+          type="number"
+          inputmode="numeric"
+          class="input"
+          v-model="authenticatorCode"
+          @keypress="handleKeyPress"
+        />
       </div>
     </div>
 
@@ -26,12 +32,18 @@
       <p>⚠️ <span data-cy="passwordError" v-html="logonError"></span></p>
     </div>
 
-    <button data-cy="confirmAccessButton" @click="accessConfirmed()"
+    <button
+      data-cy="confirmAccessButton"
+      @click="accessConfirmed()"
       class="button is-green big-button is-login transition-faster mt-5"
-      :disabled="!authenticatorCode || authenticatorCode.length != 6">
+      :disabled="!authenticatorCode || authenticatorCode.length != 6"
+    >
       <span class="text">{{ $t('common.CONTINUE') }}</span>
     </button>
-    <button v-on:click="pageBack()" class="button is-ghost is-blue big-button medium-text transition-faster">
+    <button
+      v-on:click="pageBack()"
+      class="button is-ghost is-blue big-button medium-text transition-faster"
+    >
       <span class="text">{{ $t('common.BACK') }}</span>
     </button>
   </div>

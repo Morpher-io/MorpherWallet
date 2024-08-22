@@ -13,15 +13,28 @@
             <div class="field">
               <label class="label">{{ $t('common.NEW_EMAIL') }}</label>
               <div class="control">
-                <input data-cy="newEmail" class="input" name="newEmail" ref="new_email" v-model="newEmail"
-                  @keypress="handleKeyPress" />
+                <input
+                  data-cy="newEmail"
+                  class="input"
+                  name="newEmail"
+                  ref="new_email"
+                  v-model="newEmail"
+                  @keypress="handleKeyPress"
+                />
               </div>
             </div>
             <div class="field" v-if="store.recoveryTypeId == 1">
               <label class="label">{{ $t('common.PASSWORD') }}</label>
               <div class="control">
-                <input data-cy="confirmPassword" type="password" class="input" name="password" ref="new_password"
-                  v-model="password" @keypress="handleKeyPress" />
+                <input
+                  data-cy="confirmPassword"
+                  type="password"
+                  class="input"
+                  name="password"
+                  ref="new_password"
+                  v-model="password"
+                  @keypress="handleKeyPress"
+                />
               </div>
             </div>
           </div>
@@ -38,17 +51,24 @@
 					<div v-else-if="recoveryTypeId == 6">
 						<LoginApple :update="true" @processMethod="processMethod"></LoginApple>
 					</div> -->
-          <button class="button is-green big-button is-login transition-faster" data-cy="updateEmailButton"
-            :disabled="!newEmail || (!password && recoveryTypeId !== 3 && recoveryTypeId !== 6)" @click="
+          <button
+            class="button is-green big-button is-login transition-faster"
+            data-cy="updateEmailButton"
+            :disabled="!newEmail || (!password && recoveryTypeId !== 3 && recoveryTypeId !== 6)"
+            @click="
               setNewData({
                 email: newEmail,
                 password: password
               })
-              ">
+            "
+          >
             <span class="text confirm-button">{{ $t('common.UPDATE_EMAIL') }}</span>
           </button>
-          <button v-on:click="$router.push('/settings?email_password=true').catch(() => undefined)" tag="button"
-            class="button is-ghost is-blue big-button medium-text transition-faster">
+          <button
+            v-on:click="$router.push('/settings?email_password=true').catch(() => undefined)"
+            tag="button"
+            class="button is-ghost is-blue big-button medium-text transition-faster"
+          >
             <span class="text">{{ $t('common.CANCEL') }}</span>
           </button>
         </div>

@@ -2,8 +2,11 @@
   <div class="container">
     <div v-if="currentPage === 0">
       <div class="title-container has-text-left">
-        <button @click="redirectUser" tag="button"
-          class="button is-grey big-button outlined-button is-thick transition-faster is-icon-only">
+        <button
+          @click="redirectUser"
+          tag="button"
+          class="button is-grey big-button outlined-button is-thick transition-faster is-icon-only"
+        >
           <span class="icon is-small">
             <i class="fas fa-chevron-left"></i>
           </span>
@@ -12,15 +15,23 @@
       </div>
       <div class="divider just-space" />
       <p class="has-text-left reset-line-height">
-        <span class="has-text-weight-medium" v-html="$t('delete.PLEASE_EXPORT_YOUR_WALLET', {
-          link: '/settings/keys'
-        })
-          "></span>
+        <span
+          class="has-text-weight-medium"
+          v-html="
+            $t('delete.PLEASE_EXPORT_YOUR_WALLET', {
+              link: '/settings/keys'
+            })
+          "
+        ></span>
         {{ $t('delete.DELETE_TIP') }}
       </p>
       <div class="field is-grouped mb-5">
-        <button data-cy="deleteAccountButton" @click="setNewPage()" tag="button"
-          class="button big-button is-danger transition-faster">
+        <button
+          data-cy="deleteAccountButton"
+          @click="setNewPage()"
+          tag="button"
+          class="button big-button is-danger transition-faster"
+        >
           <span class="text">{{ $t('delete.DELETE_ACCOUNT_TITLE') }}</span>
         </button>
       </div>
@@ -38,10 +49,18 @@
         <p>{{ $t('delete.WHAT_FUNDS_DESCRIPTION') }}</p>
       </div>
     </div>
-    <ConfirmAccess v-if="currentPage === 1" @pageBack="pageBack" @accessConfirmed="accessConfirmed"
-      :error="logonError" />
-    <AccountDeletion v-if="currentPage === 2" @pageBack="resetData" @deleteAccount="deleteAccount"
-      :error="logonError" />
+    <ConfirmAccess
+      v-if="currentPage === 1"
+      @pageBack="pageBack"
+      @accessConfirmed="accessConfirmed"
+      :error="logonError"
+    />
+    <AccountDeletion
+      v-if="currentPage === 2"
+      @pageBack="resetData"
+      @deleteAccount="deleteAccount"
+      :error="logonError"
+    />
   </div>
 </template>
 

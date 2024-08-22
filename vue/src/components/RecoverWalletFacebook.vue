@@ -1,9 +1,10 @@
 <template>
   <div class="control is-expanded">
     <HFaceBookLogin v-slot="fbLogin" :app-id="clientId" :version="'v18.0'" @onSuccess="onLogin">
-      <button @click="fbLogin.initFBLogin"
-        class="button is-grey big-button outlined-button is-thick transition-faster facebook-button">
-
+      <button
+        @click="fbLogin.initFBLogin"
+        class="button is-grey big-button outlined-button is-thick transition-faster facebook-button"
+      >
         <span class="is-flex is-align-items-center" slot="login">
           <span class="icon img">
             <img src="@/assets/img/fb_logo.svg" alt="Facebook Logo" />
@@ -69,7 +70,6 @@ export default defineComponent({
           recoveryTypeId: this.recoveryTypeId
         })
           .then(() => {
-
             this.hideSpinner()
             this.setPassword({
               success: true,

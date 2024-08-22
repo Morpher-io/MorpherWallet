@@ -146,7 +146,11 @@ export default defineComponent({
       const keyEnc = await sha256(key)
       const token = googleUser.token
 
-      this.resetRecoveryMethod({ key: keyEnc, recoveryTypeId: this.recoveryTypeId.toString(), token })
+      this.resetRecoveryMethod({
+        key: keyEnc,
+        recoveryTypeId: this.recoveryTypeId.toString(),
+        token
+      })
         .then(async () => {
           this.showSpinnerThenAutohide(this.$t('loader.DELETED_KEYSTORE_SUCCESSFULLY'))
           this.hasRecoveryMethod = false

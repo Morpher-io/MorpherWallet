@@ -18,13 +18,19 @@
             <p v-else>{{ $t('2fa.2FA_EMAIL_DESCRIPTION') }}</p>
           </div>
           <div class="actions">
-            <button :class="{
-              'button is-light-green is-small-button has-text-weight-bold transition-faster': true,
-              'is-light-danger': store.twoFaRequired.email
-            }" :disabled="store.ipCountry == 'RU' ||
-              ((Number(ssoEmailError) == 3 || Number(ssoEmailError) == 6) &&
-                store.twoFaRequired.email == false)
-              " data-cy="emailToggle" @click="setCurrentMethod('email', !store.twoFaRequired.email)">
+            <button
+              :class="{
+                'button is-light-green is-small-button has-text-weight-bold transition-faster': true,
+                'is-light-danger': store.twoFaRequired.email
+              }"
+              :disabled="
+                store.ipCountry == 'RU' ||
+                ((Number(ssoEmailError) == 3 || Number(ssoEmailError) == 6) &&
+                  store.twoFaRequired.email == false)
+              "
+              data-cy="emailToggle"
+              @click="setCurrentMethod('email', !store.twoFaRequired.email)"
+            >
               <span class="text">{{
                 !store.twoFaRequired.email ? $t('common.ENABLE') : $t('common.DISABLE')
               }}</span>
@@ -34,7 +40,11 @@
         <p class="has-text-left mt-2 is-size-7">{{ store.email }}</p>
       </div>
     </div>
-    <div data-cy="email2faConfirmed" v-if="store.twoFaRequired.email" class="recovery-active is-text-small">
+    <div
+      data-cy="email2faConfirmed"
+      v-if="store.twoFaRequired.email"
+      class="recovery-active is-text-small"
+    >
       <span class="icon">
         <i class="fas fa-check-circle"></i>
       </span>
@@ -51,11 +61,14 @@
             <p>{{ $t('2fa.2FA_AUTH_DESCRIPTION') }}</p>
           </div>
           <div class="actions">
-            <button :class="{
-              'button is-light-green is-small-button has-text-weight-bold transition-faster': true,
-              'is-light-danger': store.twoFaRequired.authenticator
-            }" data-cy="authenticatorToggle"
-              @click="setCurrentMethod('authenticator', !store.twoFaRequired.authenticator)">
+            <button
+              :class="{
+                'button is-light-green is-small-button has-text-weight-bold transition-faster': true,
+                'is-light-danger': store.twoFaRequired.authenticator
+              }"
+              data-cy="authenticatorToggle"
+              @click="setCurrentMethod('authenticator', !store.twoFaRequired.authenticator)"
+            >
               <span class="text">{{
                 !store.twoFaRequired.authenticator ? $t('common.ENABLE') : $t('common.DISABLE')
               }}</span>
@@ -64,8 +77,11 @@
         </div>
       </div>
     </div>
-    <div data-cy="authenticator2faConfirmed" v-if="store.twoFaRequired.authenticator"
-      class="recovery-active is-text-small">
+    <div
+      data-cy="authenticator2faConfirmed"
+      v-if="store.twoFaRequired.authenticator"
+      class="recovery-active is-text-small"
+    >
       <span class="icon">
         <i class="fas fa-check-circle"></i>
       </span>
@@ -92,8 +108,7 @@ export default defineComponent({
   methods: {
     setCurrentMethod(method: any, isEnabling: boolean) {
       console.log('setCurrentMethod', method, isEnabling)
-
-    },
+    }
   }
 })
 </script>

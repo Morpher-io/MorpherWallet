@@ -1,6 +1,10 @@
 <template>
   <div class="control is-expanded">
-    <button type="button" class="button is-grey big-button outlined-button is-thick transition-faster" @click="doLogin">
+    <button
+      type="button"
+      class="button is-grey big-button outlined-button is-thick transition-faster"
+      @click="doLogin"
+    >
       <span class="icon img">
         <img src="@/assets/img/vk_logo.svg" alt="VKontakte Logo" />
       </span>
@@ -143,7 +147,10 @@ export default defineComponent({
 
             this.showSpinner(this.$t('loader.RECOVERY_LOG_IN'))
             try {
-              const auth_token: any = await this.recoveryVKAuthToken({ code: user_code, type: 'wallet' })
+              const auth_token: any = await this.recoveryVKAuthToken({
+                code: user_code,
+                type: 'wallet'
+              })
 
               const userID = auth_token.user_id
               const accessToken = auth_token.access_token

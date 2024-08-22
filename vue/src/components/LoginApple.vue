@@ -2,8 +2,11 @@
   <div class="field">
     <!-- <div id="appleid-signin" data-color="black" data-border="true" data-type="sign in"></div> -->
     <div class="control is-expanded">
-      <button class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
-        @click="doLogin" data-cy="vkontakteButton">
+      <button
+        class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
+        @click="doLogin"
+        data-cy="vkontakteButton"
+      >
         <span class="icon img">
           <img src="@/assets/img/apple_logo.svg" alt="Apple Logo" />
         </span>
@@ -60,7 +63,7 @@ export default defineComponent({
     },
     async doLogin() {
       try {
-        ; (window as any).AppleID.auth
+        ;(window as any).AppleID.auth
           .signIn()
           .then((userData: any) => {
             this.onLogin(userData)

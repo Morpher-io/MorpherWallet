@@ -1,28 +1,51 @@
 <template>
   <div class="container">
-    <vue-recaptcha ref="recaptcha" size="invisible" :sitekey="recaptchaSiteKey" :load-recaptcha-script="true"
-      @verify="onCaptchaVerified" @error="onCaptchaError" @expired="onCaptchaExpired" @render="onCaptchaLoaded"
-      style="display: none" />
-    <img v-if="
-      (store.twoFaRequired.email || store.twoFaRequired.needConfirmation) &&
-      !store.twoFaRequired.authenticator
-    " src="@/assets/img/email_verification.svg" alt="Email 2FA image" class="mb-3" />
-    <img v-if="store.twoFaRequired.authenticator" src="@/assets/img/authenticator.svg" alt="Phone authenticator image"
-      class="mb-3" />
+    <vue-recaptcha
+      ref="recaptcha"
+      size="invisible"
+      :sitekey="recaptchaSiteKey"
+      :load-recaptcha-script="true"
+      @verify="onCaptchaVerified"
+      @error="onCaptchaError"
+      @expired="onCaptchaExpired"
+      @render="onCaptchaLoaded"
+      style="display: none"
+    />
+    <img
+      v-if="
+        (store.twoFaRequired.email || store.twoFaRequired.needConfirmation) &&
+        !store.twoFaRequired.authenticator
+      "
+      src="@/assets/img/email_verification.svg"
+      alt="Email 2FA image"
+      class="mb-3"
+    />
+    <img
+      v-if="store.twoFaRequired.authenticator"
+      src="@/assets/img/authenticator.svg"
+      alt="Phone authenticator image"
+      class="mb-3"
+    />
     <h2 v-if="emailSent" data-cy="verificationTitle" class="title">
       {{ $t('settings.2_STEP_VERIFICATION') }}
     </h2>
-    <p v-if="
-      (store.twoFaRequired.email || store.twoFaRequired.needConfirmation) &&
-      !store.twoFaRequired.authenticator
-    " class="subtitle">
+    <p
+      v-if="
+        (store.twoFaRequired.email || store.twoFaRequired.needConfirmation) &&
+        !store.twoFaRequired.authenticator
+      "
+      class="subtitle"
+    >
       {{ $t('2fa.ENTER_EMAIL_CODE') }}
     </p>
-    <p v-if="
-      store.twoFaRequired.authenticator &&
-      !store.twoFaRequired.email &&
-      !store.twoFaRequired.needConfirmation
-    " class="subtitle">
+    <p
+      v-if="
+        store.twoFaRequired.authenticator &&
+        !store.twoFaRequired.email &&
+        !store.twoFaRequired.needConfirmation
+      "
+      class="subtitle"
+    >
       {{ $t('2fa.ENTER_AUTH_CODE') }}
     </p>
     <p v-if="store.twoFaRequired.email && store.twoFaRequired.authenticator" class="subtitle">
@@ -32,15 +55,35 @@
       <div class="field" v-if="store.twoFaRequired.email || store.twoFaRequired.needConfirmation">
         <label class="label">{{ $t('2fa.EMAIL_CODE') }}</label>
         <div class="control">
-          <input type="number" inputmode="numeric" min="100000" max="999999" class="input" name="emailCode"
-            id="emailCode" data-cy="emailCode" v-model="emailCode" ref="email_code" @keypress="handleKeyPress" />
+          <input
+            type="number"
+            inputmode="numeric"
+            min="100000"
+            max="999999"
+            class="input"
+            name="emailCode"
+            id="emailCode"
+            data-cy="emailCode"
+            v-model="emailCode"
+            ref="email_code"
+            @keypress="handleKeyPress"
+          />
         </div>
       </div>
       <div class="field" v-if="store.twoFaRequired.authenticator">
         <label class="label">{{ $t('2fa.AUTH_CODE') }}</label>
         <div class="control">
-          <input type="number" inputmode="numeric" class="input" name="authenticatorCode" id="authenticatorCode"
-            data-cy="authenticatorCode" ref="auth_code" v-model="authenticatorCode" @keypress="handleKeyPress" />
+          <input
+            type="number"
+            inputmode="numeric"
+            class="input"
+            name="authenticatorCode"
+            id="authenticatorCode"
+            data-cy="authenticatorCode"
+            ref="auth_code"
+            v-model="authenticatorCode"
+            @keypress="handleKeyPress"
+          />
         </div>
       </div>
 
@@ -48,20 +91,31 @@
         <p>⚠️ <span v-html="logonError"></span></p>
       </div>
 
-      <button class="button is-green big-button is-login transition-faster mt-5" type="submit" data-cy="unlock">
+      <button
+        class="button is-green big-button is-login transition-faster mt-5"
+        type="submit"
+        data-cy="unlock"
+      >
         <span class="text">{{ $t('common.SUBMIT') }}</span>
       </button>
 
-      <button v-on:click="logout()" tag="button"
-        class="button is-ghost is-blue big-button medium-text transition-faster">
+      <button
+        v-on:click="logout()"
+        tag="button"
+        class="button is-ghost is-blue big-button medium-text transition-faster"
+      >
         <span class="text">{{ $t('common.CANCEL') }}</span>
       </button>
     </form>
 
     <p class="mt-5 transition-faster">
       {{ $t('2fa.HAVING_PROBLEMS') }}
-      <a href="https://support.morpher.com/en/article/2fa-2-step-verification-troubleshooting-ejmssf/" target="__blank"
-        class="login-router">{{ $t('2fa.2_STEP_SUPPORT') }}</a>
+      <a
+        href="https://support.morpher.com/en/article/2fa-2-step-verification-troubleshooting-ejmssf/"
+        target="__blank"
+        class="login-router"
+        >{{ $t('2fa.2_STEP_SUPPORT') }}</a
+      >
     </p>
   </div>
 </template>

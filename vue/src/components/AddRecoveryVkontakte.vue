@@ -1,8 +1,12 @@
 <template>
   <div class="field">
     <div class="control is-expanded">
-      <button class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
-        @click="doLogin" v-if="!hasRecoveryMethod" data-cy="vkontakteButton">
+      <button
+        class="button is-grey big-button outlined-button is-thick facebook-button transition-faster"
+        @click="doLogin"
+        v-if="!hasRecoveryMethod"
+        data-cy="vkontakteButton"
+      >
         <span class="icon img">
           <img src="@/assets/img/vk_logo.svg" alt="VKontakte Logo" />
         </span>

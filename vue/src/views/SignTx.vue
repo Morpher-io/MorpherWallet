@@ -7,13 +7,19 @@
       <p class="subtitle" v-if="store.transactionDetails">{{ chainName }}</p>
       <div class="settings-data user-details">
         <div class="details is-flex is-align-items-center">
-          <p class="layout split first eth-address-copy" :data-tooltip="copyTextSrc"
-            @click="copySrcETHAddress(store.transactionDetails.from)">
+          <p
+            class="layout split first eth-address-copy"
+            :data-tooltip="copyTextSrc"
+            @click="copySrcETHAddress(store.transactionDetails.from)"
+          >
             {{ formatEthAddress(store.transactionDetails.from) }}
           </p>
           <i class="fas fa-arrow-right transfer-icon"></i>
-          <p class="layout split second eth-address-copy" :data-tooltip="copyTextDest"
-            @click="copyDestETHAddress(store.transactionDetails.to)">
+          <p
+            class="layout split second eth-address-copy"
+            :data-tooltip="copyTextDest"
+            @click="copyDestETHAddress(store.transactionDetails.to)"
+          >
             {{ formatEthAddress(store.transactionDetails.to) }}
           </p>
         </div>
@@ -39,7 +45,7 @@
                   store.transactionDetails.gasPrice || store.transactionDetails.maxFeePerGas
                 ) *
                   Number(store.transactionDetails.gas)) /
-                Math.pow(10, 18)
+                  Math.pow(10, 18)
               )
             }}
             ETH
@@ -51,7 +57,7 @@
             {{
               roundFormatter(
                 Number(store.transactionDetails.gasPrice || store.transactionDetails.maxFeePerGas) /
-                Math.pow(10, 9)
+                  Math.pow(10, 9)
               )
             }}
             gwei
@@ -70,11 +76,11 @@
             {{
               roundFormatter(
                 Number(store.transactionDetails.value || 0) / Math.pow(10, 18) +
-                (Number(
-                  store.transactionDetails.gasPrice || store.transactionDetails.maxFeePerGas
-                ) *
-                  Number(store.transactionDetails.gas)) /
-                Math.pow(10, 18)
+                  (Number(
+                    store.transactionDetails.gasPrice || store.transactionDetails.maxFeePerGas
+                  ) *
+                    Number(store.transactionDetails.gas)) /
+                    Math.pow(10, 18)
               )
             }}
             ETH
@@ -83,18 +89,22 @@
         <div v-else class="details-group mb-0 is-align-items-start">
           <p class="subtitle has-text-weight-medium">{{ $t('common.TOTAL') }}</p>
           <p class="text">
-            <span class="is-block has-text-right reset-line-height">{{ roundFormatter(mphValue) }} MPH</span>
-            <span class="is-block has-text-right reset-line-height mt-1">+
+            <span class="is-block has-text-right reset-line-height"
+              >{{ roundFormatter(mphValue) }} MPH</span
+            >
+            <span class="is-block has-text-right reset-line-height mt-1"
+              >+
               {{
                 roundFormatter(
                   (Number(
                     store.transactionDetails.gasPrice || store.transactionDetails.maxFeePerGas
                   ) *
                     Number(store.transactionDetails.gas)) /
-                  Math.pow(10, 18)
+                    Math.pow(10, 18)
                 )
               }}
-              ETH</span>
+              ETH</span
+            >
           </p>
         </div>
       </div>
@@ -103,7 +113,10 @@
         <span class="text">{{ $t('common.CONFIRM') }}</span>
       </button>
 
-      <button @click="cancel()" class="button is-ghost is-blue big-button medium-text transition-faster">
+      <button
+        @click="cancel()"
+        class="button is-ghost is-blue big-button medium-text transition-faster"
+      >
         <span class="text">{{ $t('common.CANCEL') }}</span>
       </button>
     </div>
@@ -259,7 +272,7 @@ export default defineComponent({
       position: relative;
       margin-bottom: 0;
 
-      +.small {
+      + .small {
         margin-top: 3px;
       }
 
