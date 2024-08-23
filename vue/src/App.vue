@@ -281,9 +281,9 @@ export default defineComponent({
                   routerObject.push('/login').catch(() => undefined)
 
                 if (storeObject.hiddenLogin) {
-                  storeObject.hiddenLogin({})
+                  storeObject.hiddenLoginAction({})
                 }
-                storeObject.hiddenLogin({ type, user, password })
+                storeObject.hiddenLoginAction({ type, user, password })
               }, 3000)
             } else {
               localStorage.removeItem('lastEmail')
@@ -292,9 +292,9 @@ export default defineComponent({
                 routerObject.push('/login').catch(() => undefined)
 
               if (storeObject.hiddenLogin) {
-                storeObject.hiddenLogin()
+                storeObject.hiddenLoginAction({})
               }
-              storeObject.hiddenLogin({ type, user, password })
+              storeObject.hiddenLoginAction({ type, user, password })
             }
           },
           async signupWalletHidden(
@@ -309,9 +309,9 @@ export default defineComponent({
               setTimeout(() => {
                 routerObject.push('/signup').catch(() => undefined)
                 if (storeObject.hiddenLogin) {
-                  storeObject.hiddenLogin({})
+                  storeObject.hiddenLoginAction({})
                 }
-                storeObject.hiddenLogin({
+                storeObject.hiddenLoginAction({
                   type,
                   walletEmail,
                   walletPassword,
@@ -322,9 +322,9 @@ export default defineComponent({
             } else {
               routerObject.push('/signup').catch(() => undefined)
               if (storeObject.hiddenLogin) {
-                storeObject.hiddenLogin({})
+                storeObject.hiddenLoginAction({})
               }
-              storeObject.hiddenLogin({
+              storeObject.hiddenLoginAction({
                 type,
                 walletEmail,
                 walletPassword,
@@ -342,23 +342,23 @@ export default defineComponent({
               routerObject.push('/recovery').catch(() => undefined)
             }
             if (storeObject.hiddenLogin) {
-              storeObject.hiddenLogin({})
+              storeObject.hiddenLoginAction({})
             }
-            storeObject.hiddenLogin({ type: 'recovery', recovery: { type, data } })
+            storeObject.hiddenLoginAction({ type: 'recovery', recovery: { type, data } })
           },
           async loginWallet2fa(twoFACode: string) {
             routerObject.push('/2fa').catch(() => undefined)
             if (storeObject.hiddenLogin) {
-              storeObject.hiddenLogin({})
+              storeObject.hiddenLoginAction({})
             }
-            storeObject.hiddenLogin({ type: '2fa', twoFACode: twoFACode })
+            storeObject.hiddenLoginAction({ type: '2fa', twoFACode: twoFACode })
           },
           async loginWallet2faSend(twoFACode: string) {
             routerObject.push('/2fa').catch(() => undefined)
             if (storeObject.hiddenLogin) {
-              storeObject.hiddenLogin({})
+              storeObject.hiddenLoginAction({})
             }
-            storeObject.hiddenLogin({ type: '2fasend', twoFACode: twoFACode })
+            storeObject.hiddenLoginAction({ type: '2fasend', twoFACode: twoFACode })
           },
           async isLoggedIn() {
             let counter = 0
