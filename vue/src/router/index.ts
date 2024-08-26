@@ -131,7 +131,7 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  let store = useWalletStore()
+  const store = useWalletStore()
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     if (to.query && to.query.code) {
       next()

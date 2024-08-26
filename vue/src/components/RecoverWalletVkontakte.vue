@@ -38,9 +38,6 @@ export default defineComponent({
   unmounted() {
     if (this.watchTimer) clearInterval(this.watchTimer)
   },
-  destroyed() {
-    if (this.watchTimer) clearInterval(this.watchTimer)
-  },
   methods: {
     setPassword(data: any) {
       return data

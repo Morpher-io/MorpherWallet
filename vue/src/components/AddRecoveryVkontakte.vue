@@ -59,9 +59,6 @@ export default defineComponent({
   async unmounted() {
     if (this.watchTimer) clearInterval(this.watchTimer)
   },
-  async destroyed() {
-    if (this.watchTimer) clearInterval(this.watchTimer)
-  },
   methods: {
     processMethod(data: any) {
       return data

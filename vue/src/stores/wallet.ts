@@ -1063,7 +1063,7 @@ export const useWalletStore = defineStore('wallet', {
           if (this.keystore != null) {
             const signature = await this.keystore.signMessage({ message: signMessage })
 
-            let parse: any = parseSignature(signature)
+            const parse: any = parseSignature(signature)
             if (parse.v) {
               parse.v = parse.v.toString()
             }
@@ -1146,7 +1146,7 @@ export const useWalletStore = defineStore('wallet', {
       const storedPassword = this.hashedPassword
 
       if (this.keystore !== null) {
-        let hdkey = this.keystore.getHdKey()
+        const hdkey = this.keystore.getHdKey()
 
         let privateKey = ''
         if (hdkey.privateKey) {
@@ -1160,7 +1160,7 @@ export const useWalletStore = defineStore('wallet', {
       const storedPassword = this.hashedPassword
 
       if (this.keystore !== null) {
-        let hdkey = this.keystore.getHdKey()
+        const hdkey = this.keystore.getHdKey()
 
         let privateKey = ''
         if (hdkey.privateKey) {
@@ -1175,7 +1175,7 @@ export const useWalletStore = defineStore('wallet', {
       const storedPassword = await sha256(params.password)
       if (storedPassword == this.hashedPassword) {
         if (this.keystore !== null) {
-          let hdkey = this.keystore.getHdKey()
+          const hdkey = this.keystore.getHdKey()
 
           let privateKey = ''
           if (hdkey.privateKey) {
@@ -1188,7 +1188,7 @@ export const useWalletStore = defineStore('wallet', {
           const textToUInt8Array = (s: string) => new TextEncoder().encode(s)
           const UInt8ArrayToString = (u8: number[]) => String.fromCharCode.apply(null, u8)
           const convert = (Uint8Arr: Uint8Array) => {
-            let return_data: number[] = []
+            const return_data: number[] = []
 
             Uint8Arr.forEach((uint8) => {
               return_data.push(uint8)
@@ -1211,7 +1211,7 @@ export const useWalletStore = defineStore('wallet', {
 
           const iv = window.crypto.getRandomValues(new Uint8Array(16))
 
-          let ciphertext = new Uint8Array(
+          const ciphertext = new Uint8Array(
             await crypto.subtle.encrypt(
               {
                 name: 'AES-CTR',
@@ -1223,7 +1223,7 @@ export const useWalletStore = defineStore('wallet', {
             )
           )
 
-          let data = {
+          const data = {
             iv: UInt8ArrayToBase64(iv),
             ciphertext: UInt8ArrayToBase64(ciphertext)
           }
