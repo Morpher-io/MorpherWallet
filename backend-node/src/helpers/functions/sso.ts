@@ -11,6 +11,7 @@ const options = {
     default_graph_version: 'v18.0'
 };
 const FB = new Facebook(options);
+import axios from 'axios';
 
 // Verify the sso user/token and return the user email and fetch key
 export const getKeyEmail = async (recoveryTypeId: number, token: any, key: string, email: string, vk_token: any) => {
@@ -189,7 +190,6 @@ export const getKeyEmail = async (recoveryTypeId: number, token: any, key: strin
                 const url_service = `https://api.vk.com/method/users.get?access_token=${process.env.VK_SERVICE_TOKEN}&v=5.131&user_ids=${vk_token.vk_user_id}`
                 const url_user = `https://api.vk.com/method/users.get?access_token=${token}&v=5.131`
 
-                const axios = require('axios')
                 // get the vk user info
                 const response_service = await axios.get(url_service);
                 const response_user = await axios.get(url_user);

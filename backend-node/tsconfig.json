@@ -8,7 +8,6 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "noImplicitUseStrict": true,
     "target": "es2017",
     "resolveJsonModule":true
   },

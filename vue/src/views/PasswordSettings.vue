@@ -1,33 +1,32 @@
 <template>
-	<div class="container">
-		<ChangePassword />
-	</div>
+  <div class="container">
+    <ChangePassword />
+  </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import ChangePassword from '../components/ChangePassword.vue';
+import Vue, { defineComponent } from 'vue'
+import ChangePassword from '@/components/ChangePassword.vue'
 
-@Component({
-	components: {
-		ChangePassword
-	}
+export default defineComponent({
+  components: {
+    ChangePassword
+  },
+  methods: {
+    redirectUser() {
+      this.$router.push('/settings').catch(() => undefined)
+    }
+  }
 })
-export default class PasswordSettings extends Vue {
-	redirectUser() {
-		this.$router.push('/settings').catch(() => undefined);
-	}
-}
 </script>
 
 <style lang="scss" scoped>
 .title-container {
-	display: flex;
-	align-items: center;
+  display: flex;
+  align-items: center;
 
-	.title {
-		margin: 0;
-	}
+  .title {
+    margin: 0;
+  }
 }
 </style>
