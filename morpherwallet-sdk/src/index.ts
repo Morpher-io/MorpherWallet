@@ -70,7 +70,7 @@ protected rpcURL: string;
   if (config.env === 'live') {
     this.WIDGET_URL = 'https://wallet.morpher.com';			
   } else if (config.env === 'dev') {
-    this.WIDGET_URL = 'https://wallet-dev.morpher.com';
+    this.WIDGET_URL = 'https://wallet-dev-test.morpher.com';
   } else {
     this.WIDGET_URL = 'http://localhost:3001';
   }
