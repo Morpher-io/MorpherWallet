@@ -15,7 +15,7 @@ This is the repository for the core components of Morpher Wallet. Instead of bei
 The wallet users (probably) won't lose.
 
 - Non-custodial, users own their keys
-- Easy email/password sign up & log in flow
+- Easy email/password/SSO sign up & log in flow
 - Trusted recovery, restore wallet using Google/FB/VK account
 - 2-Step verification with authenticator app or email
 - Web-based (runs virtually anywhere)
