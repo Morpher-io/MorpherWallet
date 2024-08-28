@@ -1,6 +1,6 @@
 {
   "name": "morpherwallet-sdk",
-  "version": "1.2.0",
+  "version": "1.2.3",
   "description": "This is an SDK for the zero-wallet to simply add it to the website. Drop-In Replacement for Fortmatic/Portis/MetaMask",
   "main": "lib/index.js",
   "scripts": {
@@ -9,6 +9,11 @@
   },
   "author": "Thomas Wiesner (thomas@morpher.com)",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Morpher-io/MorpherWallet.git"
+  },
+  "homepage": "https://www.morpher.com/wallet",
   "dependencies": {
     "@types/events": "^3.0.3",
     "events": "^3.3.0",
