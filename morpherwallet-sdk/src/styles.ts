@@ -5,9 +5,25 @@ export const  styles =  `
   height: 0px;
   top: 0px;
 	right: 0px;
-	background: radial-gradient(50% 50% at 50% 50%,rgba(255,255,255,.45) 0,rgba(255,255,255,.72) 100%);
+	background: rgba(0, 0, 0, 0.30);
 	
   z-index: 123123123123;
+}
+
+.hidden {
+  display: none!important;
+}
+.close-button {
+  border-radius: 8px;
+  background: #FFF;
+  display: inline-flex;
+  padding: 8px;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  position: fixed;
+  right: 20px;
+  top: 20px;
 }
 @media (max-width: 576px) {
   .morpherwallet-container {
@@ -25,8 +41,8 @@ export const  styles =  `
 	transform: translate(-50%, 0);
 	top: 80px;
 
-  box-shadow: 0 0 30px rgba(0,0,0,.3);
-  border-radius: 14px;
+  box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.04), 0px 1px 2px 0px rgba(16, 24, 40, 0.06);
+  border-radius: 8px;
 	overflow: hidden;
 	border: 0;
 	margin-left: auto;
@@ -49,3 +65,11 @@ export const  styles =  `
   }
 }
 `;
+
+export const closeButton = `
+
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d="M18 6L6 18M6 6L18 18" stroke="#333333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+
+`

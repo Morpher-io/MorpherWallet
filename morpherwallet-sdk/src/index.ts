@@ -4,7 +4,7 @@ import { getChain, makeError } from './utils';
 import { Address, createPublicClient, fromHex, GetBlockParameters, http, stringify, toHex, webSocket  } from 'viem';
 import { connectToChild } from 'penpal';
 import { onWindowLoad } from './onWindowLoad';
-import { styles } from './styles';
+import { styles, closeButton } from './styles';
 
 var __defProp = Object.defineProperty;
 var __name = (target: any, value: string) => __defProp(target, "name", { value, configurable: true });
@@ -26,7 +26,8 @@ export class MorpherWalletProvider extends EventEmitter {
   protected morpherWalletContainer: HTMLDivElement;
 	protected chainId: number;
 	protected widget: any;
-
+  public isConnecting: boolean = false;
+  
   protected _on2FAUpdateCallback: any;
   protected _onRecoveryUpdateCallback: any;
   protected _onRecoveryCallback: any;
@@ -111,15 +112,25 @@ protected rpcURL: string;
     this.public_client = public_client;
   }
   async _initWidget() {
+    this.isConnecting = true;
 		this.morpherWalletIframe.src = this.WIDGET_URL;
     
     await onWindowLoad();
     const style = document.createElement('style');
     style.innerHTML = styles;
 
+    const closeButtonHtml = document.createElement('div');
+    closeButtonHtml.innerHTML = closeButton;
+    closeButtonHtml.className = 'hidden';
+    closeButtonHtml.id='morpher_WalletCloseButton'
+    
+
 		if (!document.getElementById('morpher_wallet_sdk_container')) {
 			this.morpherWalletContainer.id= 'morpher_wallet_sdk_container';
 			this.morpherWalletContainer.className = MORPHERWALLET_CONTAINER_CLASS;
+      this.morpherWalletContainer.appendChild(closeButtonHtml);
+      closeButtonHtml.style.visibility = 'invisible'
+      
 			this.morpherWalletContainer.style.width = '0';
 			this.morpherWalletContainer.style.height = '0';
 			this.morpherWalletContainer.style.border = 'none';
@@ -156,6 +167,8 @@ protected rpcURL: string;
 
     const communication = await connection.promise;
     //communication.retrieveSession();
+
+    this.isConnecting = false;
 
     return { communication: (communication as any), iframe: this.morpherWalletIframe };
   }
@@ -230,13 +243,11 @@ protected rpcURL: string;
 		if (loggedInResult && loggedInResult.isLoggedIn) {
 			const widgetCommunication = (await this.widget).communication;
 			const result = await widgetCommunication.getAccounts();
-      this.loggedIn = true;
       if (this._onLoginCallback) {
         this._onLoginCallback(result[0], loggedInResult.walletEmail, loggedInResult.recovery_type);
       }      
 			return result
 		} else {
-      this.loggedIn = false;
 			this.showWallet();
 		}
 
@@ -316,6 +327,7 @@ protected rpcURL: string;
     if (!this.morpherWalletContainer) {
       this.morpherWalletContainer = (document.getElementById('morpher_wallet_sdk_container') as HTMLDivElement);
     }
+
     
     if (!this.morpherWalletContainer) {
       console.log('Cannnot show wallet - No wallet container was found')
@@ -331,6 +343,15 @@ protected rpcURL: string;
       return
     }
 		
+    let closeButtonHtml = document.getElementById('morpher_WalletCloseButton')
+    
+    
+    if (closeButtonHtml) {
+      closeButtonHtml.className = 'close-button'
+      closeButtonHtml.addEventListener("click", this.hideWallet);
+    }
+
+    this.morpherWalletContainer.addEventListener("click", this.hideWallet);
     this.morpherWalletContainer.style.height = '100%';
     this.morpherWalletContainer.style.width = '100%';
     this.morpherWalletContainer.style.top = '0';
@@ -365,6 +386,13 @@ protected rpcURL: string;
     }
     
 
+    let closeButtonHtml = document.getElementById('morpher_WalletCloseButton')
+    
+    
+    if (closeButtonHtml) {
+      closeButtonHtml.className = 'hidden'
+    }
+
     this.morpherWalletContainer.style.width = '0';
     this.morpherWalletContainer.style.height = '0';
     this.morpherWalletContainer.style.display = 'block';
@@ -378,7 +406,6 @@ protected rpcURL: string;
 
   async isLoggedIn() {
 
-    this.loggedIn = false;
 		await this.iframeLoaded();
 
 		const widget = await this.widget;
@@ -386,9 +413,6 @@ protected rpcURL: string;
 		const widgetCommunication = (await this.widget).communication;
     const loggedIn = await widgetCommunication.isLoggedIn();
     
-    if (loggedIn && loggedIn.isLoggedIn){
-      this.loggedIn = true;
-    }
     
     return loggedIn
 
@@ -539,7 +563,8 @@ protected rpcURL: string;
       }
       case "eth_accounts": {
         let result = [];
-        if (this.loggedIn) {
+        let loggedIn = await this.isLoggedIn()
+        if (loggedIn.isLoggedIn) {
           const widgetCommunication = (await this.widget).communication;
           result = await widgetCommunication.getAccounts();
         }
@@ -608,7 +633,8 @@ protected rpcURL: string;
         return result;
       }
       case "eth_sendRawTransaction": {
-        if (!params || !this.loggedIn) {
+        let loggedIn = await this.isLoggedIn()
+        if (!params || !loggedIn.isLoggedIn) {
             return 0;
         }
 
@@ -683,7 +709,6 @@ protected rpcURL: string;
         } else if (result_formatted.status !== false && result_formatted.status !== true) {
           result_formatted.status = false
         }
-
         result_formatted.status = 'success';
 
         return result_formatted;
@@ -693,9 +718,10 @@ protected rpcURL: string;
         if (!params) {
             return throwUnsupported("eth_sign requires an account");
         }
-        if (!this.loggedIn) {
-          return throwUnsupported("cannot sign when not logged in");
-        }
+        let loggedIn = await this.isLoggedIn()
+        if (!loggedIn.isLoggedIn) {
+           return throwUnsupported("cannot sign when not logged in");
+         }
 
         const widgetCommunication = (await this.widget).communication;
           const sign_params = Object.assign({}, params, { messageStandard: 'signMessage' });
@@ -717,7 +743,8 @@ protected rpcURL: string;
         if ( !params) {
           return throwUnsupported("eth_sendTransaction requires an account");
         }
-        if (!this.loggedIn) {
+        let loggedIn = await this.isLoggedIn()
+        if (!loggedIn.isLoggedIn) {
           return throwUnsupported("cannot send a transaction when not logged in");
         }
 
