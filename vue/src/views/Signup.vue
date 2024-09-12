@@ -8,7 +8,8 @@
 			<h2 data-cy="signUpTitle" class="title">{{  $t('auth.SIGNUP')  }}</h2>
 			<p data-cy="signUpDescription" class="subtitle">{{  $t('auth.SIGNUP_DESCRIPTION')  }}</p>
 
-			<!-- Pick signing method -->
+			signups temporarily disabled, will be enabled again shortly
+			<!-- Pick signing method 
 			<div v-if="!passwordSignin">
 				<LoginApple @processMethod="processMethod" :signIn="true"></LoginApple>
 				<LoginGoogle @processMethod="processMethod" :signIn="true"></LoginGoogle>
@@ -25,7 +26,7 @@
 					<p>⚠️ <span v-html="logonError"></span></p>
 				</div>
 			</div>
-			<!-- Signin with email/password -->
+			 Signin with email/password 
 			<div v-else>
 				<div class="field">
 					<label class="label">{{  $t('common.EMAIL')  }}</label>
@@ -98,6 +99,7 @@
 				</button>
 			</div>
 
+		-->
 			<div class="divider"></div>
 
 			<div class="login-link">

@@ -13,6 +13,8 @@ const vk_tokens = {};
 
 // Function to save new signups to the database.
 export async function saveEmailPassword(req: Request, res: Response) {
+    return errorResponse(res, 'SIGNUP_DISABLED', 500);     
+
     // Get sequelize transactions to rollback changes in case of failure.
     const [err, transaction] = await to(getTransaction());
     if (err) return errorResponse(res, 'INTERNAL_SERVER_ERROR', 500);
