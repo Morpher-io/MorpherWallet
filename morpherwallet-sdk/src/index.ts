@@ -27,6 +27,7 @@ export class MorpherWalletProvider extends EventEmitter {
 	protected chainId: number;
 	protected widget: any;
   public isConnecting: boolean = false;
+  protected iframeLoad: boolean = false;
   
   protected _on2FAUpdateCallback: any;
   protected _onRecoveryUpdateCallback: any;
@@ -96,6 +97,9 @@ protected rpcURL: string;
     this.morpherWalletContainer = document.createElement('div');
   }
 
+  this.morpherWalletIframe.addEventListener('load', () => {
+      this.iframeLoad = true;
+  })
 
   this.widget = this._initWidget();
 
@@ -440,26 +444,25 @@ protected rpcURL: string;
 
   async iframeLoaded() {
     return new Promise((resolve) => {
-      let frame:any = document.getElementById('morpher_wallet_sdk_iframe');
-      try {
-          if (frame && frame.contentWindow && !frame.contentDocument) {
-              return resolve(true);
-          }
-      } catch (err) {
-          
+      if (this.iframeLoad) {
+          return resolve(true);
       }
+      let counter = 0
       const int = setInterval(() => {
-          try {
-              frame = document.getElementById('morpher_wallet_sdk_iframe');
-              if (frame && frame.contentWindow && !frame.contentDocument) {
-                  clearInterval(int);
-                  return resolve(true);
-              }
-          } catch (err) {
+          if (this.iframeLoad) {
+              clearInterval(int)
+              return resolve(true);
               
+          }
+          counter +=1
+          if (counter > 200) {
+              this.iframeLoad = true;
+              clearInterval(int)
+              return resolve(true);
           }
       }, 100);
     });
+
   }
   
   async _setHeight(height: any) {
