@@ -558,289 +558,278 @@ protected rpcURL: string;
     let coerce = /* @__PURE__ */ __name((value: any) => value, "coerce");
     switch (method) {
       case "eth_gasPrice": {
-        const result = (await this.public_client.getGasPrice());
-        return result ? result.toString() : null;
+          const result = (await this.public_client.getGasPrice());
+          return result ? result.toString() : null;
       }
       case "eth_accounts": {
-        let result = [];
-        let loggedIn = await this.isLoggedIn()
-        if (loggedIn.isLoggedIn) {
-          const widgetCommunication = (await this.widget).communication;
-          result = await widgetCommunication.getAccounts();
-        }
-        return result;
+          let result = [];
+          let loggedIn = await this.isLoggedIn();
+          if (loggedIn.isLoggedIn) {
+              const widgetCommunication = (await this.widget).communication;
+              result = await widgetCommunication.getAccounts();
+          }
+          return result;
       }
       case "eth_blockNumber": {
-        let block = await this.public_client.getBlockNumber()
-        return block.toString();
+          let block = await this.public_client.getBlockNumber();
+          return block.toString();
       }
       case "eth_chainId": {
-        let chainId = await this.public_client.getChainId()
-        return chainId;
+          let chainId = await this.public_client.getChainId();
+          return chainId;
       }
       case "eth_getBalance": {
-        if (!params) {
-            return 0;
-        }
-        let balance = await this.public_client.getBalance({ address: params[0], blockTag: params[1] || undefined})
-        
-        return balance.toString();
+          if (!params) {
+              return 0;
+          }
+          let balance = await this.public_client.getBalance({ address: params[0], blockTag: params[1] || undefined });
+          return balance.toString();
       }
       case "eth_getStorageAt": {
-        if (!params) {
-            return '';
-        }
-        let address: Address = params[0]
-        let storage = await this.public_client.getStorageAt({address, slot : params[1], blockNumber: params[2]})
-        return storage;
+          if (!params) {
+              return '';
+          }
+          let address = params[0];
+          let storage = await this.public_client.getStorageAt({ address, slot: params[1], blockNumber: params[2] });
+          return storage;
       }
       case "eth_getTransactionCount": {
-        if (!params) {
-            return 0;
-        }
-        const result = await this.public_client.getTransactionCount({
-          address: params[0],
-          blockNumber: params[1]
-      });
-        return result;
+          if (!params) {
+              return 0;
+          }
+          const result = await this.public_client.getTransactionCount({
+              address: params[0],
+              blockNumber: params[1]
+          });
+          return result;
       }
       case "eth_getBlockTransactionCountByHash":
       case "eth_getBlockTransactionCountByNumber": {
-        if (!params) {
-            return 0;
-        }
-
-        
-        let param: GetBlockParameters
-        if (params[0] && params[0].toString().includes('0x')) {
-          param = {blockHash: params[0]}
-        } else {
-          param = {blockNumber: params[0]}
-        }
-        const result = await this.public_client.getBlock(param);
-        return result &&  result.transactions ? result.transactions.length : result;
+          if (!params) {
+              return 0;
+          }
+          let param;
+          if (params[0] && params[0].toString().includes('0x')) {
+              param = { blockHash: params[0] };
+          }
+          else {
+              param = { blockNumber: params[0] };
+          }
+          const result = await this.public_client.getBlock(param);
+          return result && result.transactions ? result.transactions.length : result;
       }
       case "eth_getCode": {
-        if (!params) {
-            return 0;
-        }
-        const result = await this.public_client.getCode({
-          address: params[0],
-          blockNumber: params[1] 
-        });
-
-        
-        return result;
+          if (!params) {
+              return 0;
+          }
+          const result = await this.public_client.getCode({
+              address: params[0],
+              blockNumber: params[1]
+          });
+          return result;
       }
       case "eth_sendRawTransaction": {
-        let loggedIn = await this.isLoggedIn()
-        if (!params || !loggedIn.isLoggedIn) {
-            return 0;
-        }
-
-        const result = await this.public_client.sendRawTransaction({serializedTransaction: params[0]})
-        return result;
+          let loggedIn = await this.isLoggedIn();
+          if (!params || !loggedIn.isLoggedIn) {
+              return 0;
+          }
+          const result = await this.public_client.sendRawTransaction({ serializedTransaction: params[0] });
+          return result;
       }
       case "eth_call": {
-        if (!params) {
-            return 0;
-        }
-        
-        let call_prams = {
-          account: params[0].from,
-          to: params[0].to,
-          value: params[0].value,
-          data: params[0].data,
-        }
-        const result = await this.public_client.call(call_prams)
-
-        return result.data;
+          if (!params) {
+              return 0;
+          }
+          let call_prams = {
+              account: params[0].from,
+              to: params[0].to,
+              value: params[0].value,
+              data: params[0].data,
+          };
+          const result = await this.public_client.call(call_prams);
+          return result.data;
       }
       case "estimateGas": {
-        if (!params) {
-            return 0;
-        }
-        if (params[1] && params[1] !== "latest") {
-          throwUnsupported("estimateGas does not support blockTag");
-        }
-        const result = await this.public_client.estimateGas({account: params[0]})
-
-        return result.toString();
+          if (!params) {
+              return 0;
+          }
+          if (params[1] && params[1] !== "latest") {
+              throwUnsupported("estimateGas does not support blockTag");
+          }
+          const result = await this.public_client.estimateGas({ account: params[0] });
+          return result.toString();
       }
       case "eth_getBlockByHash":
       case "eth_getBlockByNumber": {
-        if (!params) {
-            return 0;
-        }
-
-        let param: GetBlockParameters
-        if (params[0] && params[0].toString().includes('0x')) {
-          param = {blockHash: params[0]}
-        } else {
-          if (isNaN(Number(params[0]))) {
-            param = {blockTag: params[0]}
-          } else {
-            param = {blockNumber: BigInt(params[0])}
+          if (!params) {
+              return 0;
           }
-          
-        }
-        const result = await this.public_client.getBlock(param);
-
-       return JSON.parse(stringify(result))
+          let param;
+          if (params[0] && params[0].toString().includes('0x')) {
+              param = { blockHash: params[0] };
+          }
+          else {
+              if (isNaN(Number(params[0]))) {
+                  param = { blockTag: params[0] };
+              }
+              else {
+                  param = { blockNumber: BigInt(params[0]) };
+              }
+          }
+          const result = await this.public_client.getBlock(param);
+          return JSON.parse(stringify(result));
       }
       case "eth_getTransactionByHash": {
-        if (!params) {
-            return 0;
-        }
-        const result = await this.public_client.getTransaction({hash: params[0]});
-
-        return JSON.parse(stringify(result))
+          if (!params) {
+              return 0;
+          }
+          const result = await this.public_client.getTransaction({ hash: params[0] });
+          return JSON.parse(stringify(result));
       }
       case "eth_getTransactionReceipt": {
-        if (!params) {
-            return 0;
-        }
-        const result = await this.public_client.waitForTransactionReceipt({hash: params[0]});
-        
-        const result_formatted = JSON.parse(stringify(result))
-        result_formatted.transactionIndex = (result_formatted.transactionIndex).toString()
-        if (result_formatted.status === "success") {
-          result_formatted.status = true
-        } else if (result_formatted.status !== false && result_formatted.status !== true) {
-          result_formatted.status = false
-        }
-        result_formatted.status = 'success';
+          if (!params) {
+              return 0;
+          }
+          const result = await this.public_client.waitForTransactionReceipt({ hash: params[0] });
+          const result_formatted = JSON.parse(stringify(result));
+          result_formatted.transactionIndex = (result_formatted.transactionIndex).toString();
+          if (result_formatted.status === "success") {
+              result_formatted.status = true;
+          }
+          else if (result_formatted.status !== false && result_formatted.status !== true) {
+              result_formatted.status = false;
+          }
+          result_formatted.status = 'success';
+          return result_formatted;
+      }
+      case "eth_signTypedData_v3":
+      case "eth_signTypedData_v4": {
+          if (!params) {
+              return throwUnsupported("eth_signTypedData requires an account");
+          }
+          let loggedIn = await this.isLoggedIn()
+          if (!loggedIn.isLoggedIn) {
+             return throwUnsupported("cannot sign when not logged in");
+           }
 
-        return result_formatted;
+         
+          const widgetCommunication = (await this.widget).communication;
+            let sign_params: any = {}
+
+            if (params.length == 2) {
+              sign_params.account = params[0]
+              sign_params.data = params[1]
+              sign_params.messageStandard = 'signTypedMessage'
+            } else {
+              sign_params= Object.assign({}, params, { messageStandard: 'signTypedMessage' });
+            }
+    
+            let cfg = {
+              confirm_message: this.config?.confirm_message,
+              show_message: this.config?.show_message,
+            }
+            const  result  = await widgetCommunication.signMessage(sign_params, cfg);
+            
+
+           return result; 
       }
       case "personal_sign":
       case "eth_sign": {
-        if (!params) {
-            return throwUnsupported("eth_sign requires an account");
-        }
-        let loggedIn = await this.isLoggedIn()
-        if (!loggedIn.isLoggedIn) {
-           return throwUnsupported("cannot sign when not logged in");
-         }
-
-        const widgetCommunication = (await this.widget).communication;
+          if (!params) {
+              return throwUnsupported("eth_sign requires an account");
+          }
+          let loggedIn = await this.isLoggedIn();
+          if (!loggedIn.isLoggedIn) {
+              return throwUnsupported("cannot sign when not logged in");
+          }
+          const widgetCommunication = (await this.widget).communication;
           const sign_params = Object.assign({}, params, { messageStandard: 'signMessage' });
-          if (this.config?.show_message || this.config?.confirm_message)
-            this.showWallet();
 
           let cfg = {
-            confirm_message: this.config?.confirm_message,
-            show_message: this.config?.show_message,
-          }
-          const  result  = await widgetCommunication.signMessage(sign_params, cfg);
-          
-          if (this.config?.show_message || this.config?.confirm_message)
-            this.hideWallet();    
-          return result; 
-          
+              confirm_message: this.config?.confirm_message,
+              show_message: this.config?.show_message,
+          };
+          const result = await widgetCommunication.signMessage(sign_params, cfg);
+
+          return result;
       }
       case "eth_sendTransaction": {
-        if ( !params) {
-          return throwUnsupported("eth_sendTransaction requires an account");
-        }
-        let loggedIn = await this.isLoggedIn()
-        if (!loggedIn.isLoggedIn) {
-          return throwUnsupported("cannot send a transaction when not logged in");
-        }
-
-
-        const widgetCommunication = (await this.widget).communication;
-         let txParams = params[0] as any
-          txParams.chainId = this.chainId
-          if (txParams.maxFeePerGas !== undefined && txParams.maxPriorityFeePerGas !== undefined && txParams.gasPrice !== undefined) 
-            delete txParams.gasPrice;
-
+          if (!params) {
+              return throwUnsupported("eth_sendTransaction requires an account");
+          }
+          let loggedIn = await this.isLoggedIn();
+          if (!loggedIn.isLoggedIn) {
+              return throwUnsupported("cannot send a transaction when not logged in");
+          }
+          const widgetCommunication = (await this.widget).communication;
+          let txParams = params[0];
+          txParams.chainId = this.chainId;
+          if (txParams.maxFeePerGas !== undefined && txParams.maxPriorityFeePerGas !== undefined && txParams.gasPrice !== undefined)
+              delete txParams.gasPrice;
           if (txParams.maxFeePerGas !== undefined && txParams.maxPriorityFeePerGas !== undefined && txParams.chainId && Number(txParams['chainId']) !== 21 && Number(txParams['chainId']) !== 210 && Number(txParams['chainId']) !== 2100) {
-            txParams.chain = 'mainnet';
-            txParams.hardfork = 'london';
-          }          
-          
-          if (this.config?.show_transaction || this.config?.confirm_transaction || (Number(txParams.chainId) !== 21 && Number(txParams.chainId) !== 210 && Number(txParams.chainId) !== 2100))
-            this.showWallet();
+              txParams.chain = 'mainnet';
+              txParams.hardfork = 'london';
+          }
+
           let cfg = {
-            confirm_transaction: this.config?.confirm_transaction
+              confirm_transaction: this.config?.confirm_transaction
+          };
+          if (!txParams.gas && !txParams.gasLimit) {
+              // const txObj =  JSON.parse(JSON.stringify(txParams))
+              // if (txObj.gas && String(txObj.gas).includes('0x')) {
+              //   txObj.gas = fromHex(txObj.gas, "bigint")
+              // }
+              // // if (!txObj.gas) {
+              // //   txObj.gas = BigInt(21000)
+              // // }
+              // if (txObj.value && String(txObj.value).includes('0x')) {
+              //   txObj.value = fromHex(txObj.value, "bigint")
+              // }
+              // if (txObj.maxFeePerGas && String(txObj.maxFeePerGas).includes('0x')) {
+              //   txObj.maxFeePerGas = fromHex(txObj.maxFeePerGas, "bigint")
+              // }
+              // if (txObj.maxPriorityFeePerGas && String(txObj.maxPriorityFeePerGas).includes('0x')) {
+              //   txObj.maxPriorityFeePerGas = fromHex(txObj.maxPriorityFeePerGas, "bigint")
+              // }
+              // txObj.gas = BigInt(1)
+              let gasTx = {
+                  account: txParams.from || txParams.account,
+                  to: txParams.to,
+                  value: txParams.value,
+                  data: txParams.data
+              };
+              let gas = await this.public_client.estimateGas(gasTx);
+              txParams.gas = toHex(gas);
           }
-
-          if (!txParams.gas && ! txParams.gasLimit) {
-            
-            // const txObj =  JSON.parse(JSON.stringify(txParams))
-            // if (txObj.gas && String(txObj.gas).includes('0x')) {
-            //   txObj.gas = fromHex(txObj.gas, "bigint")
-            // }
-            // // if (!txObj.gas) {
-            // //   txObj.gas = BigInt(21000)
-            // // }
-            // if (txObj.value && String(txObj.value).includes('0x')) {
-            //   txObj.value = fromHex(txObj.value, "bigint")
-            // }
-            // if (txObj.maxFeePerGas && String(txObj.maxFeePerGas).includes('0x')) {
-            //   txObj.maxFeePerGas = fromHex(txObj.maxFeePerGas, "bigint")
-            // }
-            
-            // if (txObj.maxPriorityFeePerGas && String(txObj.maxPriorityFeePerGas).includes('0x')) {
-            //   txObj.maxPriorityFeePerGas = fromHex(txObj.maxPriorityFeePerGas, "bigint")
-            // }
-            // txObj.gas = BigInt(1)
-            
-            let gasTx = {
-              account: txParams.from || txParams.account,
-              to: txParams.to,
-              value: txParams.value,
-              data: txParams.data
-            }
-            let gas = await this.public_client.estimateGas(gasTx)
-            txParams.gas = toHex(gas)
-            
-          }
-
           if (!txParams.nonce) {
-            let nonce = await this.public_client.getTransactionCount({
-              address:txParams.from
-            })
-            txParams.nonce = nonce
-
+              let nonce = await this.public_client.getTransactionCount({
+                  address: txParams.from
+              });
+              txParams.nonce = nonce;
           }
-
           if (!txParams.gasPrice && !txParams.maxFeePerGas) {
-            const {
-              maxFeePerGas,
-              maxPriorityFeePerGas
-            } = await this.public_client.estimateFeesPerGas()
-
-            txParams.maxFeePerGas = toHex(maxFeePerGas)
-            txParams.maxPriorityFeePerGas = toHex(maxPriorityFeePerGas)
+              const { maxFeePerGas, maxPriorityFeePerGas } = await this.public_client.estimateFeesPerGas();
+              txParams.maxFeePerGas = toHex(maxFeePerGas);
+              txParams.maxPriorityFeePerGas = toHex(maxPriorityFeePerGas);
           }
-                    
           const result = await widgetCommunication.signTransaction(txParams, cfg, this.rpcURL);
           if (!result) {
-            return throwUnsupported("Error signing transaction with wallet");
+              return throwUnsupported("Error signing transaction with wallet");
           }
 
-          if (this.config?.show_transaction || this.config?.confirm_transaction || (Number(txParams.chainId) !== 21 && Number(txParams.chainId) !== 210 && Number(txParams.chainId) !== 2100))
-              this.hideWallet();  
-
-					let tx_hash = await this.public_client.sendRawTransaction({
-            serializedTransaction: result
-          })
-               
-
+          let tx_hash = await this.public_client.sendRawTransaction({
+              serializedTransaction: result
+          });
           return tx_hash;
-        
-        // return tx.hash;
-
+          // return tx.hash;
       }
       case "eth_getUncleCountByBlockHash":
       case "eth_getUncleCountByBlockNumber": {
-        this.public_client.simulateContract
-        coerce = 0;
-        break;
+          this.public_client.simulateContract;
+          coerce = 0;
+          break;
       }
-    }
+  }
     // if (this.send) {
     
     //   const result: any = await this.send(method, params || []);

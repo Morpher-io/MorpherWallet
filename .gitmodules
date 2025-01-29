@@ -4,3 +4,6 @@
 [submodule "backend-node"]
 	path = backend-node
 	url = git@github.com:Morpher-io/morpher-wallet-backend.git
+[submodule "penpal"]
+	path = penpal
+	url = https://github.com/beornb/penpal.git
