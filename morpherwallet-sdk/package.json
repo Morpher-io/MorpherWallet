@@ -1,6 +1,6 @@
 {
   "name": "morpherwallet-sdk",
-  "version": "1.2.10",
+  "version": "1.2.12",
   "description": "This is an SDK for the zero-wallet to simply add it to the website. Drop-In Replacement for Fortmatic/Portis/MetaMask",
   "main": "index.js",
   "scripts": {

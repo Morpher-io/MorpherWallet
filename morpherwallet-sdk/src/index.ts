@@ -160,7 +160,7 @@ protected rpcURL: string;
         onActiveWalletChanged: this._onActiveWalletChanged.bind(this),
 				onError: this._onError.bind(this),
 				hideWallet: this.hideWallet,
-        openSendInApp: this.openSendInApp,
+        openSendInApp: this._onSend.bind(this),
         showWallet: this.showWallet
       },
     });
@@ -231,13 +231,6 @@ protected rpcURL: string;
   onSend(callback: any) {
     this._onSendCallback = callback;
   }
-  async openSendInApp() {
-    this.hideWallet()
-    if (this._onSendCallback) {
-      this._onSendCallback();
-    }
-  }
-	
 	async loginWallet() {
 		const loggedInResult = await this.isLoggedIn();
 		if (loggedInResult && loggedInResult.isLoggedIn) {
@@ -473,6 +466,13 @@ protected rpcURL: string;
     const height = window.innerHeight || document.documentElement.clientHeight || body.clientHeight;
     return { width, height };
   }
+
+  _onSend() {
+    this.hideWallet()
+    if (this._onSendCallback) {
+      this._onSendCallback();
+    }
+  }  
 
   _onLogin(walletAddress: any, email: any, recovery_type: any) {
 		this.hideWallet();
@@ -753,7 +753,11 @@ protected rpcURL: string;
 
           return result;
       }
+      case "wallet_sendTransaction":
       case "eth_sendTransaction": {
+          if (method === 'wallet_sendTransaction') {
+            console.log('wallet_sendTransaction params:', params)
+          }
           if (!params) {
               return throwUnsupported("eth_sendTransaction requires an account");
           }
@@ -761,6 +765,7 @@ protected rpcURL: string;
           if (!loggedIn.isLoggedIn) {
               return throwUnsupported("cannot send a transaction when not logged in");
           }
+          
           const widgetCommunication = (await this.widget).communication;
           let txParams = params[0];
           txParams.chainId = this.chainId;
