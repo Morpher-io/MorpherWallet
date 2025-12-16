@@ -3,3 +3,5 @@
 
 .env.aws.backend
 .DS_Store
+.aider*
+!.aider.conf.yml
