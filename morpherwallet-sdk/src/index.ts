@@ -2,7 +2,7 @@ import { EventEmitter} from 'events';
 
 import { getChain, makeError } from './utils';
 import { Address, createPublicClient, fromHex, GetBlockParameters, http, stringify, toHex, webSocket  } from 'viem';
-import { connectToChild } from 'penpal';
+import { WindowMessenger, connect } from 'penpal';
 import { onWindowLoad } from './onWindowLoad';
 import { styles, closeButton } from './styles';
 
@@ -144,28 +144,37 @@ protected rpcURL: string;
 	
 		}
 
-    const connection = connectToChild({
-      iframe: this.morpherWalletIframe,
-      methods: {
-        setHeight: this._setHeight.bind(this),
-        getWindowSize: this._getWindowSize.bind(this),
-				onLogin: this._onLogin.bind(this),
-        on2FA: this._on2FA.bind(this),
-        on2FAUpdate: this._on2FAUpdate.bind(this),
-        onRecoveryUpdate: this._onRecoveryUpdate.bind(this),
-        onRecovery: this._onRecovery.bind(this),
-        onLoginError: this._onLoginError.bind(this),
-				onClose: this._onClose.bind(this),
-        onLogout: this._onLogout.bind(this),
-        onActiveWalletChanged: this._onActiveWalletChanged.bind(this),
-				onError: this._onError.bind(this),
-				hideWallet: this.hideWallet,
-        openSendInApp: this._onSend.bind(this),
-        showWallet: this.showWallet
-      },
-    });
+    let communication
 
-    const communication = await connection.promise;
+    if (this.morpherWalletIframe?.contentWindow) {
+
+      const messenger = new WindowMessenger({
+        remoteWindow: this.morpherWalletIframe.contentWindow,
+      });
+
+      const connection = connect({
+        messenger: messenger,
+        methods: {
+          setHeight: this._setHeight.bind(this),
+          getWindowSize: this._getWindowSize.bind(this),
+          onLogin: this._onLogin.bind(this),
+          on2FA: this._on2FA.bind(this),
+          on2FAUpdate: this._on2FAUpdate.bind(this),
+          onRecoveryUpdate: this._onRecoveryUpdate.bind(this),
+          onRecovery: this._onRecovery.bind(this),
+          onLoginError: this._onLoginError.bind(this),
+          onClose: this._onClose.bind(this),
+          onLogout: this._onLogout.bind(this),
+          onActiveWalletChanged: this._onActiveWalletChanged.bind(this),
+          onError: this._onError.bind(this),
+          hideWallet: this.hideWallet,
+          openSendInApp: this._onSend.bind(this),
+          showWallet: this.showWallet
+        },
+      });
+
+      communication  = await connection.promise;
+    }
     //communication.retrieveSession();
 
     this.isConnecting = false;
