@@ -166,9 +166,9 @@ protected rpcURL: string;
                     onLogout: this._onLogout.bind(this),
                     onActiveWalletChanged: this._onActiveWalletChanged.bind(this),
                     onError: this._onError.bind(this),
-                    hideWallet: this.hideWallet,
+                    hideWallet: this.hideWallet.bind(this),
                     openSendInApp: this._onSend.bind(this),
-                    showWallet: this.showWallet
+                    showWallet: this.showWallet.bind(this)
                   },
               });
               resolve(connection.promise);
