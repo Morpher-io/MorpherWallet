@@ -1,6 +1,6 @@
-# client_trade_morpher_com
+# Morpher Wallet Test Client
 
-This template should help get you started developing with Vue 3 in Vite.
+This is a test client for the Morpher Wallet that uses the wallet SDK to test connectivity to the wallet and executes test transactions.
 
 ## Recommended IDE Setup
 

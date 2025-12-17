@@ -1,7 +1,7 @@
 import { EventEmitter} from 'events';
 
 import { getChain, makeError } from './utils';
-import { Address, createPublicClient, fromHex, GetBlockParameters, http, stringify, toHex, webSocket  } from 'viem';
+import { createPublicClient, http, stringify, toHex, webSocket  } from 'viem';
 import { WindowMessenger, connect } from 'penpal';
 import { onWindowLoad } from './onWindowLoad';
 import { styles, closeButton } from './styles';
@@ -113,7 +113,6 @@ protected rpcURL: string;
   }
   async _initWidget() {
     this.isConnecting = true;
-		this.morpherWalletIframe.src = this.WIDGET_URL;
     
     await onWindowLoad();
     const style = document.createElement('style');
@@ -144,38 +143,46 @@ protected rpcURL: string;
 	
 		}
 
-    let communication
+    const communicationPromise = new Promise(resolve => {
+      this.morpherWalletIframe.onload = () => {
+          if (this.morpherWalletIframe?.contentWindow) {
+              const messenger = new WindowMessenger({
+                  remoteWindow: this.morpherWalletIframe.contentWindow,
+                  allowedOrigins: [new URL(this.morpherWalletIframe.src).origin]
+              });
 
-    if (this.morpherWalletIframe?.contentWindow) {
+              const connection = connect({
+                  messenger: messenger,
+                  methods: {
+                    setHeight: this._setHeight.bind(this),
+                    getWindowSize: this._getWindowSize.bind(this),
+                    onLogin: this._onLogin.bind(this),
+                    on2FA: this._on2FA.bind(this),
+                    on2FAUpdate: this._on2FAUpdate.bind(this),
+                    onRecoveryUpdate: this._onRecoveryUpdate.bind(this),
+                    onRecovery: this._onRecovery.bind(this),
+                    onLoginError: this._onLoginError.bind(this),
+                    onClose: this._onClose.bind(this),
+                    onLogout: this._onLogout.bind(this),
+                    onActiveWalletChanged: this._onActiveWalletChanged.bind(this),
+                    onError: this._onError.bind(this),
+                    hideWallet: this.hideWallet,
+                    openSendInApp: this._onSend.bind(this),
+                    showWallet: this.showWallet
+                  },
+              });
+              resolve(connection.promise);
+          } else {
+              resolve(undefined);
+          }
+      };
+    });
 
-      const messenger = new WindowMessenger({
-        remoteWindow: this.morpherWalletIframe.contentWindow,
-      });
+    this.morpherWalletIframe.src = this.WIDGET_URL;
 
-      const connection = connect({
-        messenger: messenger,
-        methods: {
-          setHeight: this._setHeight.bind(this),
-          getWindowSize: this._getWindowSize.bind(this),
-          onLogin: this._onLogin.bind(this),
-          on2FA: this._on2FA.bind(this),
-          on2FAUpdate: this._on2FAUpdate.bind(this),
-          onRecoveryUpdate: this._onRecoveryUpdate.bind(this),
-          onRecovery: this._onRecovery.bind(this),
-          onLoginError: this._onLoginError.bind(this),
-          onClose: this._onClose.bind(this),
-          onLogout: this._onLogout.bind(this),
-          onActiveWalletChanged: this._onActiveWalletChanged.bind(this),
-          onError: this._onError.bind(this),
-          hideWallet: this.hideWallet,
-          openSendInApp: this._onSend.bind(this),
-          showWallet: this.showWallet
-        },
-      });
-
-      communication  = await connection.promise;
-    }
-    //communication.retrieveSession();
+    let communication = await communicationPromise;
+    
+    // communication.retrieveSession();
 
     this.isConnecting = false;
 

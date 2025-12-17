@@ -28,3 +28,7 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+# Aider
+.aider*
+!.aider.conf.yml
+

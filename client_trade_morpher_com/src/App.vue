@@ -10,6 +10,7 @@ import {
   custom,
   getContract,
   type Account,
+  type Address,
   type PublicClient,
   type WalletClient,
 } from "viem";
@@ -19,8 +20,7 @@ const eth_address = ref("");
 const morpherWallet = ref(undefined as MorpherWallet | undefined);
 const isAuthenticated = ref(false);
 const walletEmail = ref("");
-const public_client_ref = ref();
-const wallet_client_ref = ref();
+
 const showWallet = ref(false);
 const balance = ref("0");
 const numberOfEther = ref(0.02);
@@ -69,10 +69,9 @@ onMounted(async () => {
         let public_client = createPublicClient({
           chain: chain,
           transport: custom(provider),
+          cacheTime: 10_000,
         });
         isAuthenticated.value = true;
-        wallet_client_ref.value = wallet_client;
-        public_client_ref.value = public_client;
 
         let accounts = await wallet_client.getAddresses();
 
@@ -109,11 +108,11 @@ onMounted(async () => {
     let public_client = createPublicClient({
       chain: chain,
       transport: custom(provider),
+      cacheTime: 10_000,
     });
 
     isAuthenticated.value = true;
-    wallet_client_ref.value = wallet_client;
-    public_client_ref.value = public_client;
+
 
     let accounts = await wallet_client.getAddresses();
 
@@ -150,13 +149,31 @@ const toggleWallet = async () => {
 const testTrade = async (e: any) => {
   e.preventDefault();
 
+  if (!morpherWallet.value) {
+    return
+  }
+  let provider = morpherWallet.value.getProvider();
+
+  let wallet_client = createWalletClient({
+    chain: chain,
+    account: eth_address.value as `0x${string}`,
+    transport: custom(provider),
+  });
+
+  let public_client = createPublicClient({
+    chain: chain,
+    transport: custom(provider),
+    cacheTime: 10_000,
+  });
+
   const contractInstance = getContract({
     address: oracleAddress,
     abi: morpherOracleAbi,
 
     client: {
-      public: public_client_ref.value as PublicClient,
-      wallet: wallet_client_ref.value as WalletClient,
+      
+      public: public_client ,
+      wallet: wallet_client ,
     },
   });
 
@@ -165,8 +182,8 @@ const testTrade = async (e: any) => {
     abi: morpherTokenAbi,
 
     client: {
-      public: public_client_ref.value as PublicClient,
-      wallet: wallet_client_ref.value as WalletClient,
+      public: public_client,
+      wallet: wallet_client,
     },
   });
 
@@ -199,14 +216,14 @@ const testTrade = async (e: any) => {
       good_from,
     ]);
 
-    let result = await public_client_ref.value.waitForTransactionReceipt({
+    let result = await public_client.waitForTransactionReceipt({
       hash: tx_hash,
     });
 
     if (result.status === "success" || result.transactionHash) {
       alert("Trade was successful");
-      let accounts = await wallet_client_ref.value.getAddresses();
-      let balanceFetch = await public_client_ref.value.getBalance({
+      let accounts = await wallet_client.getAddresses();
+      let balanceFetch = await public_client.getBalance({
         address: accounts[0],
       });
       balance.value = String(Number(balanceFetch) / 10 ** 18);
@@ -215,7 +232,24 @@ const testTrade = async (e: any) => {
 };
 
 const sendEther = async (e: any) => {
-  const signature_1 = await wallet_client_ref.value.signMessage({
+  if (!morpherWallet.value) {
+    return
+  }  
+    let provider = morpherWallet.value.getProvider();
+
+  let wallet_client = createWalletClient({
+    chain: chain,
+    account: eth_address.value as `0x${string}`,
+    transport: custom(provider),
+  });
+
+  let public_client = createPublicClient({
+    chain: chain,
+    transport: custom(provider),
+    cacheTime: 10_000,
+  });
+
+  const signature_1 = await wallet_client.signMessage({
     message: "hello world",
   });
 
@@ -223,8 +257,8 @@ const sendEther = async (e: any) => {
 
   e.preventDefault();
   let amount = numberOfEther.value;
-  let to = targetAddress.value;
-  const wallet_client = wallet_client_ref.value;
+  let to = targetAddress.value as Address;
+  
   const walletAddress = eth_address.value;
 
   let tx_hash = await wallet_client.sendTransaction({
@@ -232,7 +266,7 @@ const sendEther = async (e: any) => {
     value: BigInt(amount * 10 ** 18),
   });
 
-  let result = await public_client_ref.value.waitForTransactionReceipt({
+  let result = await public_client.waitForTransactionReceipt({
     hash: tx_hash,
   });
 
@@ -240,7 +274,7 @@ const sendEther = async (e: any) => {
     alert("Sent was successful");
     let accounts = await wallet_client.getAddresses();
 
-    let balanceFetch = await public_client_ref.value.getBalance({
+    let balanceFetch = await public_client.getBalance({
       address: accounts[0],
     });
     balance.value = String(Number(balanceFetch) / 10 ** 18);
@@ -262,32 +296,39 @@ const sendEther = async (e: any) => {
       <h2>Hi {{ walletEmail }}</h2>
 
       <div>
-        <span>Your eth_address is {{ eth_address }} </span>
-        <span>Your Balance is {{ balance }} ether</span>
-        <h3>Send some Ether</h3>
+        <p><strong>Your eth_address is:</strong> {{ eth_address }}</p>
+        <p><strong>Your Balance is:</strong> {{ balance }} ether</p>
 
-        Target Address:
-        <input
-          type="text"
-          name="targetAddress"
-          placeholder="0x123"
-          v-model="targetAddress"
-        /><br />
-        Ether:
-        <input
-          type="text"
-          name="numberOfEther"
-          placeholder="1"
-          v-model="numberOfEther"
-          className="Input"
-        /><br />
-        <button type="submit" @click="sendEther">Send Now</button>
+        <form @submit.prevent="sendEther" class="send-ether-form">
+          <h3>Send some Ether</h3>
+          <div class="form-group">
+            <label for="targetAddress">Target Address:</label>
+            <input
+              id="targetAddress"
+              type="text"
+              name="targetAddress"
+              placeholder="0x123"
+              v-model="targetAddress"
+            />
+          </div>
+          <div class="form-group">
+            <label for="numberOfEther">Ether:</label>
+            <input
+              id="numberOfEther"
+              type="text"
+              name="numberOfEther"
+              placeholder="1"
+              v-model="numberOfEther"
+              className="Input"
+            />
+          </div>
+          <button type="submit">Send Now</button>
+        </form>
 
-        <br />
-        <br />
-        <button @click="testTrade">Test Trade</button>
-        <br />
-        <button @click="toggleWallet">Show/Hide Wallet</button>
+        <div class="actions">
+          <button @click="testTrade">Test Trade</button>
+          <button @click="toggleWallet">Show/Hide Wallet</button>
+        </div>
       </div>
     </div>
     <div v-else class="wrapper">
@@ -307,6 +348,27 @@ header {
 .logo {
   display: block;
   margin: 0 auto 2rem;
+}
+
+.send-ether-form {
+  margin-top: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.actions {
+  margin-top: 2rem;
+}
+
+.actions button {
+  margin-right: 1rem;
 }
 
 @media (min-width: 1024px) {
