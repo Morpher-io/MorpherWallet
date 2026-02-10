@@ -730,14 +730,14 @@ protected rpcURL: string;
 
          
           const widgetCommunication = (await this.widget).communication;
-            let sign_params: any = {}
+            let sign_params: any = {chainId:this.chainId}
 
             if (params.length == 2) {
               sign_params.account = params[0]
               sign_params.data = params[1]
               sign_params.messageStandard = 'signTypedMessage'
             } else {
-              sign_params= Object.assign({}, params, { messageStandard: 'signTypedMessage' });
+              sign_params= Object.assign({chainId:this.chainId}, params, { messageStandard: 'signTypedMessage' });
             }
     
             let cfg = {
@@ -759,7 +759,7 @@ protected rpcURL: string;
               return throwUnsupported("cannot sign when not logged in");
           }
           const widgetCommunication = (await this.widget).communication;
-          const sign_params = Object.assign({}, params, { messageStandard: 'signMessage' });
+          const sign_params = Object.assign({chainId:this.chainId}, params, { messageStandard: 'signMessage' });
 
           let cfg = {
               confirm_message: this.config?.confirm_message,
