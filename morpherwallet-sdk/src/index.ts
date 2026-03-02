@@ -19,6 +19,7 @@ export type MorpherWalletConfig = {
 	show_message: boolean;
   confirm_message: boolean;
   locale?: string;
+  sdk_version?: string;
 } | null;
 export class MorpherWalletProvider extends EventEmitter {
   protected WIDGET_URL: string;
@@ -178,7 +179,12 @@ protected rpcURL: string;
       };
     });
 
-    this.morpherWalletIframe.src = this.WIDGET_URL;
+    // Use a stable version string rather than Date.now() so the browser can
+    // cache the wallet app bundle between page loads. Date.now() was defeating
+    // the cache on every single initialisation, forcing a full re-download.
+    // The ?v= param still allows forced cache-busting by deploying a new version.
+    const WALLET_VERSION = this.config?.sdk_version || '1.2.22';
+    this.morpherWalletIframe.src = `${this.WIDGET_URL}?v=${WALLET_VERSION}`;
 
     let communication = await communicationPromise;
     
@@ -414,14 +420,10 @@ protected rpcURL: string;
 	}
 
   async isLoggedIn() {
-
-		await this.iframeLoaded();
-
 		const widget = await this.widget;
 
-		const widgetCommunication = (await this.widget).communication;
+		const widgetCommunication = widget.communication;
     const loggedIn = await widgetCommunication.isLoggedIn();
-    
     
     return loggedIn
 
@@ -430,46 +432,19 @@ protected rpcURL: string;
   async setLanguage(lang?: string) {
     if (!lang) return;
 
-		await this.iframeLoaded();
-
 		const widgetCommunication = (await this.widget).communication;
 
 		return widgetCommunication.setLanguage(lang);
 	}
 
   async hasSocialRecoveryMethods() {
-
-    await this.iframeLoaded();
-
     const widget = await this.widget;
 
     const widgetCommunication = (await this.widget).communication;
     return widgetCommunication.hasSocialRecoveryMethods();        
 }
 
-  async iframeLoaded() {
-    return new Promise((resolve) => {
-      let frame:any = document.getElementById('morpher_wallet_sdk_iframe');
-      try {
-          if (frame && frame.contentWindow && !frame.contentDocument) {
-              return resolve(true);
-          }
-      } catch (err) {
-          
-      }
-      const int = setInterval(() => {
-          try {
-              frame = document.getElementById('morpher_wallet_sdk_iframe');
-              if (frame && frame.contentWindow && !frame.contentDocument) {
-                  clearInterval(int);
-                  return resolve(true);
-              }
-          } catch (err) {
-              
-          }
-      }, 100);
-    });
-  }
+
   
   async _setHeight(height: any) {
     const widgetFrame = (await this.widget).widgetFrame;
