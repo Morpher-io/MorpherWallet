@@ -1221,7 +1221,10 @@ if (isIframe()) {
 	store.state.connection = connectToParent({
 		parentOrigin:
 			process.env.NODE_ENV === 'production'
-				? /^https:\/\/[w]{0,3}\.?morpher\.com\/?.*$/
+				// Allow any first-party morpher.com origin (e.g. www.morpher.com,
+				// close.morpher.com). Anchored to the end so look-alike domains such
+				// as morpher.com.evil.com no longer match (the old `\/?.*$` did).
+				? /^https:\/\/([a-z0-9-]+\.)?morpher\.com$/
 				: /.*/gm,
 				
 		// Methods child is exposing to parent
